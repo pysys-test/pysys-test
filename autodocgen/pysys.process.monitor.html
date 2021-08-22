@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.monitor &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.process.monitor &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -109,7 +111,6 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -128,7 +129,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -184,7 +185,7 @@
             
   <div class="section" id="module-pysys.process.monitor">
 <span id="pysys-process-monitor"></span><h1>pysys.process.monitor<a class="headerlink" href="#module-pysys.process.monitor" title="Permalink to this headline">¶</a></h1>
-<p>Contains the process monitoring API used by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p>
+<p>Contains the process monitoring API used by <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p>
 <p>The main components are the <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a> class, <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a> constants for identifying 
 columns and the default <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler" title="pysys.process.monitor.ProcessMonitorTextFileHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorTextFileHandler</span></code></a> class for writing monitoring information to a file.</p>
 <div class="section" id="processmonitorkey">
@@ -316,21 +317,20 @@ of data. By default a header line starting with <code class="xref py py-obj docu
 start of the file to indicate the column headings.</p>
 <p>If any value cannot be retrieved or is unavailable on this operating 
 system, a -1 value will be written instead.</p>
-<p>Constructor.</p>
 <p>Uses default values set on the instance unless keyword overrides 
 are provided; see <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults" title="pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDefaults</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> – An absolute path string or open file handle to which 
+<li><p><strong>file</strong> (<em>str</em>) – An absolute path string or open file handle to which 
 process monitor data lines will be written.</p></li>
-<li><p><strong>columns</strong> – An ordered list of the columns from <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a> that 
+<li><p><strong>columns</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – An ordered list of the columns from <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a> that 
 should be included in the file. If not specified, the columns specified 
 by <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_COLUMNS</span></code></a> will be used.</p></li>
-<li><p><strong>delimiter</strong> – The delimiter string used between each column. 
+<li><p><strong>delimiter</strong> (<em>str</em>) – The delimiter string used between each column. 
 If not specified, the string specified by <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_DELIMITER" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_DELIMITER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_DELIMITER</span></code></a> will be 
 used.</p></li>
-<li><p><strong>writeHeaderLine</strong> – Determines whether a header line prefixed 
+<li><p><strong>writeHeaderLine</strong> (<em>bool</em>) – Determines whether a header line prefixed 
 by <code class="xref py py-obj docutils literal notranslate"><span class="pre">#</span></code> will be written at the start of the file. If not overridden, the 
 default is taken from <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_WRITE_HEADER_LINE</span></code></a>.</p></li>
 </ul>
@@ -403,7 +403,7 @@ from a running process using a background thread.</p>
 <p>For detail on the statistic keys available from the standard 
 process monitor classes see <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a>.</p>
 <p>The most convenient way to start the default process monitor for this 
-operating system is to use <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p>
+operating system is to use <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p>
 <p>You can create a custom subclass if you need to add support for a new OS 
 or return additional monitoring statistics. For example, you could 
 create a custom process monitor for Java processes that returned 
@@ -416,7 +416,6 @@ passed the owner basetest to its constructor and then call the <a class="referen
 method.</p>
 <p>Monitors are automatically terminated during cleanup at the end 
 of a test, or can be manually stopped before that using the <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor.stop" title="pysys.process.monitor.BaseProcessMonitor.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a> method.</p>
-<p>Construct an instance of the process monitor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -509,9 +508,15 @@ may add or modify the contents of this dictionary.</p>
 
 <dl class="py method">
 <dt id="pysys.process.monitor.BaseProcessMonitor.stop">
-<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.stop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Request the process monitor thread to terminate.</p>
-<p>Does not wait for the termination to complete.</p>
+<p>Waits for the termination to complete if possible, but does not throw an exception if it fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> (<em>float</em>) – Overrides the maximum time we will wait for the monitor to stop. By default this is 
+<code class="docutils literal notranslate"><span class="pre">['WaitForProcessStop']</span></code> from <code class="xref py py-obj docutils literal notranslate"><span class="pre">constants.TIMEOUTS</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -566,7 +571,7 @@ this method is called.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.filediff &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.filediff &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.utils.filediff</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -310,7 +311,7 @@
 		<span class="n">logContents</span><span class="p">(</span><span class="s2">&quot;Contents of </span><span class="si">%s</span><span class="s2"> after pre-processing;&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file2</span><span class="p">),</span> <span class="n">list2</span><span class="p">)</span>		
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">list1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">list2</span><span class="p">:</span>
 			<span class="c1"># maybe this should be an exception... it&#39;s probably not what was intended</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;File comparison pre-processing has filtered out all lines from the files to be diffed, please check if this is intended: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file1</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file2</span><span class="p">))</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;File comparison pre-processing has filtered out all lines from the files to be diffed, please check if this is intended: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file1</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file2</span><span class="p">))</span>
 			
 		<span class="k">if</span> <span class="n">list1</span> <span class="o">!=</span> <span class="n">list2</span><span class="p">:</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Unified diff between pre-processed input files;&quot;</span><span class="p">)</span>
@@ -380,7 +381,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

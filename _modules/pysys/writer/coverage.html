@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.coverage &mdash; PySys v2.0.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.writer.coverage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.writer.coverage</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Writers that collect and report on code coverage data. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+	<span class="s2">&quot;PythonCoverageWriter&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">io</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shlex</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.writer.testoutput</span> <span class="kn">import</span> <span class="n">CollectTestOutputWriter</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PythonCoverageWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter">[docs]</a><span class="k">class</span> <span class="nc">PythonCoverageWriter</span><span class="p">(</span><span class="n">CollectTestOutputWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Writer that collects Python code coverage files in a single directory and writes a coverage report during </span>
+<span class="sd">	runner cleanup. Requires the &quot;coverage.py&quot; library to be installed. </span>
+<span class="sd">	</span>
+<span class="sd">	To enable this, run with ``-XcodeCoverage`` (or ``-XpythonCoverage``) and configure the ``destDir`` plugin property </span>
+<span class="sd">	in pysysproject.xml (e.g. to ``__coverage_python.${outDirName}``). </span>
+
+<span class="sd">	If coverage is generated, the directory containing all coverage files is published as an artifact named </span>
+<span class="sd">	&quot;PythonCoverageDir&quot;. Optionally an archive of this directory can be generated by setting the </span>
+<span class="sd">	``destArchive`` property (see `CollectTestOutputWriter`), and published as &quot;PythonCoverageArchive&quot;. </span>
+
+<span class="sd">	Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ </span>
+<span class="sd">	added to the project if the ``pythonCoverageDirA`` project property is set and none is explicitly configured; but </span>
+<span class="sd">	the automatic addition is deprecated so you should explicity add this writer to your project if you need it. </span>
+
+<span class="sd">	.. versionadded:: 1.6.0</span>
+
+<span class="sd">	The following properties can be set in the project configuration for this writer (and see also </span>
+<span class="sd">	`pysys.writer.testoutput.CollectTestOutputWriter` for inherited properties such as ``destArchive`` which produces </span>
+<span class="sd">	a .zip of the destDir):		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1"># override CollectTestOutputWriter property values</span>
+	<span class="n">destDir</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;.*/[.]coverage[.]python.*&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
+	<span class="n">outputPattern</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;.coverage.python.@TESTID@_@FILENAME@.@FILENAME_EXT@.@UNIQUE@&#39;</span> 
+	<span class="n">publishArtifactDirCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageDir&#39;</span>
+	<span class="n">publishArtifactArchiveCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageArchive&#39;</span>
+	
+	<span class="n">pythonCoverageArgs</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A string of command line arguments used to customize the ``coverage run`` and ``coverage html`` commands. </span>
+<span class="sd">	Use &quot;...&quot; double quotes around any arguments that contain spaces. </span>
+<span class="sd">	</span>
+<span class="sd">	For example::</span>
+<span class="sd">	</span>
+<span class="sd">		&lt;property name=&quot;pythonCoverageArgs&quot; value=&quot;--rcfile=${testRootDir}/python_coveragerc&quot;/&gt;</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">includeCoverageFromPySysProcess</span> <span class="o">=</span> <span class="kc">False</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Set this to True to enable measuring coverage for this process (i.e. PySys), rather than only child Python processes. </span>
+<span class="sd">	This is useful for testing PySys plugins. </span>
+<span class="sd">	</span>
+<span class="sd">	.. versionadded:: 2.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">__selfCoverage</span> <span class="o">=</span> <span class="kc">None</span>
+
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;pythonCoverage&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;codeCoverage&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="kn">import</span> <span class="nn">coverage</span>
+			<span class="k">assert</span> <span class="n">coverage</span><span class="o">.</span><span class="vm">__file__</span> <span class="o">!=</span> <span class="vm">__file__</span><span class="p">,</span> <span class="vm">__file__</span> <span class="c1"># just to make sure we&#39;re not getting confused with our own pysys coverage module</span>
+		<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+			<span class="c1"># don&#39;t log higher than debug because this user may just be doing a --ci run with -XcodeCoverage for some </span>
+			<span class="c1"># other reason and may not even be intending to run with Python coverage</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Not enabling Python coverage because the coverage.py package is not installed&#39;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">True</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">PythonCoverageWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="kn">import</span> <span class="nn">coverage</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeCoverageFromPySysProcess</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> 
+				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Ignoring includeCoverageFromPySysProcess option - not supported by Python 2&#39;</span><span class="p">)</span>
+				<span class="k">return</span>
+			<span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCoverageArgsList</span><span class="p">()</span>
+			<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;--rcfile=&#39;</span><span class="p">),</span> <span class="s1">&#39;includeCoverageFromPySysProcess can only be used if pythonCoverageArgs is set to &quot;--rcfile=XXXX&quot;&#39;</span>
+			<span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
+			<span class="n">cov</span> <span class="o">=</span> <span class="n">coverage</span><span class="o">.</span><span class="n">Coverage</span><span class="p">(</span><span class="n">config_file</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span> <span class="n">data_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="o">+</span><span class="s1">&#39;/.coverage.pysys_parent&#39;</span><span class="p">)</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Enabling Python coverage for this process: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+
+			<span class="c1"># These lines avoid unhelpful warnings, and also match what coverage.process_startup() does</span>
+			<span class="n">cov</span><span class="o">.</span><span class="n">_warn_preimported_source</span> <span class="o">=</span> <span class="kc">False</span>
+			<span class="n">cov</span><span class="o">.</span><span class="n">_warn_unimported_source</span> <span class="o">=</span> <span class="kc">False</span>
+			<span class="n">cov</span><span class="o">.</span><span class="n">_warn_no_data</span> <span class="o">=</span> <span class="kc">False</span>
+			<span class="n">cov</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__selfCoverage</span> <span class="o">=</span> <span class="n">cov</span>
+
+	<span class="k">def</span> <span class="nf">getCoverageArgsList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># also used by startPython()</span>
+		<span class="k">return</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pythonCoverageArgs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">))</span> <span class="c1"># need to escape windows \ else it gets removed; do this the same on all platforms for consistency</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__selfCoverage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__selfCoverage</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__selfCoverage</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+	
+		<span class="n">coverageDestDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span>
+		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">)</span> <span class="c1"># The base class is responsible for absolutizing this config property</span>
+		<span class="n">coverageDestDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">))</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">):</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No Python coverage files were generated.&#39;</span><span class="p">)</span>
+			<span class="k">return</span>
+			
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing Python coverage report in: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">coverageDestDir</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;combine&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+			<span class="n">workingDir</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-combine&#39;</span><span class="p">,</span> 
+			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> 
+				<span class="s1">&#39;Failed to combine Python code coverage data: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+					<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+		<span class="c1"># produces coverage.xml in a standard format that is useful to code coverage tools</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+			<span class="n">workingDir</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-xml&#39;</span><span class="p">,</span> 
+			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+				<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+	
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="o">+</span><span class="s1">&#39;/htmlcov&#39;</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">getCoverageArgsList</span><span class="p">(),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+			<span class="n">workingDir</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-html&#39;</span><span class="p">,</span> 
+			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+				<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+		
+		<span class="n">htmlcov</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">,</span> <span class="s1">&#39;htmlcov&#39;</span><span class="p">,</span> <span class="s1">&#39;index.html&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">htmlcov</span><span class="p">):</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Python coverage HTML: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">htmlcov</span><span class="p">)</span>
+
+
+		<span class="c1"># to avoid confusion, remove any zero byte out/err files from the above</span>
+		<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">):</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.out&#39;</span><span class="p">,</span> <span class="s1">&#39;.err&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+			
+		<span class="bp">self</span><span class="o">.</span><span class="n">archiveAndPublish</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

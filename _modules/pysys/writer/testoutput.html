@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.testoutput &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.writer.testoutput &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.writer.testoutput</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -171,8 +172,7 @@
 
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Writers that process the contents of test output directories, archiving or collecting output files, or aggregating </span>
-<span class="sd">code coverage data. </span>
+<span class="sd">Writers that process the contents of test output directories by archiving or collecting output files.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -376,7 +376,7 @@
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">outputDir</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">outputDir</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">PY2</span><span class="p">:</span> <span class="c1"># it&#39;s simpler if we always deal with unicode strings (which would happen on windows anyway due to the longpathsafe stuff)</span>
-				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">outputDir</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">())</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">outputDir</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="n">PREFERRED_ENCODING</span><span class="p">)</span>
 			<span class="n">skippedFiles</span> <span class="o">=</span> <span class="p">[]</span>
 			
 			<span class="c1"># this is performance-critical so worth caching these</span>
@@ -634,7 +634,22 @@
 					<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
 						<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span><span class="o">==</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">):</span> <span class="k">continue</span>
 						<span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-						<span class="n">archive</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">fn</span><span class="p">[</span><span class="n">rootlen</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+						
+						<span class="n">destname</span> <span class="o">=</span> <span class="n">fn</span><span class="p">[</span><span class="n">rootlen</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+						
+						<span class="k">try</span><span class="p">:</span>
+							<span class="k">try</span><span class="p">:</span>
+								<span class="n">archive</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">destname</span><span class="p">)</span>
+							<span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span> <span class="c1"># pragma: no cover - can happen on windows due to file system locking issues</span>
+								<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+								<span class="n">archive</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">destname</span><span class="p">)</span>
+						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+							<span class="c1"># Deal with failures (even after retry) - don&#39;t abort the whole archive </span>
+							<span class="c1"># (e.g. a locked .err file in coverage output dir doesn&#39;t matter)</span>
+							<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Could not write file to archive </span><span class="si">%s</span><span class="s1">: &quot;</span><span class="si">%s</span><span class="s1">&quot; - </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">),</span> <span class="n">fn</span><span class="p">,</span> 
+								<span class="n">ex</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+							<span class="n">archive</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span><span class="n">destname</span><span class="o">+</span><span class="s1">&#39;.pysyserror.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;!!! PySys could not write this file to the archive - </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span>
+								<span class="n">ex</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="p">))</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactDirCategory</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactDirCategory</span><span class="p">)</span>
@@ -650,94 +665,8 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">archiveAndPublish</span><span class="p">()</span></div>
 		
 
-<div class="viewcode-block" id="PythonCoverageWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.PythonCoverageWriter">[docs]</a><span class="k">class</span> <span class="nc">PythonCoverageWriter</span><span class="p">(</span><span class="n">CollectTestOutputWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer that collects Python code coverage files in a single directory and writes a coverage report during </span>
-<span class="sd">	runner cleanup. Requires the &quot;coverage.py&quot; library to be installed. </span>
-<span class="sd">	</span>
-<span class="sd">	To enable this, run with ``-XcodeCoverage`` (or ``-XpythonCoverage``) and configure the ``destDir`` plugin property </span>
-<span class="sd">	in pysysproject.xml (e.g. to ``__coverage_python.${outDirName}``). </span>
-
-<span class="sd">	If coverage is generated, the directory containing all coverage files is published as an artifact named </span>
-<span class="sd">	&quot;PythonCoverageDir&quot;. Optionally an archive of this directory can be generated by setting the </span>
-<span class="sd">	``destArchive`` property (see `CollectTestOutputWriter`), and published as &quot;PythonCoverageArchive&quot;. </span>
-
-<span class="sd">	Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ </span>
-<span class="sd">	added to the project if the ``pythonCoverageDir`` project property is set and none is explicitly configured; but </span>
-<span class="sd">	the automatic addition is deprecated so you should explicity add this writer to your project if you need it. </span>
-
-<span class="sd">	.. versionadded:: 1.6.0</span>
-
-<span class="sd">	The following property can be set in the project configuration for this writer (and see also </span>
-<span class="sd">	`CollectTestOutputWriter` for inherited properties such as ``destArchive``):		</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-
-	<span class="c1"># override CollectTestOutputWriter property values</span>
-	<span class="n">destDir</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
-	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;.*/[.]coverage[.]python.*&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
-	<span class="n">outputPattern</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;.coverage.python.@TESTID@_@FILENAME@.@FILENAME_EXT@.@UNIQUE@&#39;</span> 
-	<span class="n">publishArtifactDirCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageDir&#39;</span>
-	<span class="n">publishArtifactArchiveCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageArchive&#39;</span>
-
-	<span class="n">pythonCoverageArgs</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	A string of command line arguments used to customize the ``coverage run`` and ``coverage html`` commands. </span>
-<span class="sd">	Use &quot;...&quot; double quotes around any arguments that contain spaces. </span>
-<span class="sd">	</span>
-<span class="sd">	For example::</span>
-<span class="sd">	</span>
-<span class="sd">		&lt;property name=&quot;pythonCoverageArgs&quot; value=&quot;--rcfile=${testRootDir}/python_coveragerc&quot;/&gt;</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-
-	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
-		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;pythonCoverage&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;codeCoverage&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">):</span>
-			<span class="k">return</span> <span class="kc">False</span>
-		<span class="k">try</span><span class="p">:</span>
-			<span class="kn">import</span> <span class="nn">coverage</span>
-		<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-			<span class="c1"># don&#39;t log higher than debug because this user may just be doing a --ci run with -XcodeCoverage for some </span>
-			<span class="c1"># other reason and may not even be intending to run with Python coverage</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Not enabling Python coverage because the coverage.py package is not installed&#39;</span><span class="p">)</span>
-			<span class="k">return</span> <span class="kc">False</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span> <span class="kc">True</span>
-
-	<span class="k">def</span> <span class="nf">getCoverageArgsList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># also used by startPython()</span>
-		<span class="k">return</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pythonCoverageArgs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">))</span> <span class="c1"># need to escape windows \ else it gets removed; do this the same on all platforms for consistency</span>
-
-	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="n">pythonCoverageDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span>
-		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">)</span>
-		<span class="n">pythonCoverageDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">))</span>
-		<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">):</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No Python coverage files were generated.&#39;</span><span class="p">)</span>
-			<span class="k">return</span>
-			
-		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing Python coverage report in: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pythonCoverageDir</span><span class="p">)</span>
-
-		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;combine&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-			<span class="n">workingDir</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-combine&#39;</span><span class="p">,</span> 
-			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> 
-				<span class="s1">&#39;Failed to combine Python code coverage data: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
-					<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-
-		<span class="c1"># produces coverage.xml in a standard format that is useful to code coverage tools</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-			<span class="n">workingDir</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-xml&#39;</span><span class="p">,</span> 
-			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
-				<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-	
-		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/htmlcov&#39;</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">getCoverageArgsList</span><span class="p">(),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-			<span class="n">workingDir</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-html&#39;</span><span class="p">,</span> 
-			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
-				<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-
-		<span class="c1"># to avoid confusion, remove any zero byte out/err files from the above</span>
-		<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">):</span>
-			<span class="n">p</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-			<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.out&#39;</span><span class="p">,</span> <span class="s1">&#39;.err&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-				<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-			
-		<span class="bp">self</span><span class="o">.</span><span class="n">archiveAndPublish</span><span class="p">()</span></div>
+<span class="c1"># for compatibility with 1.6.0/1.6.1</span>
+<span class="kn">from</span> <span class="nn">pysys.writer.coverage</span> <span class="kn">import</span> <span class="n">PythonCoverageWriter</span>
 </pre></div>
 
            </div>
@@ -750,7 +679,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

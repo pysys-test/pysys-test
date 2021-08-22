@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.xml.project &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.config.project &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="License" href="../license.html" />
-    <link rel="prev" title="pysys.xml.descriptor" href="pysys.xml.descriptor.html" /> 
+    <link rel="next" title="pysys.constants" href="pysys.constants.html" />
+    <link rel="prev" title="pysys.config.descriptor" href="pysys.config.descriptor.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,20 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.config.html">pysys.config</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.config.descriptor.html">pysys.config.descriptor</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.config.project</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#project">Project</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -97,14 +106,6 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="pysys.xml.html">pysys.xml</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="pysys.xml.descriptor.html">pysys.xml.descriptor</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.xml.project</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#project">Project</a></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -123,7 +124,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -156,15 +157,15 @@
         
           <li><a href="pysys.html">API Reference</a> &raquo;</li>
         
-          <li><a href="pysys.xml.html">pysys.xml</a> &raquo;</li>
+          <li><a href="pysys.config.html">pysys.config</a> &raquo;</li>
         
-      <li>pysys.xml.project</li>
+      <li>pysys.config.project</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/autodocgen/pysys.xml.project.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autodocgen/pysys.config.project.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -177,29 +178,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pysys.xml.project">
-<span id="pysys-xml-project"></span><h1>pysys.xml.project<a class="headerlink" href="#module-pysys.xml.project" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="#pysys.xml.project.Project" title="pysys.xml.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> class holds the <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> project configuration, including all 
+  <div class="section" id="module-pysys.config.project">
+<span id="pysys-config-project"></span><h1>pysys.config.project<a class="headerlink" href="#module-pysys.config.project" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> class holds the <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> project configuration, including all 
 user-defined project properties.</p>
 <div class="section" id="project">
 <h2>Project<a class="headerlink" href="#project" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pysys.xml.project.Project">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.xml.project.</code><code class="sig-name descname">Project</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root</span></em>, <em class="sig-param"><span class="n">projectFile</span></em>, <em class="sig-param"><span class="n">outdir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/xml/project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.xml.project.Project" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.config.project.Project">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.config.project.</code><code class="sig-name descname">Project</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root</span></em>, <em class="sig-param"><span class="n">projectFile</span></em>, <em class="sig-param"><span class="n">outdir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.project.Project" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains settings for the entire test project, as defined by the 
-<code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> project configuration file.</p>
-<p>To get a reference to the current <a class="reference internal" href="#pysys.xml.project.Project" title="pysys.xml.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> instance, use the 
+<code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> project configuration file; see <a class="reference internal" href="../pysys/ProjectConfiguration.html"><span class="doc">Project Configuration</span></a>.</p>
+<p>To get a reference to the current <a class="reference internal" href="#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> instance, use the 
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.project</span></code> 
 (or <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser.project" title="pysys.process.user.ProcessUser.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.project</span></code></a>) field.</p>
 <p>All project properties are strings. If you need to get a project property value that’s a a bool/int/float/list it is 
-recommended to use <a class="reference internal" href="#pysys.xml.project.Project.getProperty" title="pysys.xml.project.Project.getProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getProperty()</span></code></a> which will automatically perform the conversion. For string properties 
+recommended to use <a class="reference internal" href="#pysys.config.project.Project.getProperty" title="pysys.config.project.Project.getProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getProperty()</span></code></a> which will automatically perform the conversion. For string properties 
 you can just use <code class="docutils literal notranslate"><span class="pre">project.propName</span></code> or <code class="docutils literal notranslate"><span class="pre">project.properties['propName']</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>properties</strong> (<em>dict</em><em>(</em><em>str</em><em>,</em><em>str</em><em>)</em>) – The resolved values of all project properties defined in the configuration file. 
-In addition, each of these is set as an attribute onto the <a class="reference internal" href="#pysys.xml.project.Project" title="pysys.xml.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> instance itself.</p></li>
+In addition, each of these is set as an attribute onto the <a class="reference internal" href="#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> instance itself.</p></li>
 <li><p><strong>root</strong> (<em>str</em>) – Full path to the project root directory, as specified by the first PySys project
 file encountered when walking up the directory tree from the start directory. 
 If no project file was found, this is just the start directory PySys was run from.</p></li>
@@ -208,11 +209,12 @@ If no project file was found, this is just the start directory PySys was run fro
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pysys.xml.project.Project.expandProperties">
-<code class="sig-name descname">expandProperties</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/xml/project.html#Project.expandProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.xml.project.Project.expandProperties" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.config.project.Project.expandProperties">
+<code class="sig-name descname">expandProperties</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/project.html#Project.expandProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.project.Project.expandProperties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Expand any ${…} project properties in the specified string.</p>
-<p>An exception is thrown if any property is missing. This method is only for expanding project properties so 
-<code class="docutils literal notranslate"><span class="pre">${env.*}</span></code> syntax is not permitted (if you need to expand an environment variable, use a project property).</p>
+<p>An exception is thrown if any property is missing. This method is only for expanding project properties 
+and <code class="docutils literal notranslate"><span class="pre">${eval:xxx})</span></code> strings, so <code class="docutils literal notranslate"><span class="pre">${env.*}</span></code> syntax is not permitted (if you need to use an environment 
+variable, put it into a project property first).</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 1.6.0.</span></p>
 </div>
@@ -227,8 +229,8 @@ If no project file was found, this is just the start directory PySys was run fro
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.xml.project.Project.getProperty">
-<code class="sig-name descname">getProperty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/xml/project.html#Project.getProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.xml.project.Project.getProperty" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.config.project.Project.getProperty">
+<code class="sig-name descname">getProperty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/project.html#Project.getProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.project.Project.getProperty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the specified project property value, or a default if it is not defined, with type conversion from string 
 to int/float/bool/list[str] (matching the default’s type; for list[str], comma-separated input is assumed).</p>
 <div class="versionadded">
@@ -247,18 +249,18 @@ provided. An exception will be raised if the value is non-empty but cannot be co
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.xml.project.Project.getInstance">
-<em class="property">static </em><code class="sig-name descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/xml/project.html#Project.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.xml.project.Project.getInstance" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.config.project.Project.getInstance">
+<em class="property">static </em><code class="sig-name descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/project.html#Project.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.project.Project.getInstance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides access to the singleton instance of Project.</p>
 <p>Raises an exception if the project has not yet been loaded.</p>
 <p>Use <code class="docutils literal notranslate"><span class="pre">self.project</span></code> to get access to the project instance where possible, 
-for example from a <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> or <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> class. This attribute is for 
+for example from a <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> or <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> class. This attribute is for 
 use in internal functions and classes that do not have a <code class="docutils literal notranslate"><span class="pre">self.project</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.xml.project.Project.findAndLoadProject">
-<em class="property">static </em><code class="sig-name descname">findAndLoadProject</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">startdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outdir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/xml/project.html#Project.findAndLoadProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.xml.project.Project.findAndLoadProject" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.config.project.Project.findAndLoadProject">
+<em class="property">static </em><code class="sig-name descname">findAndLoadProject</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">startdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outdir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/project.html#Project.findAndLoadProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.project.Project.findAndLoadProject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find and load a project file, starting from the specified directory.</p>
 <p>If this fails an error is logged and the process is terminated.</p>
 <p>The method walks up the directory tree from the supplied path until the 
@@ -294,10 +296,10 @@ this.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pysys.constants.html" class="btn btn-neutral float-right" title="pysys.constants" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pysys.xml.descriptor.html" class="btn btn-neutral float-left" title="pysys.xml.descriptor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pysys.config.descriptor.html" class="btn btn-neutral float-left" title="pysys.config.descriptor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -306,7 +308,7 @@ this.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

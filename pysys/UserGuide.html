@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>User Guide &mdash; PySys v1.6.1  documentation</title>
+  <title>User Guide &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -17,26 +17,26 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
-    <script type="text/javascript" src="_static/js/theme.js"></script>
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Project Configuration" href="ProjectConfig.html" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Project Configuration" href="ProjectConfiguration.html" />
     <link rel="prev" title="The BaseTest Class" href="BaseTest.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -64,7 +64,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -82,25 +82,28 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#platform-detection">Platform detection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skipping-tests">Skipping tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#customizing-pysys-make">Customizing pysys make</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#checking-for-error-messages-in-log-files">Checking for error messages in log files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sharing-logic-across-tests-using-plugins">Sharing logic across tests using plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#thread-safety">Thread-safety</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#producing-code-coverage-reports">Producing code coverage reports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-tests-in-multiple-modes">Running tests in multiple modes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#controlling-execution-order">Controlling execution order</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ProjectConfig.html">Project Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
 </ul>
 
             
@@ -115,7 +118,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -144,7 +147,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html">Docs</a> &raquo;</li>
         
       <li>User Guide</li>
     
@@ -152,7 +155,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/UserGuide.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/pysys/UserGuide.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -170,7 +173,7 @@
 <div class="section" id="platform-detection">
 <h2>Platform detection<a class="headerlink" href="#platform-detection" title="Permalink to this headline">¶</a></h2>
 <p>It’s very common to have one set of logic for Windows and another for
-all non-Windows (Unix-based) platforms, and PySys has a dedicated constant <a class="reference internal" href="autodocgen/pysys.constants.html#pysys.constants.IS_WINDOWS" title="pysys.constants.IS_WINDOWS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.IS_WINDOWS</span></code></a> for
+all non-Windows (Unix-based) platforms, and PySys has a dedicated constant <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.IS_WINDOWS" title="pysys.constants.IS_WINDOWS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.IS_WINDOWS</span></code></a> for
 that:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">startProcess</span><span class="p">(</span><span class="s1">&#39;cmd.exe&#39;</span> <span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="k">else</span> <span class="s1">&#39;bash&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </pre></div>
@@ -180,7 +183,7 @@ that:</p>
 </div>
 <div class="section" id="skipping-tests">
 <h2>Skipping tests<a class="headerlink" href="#skipping-tests" title="Permalink to this headline">¶</a></h2>
-<p>If your <code class="docutils literal notranslate"><span class="pre">run.py</span></code> logic detects that a test should not be executed for this
+<p>If your tests’ <code class="docutils literal notranslate"><span class="pre">.py</span></code> logic detects that a test should not be executed for this
 platform or mode, simply use <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.skipTest" title="pysys.basetest.BaseTest.skipTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.skipTest(...)</span></code></a> near the top of the test’s
 <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.execute" title="pysys.basetest.BaseTest.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute()</span></code></a> method, specifying the reason for the skip:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">skipTest</span><span class="p">(</span><span class="s1">&#39;MyFeature is not supported on Windows&#39;</span><span class="p">)</span>
@@ -190,10 +193,66 @@ platform or mode, simply use <a class="reference internal" href="BaseTest.html#p
 ensuring that the rest of <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.execute" title="pysys.basetest.BaseTest.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute()</span></code></a> and
 <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.validate" title="pysys.basetest.BaseTest.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate()</span></code></a> do not get executed.</p>
 <p>Alternatively if the test should be skipped regardless of platform/mode etc,
-it is best to specify that statically in your <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysystest.xml</span></code> file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">skipped</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Skipped until bug #12345 is fixed&quot;</span><span class="o">/&gt;</span>
+it is best to specify that statically in your <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysystest.*</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_skipped_reason__</span>   <span class="o">=</span> <span class="s2">&quot;Skipped until Bug-1234 is fixed&quot;</span>
 </pre></div>
 </div>
+<p>Or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">skipped</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Skipped until Bug-1234 is fixed&quot;</span><span class="o">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="customizing-pysys-make">
+<h2>Customizing pysys make<a class="headerlink" href="#customizing-pysys-make" title="Permalink to this headline">¶</a></h2>
+<p>You can define templates that <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> will use to create new tests specific to your project, or even multiple
+templates for individual directories within your project. This helps to encourage teams to follow the latest best
+practice by ensuring new tests are copying known good patterns, and also saves looking up how to do common things when
+creating new tests.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> command line comes with a <code class="docutils literal notranslate"><span class="pre">pysys-default-test</span></code> template for creating a simple PySys test, you can
+add your own by adding <code class="docutils literal notranslate"><span class="pre">&lt;maker-template&gt;</span></code> elements to <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> in any directory under your project,
+or to a <code class="docutils literal notranslate"><span class="pre">&lt;pysysdirconfig&gt;</span></code> element in your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file. Here are a couple of examples (taken from
+the cookbook sample):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pysysdirconfig</span><span class="o">&gt;</span>
+
+        <span class="o">&lt;</span><span class="n">maker</span><span class="o">-</span><span class="n">template</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my-test&quot;</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;a test with the Python code pre-customized to get things started&quot;</span>
+                <span class="n">copy</span><span class="o">=</span><span class="s2">&quot;./_pysys_templates/MyTemplateTest/*&quot;</span> <span class="o">/&gt;</span>
+
+        <span class="o">&lt;</span><span class="n">maker</span><span class="o">-</span><span class="n">template</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;perf-test&quot;</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;a performance test including configuration for my fictional performance tool&quot;</span>
+                <span class="n">copy</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{pysysTemplatesDir}</span><span class="s2">/default-test/*, ./_pysys_templates/perf/my-perf-config.xml&quot;</span><span class="o">/&gt;</span>
+
+        <span class="o">&lt;</span><span class="n">maker</span><span class="o">-</span><span class="n">template</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;foobar-test&quot;</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;an advanced test based on the existing XXX test&quot;</span>
+                <span class="n">copy</span><span class="o">=</span><span class="s2">&quot;./PySysDirConfigSample/*&quot;</span>
+                <span class="n">mkdir</span><span class="o">=</span><span class="s2">&quot;ExtraDir1, ExtraDir2&quot;</span>
+        <span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="n">replace</span> <span class="n">regex</span><span class="o">=</span><span class="s1">&#39;__pysys_title__ *= r&quot;&quot;&quot;[^&quot;]*&quot;&quot;&quot;&#39;</span> <span class="k">with</span><span class="o">=</span><span class="s1">&#39;__pysys_title__   = r&quot;&quot;&quot; Foobar - My new @</span><span class="si">{DIR_NAME}</span><span class="s1"> test title TODO &quot;&quot;&quot;&#39;</span><span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="n">replace</span> <span class="n">regex</span><span class="o">=</span><span class="s1">&#39;__pysys_authors__ *= &quot;[^&quot;]*&quot;&#39;</span>    <span class="k">with</span><span class="o">=</span><span class="s1">&#39;__pysys_authors__ = &quot;@</span><span class="si">{USERNAME}</span><span class="s1">&quot;&#39;</span><span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="n">replace</span> <span class="n">regex</span><span class="o">=</span><span class="s1">&#39;__pysys_created__ *= &quot;[^&quot;]*&quot;&#39;</span>    <span class="k">with</span><span class="o">=</span><span class="s1">&#39;__pysys_created__ = &quot;@</span><span class="si">{DATE}</span><span class="s1">&quot;&#39;</span><span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="n">replace</span> <span class="n">regex</span><span class="o">=</span><span class="s1">&#39;@@DIR_NAME@@&#39;</span>                    <span class="k">with</span><span class="o">=</span><span class="s1">&#39;@</span><span class="si">{DIR_NAME}</span><span class="s1">&#39;</span><span class="o">/&gt;</span>
+        <span class="o">&lt;/</span><span class="n">maker</span><span class="o">-</span><span class="n">template</span><span class="o">&gt;</span>
+
+<span class="o">&lt;/</span><span class="n">pysysdirconfig</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>For customizing the PySysTest class the best approach is usually to create a <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> template test
+containing <code class="docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR&#64;&#64;</span></code> to include the default PySys descriptor values (this means your template will
+automatically benefit from any future changes to the defaults), and put it in a <code class="docutils literal notranslate"><span class="pre">_pysys_templates/&lt;templatename&gt;</span></code>
+directory alongside the <code class="docutils literal notranslate"><span class="pre">pysystestdir.xml</span></code> file. The <code class="docutils literal notranslate"><span class="pre">_pysys_templates</span></code> directory should contain a file
+named <code class="docutils literal notranslate"><span class="pre">.pysysignore</span></code> file (which avoids the template being loaded as a real test).</p>
+<p>other options are possible (as above) e.g. copying files from an absolute location such as under your project’s
+<code class="docutils literal notranslate"><span class="pre">${testRootDir}</span></code>, copying from PySys default templates directly (if you just want to <em>add</em> files) by
+using <code class="docutils literal notranslate"><span class="pre">${pysysTemplatesDir}/default-test/*</span></code>, or copying from a path relative to the XML file where the template is
+defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic).</p>
+<p>See <a class="reference internal" href="TestDescriptors.html#sample-pysysdirconfig-xml"><span class="std std-ref">Sample pysysdirconfig.xml</span></a> for more information about how to configure templates in
+a <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> file.</p>
+<p>When creating tests using <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code>, by default the first template (from the most specific <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>)
+is selected, but you can also specify any other template by name using the <code class="docutils literal notranslate"><span class="pre">-t</span></code> option, and get a list of available
+templates for the current directory using <code class="docutils literal notranslate"><span class="pre">--help</span></code>.</p>
+<p>It is possible to subclass the <a class="reference internal" href="../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker" title="pysys.launcher.console_make.DefaultTestMaker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.launcher.console_make.DefaultTestMaker</span></code></a> responsible for this logic if needed.
+The main reason to do that is to provide a <a class="reference internal" href="../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.validateTestId" title="pysys.launcher.console_make.DefaultTestMaker.validateTestId"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.launcher.console_make.DefaultTestMaker.validateTestId</span></code></a> method
+to check that new test ids do not conflict with others used by others in a remote version control system (to avoid
+merge conflicts).</p>
+<p>By default PySys creates <code class="docutils literal notranslate"><span class="pre">.py</span></code> files with tabs for indentation (as in previous PySys releases). If you prefer spaces,
+just set the <code class="docutils literal notranslate"><span class="pre">pythonIndentationSpacesPerTab</span></code> project property to a string containing the required spaces per tab.</p>
 </div>
 <div class="section" id="checking-for-error-messages-in-log-files">
 <h2>Checking for error messages in log files<a class="headerlink" href="#checking-for-error-messages-in-log-files" title="Permalink to this headline">¶</a></h2>
@@ -223,17 +282,17 @@ class provided it has a method <code class="docutils literal notranslate"><span 
 As the plugins are instantiated just after the <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass, you can use them any time after (but not within)
 your test’s <code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__()</span></code> constructor (for example, in <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.setup" title="pysys.basetest.BaseTest.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.setup()</span></code></a>).</p></li>
 <li><p><strong>runner plugins</strong>; these are instantiated just once per invocation of PySys, by the BaseRunner,
-before <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> is called. Unlike test plugins, any processes or state they maintain are
+before <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> is called. Unlike test plugins, any processes or state they maintain are
 shared across all tests. These can be used to start servers/VMs that are shared across tests.
 Runner plugins are configured with <code class="docutils literal notranslate"><span class="pre">&lt;runner-plugin</span> <span class="pre">classname=&quot;...&quot;</span> <span class="pre">alias=&quot;...&quot;/&gt;</span></code> and can be any Python
 class provided it has a method <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">runner)</span></code> (and no constructor arguments).</p>
 <p>Runner plugins that generate output files/directories should by default put that output under either the
-<a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence) the <code class="docutils literal notranslate"><span class="pre">runner.output+'/..'</span></code>
+<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence) the <code class="docutils literal notranslate"><span class="pre">runner.output+'/..'</span></code>
 directory (which is typically <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code> unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided).</p>
 </li>
 <li><p><strong>writer plugins</strong>: this kind of plugin has existed in PySys for many releases and are effectively a special kind of
 runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of
-destinations. Writers must implement a similar but different interface to other runner plugins; see <a class="reference internal" href="autodocgen/pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a>
+destinations. Writers must implement a similar but different interface to other runner plugins; see <a class="reference internal" href="../autodocgen/pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a>
 for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to
 collecting files from each test output and using them to generate a code coverage report during cleanup at the end
 of the run.</p></li>
@@ -242,7 +301,7 @@ of the run.</p></li>
 and (implicitly) the type. After construction of each plugin, an attribute is assigned with the actual value
 of each plugin property so each property can be accessed using <code class="docutils literal notranslate"><span class="pre">self.propname</span></code> (by the time the plugin’s setup method
 is called). In addition to plugin properties, <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-Xkey=value</span></code> command line options for the plugin
-(if needed) can be accessed using the runner’s <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.getXArg()</span></code></a> method.</p>
+(if needed) can be accessed using the runner’s <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.getXArg()</span></code></a> method.</p>
 <p>A test plugin could look like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyTestPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="n">myPluginProperty</span> <span class="o">=</span> <span class="s1">&#39;default value&#39;</span>
@@ -270,8 +329,8 @@ is called). In addition to plugin properties, <code class="docutils literal notr
         <span class="c1"># A common pattern is to create a helper method that you always call from your `BaseTest.validate()`</span>
         <span class="c1"># That approach allows you to later customize the logic by changing just one single place, and also to omit</span>
         <span class="c1"># it for specific tests where it is not wanted.</span>
-        <span class="k">def</span> <span class="nf">checkLogsForErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myapp.log&#39;</span><span class="p">,</span> <span class="s1">&#39; ERROR .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">checkLogsForErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s2">&quot;my_server.log&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s1">&#39; (ERROR|FATAL) .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>With configuration like this:</p>
@@ -289,18 +348,18 @@ the modular composition approach.</p>
 <p>You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific
 to your application, and third party PySys plugins supporting standard tools and languages.</p>
 <p>In addition to the alias-based lookup, plugins can get a list of the other plugin instances
-using <code class="docutils literal notranslate"><span class="pre">self.testPlugins</span></code> (from <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a>) or <code class="docutils literal notranslate"><span class="pre">self.runnerPlugins</span></code> (from <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>), which
+using <code class="docutils literal notranslate"><span class="pre">self.testPlugins</span></code> (from <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a>) or <code class="docutils literal notranslate"><span class="pre">self.runnerPlugins</span></code> (from <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>), which
 provides a way for plugins to reference each other without depending on the aliases that may be in use in a
 particular project configuration.</p>
 <p>When creating a runner plugin you may need somewhere to put output files, logs etc. Plugins that generate output
 files/directories should by default put that output in a dedicated directory either the
-<a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence if it’s something users will
+<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence if it’s something users will
 look at a lot) a directory one level up e.g. <code class="docutils literal notranslate"><span class="pre">runner.output+'/../myplugin'</span></code> (which is typically under <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code>
 unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided) .
 A prefix of double underscore <code class="docutils literal notranslate"><span class="pre">__pysys</span></code> is recommended under testRootDir to distinguish dynamically created
 directories (ignored by version control) from the testcase directories (checked into version control).</p>
 <p>For examples of the project configuration, including how to set plugin-specific properties that will be passed to
-its constructor, see the sample Project Configuration file.</p>
+its constructor, see <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a>.</p>
 </div>
 <div class="section" id="configuring-and-overriding-test-options">
 <h2>Configuring and overriding test options<a class="headerlink" href="#configuring-and-overriding-test-options" title="Permalink to this headline">¶</a></h2>
@@ -348,13 +407,13 @@ be a string.</p>
 <p>If instead of setting a default for just one test you wish to set the default
 for many tests from your custom <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass, then you would do the same thing in the
 definition of that <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass. If you don’t have a custom BaseTest class, you can use
-<a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.runner.getXArg()</span></code></a> from any plugin to get the value or default, with the same
+<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.runner.getXArg()</span></code></a> from any plugin to get the value or default, with the same
 type conversion described above.</p>
 <p>The other mechanism that PySys supports for configurable test options is
 project properties.</p>
 <p>To use a project property that can be overridden with an environment variable,
 add a <code class="docutils literal notranslate"><span class="pre">property</span></code> element to your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myCredentials&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYCOMPANY_CREDENTIALS}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;testuser:testpassword&quot;</span><span class="o">/&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myCredentials&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYORG_CREDENTIALS}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;testuser:testpassword&quot;</span><span class="o">/&gt;</span>
 </pre></div>
 </div>
 <p>This property can will take the value of the specified environment variable,
@@ -362,27 +421,42 @@ or else the default if any undefined properties/env vars are included in value. 
 unresolved variables and there is no valid default, the project will fail to load.</p>
 <p>You may want to set the attribute <code class="docutils literal notranslate"><span class="pre">pathMustExist=&quot;true&quot;</span></code> when defining properties that refer to a path such as a
 build output directory that should always be present.</p>
-<p>Another way to specify default project property values is to put them into a
-Java-style <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file. You can use properties to specify which file is
-loaded, so it would be possible to customize using environment variables:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myProjectPropertiesFile&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/default-config.properties&quot;</span><span class="o">/&gt;</span>
+<p>Another way to specify default project property values is to put them into a <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file. You can use
+properties to specify which file is loaded, so it would be possible to customize using environment variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myProjectPropertiesFile&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYORG_CUSTOM_PROJECT_PROPERTIES}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/default-config.properties&quot;</span><span class="o">/&gt;</span>
 <span class="o">&lt;</span><span class="nb">property</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{myProjectPropertiesFile}</span><span class="s2">&quot;</span> <span class="n">pathMustExist</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="o">/&gt;</span>
 </pre></div>
 </div>
 <p>To use projects properties in your testcase, just access the attributes on
-<a class="reference internal" href="autodocgen/pysys.xml.project.html#pysys.xml.project.Project" title="pysys.xml.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.project</span></code></a> from either a test instance or a runner:</p>
+<a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.project</span></code></a> from either a test instance or a runner:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using username=</span><span class="si">%s</span><span class="s1"> and password </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">myCredentials</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">))</span>
+        <span class="n">username</span><span class="p">,</span> <span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">myCredentials</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using username=</span><span class="si">%s</span><span class="s1"> and password=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Property properties will always be of string type.</p>
+<p>Project properties are always be of string type, but <a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project.getProperty" title="pysys.config.project.Project.getProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.project.Project.getProperty()</span></code></a> can be used to
+convert the value to other types when needed.</p>
+</div>
+<div class="section" id="thread-safety">
+<h2>Thread-safety<a class="headerlink" href="#thread-safety" title="Permalink to this headline">¶</a></h2>
+<p>As your testsuite grows, the ability to run tests in parallel will be increasingly important, so make sure your
+tests and any shared plugin code do not manipulate shared data structures or files in a way that could cause
+race conditions.</p>
+<p>Most Python library functions are safe to use, but you should avoid calling <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>
+(use <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.PREFERRED_ENCODING" title="pysys.constants.PREFERRED_ENCODING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.PREFERRED_ENCODING</span></code></a> instead) and <code class="docutils literal notranslate"><span class="pre">shutil.make_archive</span></code> which are not.</p>
+<p>It is also important not to change to the working directory of the PySys process or its environment (<code class="docutils literal notranslate"><span class="pre">os.environ</span></code>)
+while tests are executing. Any setup that might involve changing the environment - including initialization of
+some libraries (e.g. Matplotlib) must be performed before tests start in the <code class="docutils literal notranslate"><span class="pre">setup</span></code> of a runner plugin (or runner),
+so that everything is stable ready for tests to be executed.</p>
+<p>To avoid dangerous and hard-to-debug race conditions, PySys has built-in checking for changes to the working directory
+and os.environ and the test run will fail if either is detected.</p>
 </div>
 <div class="section" id="producing-code-coverage-reports">
 <h2>Producing code coverage reports<a class="headerlink" href="#producing-code-coverage-reports" title="Permalink to this headline">¶</a></h2>
 <p>PySys can be extended to produce code coverage reports for any language, by creating a writer plugin.</p>
 <p>There is an existing writer that produces coverage reports for programs written in Python called
-<a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.PythonCoverageWriter" title="pysys.writer.testoutput.PythonCoverageWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.PythonCoverageWriter</span></code></a>, which uses the <code class="docutils literal notranslate"><span class="pre">coverage.py</span></code> library. To use this you need to add the
-<code class="docutils literal notranslate"><span class="pre">&lt;writer&gt;</span></code> to your project (see the sample <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> for an example) and make sure you’re starting
+<a class="reference internal" href="../autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter" title="pysys.writer.coverage.PythonCoverageWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.coverage.PythonCoverageWriter</span></code></a>, which uses the <code class="docutils literal notranslate"><span class="pre">coverage.py</span></code> library. To use this you need to add the
+<code class="docutils literal notranslate"><span class="pre">&lt;writer&gt;</span></code> to your project (see the sample <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a> for an example) and make sure you’re starting
 your Python processes with coverage support enabled, by using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.startPython" title="pysys.basetest.BaseTest.startPython"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.startPython</span></code></a>.</p>
 <p>The usual way to enable code coverage (for all supported languages) is to set <code class="docutils literal notranslate"><span class="pre">-XcodeCoverage</span></code> when running your
 tests (or to run with <code class="docutils literal notranslate"><span class="pre">--ci</span></code> which does this automatically). Individual writers may additionally provide their own
@@ -395,23 +469,21 @@ such as performance tests.</p>
 variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods
 for starting your application is in a custom test plugin class.</p>
 <p>When starting your process, you can detect whether to enable code coverage like this:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>if self.runner.getBoolProperty(‘mylanguageCoverage’, default=self.runner.getBoolProperty(‘codeCoverage’)) and not self.disableCoverage:</dt><dd><p>…</p>
-</dd>
-</dl>
-</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;mylanguageCoverage&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;codeCoverage&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disableCoverage</span><span class="p">:</span>
+      <span class="o">...</span>
+</pre></div>
+</div>
 <p>Often you will need to set an environment variable to indicate the filename that coverage should be generated under.
 Make sure to use a unique filename so that multiple processes started by the same test do not clash. Often you
 will need to ensure that your application is shutdown cleanly (rather than being automatically killed at the end of
 the test) so that it has a chance to write the code coverage information.</p>
 </li>
 <li><p>Create a custom writer class which collects coverage files (matching a specific regex pattern) from the output
-directory. The usual way to do this would be to subclass <a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a>. Configure
+directory. The usual way to do this would be to subclass <a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a>. Configure
 default values for main configuration properties (by defining them as static variables in your class). Then implement
-<a class="reference internal" href="autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.isEnabled" title="pysys.writer.api.BaseResultsWriter.isEnabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.isEnabled()</span></code></a> to define when coverage reporting will happen, and run the
+<a class="reference internal" href="../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.isEnabled" title="pysys.writer.api.BaseResultsWriter.isEnabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.isEnabled()</span></code></a> to define when coverage reporting will happen, and run the
 required processes to combine coverage files and generate a report in the destDir in
-<a class="reference internal" href="autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.cleanup" title="pysys.writer.api.BaseResultsWriter.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.cleanup()</span></code></a>, which will execute after all tests have completed.</p>
+<a class="reference internal" href="../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.cleanup" title="pysys.writer.api.BaseResultsWriter.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.cleanup()</span></code></a>, which will execute after all tests have completed.</p>
 <p>Finally, add the new writer class to your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file.</p>
 </li>
 <li><p>Add the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group to any tests (or test directories) that should not use coverage,
@@ -419,62 +491,125 @@ such as performance tests.</p></li>
 <li><p>If using a continuous integration system or centralized code coverage database, you could optionally upload the
 coverage data there from the directory PySys collected it into, so there is a permanent record of
 any changes in coverage over time. The artifact publishing capability of
-<a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a> will help with that.</p></li>
+<a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a> will help with that.</p></li>
 </ul>
 </div>
 <div class="section" id="running-tests-in-multiple-modes">
 <h2>Running tests in multiple modes<a class="headerlink" href="#running-tests-in-multiple-modes" title="Permalink to this headline">¶</a></h2>
-<p>One of the most powerful features of PySys is the ability to run the same test
+<p>One of the powerful features of PySys is the ability to run the same test
 in multiple modes from a single execution. This could be useful for cases such
-as a web test that needs to pass against multiple supported web browsers,
-or a set of tests that should be run against various different database but
-can also be run against a mocked database for quick local development.</p>
-<p>Using modes is fairly straightforward. First edit the <code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code> files for tests that
-need to run in multiple modes, and add a list of the supported modes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">classification</span><span class="o">&gt;</span>
-     <span class="o">&lt;</span><span class="n">groups</span><span class="o">&gt;...&lt;/</span><span class="n">groups</span><span class="o">&gt;</span>
-     <span class="o">&lt;</span><span class="n">modes</span> <span class="n">inherit</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="o">&gt;</span>
-             <span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;</span><span class="n">MockDatabase_Firefox</span><span class="o">&lt;/</span><span class="n">mode</span><span class="o">&gt;</span>
-             <span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;</span><span class="n">MyDatabase2</span><span class="o">.</span><span class="mi">0</span><span class="n">_Chrome</span><span class="o">&lt;/</span><span class="n">mode</span><span class="o">&gt;</span>
-     <span class="o">&lt;/</span><span class="n">modes</span><span class="o">&gt;</span>
-<span class="o">&lt;/</span><span class="n">classification</span><span class="o">&gt;</span>
+as a set of tests that should be run against various different databases but
+can also be run against a mocked database for quick local development.
+Another common use case is executing the same PySysTest class in different
+modes to test different scenarios.</p>
+<p>To define some modes, first edit the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file for your test, and provide a string
+containing a Python lambda that will be evaluated when the test descriptors are loaded to
+return a list of named modes that the test can run in:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        lambda helper: helper.inheritedModes+[</span>
+<span class="s2">                {&#39;mode&#39;:&#39;CompressionGZip&#39;, &#39;compressionType&#39;:&#39;gzip&#39;},</span>
+<span class="s2">        ]</span>
+<span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 </div>
-<p>When naming modes, TitleCase is recommended, and dot and underscore characters
-may be used; typically dot is useful for version numbers and underscore is
-useful for separating out different dimensions e.g. database vs web browser
-as in the above example. PySys will give an error if you use different
-capitalization for the same mode in different places, as this would likely
-result in test bugs.</p>
-<p>The first mode listed is designated the “primary” mode which means it’s the
-one that is used by default when running your tests without a <code class="docutils literal notranslate"><span class="pre">--mode</span></code>
-argument. It’s best to choose either the fastest mode or else the one that
-is most likely to show up interesting issues as the primary mode.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">helper</span></code> is an instance of <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper" title="pysys.config.descriptor.TestModesConfigHelper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper</span></code></a> which provides
+access to the list of inherited modes (and more).</p>
+<p>When naming modes, TitleCase is recommended, and dot, underscore and equals characters
+may be used. Typically dot is useful for version numbers and underscore <code class="docutils literal notranslate"><span class="pre">_</span></code> is
+useful for separating out different dimensions (e.g. compression vs authentication type
+in the example described later in this section); separating dimensions cleanly will make it
+much easier to include/exclude the test modes you want. PySys will give an error if you use different
+capitalization for the same mode in different places, as this can result in test bugs.</p>
 <p>In large projects you may wish to configure modes in a <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>
-file in a parent directory rather than in <code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code>, which will by
-default be inherited by all nested testcases (unless <code class="docutils literal notranslate"><span class="pre">inherit=&quot;false&quot;</span></code> is
-specified in the <code class="docutils literal notranslate"><span class="pre">&lt;modes&gt;</span></code> element), and so there’s a single place to
-edit the modes list if you need to change them later. It’s also possible to
-create a custom DescriptorLoader subclass that dynamically adds modes
-from Python code, perhaps based on the groups specified in each descriptor
-or runtime information such as the current operating system.</p>
-<p>You can find the mode that this test is running in using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.mode</span></code></a>.
-To ensure typos and inconsistencies in individual test descriptor modes do
-no go unnoticed, it is best to provide constants for the possible mode values
-and/or do validation and unpacking of modes in a test plugin like this:</p>
+file in a parent directory rather than in <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code>, which will by
+default be inherited by all nested testcases (unless an explicit modes
+configuration is provided), and so that there’s a single place to edit the modes
+list if you need to change them later.</p>
+<p>By default the first mode in each list is “primary”, so the test will only run in that one primary mode by
+default during local test runs (i.e. unless you supply a <code class="docutils literal notranslate"><span class="pre">--modes</span></code> or <code class="docutils literal notranslate"><span class="pre">--ci</span></code> argument). This is optimal when
+using modes to validate the same behaviour/conditions in different execution environments e.g.
+browsers/databases etc. It’s best to choose either the fastest mode or else the one that
+is most likely to show up interesting issues as the primary mode.</p>
+<p>However when using modes to validate different <em>behaviours/conditions</em> (e.g. testing
+out different command line options) using a single PySysTest class, then you should designate all your modes as
+“primary” as you want <em>all of them</em> to execute by default in a quick local test run.
+The <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary" title="pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary</span></code></a> helper function can do this.</p>
+<p>Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication
+type etc, and you may want your tests to run in all combinations of each item in each dimension list.
+Rather than writing out every combination manually, you can use the function
+<a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions" title="pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions</span></code></a> to automatically generate the combinations,
+passing it each dimension (e.g. each compression type) as a separate list.</p>
+<p>Here is an example of multi-dimensional modes (taken from the getting-started sample):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">lambda helper: [</span>
+<span class="s2">                mode for mode in</span>
+<span class="s2">                        helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list</span>
+<span class="s2">                                helper.inheritedModes,</span>
+<span class="s2">                                {</span>
+<span class="s2">                                                &#39;CompressionNone&#39;: {&#39;compressionType&#39;:None, &#39;isPrimary&#39;:True},</span>
+<span class="s2">                                                &#39;CompressionGZip&#39;: {&#39;compressionType&#39;:&#39;gzip&#39;},</span>
+<span class="s2">                                },</span>
+<span class="s2">                                [</span>
+<span class="s2">                                        {&#39;auth&#39;:None}, # Mode name is optional</span>
+<span class="s2">                                        {&#39;auth&#39;:&#39;OS&#39;}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS</span>
+<span class="s2">                                ],</span>
+
+<span class="s2">                                # By default only the first mode in each list is &quot;primary&quot;, so the test will only run in that one mode by</span>
+<span class="s2">                                # default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when</span>
+<span class="s2">                                # using modes to validate the same behaviour/conditions in different execution environments e.g.</span>
+<span class="s2">                                # browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing</span>
+<span class="s2">                                # out different command line options) using a single PySysTest class, then you should have all your modes as</span>
+<span class="s2">                                # &quot;primary&quot; as you want all of them to execute by default in a quick local test run.</span>
+<span class="s2">                                helper.makeAllPrimary(</span>
+<span class="s2">                                        {</span>
+<span class="s2">                                                &#39;Usage&#39;:        {&#39;cmd&#39;: [&#39;--help&#39;], &#39;expectedExitStatus&#39;:&#39;==0&#39;},</span>
+<span class="s2">                                                &#39;BadPort&#39;:      {&#39;cmd&#39;: [&#39;--port&#39;, &#39;-1&#39;],  &#39;expectedExitStatus&#39;:&#39;!=0&#39;},</span>
+<span class="s2">                                                &#39;MissingPort&#39;:  {&#39;cmd&#39;: [],  &#39;expectedExitStatus&#39;:&#39;!=0&#39;},</span>
+<span class="s2">                                        }),</span>
+<span class="s2">                                )</span>
+
+<span class="s2">                # This is Python list comprehension syntax for filtering the items in the list</span>
+<span class="s2">                if (mode[&#39;auth&#39;] != &#39;OS&#39; or helper.import_module(&#39;sys&#39;).platform == &#39;MyFunkyOS&#39;)</span>
+<span class="s2">        ]</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This will create the following modes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CompressionNone_Auth</span><span class="o">=</span><span class="n">None_Usage</span>       <span class="p">[</span><span class="n">PRIMARY</span><span class="p">]</span>
+<span class="n">CompressionNone_Auth</span><span class="o">=</span><span class="n">None_BadPort</span>     <span class="p">[</span><span class="n">PRIMARY</span><span class="p">]</span>
+<span class="n">CompressionNone_Auth</span><span class="o">=</span><span class="n">None_MissingPort</span> <span class="p">[</span><span class="n">PRIMARY</span><span class="p">]</span>
+<span class="n">CompressionGZip_Auth</span><span class="o">=</span><span class="n">None_Usage</span>
+<span class="n">CompressionGZip_Auth</span><span class="o">=</span><span class="n">None_BadPort</span>
+<span class="n">CompressionGZip_Auth</span><span class="o">=</span><span class="n">None_MissingPort</span>
+<span class="n">CompressionNone_OS_Usage</span>
+<span class="n">CompressionNone_OS_BadPort</span>
+<span class="n">CompressionNone_OS_MissingPort</span>
+<span class="n">CompressionGZip_OS_Usage</span>
+<span class="n">CompressionGZip_OS_BadPort</span>
+<span class="n">CompressionGZip_OS_MissingPort</span>
+</pre></div>
+</div>
+<p>When creating multi-dimensional modes you can explicitly specify the name of each mode using <code class="docutils literal notranslate"><span class="pre">'mode':..</span></code>, but
+if you want to avoid repeating the value of your parameters you can let PySys generate a default mode, which
+it does by taking each parameter concatenated with <code class="docutils literal notranslate"><span class="pre">_</span></code>; parameters with non-string values (e.g. <code class="docutils literal notranslate"><span class="pre">None</span></code> in
+the above example) are additionally qualified with <code class="docutils literal notranslate"><span class="pre">paramName=</span></code> to make the meaning clear.</p>
+<p>The above example also shows how a Python list comprehension can be used to filter prevent the Auth=OS modes
+from being added on some operation systems (in this example, on all non-fictional operating systems!).</p>
+<p>You can find the mode that this test is running in using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.mode</span></code></a>, which returns an instance of
+<a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestMode" title="pysys.config.descriptor.TestMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestMode</span></code></a> that subclasses a <code class="docutils literal notranslate"><span class="pre">str</span></code> of the mode name, as well as the parameters
+via a <code class="docutils literal notranslate"><span class="pre">params</span></code> field.</p>
+<p>Here’s an example showing how a test plugin might use modes configuration to configure the test object
+during test setup:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyTestPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">):</span>
-                <span class="c1"># Unpack and validate mode</span>
-                <span class="n">testObj</span><span class="o">.</span><span class="n">databaseMode</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">browserMode</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
-                <span class="k">assert</span> <span class="n">testObj</span><span class="o">.</span><span class="n">browserMode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Chrome&#39;</span><span class="p">,</span> <span class="s1">&#39;Firefox&#39;</span><span class="p">],</span> <span class="n">testObj</span><span class="o">.</span><span class="n">browserMode</span>
-
                 <span class="c1"># This is a convenient pattern for specifying the method or class</span>
                 <span class="c1"># constructor to call for each mode, and to get an exception if an</span>
                 <span class="c1"># invalid mode is specified</span>
                 <span class="n">dbHelperFactory</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="s1">&#39;MockDatabase&#39;</span><span class="p">:</span> <span class="n">MockDB</span><span class="p">,</span>
                         <span class="s1">&#39;MyDatabase2.0&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">startMyDatabase</span><span class="p">(</span><span class="s1">&#39;2.0&#39;</span><span class="p">)</span>
-                <span class="p">}[</span><span class="n">testObj</span><span class="o">.</span><span class="n">databaseMode</span><span class="p">]</span>
+                <span class="p">}[</span><span class="n">testObj</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">]]</span>
                 <span class="o">...</span>
                 <span class="c1"># Call the supplied method to start/configure the database</span>
                 <span class="n">testObj</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">dbHelperFactory</span><span class="p">()</span>
@@ -482,22 +617,24 @@ and/or do validation and unpacking of modes in a test plugin like this:</p>
 </div>
 <p>Finally, PySys provides a rich variety of <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> arguments to control
 which modes your tests will run with. By default it will run every test in its
-primary mode (for tests with no mode, the primary mode is <code class="docutils literal notranslate"><span class="pre">self.mode==None</span></code>) -
+primary modes (for tests with no mode, the primary mode is <code class="docutils literal notranslate"><span class="pre">self.mode==None</span></code>) -
 which is great for quick checks during development of your application and
 testcases.</p>
 <p>Your main test run (perhaps in a CI job) probably wants to run tests in all
 modes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">--</span><span class="n">mode</span> <span class="n">ALL</span> <span class="o">--</span><span class="n">threads</span> <span class="n">auto</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">--</span><span class="n">mode</span> <span class="n">ALL</span>
 </pre></div>
 </div>
+<p>(In practice you would use <code class="docutils literal notranslate"><span class="pre">--ci</span></code> which does the above and also sets some other useful defaults).</p>
 <p>You can also specify specifies modes to run in, or to run everything except
-specified modes:</p>
+specified modes, or even use regular expressions for even more flexibility:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pysys run --mode MyMode1,MyMode2
 pysys run --mode !MyMode3,!MyMode4
+pysys run --mode MyMode.*
 </pre></div>
 </div>
-<p>After successfully getting all your tests passing in their primary mode, it could
-be useful to run them in every mode other than the primary one:</p>
+<p>After successfully getting all your tests passing in their primary modes, it could
+be useful to run them in every mode other than the primary:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pysys run --mode !PRIMARY
 </pre></div>
 </div>
@@ -505,13 +642,12 @@ be useful to run them in every mode other than the primary one:</p>
 mode test this is achieved by having the id automatically include a <code class="docutils literal notranslate"><span class="pre">~Mode</span></code>
 suffix. If you are reporting performance results from a multi-mode test, make
 sure you include the mode in the <code class="docutils literal notranslate"><span class="pre">resultKey</span></code> when you all <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.reportPerformanceResult</span></code></a>,
-since the <code class="docutils literal notranslate"><span class="pre">resultKey</span></code> must be
-globally unique.</p>
+since the <code class="docutils literal notranslate"><span class="pre">resultKey</span></code> must be globally unique.</p>
 <p>In addition to the <code class="docutils literal notranslate"><span class="pre">--mode</span></code> argument which affects all selected tests, it is
 possible to run a specific test in a specific mode. This can be useful when you
 have a few miscellaneous test failures and just want to re-run the failing
 tests:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="n">MyTest_001</span><span class="o">~</span><span class="n">MockDatabase</span> <span class="n">MyTest_020</span><span class="o">~</span><span class="n">MyDatabase_2</span><span class="o">.</span><span class="mi">0</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="n">MyTest_001</span><span class="o">~</span><span class="n">MockDatabase</span> <span class="n">MyTest_020</span><span class="o">~</span><span class="n">MyDatabase_2</span><span class="mf">.0</span>
 </pre></div>
 </div>
 </div>
@@ -519,7 +655,7 @@ tests:</p>
 <h2>Test ids and structuring large projects<a class="headerlink" href="#test-ids-and-structuring-large-projects" title="Permalink to this headline">¶</a></h2>
 <p>Each test has a unique <code class="docutils literal notranslate"><span class="pre">id</span></code> which is used in various places such as when
 reporting passed/failed outcomes. By default the id is just the name of the
-directory containing the <code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code> file.</p>
+directory containing the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file.</p>
 <p>You can choose a suitable naming convention for your tests. For example,
 you might wish to differentiate with just a numeric suffix such as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MyApp_001</span>
@@ -605,12 +741,11 @@ broken temporarily pending a bug fix.</p></li>
 </ul>
 <p>By default both modes and groups are inherited from <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> files
 in parent directories, but inheriting can be disabled in an individual
-descriptor by setting <code class="docutils literal notranslate"><span class="pre">inherit=&quot;false&quot;</span></code>, in case you have a few tests that only
+descriptor by providing an explicit list of modes, in case you have a few tests that only
 make sense in one mode. Alternatively, you could allow the tests to exist
 in all modes but call <code class="docutils literal notranslate"><span class="pre">self.skipTest</span> <span class="pre">&lt;BaseTest.skipTest&gt;</span></code> at the start of the test <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.execute" title="pysys.basetest.BaseTest.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.execute</span></code></a> method
 if the test cannot execute in the current mode.</p>
-<p>See the <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> sample in <code class="docutils literal notranslate"><span class="pre">pysys/xml/templates/dirconfig</span></code>
-for a full example of a directory configuration file.</p>
+<p>See the <a class="reference internal" href="TestDescriptors.html#sample-pysysdirconfig-xml"><span class="std std-ref">Sample pysysdirconfig.xml</span></a> for a full example of a directory configuration file.</p>
 </div>
 <div class="section" id="controlling-execution-order">
 <h2>Controlling execution order<a class="headerlink" href="#controlling-execution-order" title="Permalink to this headline">¶</a></h2>
@@ -620,22 +755,22 @@ with different modes, to maximize the chance of finding out quickly if
 something has gone wrong, and perhaps to prioritize running fast unit and
 correctness tests before commencing on longer running performance or soak tests.</p>
 <p>By default, PySys runs tests based on the sorting them by the full path of
-the <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysystest.xml</span></code> files. If you have tests with multiple modes, PySys will
-run all tests in their primary mode first, then any/all tests which list a
+the <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysystest.*</span></code> files. If you have tests with multiple modes, PySys will
+run all tests in their primary modes first, then any/all tests which list a
 second mode, followed by 3rd, 4th, etc.</p>
 <p>All of this can be customized using the concept of an execution order hint.
 Every test descriptor is assigned an execution order hint, which is a positive
 or negative floating point number which defaults to 0.0, and is used to sort
 the descriptors before execution. Higher execution order hints mean later
 execution. If two tests have the same hint, PySys falls back on using the
-path of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysystest.xml</span></code> file to determine a canonical order.</p>
+path of the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file to determine a canonical order.</p>
 <p>The hint for each test is generated by adding together hint components from the
 following:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>A test-specific hint from the <code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code> file’s
-<code class="docutils literal notranslate"><span class="pre">&lt;execution-order</span> <span class="pre">hint=&quot;...&quot;/&gt;</span></code>. If the hint is
-blank (the default), the test inherits any hint specified in a
+<li><p>A test-specific hint from the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file’s <code class="docutils literal notranslate"><span class="pre">__pysys_execution_order_hint__</span> <span class="pre">=</span> <span class="pre">``</span> <span class="pre">or</span>
+<span class="pre">``&lt;execution-order</span> <span class="pre">hint=&quot;...&quot;/&gt;</span></code>. If the hint is
+not specified (the default), the test inherits any hint specified in a
 <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> file in an ancestor folder, or 0.0 if there aren’t
 any. Note that hints from <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> files are not added
 together; instead, the most specific wins.</p></li>
@@ -643,14 +778,14 @@ together; instead, the most specific wins.</p></li>
 match the mode and/or group of the test. The project configuration
 is the place to put mode-specific execution order hints, such as putting
 a particular database or web browser mode earlier/later. See the
-sample <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file for details.</p></li>
+sample <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a> file for details.</p></li>
 <li><p>For multi-mode tests, the <code class="docutils literal notranslate"><span class="pre">secondaryModesHintDelta</span></code> specified in the project
 configuration (unless it’s set to zero), multiplied by a number indicating
 which mode this is. If a test had 3 modes Mode1, Mode2 and Mode3 then
-the primary mode (Mode1) would get no additional hint, Mode2 would get
+the primary mode(s) (Mode1) would get no additional hint, Mode2 would get
 <code class="docutils literal notranslate"><span class="pre">secondaryModesHintDelta</span></code> added to its hint and Mode3 would get
 <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">x</span> <span class="pre">secondaryModesHintDelta</span></code> added to its hint. This is the mechanism
-PySys uses to ensure all tests run first in their primary mode before
+PySys uses to ensure all tests run first in their primary modes before
 any tests run in their secondary modes. Usually the default value of
 <code class="docutils literal notranslate"><span class="pre">secondaryModesHintDelta</span> <span class="pre">=</span> <span class="pre">+100.0</span></code> is useful and avoids the need for too
 much mode-specific hint configuration (see above). However if you prefer to
@@ -661,7 +796,8 @@ in all modes before moving on to the next test - then simply set
 </div></blockquote>
 <p>For really advanced cases, you can programmatically set the
 <code class="docutils literal notranslate"><span class="pre">executionOrderHint</span></code> on each descriptor by providing a custom
-<a class="reference internal" href="autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader" title="pysys.xml.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.xml.descriptor.DescriptorLoader</span></code></a> or in the constructor of a custom <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> class.</p>
+<a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.DescriptorLoader" title="pysys.config.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.DescriptorLoader</span></code></a> or in the constructor of a
+custom <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> class or plugin.</p>
 </div>
 </div>
 
@@ -673,7 +809,7 @@ in all modes before moving on to the next test - then simply set
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ProjectConfig.html" class="btn btn-neutral float-right" title="Project Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ProjectConfiguration.html" class="btn btn-neutral float-right" title="Project Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="BaseTest.html" class="btn btn-neutral float-left" title="The BaseTest Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -685,7 +821,7 @@ in all modes before moving on to the next test - then simply set
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

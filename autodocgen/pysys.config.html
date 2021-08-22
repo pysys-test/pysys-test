@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.xml &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.config &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pysys.xml.descriptor" href="pysys.xml.descriptor.html" />
-    <link rel="prev" title="pysys.writer.testoutput" href="pysys.writer.testoutput.html" /> 
+    <link rel="next" title="pysys.config.descriptor" href="pysys.config.descriptor.html" />
+    <link rel="prev" title="pysys.baserunner" href="pysys.baserunner.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,17 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pysys.config.descriptor.html">pysys.config.descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.config.project.html">pysys.config.project</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -97,11 +103,6 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.xml</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pysys.xml.descriptor.html">pysys.xml.descriptor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pysys.xml.project.html">pysys.xml.project</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -120,7 +121,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -153,13 +154,13 @@
         
           <li><a href="pysys.html">API Reference</a> &raquo;</li>
         
-      <li>pysys.xml</li>
+      <li>pysys.config</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/autodocgen/pysys.xml.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autodocgen/pysys.config.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -172,20 +173,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pysys.xml">
-<span id="pysys-xml"></span><h1>pysys.xml<a class="headerlink" href="#module-pysys.xml" title="Permalink to this headline">¶</a></h1>
-<p>Test/directory descriptors (<code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code>/<code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>) and project configuration (<code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>).</p>
+  <div class="section" id="module-pysys.config">
+<span id="pysys-config"></span><h1>pysys.config<a class="headerlink" href="#module-pysys.config" title="Permalink to this headline">¶</a></h1>
+<p>Test/directory descriptors (<code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code>/<code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>) and project configuration (<code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>).</p>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.xml.descriptor.html#module-pysys.xml.descriptor" title="pysys.xml.descriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.xml.descriptor</span></code></a></p></td>
-<td><p>The <a class="reference internal" href="pysys.xml.descriptor.html#pysys.xml.descriptor.TestDescriptor" title="pysys.xml.descriptor.TestDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDescriptor</span></code></a> class holds metadata for each testcase  (<code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code>) or directory (<code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>), and the <a class="reference internal" href="pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader" title="pysys.xml.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DescriptorLoader</span></code></a>  class allows customization of the test discovery process.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.config.descriptor.html#module-pysys.config.descriptor" title="pysys.config.descriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="pysys.config.descriptor.html#pysys.config.descriptor.TestDescriptor" title="pysys.config.descriptor.TestDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDescriptor</span></code></a> class holds metadata for each testcase  (<code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code>) or directory (<code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>), and the <a class="reference internal" href="pysys.config.descriptor.html#pysys.config.descriptor.DescriptorLoader" title="pysys.config.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DescriptorLoader</span></code></a>  class allows customization of the test discovery process.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.xml.project.html#module-pysys.xml.project" title="pysys.xml.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.xml.project</span></code></a></p></td>
-<td><p>The <a class="reference internal" href="pysys.xml.project.html#pysys.xml.project.Project" title="pysys.xml.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> class holds the <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> project configuration, including all  user-defined project properties.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.config.project.html#module-pysys.config.project" title="pysys.config.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.project</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a> class holds the <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> project configuration, including all  user-defined project properties.</p></td>
 </tr>
 </tbody>
 </table>
@@ -199,10 +200,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pysys.xml.descriptor.html" class="btn btn-neutral float-right" title="pysys.xml.descriptor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pysys.config.descriptor.html" class="btn btn-neutral float-right" title="pysys.config.descriptor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pysys.writer.testoutput.html" class="btn btn-neutral float-left" title="pysys.writer.testoutput" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pysys.baserunner.html" class="btn btn-neutral float-left" title="pysys.baserunner" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -211,7 +212,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

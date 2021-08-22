@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.linecount &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.linecount &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.utils.linecount</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -178,7 +179,7 @@
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.filegrep</span> <span class="kn">import</span> <span class="n">getmatches</span>
 
-<div class="viewcode-block" id="linecount"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.linecount.html#pysys.utils.linecount.linecount">[docs]</a><span class="k">def</span> <span class="nf">linecount</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">regexpr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="linecount"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.linecount.html#pysys.utils.linecount.linecount">[docs]</a><span class="k">def</span> <span class="nf">linecount</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">regexpr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Count the number of lines in an input file matching a regular expression, return the count.</span>
 <span class="sd">	</span>
 <span class="sd">	If the input regular expression is set to None, the method returns a count of the </span>
@@ -194,7 +195,7 @@
 <span class="sd">	:raises FileNotFoundException: Raised if the input file does not exist</span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">matches</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">regexpr</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+	<span class="n">matches</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">regexpr</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span></div>
 
 
@@ -226,7 +227,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

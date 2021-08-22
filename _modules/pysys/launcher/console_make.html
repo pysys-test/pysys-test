@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.launcher.console_make &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.launcher.console_make &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -151,7 +152,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for pysys.launcher.console_make</h1><div class="highlight"><pre>
-<span></span><span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span></span><span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -174,23 +175,414 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">getopt</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 
 <span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">log</span>
 
 <span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.launcher</span> <span class="kn">import</span> <span class="n">createDescriptors</span>
-<span class="kn">from</span> <span class="nn">pysys.xml.project</span> <span class="kn">import</span> <span class="n">Project</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.loader</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span> <span class="nn">pysys.config.project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span><span class="p">,</span> <span class="n">PY2</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span><span class="p">,</span> <span class="n">mkdir</span>
 
-<div class="viewcode-block" id="ConsoleMakeTestHelper"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper">[docs]</a><span class="k">class</span> <span class="nc">ConsoleMakeTestHelper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="DefaultTestMaker"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker">[docs]</a><span class="k">class</span> <span class="nc">DefaultTestMaker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	The default implementation of ``pysys.py make``.</span>
+<span class="sd">	The default implementation of ``pysys.py make``, which creates tests and other assets using templates configurable </span>
+<span class="sd">	on a per-directory basis using ``&lt;maker-template&gt;`` configuration in ``pysysdirconfig.xml`` (and project) files.</span>
 <span class="sd">	</span>
-<span class="sd">	A custom subclass can be specified in the project if required. </span>
+<span class="sd">	See :doc:`/pysys/TestDescriptors` for information about how to configure templates. </span>
+<span class="sd">	</span>
+<span class="sd">	A subclass can be specified in the project if further customization is required using::</span>
+<span class="sd">	</span>
+<span class="sd">		&lt;maker classname=&quot;myorg.MyTestMaker&quot;/&gt;</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">__PYSYS_DEFAULT_TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+	<span class="p">{</span>
+		<span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;pysys-default-test&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;a default empty PySys test&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;isTest&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+		<span class="s1">&#39;copy&#39;</span><span class="p">:</span> <span class="p">[</span>
+			<span class="s1">&#39;$</span><span class="si">{pysysTemplatesDir}</span><span class="s1">/default-test/*&#39;</span><span class="p">,</span>
+		<span class="p">],</span>
+		<span class="s1">&#39;mkdir&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># means create the defaults - Input/Output/Reference</span>
+		<span class="s1">&#39;replace&#39;</span><span class="p">:[],</span>  <span class="c1"># empty means use defaults</span>
+	<span class="p">},</span>
+	<span class="p">]</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;make&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">parentDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">skipValidation</span> <span class="o">=</span> <span class="kc">False</span>
+
+	<span class="k">def</span> <span class="nf">getTemplates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+		<span class="n">projectroot</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">projectFile</span><span class="p">))</span>
+		<span class="nb">dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentDir</span>
+
+		<span class="n">DIR_CONFIG_DESCRIPTOR</span> <span class="o">=</span> <span class="s1">&#39;pysysdirconfig.xml&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">projectFile</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">dir</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">projectroot</span><span class="p">):</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Project file does not exist under &quot;</span><span class="si">%s</span><span class="s1">&quot; so processing of </span><span class="si">%s</span><span class="s1"> files is disabled&#39;</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">None</span>
+ 
+		<span class="kn">from</span> <span class="nn">pysys.config.descriptor</span> <span class="kn">import</span> <span class="n">_XMLDescriptorParser</span> <span class="c1"># uses a non-public API, so please don&#39;t copy this into your own test maker</span>
+
+		<span class="c1"># load any descriptors between the project dir up to (AND including) the dir we&#39;ll be walking</span>
+		<span class="n">searchdirsuffix</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">projectroot</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="n">projectroot</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
+		
+		<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">_XMLDescriptorParser</span><span class="o">.</span><span class="n">DEFAULT_DESCRIPTOR</span>
+		
+		<span class="k">def</span> <span class="nf">expandAndValidateTemplate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">defaults</span><span class="p">):</span>
+			<span class="n">source</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;unknown source&gt;&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">defaults</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span>
+
+			<span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span> <span class="c1"># enforce this to make them easy to type on cmd line, and consistent</span>
+				<span class="s2">&quot;Invalid template name </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> - must be lowercase and use hyphens not underscores/spaces for separating words, in </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">source</span><span class="p">))</span>
+		
+			<span class="n">source</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+				<span class="n">t</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+					<span class="n">defaults</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
+					<span class="n">defaults</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> 
+					<span class="n">defaults</span><span class="o">.</span><span class="n">reference</span>
+				<span class="p">]</span>
+			
+			<span class="n">t</span><span class="p">[</span><span class="s1">&#39;testOutputDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">output</span>
+			
+			<span class="n">t</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">if</span> <span class="n">source</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]]</span>
+			<span class="n">copy</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]:</span>
+				<span class="n">globbed</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">globbed</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot find any file or directory &quot;</span><span class="si">%s</span><span class="s1">&quot; in maker template &quot;</span><span class="si">%s</span><span class="s1">&quot; of &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">source</span><span class="p">))</span>
+				<span class="n">copy</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">globbed</span><span class="p">)</span>
+			<span class="n">t</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
+			
+			<span class="n">t</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">r1</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">r2</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]]</span>
+			<span class="k">for</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]:</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">r1</span><span class="p">)</span>
+				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Invalid replacement regular expression &quot;</span><span class="si">%s</span><span class="s1">&quot; in maker template &quot;</span><span class="si">%s</span><span class="s1">&quot; of &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">source</span><span class="p">,</span> <span class="n">ex</span><span class="p">))</span>
+			
+			<span class="k">return</span> <span class="n">t</span>
+		
+		<span class="c1"># start with the built-ins and project</span>
+		<span class="n">templates</span> <span class="o">=</span> <span class="p">[</span><span class="n">expandAndValidateTemplate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">_defaultDirConfig</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__PYSYS_DEFAULT_TEMPLATES</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_defaultDirConfig</span><span class="p">:</span>
+			<span class="n">templates</span> <span class="o">=</span> <span class="p">[</span><span class="n">expandAndValidateTemplate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">_defaultDirConfig</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">_defaultDirConfig</span><span class="o">.</span><span class="n">_makeTestTemplates</span><span class="p">]</span><span class="o">+</span><span class="n">templates</span>
+		
+		<span class="n">parentDirDefaults</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">searchdirsuffix</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># up to AND including dir</span>
+			<span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="n">currentdir</span> <span class="o">=</span> <span class="n">projectroot</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">currentdir</span> <span class="o">=</span> <span class="n">projectroot</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">searchdirsuffix</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>
+			
+			<span class="k">if</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">currentdir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">):</span>
+				<span class="n">parentDirDefaults</span> <span class="o">=</span> <span class="n">_XMLDescriptorParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">currentdir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentDirDefaults</span><span class="p">,</span> <span class="n">istest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">)</span>
+				<span class="n">newtemplates</span> <span class="o">=</span> <span class="p">[</span><span class="n">expandAndValidateTemplate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">parentDirDefaults</span><span class="o">.</span><span class="n">_makeTestTemplates</span><span class="p">]</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded directory configuration descriptor from </span><span class="si">%s</span><span class="s1">: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">currentdir</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="p">)</span>
+				
+				<span class="c1"># Add in existing templates from higher levels, but de-dup&#39;d, giving priority to the latest defined template, and also putting the latest ones at the top of the list </span>
+				<span class="c1"># for increased prominence</span>
+				<span class="k">for</span> <span class="n">deftmpl</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">:</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">tmpl</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">deftmpl</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tmpl</span> <span class="ow">in</span> <span class="n">newtemplates</span><span class="p">):</span>
+						<span class="n">newtemplates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deftmpl</span><span class="p">)</span> 
+				<span class="n">templates</span> <span class="o">=</span> <span class="n">newtemplates</span>
+
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded templates: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">templates</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;  &#39;</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">templates</span>
+		
+	<span class="n">supportedArgs</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ht:s&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="s1">&#39;template=&#39;</span><span class="p">,</span> <span class="s1">&#39;skipValidation&#39;</span><span class="p">])</span>
+
+	<span class="k">def</span> <span class="nf">printOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="c1">#######                                                                                                                        |</span>
+		<span class="n">_PYSYS_SCRIPT_NAME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;pysys.py&#39;</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Usage: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> [options]* [TEST_DIR_NAME]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_PYSYS_SCRIPT_NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   where [option] includes:&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -t | --template=NAME        use the named template (default is to use the first)&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">!=</span> <span class="n">DefaultTestMaker</span><span class="p">:</span> <span class="c1"># we know there is no validation anyway in this class, so only show this option for subclasses</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -s | --skipValidation       skip the usual (typically remote) validation of the proposed test id&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -h | --help                 print this message&quot;</span><span class="p">)</span>
+
+
+	<span class="k">def</span> <span class="nf">printAvailableTemplates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">templates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTemplates</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">templates</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available templates - and what they produce:&quot;</span><span class="p">)</span>
+			<span class="n">maxLength</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">maxLength</span><span class="si">}}</span><span class="s2"> - </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   (more customized templates for new tests in this project/directory can be configured using pysysdirconfig)&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DefaultTestMaker.printUsage"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.printUsage">[docs]</a>	<span class="k">def</span> <span class="nf">printUsage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
+		<span class="c1">#######                                                                                                                        |</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PySys System Test Framework (version </span><span class="si">%s</span><span class="s2">): Makes PySys tests using configurable templates&quot;</span> <span class="o">%</span> <span class="n">__version__</span><span class="p">)</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">printOptions</span><span class="p">()</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TEST_DIR_NAME is the test directory to be created, which should consist of letters, numbers and underscores, &quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;e.g. MyApp_perf_001 (&#39;numeric&#39; style) or InvalidFooBarProducesError (&#39;test that XXX&#39; long string style).&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;If TEST_DIR_NAME is not specified and existing tests follow the pattern PREFIX_NUMBER PySys will &quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;auto-generate a numeric test id using a free number. &quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">printAvailableTemplates</span><span class="p">()</span></div>
+
+	<span class="k">def</span> <span class="nf">parseArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;--template&#39;</span><span class="p">]:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">value</span>
+			<span class="k">return</span> <span class="kc">True</span>
+		<span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--skipValidation&#39;</span><span class="p">]:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">skipValidation</span> <span class="o">=</span> <span class="kc">True</span>
+			<span class="k">return</span> <span class="kc">True</span>
+		<span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="DefaultTestMaker.validateTestId"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.validateTestId">[docs]</a>	<span class="k">def</span> <span class="nf">validateTestId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentDir</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">numericSuffix</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This method can be overridden to provide customized validation of a proposed new test directory name, for example </span>
+<span class="sd">		to prevent clashes with existing tests committed to version control.</span>
+<span class="sd">		</span>
+<span class="sd">		The default implementation of this method does nothing. </span>
+<span class="sd">		</span>
+<span class="sd">		If validation fails, an exception should be thrown. The method can propose a new numericSuffix </span>
+<span class="sd">		that will be used instead (only if auto-generating the test id) by raising an </span>
+<span class="sd">		`ProposeNewTestIdNumericSuffixException` exception. </span>
+<span class="sd">		</span>
+<span class="sd">		The command line option ``--skipValidation`` can be used to disable this checking, for example when </span>
+<span class="sd">		disconnected from the network. </span>
+<span class="sd">		</span>
+<span class="sd">		:param str parentDir: The absolute path of the directory in which the test is to be created. </span>
+<span class="sd">		:param str prefix: The proposed test id, excluding any numeric suffix.</span>
+<span class="sd">		:param str numericSuffix: The numeric suffix (including padding), if any, or &#39;&#39; if this is not a numeric test id. </span>
+<span class="sd">		</span>
+<span class="sd">		:raises ProposeNewTestIdNumericSuffixException: If an alternative numeric suffix would be acceptable. This is used </span>
+<span class="sd">			when auto-generating test ids. </span>
+<span class="sd">		:raises Exception: If the specific test id is not acceptable. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DefaultTestMaker.parseArgs"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.parseArgs">[docs]</a>	<span class="k">def</span> <span class="nf">parseArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">optlist</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">gnu_getopt</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">supportedArgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">supportedArgs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Error parsing command line arguments: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">printUsage</span><span class="p">()</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			
+		<span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="k">for</span> <span class="n">option</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">optlist</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">printUsage</span><span class="p">()</span>
+				<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+			<span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseArg</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+				<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Unknown option: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">option</span><span class="p">)</span>
+				<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="n">skipValidation</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;skipValidation&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">skipValidation</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No test id validation will be performed&#39;</span><span class="p">)</span>
+
+		<span class="n">splitNumericSuffix</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;([^_].+_)([0-9][0-9]+)$&#39;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">parentdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">))</span>
+			
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">skipValidation</span><span class="p">:</span>
+					<span class="n">match</span> <span class="o">=</span> <span class="n">splitNumericSuffix</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">))</span>
+					<span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">validateTestId</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">parentdir</span><span class="p">)</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">validateTestId</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">parentdir</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+				<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test id &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="si">}</span><span class="s1">&quot; was rejected by validator: </span><span class="si">{</span><span class="n">ex</span><span class="si">}</span><span class="s1"> (if needed, use --skipValidation to disable checking)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+				<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># try to auto-generate</span>
+				<span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parentDir</span><span class="p">)</span> <span class="k">as</span> <span class="n">it</span><span class="p">:</span>
+					<span class="n">existingtests</span> <span class="o">=</span> <span class="p">[</span><span class="n">splitNumericSuffix</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">it</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span>
+				<span class="n">existingtests</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">existingtests</span> <span class="k">if</span> <span class="n">x</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+				<span class="n">existingprefixes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">existingtests</span><span class="p">])))</span>
+				<span class="k">if</span> <span class="n">existingprefixes</span><span class="p">:</span> <span class="c1"># if not, fall back to main error handler</span>
+					<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">existingprefixes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+						<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;When using numeric test ids you should use the same prefix for all tests in each directory, but multiple prefixes were found: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">existingprefixes</span><span class="p">))</span>
+						<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+					<span class="n">prefix</span><span class="p">,</span> <span class="n">highestNum</span> <span class="o">=</span> <span class="n">existingprefixes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">existingtests</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+					<span class="n">newNum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">highestNum</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+					<span class="n">pad</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">highestNum</span><span class="p">)</span>
+					
+					<span class="bp">self</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">newNum</span><span class="p">)</span><span class="si">:</span><span class="s1">0</span><span class="si">{</span><span class="n">pad</span><span class="si">}}</span><span class="s1">&#39;</span>
+					
+					<span class="k">try</span><span class="p">:</span>
+						<span class="k">if</span> <span class="ow">not</span> <span class="n">skipValidation</span><span class="p">:</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">validateTestId</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">newNum</span><span class="si">:</span><span class="s1">0</span><span class="si">{</span><span class="n">pad</span><span class="si">}}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentDir</span><span class="p">)</span>
+					<span class="k">except</span> <span class="n">ProposeNewTestIdNumericSuffixException</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+						<span class="n">newNum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">newNumericSuffix</span><span class="p">)</span>
+					<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+						<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Auto-generated id &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="si">}</span><span class="s1">&quot; was rejected by validator: </span><span class="si">{</span><span class="n">ex</span><span class="si">}</span><span class="s1"> (if needed, use --skipValidation to disable checking)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+						<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+					<span class="bp">self</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">newNum</span><span class="p">)</span><span class="si">:</span><span class="s1">0</span><span class="si">{</span><span class="n">pad</span><span class="si">}}</span><span class="s1">&#39;</span>
+					<span class="k">return</span>
+					
+			<span class="c1"># if we didn&#39;t auto-generate a numeric one, fall back to error handler</span>
+				
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Please specify the test id to be created.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">printUsage</span><span class="p">()</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DefaultTestMaker.copy"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.copy">[docs]</a>	<span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">replace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Copies the specified source file/dir to the specified dest file/dir. </span>
+<span class="sd">		</span>
+<span class="sd">		Can be overridden if any advanced post-processing is required. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__pycache__&#39;</span><span class="p">]:</span> <span class="k">return</span> <span class="c1"># definitely not worth copying these!</span>
+			<span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">replaceInDir</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">replaceInFile</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+			
+			<span class="c1"># executable permission may be important, so copy it</span>
+			<span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+	
+	<span class="k">def</span> <span class="nf">replaceInDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">replace</span><span class="p">):</span>
+		<span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span> <span class="k">as</span> <span class="n">it</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">replaceInDir</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">replaceInFile</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">replaceInFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">replace</span><span class="p">):</span>
+		<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">replace</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span> <span class="k">return</span>
+	
+		<span class="c1"># we don&#39;t know what encoding the file is in (or even if it&#39;s a text file), so read/write using bytes</span>
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+		<span class="k">for</span> <span class="n">regex</span><span class="p">,</span> <span class="n">repl</span> <span class="ow">in</span> <span class="n">replace</span><span class="p">:</span>
+			<span class="n">contents</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">repl</span><span class="p">,</span> <span class="n">contents</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pythonIndentationSpacesPerTab&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+			<span class="n">spaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pythonIndentationSpacesPerTab&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">spaces</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span> <span class="n">spaces</span> <span class="o">=</span> <span class="s1">&#39;    &#39;</span>
+			<span class="n">contents</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;^(</span><span class="se">\\</span><span class="s1">t+)&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">spaces</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">),</span> <span class="n">contents</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DefaultTestMaker.makeTest"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.makeTest">[docs]</a>	<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Uses the previously parsed arguments to create a new test (or related asset) on disk in ``self.dest``. </span>
+<span class="sd">		</span>
+<span class="sd">		Can be overridden if additional post-processing steps are required for some templates. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">templates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTemplates</span><span class="p">()</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">:</span>
+			<span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">]</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span> 
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot find a template named &quot;</span><span class="si">%s</span><span class="s1">&quot;; available templates for this project and directory are: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">)))</span>
+			<span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">tmp</span> <span class="o">=</span> <span class="n">templates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># pick the default</span>
+		
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using template: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;  &#39;</span><span class="p">))</span>
+		<span class="n">dest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating </span><span class="si">%s</span><span class="s2"> using template </span><span class="si">%s</span><span class="s2"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
+		<span class="k">assert</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;isTest&#39;</span><span class="p">]</span> <span class="c1"># not implemented for other asset types yet</span>
+		
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot create </span><span class="si">%s</span><span class="s1"> as it already exists&#39;</span><span class="o">%</span><span class="n">dest</span><span class="p">)</span>
+
+		<span class="n">mkdir</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]:</span>
+			<span class="c1"># use defaults unless user explicitly defines one or more, to save user having to keep redefining the standard ones</span>
+			<span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+				<span class="p">[</span><span class="s1">&#39;@@DATE@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DATE}</span><span class="s1">&#39;</span><span class="p">],</span> 
+				<span class="p">[</span><span class="s1">&#39;@@USERNAME@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{USERNAME}</span><span class="s1">&#39;</span><span class="p">],</span> 
+				<span class="p">[</span><span class="s1">&#39;@@DIR_NAME@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DIR_NAME}</span><span class="s1">&#39;</span><span class="p">],</span> 
+				<span class="p">[</span><span class="s1">&#39;@@DEFAULT_DESCRIPTOR@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DEFAULT_DESCRIPTOR}</span><span class="s1">&#39;</span><span class="p">],</span> 
+				<span class="p">[</span><span class="s1">&#39;@@LINE_LENGTH_GUIDE@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{LINE_LENGTH_GUIDE}</span><span class="s1">&#39;</span><span class="p">],</span>
+			<span class="p">]</span>
+		
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">pysysTemplatesDir</span><span class="o">+</span><span class="s1">&#39;/default-test/pysystest.py&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="p">[:</span><span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;import&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@@DATE@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DATE}</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@@USERNAME@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{USERNAME}</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@@LINE_LENGTH_GUIDE@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{LINE_LENGTH_GUIDE}</span><span class="s1">&#39;</span><span class="p">)</span>
+		
+		
+		<span class="n">replace</span> <span class="o">=</span> <span class="p">[</span>
+			<span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)),</span> 
+				<span class="n">r2</span> <span class="c1"># in addition to ${...] project properties, add some that are especially useful here</span>
+					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DEFAULT_DESCRIPTOR}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">))</span>
+					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DATE}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">startDate</span><span class="p">)</span>
+					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{USERNAME}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DIR_NAME}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dest</span><span class="p">))</span>
+					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{LINE_LENGTH_GUIDE}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s2">&quot;pysystestTemplateLineLengthGuide&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="o">*</span><span class="s2">&quot;=&quot;</span><span class="p">))</span>
+				<span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="c1"># non-ascii chars are unlikely, but a reasonable default is to use utf-8 to match typical XML</span>
+			<span class="p">)</span>
+			<span class="k">for</span> <span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]]</span>
+		
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using replacements: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+			
+		<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]:</span>
+			<span class="n">target</span> <span class="o">=</span> <span class="n">dest</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;testOutputDir&#39;</span><span class="p">]:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  Not copying dir </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">target</span><span class="p">)</span>
+				<span class="k">continue</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot copy to </span><span class="si">%s</span><span class="s1"> as it already exists&#39;</span><span class="o">%</span><span class="n">target</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Copied </span><span class="si">%s%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+		<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]:</span>	
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping creation of absolute directory: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">mkdir</span><span class="p">(</span><span class="n">dest</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">d</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">dest</span></div></div>
+
+<div class="viewcode-block" id="ProposeNewTestIdNumericSuffixException"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException">[docs]</a><span class="k">class</span> <span class="nc">ProposeNewTestIdNumericSuffixException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This exception should be thrown by `DefaultTestMaker.validateTestId` if the specific test id cannot be used but </span>
+<span class="sd">	the validator can propose an acceptable numeric suffix to use instead, typically with a higher number to avoid </span>
+<span class="sd">	conflicts with tests committed to version control elsewhere. </span>
+<span class="sd">	</span>
+<span class="sd">	:param str reason: The error message to use if not auto-generating a new id. </span>
+<span class="sd">	:param int newNumericSuffix: The new numeric suffix </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">newNumericSuffix</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">newNumericSuffix</span> <span class="o">=</span> <span class="n">newNumericSuffix</span></div>
+
+<div class="viewcode-block" id="LegacyConsoleMakeTestHelper"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper">[docs]</a><span class="k">class</span> <span class="nc">LegacyConsoleMakeTestHelper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The legacy and deprecated implementation of ``pysys.py make`` - used only by existing custom subclasses.</span>
+<span class="sd">	</span>
+<span class="sd">	Also known by its alias ``ConsoleMakeTestHelper``. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">TEST_TEMPLATE</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;import pysys</span>
@@ -207,37 +599,37 @@
 
 	<span class="n">DESCRIPTOR_TEMPLATE</span> <span class="o">=</span><span class="s1">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
 <span class="s1">&lt;pysystest type=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span>
-<span class="s1">  </span>
-<span class="s1">  &lt;description&gt; </span>
-<span class="s1">	&lt;title&gt;&lt;/title&gt;    </span>
-<span class="s1">	&lt;purpose&gt;&lt;![CDATA[</span>
-<span class="s1">]]&gt;</span>
-<span class="s1">	&lt;/purpose&gt;</span>
-<span class="s1">  &lt;/description&gt;</span>
+<span class="s1">	</span>
+<span class="s1">	&lt;description&gt;</span>
+<span class="s1">		&lt;title&gt;&lt;/title&gt;</span>
+<span class="s1">		&lt;purpose&gt;&lt;![CDATA[</span>
+<span class="s1">		</span>
+<span class="s1">		]]&gt;&lt;/purpose&gt;</span>
+<span class="s1">	&lt;/description&gt;</span>
 
-<span class="s1">  &lt;!-- uncomment this to skip the test:  </span>
-<span class="s1">  &lt;skipped reason=&quot;&quot;/&gt; </span>
-<span class="s1">  --&gt;</span>
-<span class="s1">  </span>
-<span class="s1">  &lt;classification&gt;</span>
-<span class="s1">	&lt;groups inherit=&quot;true&quot;&gt;</span>
-<span class="s1">	  &lt;group&gt;</span><span class="si">%s</span><span class="s1">&lt;/group&gt;</span>
-<span class="s1">	&lt;/groups&gt;</span>
-<span class="s1">	&lt;modes inherit=&quot;true&quot;&gt;</span>
-<span class="s1">	&lt;/modes&gt;</span>
-<span class="s1">  &lt;/classification&gt;</span>
+<span class="s1">	&lt;!-- uncomment this to skip the test:</span>
+<span class="s1">	&lt;skipped reason=&quot;&quot;/&gt; </span>
+<span class="s1">	--&gt;</span>
+<span class="s1">	</span>
+<span class="s1">	&lt;classification&gt;</span>
+<span class="s1">		&lt;groups inherit=&quot;true&quot;&gt;</span>
+<span class="s1">			&lt;group&gt;</span><span class="si">%s</span><span class="s1">&lt;/group&gt;</span>
+<span class="s1">		&lt;/groups&gt;</span>
+<span class="s1">		&lt;modes inherit=&quot;true&quot;&gt;</span>
+<span class="s1">		&lt;/modes&gt;</span>
+<span class="s1">	&lt;/classification&gt;</span>
 
-<span class="s1">  &lt;data&gt;</span>
-<span class="s1">	&lt;class name=&quot;</span><span class="si">%s</span><span class="s1">&quot; module=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;</span>
-<span class="s1">  &lt;/data&gt;</span>
-<span class="s1">  </span>
-<span class="s1">  &lt;traceability&gt;</span>
-<span class="s1">	&lt;requirements&gt;</span>
-<span class="s1">	  &lt;requirement id=&quot;&quot;/&gt;     </span>
-<span class="s1">	&lt;/requirements&gt;</span>
-<span class="s1">  &lt;/traceability&gt;</span>
+<span class="s1">	&lt;data&gt;</span>
+<span class="s1">		&lt;class name=&quot;</span><span class="si">%s</span><span class="s1">&quot; module=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;</span>
+<span class="s1">	&lt;/data&gt;</span>
+<span class="s1">	</span>
+<span class="s1">	&lt;traceability&gt;</span>
+<span class="s1">		&lt;requirements&gt;</span>
+<span class="s1">			&lt;requirement id=&quot;&quot;/&gt;		 </span>
+<span class="s1">		&lt;/requirements&gt;</span>
+<span class="s1">	&lt;/traceability&gt;</span>
 <span class="s1">&lt;/pysystest&gt;</span>
-<span class="s1">&#39;&#39;&#39;</span> 
+<span class="s1">&#39;&#39;&#39;</span> <span class="c1"># deprecated, only used by legacy subclassers of this class</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -246,11 +638,11 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">testdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="ConsoleMakeTestHelper.printUsage"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper.printUsage">[docs]</a>	<span class="k">def</span> <span class="nf">printUsage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LegacyConsoleMakeTestHelper.printUsage"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.printUsage">[docs]</a>	<span class="k">def</span> <span class="nf">printUsage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
 		<span class="n">_PYSYS_SCRIPT_NAME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;pysys.py&#39;</span>
 		<span class="c1">#######                                                                                                                        |</span>
-		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PySys System Test Framework (version </span><span class="si">%s</span><span class="s2">): New test maker&quot;</span> <span class="o">%</span> <span class="n">__version__</span><span class="p">)</span> 
+		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PySys System Test Framework (version </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">): Customized (legacy) test maker </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Usage: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> [option]+ TESTID&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_PYSYS_SCRIPT_NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   where [option] includes:&quot;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -d | --dir      STRING      parent directory in which to create TESTID (default is current working dir)&quot;</span><span class="p">)</span>
@@ -262,7 +654,7 @@
 		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="ConsoleMakeTestHelper.parseArgs"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper.parseArgs">[docs]</a>	<span class="k">def</span> <span class="nf">parseArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="LegacyConsoleMakeTestHelper.parseArgs"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.parseArgs">[docs]</a>	<span class="k">def</span> <span class="nf">parseArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">try</span><span class="p">:</span>
@@ -278,7 +670,7 @@
 			<span class="k">elif</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--type&quot;</span><span class="p">):</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">value</span>
 				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;manual&quot;</span><span class="p">]:</span>
-					<span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Unsupported test type - valid types are auto and manual&quot;</span><span class="p">)</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unsupported test type - valid types are auto and manual&quot;</span><span class="p">)</span>
 					<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
 
 			<span class="k">elif</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--dir&quot;</span><span class="p">):</span>
@@ -298,7 +690,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span></div>
 
 
-<div class="viewcode-block" id="ConsoleMakeTestHelper.makeTest"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper.makeTest">[docs]</a>	<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testclass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="LegacyConsoleMakeTestHelper.makeTest"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.makeTest">[docs]</a>	<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testclass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 				 <span class="n">group</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">constantsImport</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basetestImport</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basetest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">teststring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Makes a new test on disk. </span>
@@ -327,27 +719,35 @@
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created directory </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span>
 			<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">reference</span><span class="p">))</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created directory </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">reference</span><span class="p">))</span>
-			<span class="n">descriptor_fp</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-			<span class="n">descriptor_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DESCRIPTOR_TEMPLATE</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">testclass</span><span class="p">,</span> <span class="n">module</span><span class="p">))</span>
-			<span class="n">descriptor_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">descriptor_fp</span><span class="p">:</span>
+				<span class="n">descriptor_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DESCRIPTOR_TEMPLATE</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">testclass</span><span class="p">,</span> <span class="n">module</span><span class="p">))</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created descriptor </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">))</span>
-			<span class="n">testclass_fp</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.py&quot;</span> <span class="o">%</span> <span class="n">module</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span> <span class="n">module</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+			<span class="n">testclass_fp</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">module</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">teststring</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="n">testclass_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TEST_TEMPLATE</span> <span class="o">%</span> <span class="p">(</span><span class="n">constantsImport</span><span class="p">,</span> <span class="n">basetestImport</span><span class="p">,</span> <span class="n">testclass</span><span class="p">,</span> <span class="n">basetest</span><span class="p">))</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="n">testclass_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">teststring</span><span class="p">)</span>
 			<span class="n">testclass_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created test class module </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.py&quot;</span> <span class="o">%</span> <span class="n">module</span><span class="p">))</span>	</div></div>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created test class module </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">module</span><span class="p">))</span>	</div></div>
+
+<span class="n">ConsoleMakeTestHelper</span> <span class="o">=</span> <span class="n">LegacyConsoleMakeTestHelper</span>
+
 
 <span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 	<span class="n">Project</span><span class="o">.</span><span class="n">findAndLoadProject</span><span class="p">()</span>
 
 	<span class="bp">cls</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span><span class="o">.</span><span class="n">makerClassname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-	<span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+	<span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
 	<span class="n">maker</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">cls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="s2">&quot;make&quot;</span><span class="p">)</span>
 
-	<span class="n">maker</span><span class="o">.</span><span class="n">parseArgs</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-	<span class="n">maker</span><span class="o">.</span><span class="n">makeTest</span><span class="p">()</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">maker</span><span class="o">.</span><span class="n">parseArgs</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+		<span class="n">maker</span><span class="o">.</span><span class="n">makeTest</span><span class="p">()</span>
+	<span class="k">except</span> <span class="n">UserError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ERROR: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
 </pre></div>
 
@@ -361,7 +761,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

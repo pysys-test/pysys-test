@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.testoutput &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.writer.testoutput &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pysys.xml" href="pysys.xml.html" />
+    <link rel="next" title="License" href="../license.html" />
     <link rel="prev" title="pysys.writer.outcomes" href="pysys.writer.outcomes.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -100,16 +102,15 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.api.html">pysys.writer.api</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.ci.html">pysys.writer.ci</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.console.html">pysys.writer.console</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.coverage.html">pysys.writer.coverage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.writer.testoutput</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#testoutputarchivewriter">TestOutputArchiveWriter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#collecttestoutputwriter">CollectTestOutputWriter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pythoncoveragewriter">PythonCoverageWriter</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -128,7 +129,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -184,8 +185,7 @@
             
   <div class="section" id="module-pysys.writer.testoutput">
 <span id="pysys-writer-testoutput"></span><h1>pysys.writer.testoutput<a class="headerlink" href="#module-pysys.writer.testoutput" title="Permalink to this headline">¶</a></h1>
-<p>Writers that process the contents of test output directories, archiving or collecting output files, or aggregating 
-code coverage data.</p>
+<p>Writers that process the contents of test output directories by archiving or collecting output files.</p>
 <div class="section" id="testoutputarchivewriter">
 <h2>TestOutputArchiveWriter<a class="headerlink" href="#testoutputarchivewriter" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -273,7 +273,7 @@ using forward slashes as the path separator. Multiple paths can be specified usi
 <code class="docutils literal notranslate"><span class="pre">includeNonFailureOutcomes</span></code>, but this can be customized if needed by subclasses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>testObj</strong> (<a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><em>pysys.basetest.BaseTest</em></a>) – The test object under consideration.</p>
+<dd class="field-odd"><p><strong>testObj</strong> (<a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><em>pysys.basetest.BaseTest</em></a>) – The test object under consideration.</p>
 </dd>
 <dt class="field-even">Return bool</dt>
 <dd class="field-even"><p>True if this test’s output can be archived.</p>
@@ -407,41 +407,6 @@ e.g. <code class="docutils literal notranslate"><span class="pre">MyCodeCoverage
 </dd></dl>
 
 </div>
-<div class="section" id="pythoncoveragewriter">
-<h2>PythonCoverageWriter<a class="headerlink" href="#pythoncoveragewriter" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="pysys.writer.testoutput.PythonCoverageWriter">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.testoutput.</code><code class="sig-name descname">PythonCoverageWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#PythonCoverageWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.PythonCoverageWriter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a></p>
-<p>Writer that collects Python code coverage files in a single directory and writes a coverage report during 
-runner cleanup. Requires the “coverage.py” library to be installed.</p>
-<p>To enable this, run with <code class="docutils literal notranslate"><span class="pre">-XcodeCoverage</span></code> (or <code class="docutils literal notranslate"><span class="pre">-XpythonCoverage</span></code>) and configure the <code class="docutils literal notranslate"><span class="pre">destDir</span></code> plugin property 
-in pysysproject.xml (e.g. to <code class="docutils literal notranslate"><span class="pre">__coverage_python.${outDirName}</span></code>).</p>
-<p>If coverage is generated, the directory containing all coverage files is published as an artifact named 
-“PythonCoverageDir”. Optionally an archive of this directory can be generated by setting the 
-<code class="docutils literal notranslate"><span class="pre">destArchive</span></code> property (see <a class="reference internal" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectTestOutputWriter</span></code></a>), and published as “PythonCoverageArchive”.</p>
-<p>Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ 
-added to the project if the <code class="docutils literal notranslate"><span class="pre">pythonCoverageDir</span></code> project property is set and none is explicitly configured; but 
-the automatic addition is deprecated so you should explicity add this writer to your project if you need it.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">New in version 1.6.0.</span></p>
-</div>
-<p>The following property can be set in the project configuration for this writer (and see also 
-<a class="reference internal" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectTestOutputWriter</span></code></a> for inherited properties such as <code class="docutils literal notranslate"><span class="pre">destArchive</span></code>):</p>
-<dl class="py attribute">
-<dt id="pysys.writer.testoutput.PythonCoverageWriter.pythonCoverageArgs">
-<code class="sig-name descname">pythonCoverageArgs</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.PythonCoverageWriter.pythonCoverageArgs" title="Permalink to this definition">¶</a></dt>
-<dd><p>A string of command line arguments used to customize the <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">html</span></code> commands. 
-Use “…” double quotes around any arguments that contain spaces.</p>
-<p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;pythonCoverageArgs&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;--rcfile=$</span><span class="si">{testRootDir}</span><span class="s2">/python_coveragerc&quot;</span><span class="o">/&gt;</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 </div>
 
 
@@ -452,7 +417,7 @@ Use “…” double quotes around any arguments that contain spaces.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pysys.xml.html" class="btn btn-neutral float-right" title="pysys.xml" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pysys.writer.outcomes.html" class="btn btn-neutral float-left" title="pysys.writer.outcomes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -464,7 +429,7 @@ Use “…” double quotes around any arguments that contain spaces.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

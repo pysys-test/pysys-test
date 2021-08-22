@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.writer &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -100,11 +102,11 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.api.html">pysys.writer.api</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.ci.html">pysys.writer.ci</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.console.html">pysys.writer.console</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.coverage.html">pysys.writer.coverage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.testoutput.html">pysys.writer.testoutput</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -123,7 +125,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -194,11 +196,14 @@ completes, or at the end when all tests has completed.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="pysys.writer.console.html#module-pysys.writer.console" title="pysys.writer.console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.console</span></code></a></p></td>
 <td><p>Writers that record test outcomes on the console (stdout) when running PySys.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.writer.outcomes.html#module-pysys.writer.outcomes" title="pysys.writer.outcomes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.writer.coverage.html#module-pysys.writer.coverage" title="pysys.writer.coverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.coverage</span></code></a></p></td>
+<td><p>Writers that collect and report on code coverage data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.writer.outcomes.html#module-pysys.writer.outcomes" title="pysys.writer.outcomes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes</span></code></a></p></td>
 <td><p>Writers that record test outcomes to a variety of file formats.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.writer.testoutput.html#module-pysys.writer.testoutput" title="pysys.writer.testoutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput</span></code></a></p></td>
-<td><p>Writers that process the contents of test output directories, archiving or collecting output files, or aggregating  code coverage data.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.writer.testoutput.html#module-pysys.writer.testoutput" title="pysys.writer.testoutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput</span></code></a></p></td>
+<td><p>Writers that process the contents of test output directories by archiving or collecting output files.</p></td>
 </tr>
 </tbody>
 </table>
@@ -224,7 +229,7 @@ completes, or at the end when all tests has completed.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

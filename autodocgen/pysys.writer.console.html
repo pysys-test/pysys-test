@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.console &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.writer.console &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pysys.writer.outcomes" href="pysys.writer.outcomes.html" />
+    <link rel="next" title="pysys.writer.coverage" href="pysys.writer.coverage.html" />
     <link rel="prev" title="pysys.writer.ci" href="pysys.writer.ci.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -105,11 +107,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#consolefailureannotationswriter">ConsoleFailureAnnotationsWriter</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.coverage.html">pysys.writer.coverage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.writer.testoutput.html">pysys.writer.testoutput</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -128,7 +130,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -229,7 +231,7 @@ environment variable <code class="docutils literal notranslate"><span class="pre
 <p>The format can include the following placeholders:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFile&#64;</span></code>: the absolute path to the test file (e.g. run.py), using platform-specific slashes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFile&#64;</span></code>: the absolute path to the test file (e.g. pysystest.py/run.py), using platform-specific slashes.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFile/&#64;</span></code>: the absolute path to the test file, using forward slashes on all OSes.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFileLine&#64;</span></code>: the line number in the test file (if available, else 0).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;runLogFile&#64;</span></code>: the absolute path to the run log (e.g. run.log), using platform-specific slashes.</p></li>
@@ -249,7 +251,7 @@ contain any characters (other than newline).</p></li>
 <code class="sig-name descname">DEFAULT_FORMAT</code><em class="property"> = '&#64;testFile&#64;:&#64;testFileLine&#64;: &#64;category&#64;: &#64;outcome&#64; - &#64;outcomeReason&#64; (&#64;testIdAndCycle&#64;)'</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the default format if the environment variable is empty and <code class="docutils literal notranslate"><span class="pre">format</span></code> is not provided.</p>
 <p>The output looks like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="p">:</span>\<span class="n">myproject</span>\<span class="n">tests</span>\<span class="n">MyTest_001</span>\<span class="n">run</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">TIMED</span> <span class="n">OUT</span> <span class="o">-</span> <span class="n">This</span> <span class="n">test</span> <span class="n">timed</span> <span class="n">out</span> <span class="p">(</span><span class="n">MyTest_001</span> <span class="p">[</span><span class="n">CYCLE</span> <span class="mi">03</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="p">:</span>\<span class="n">myproject</span>\<span class="n">tests</span>\<span class="n">MyTest_001</span>\<span class="n">pysystest</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">TIMED</span> <span class="n">OUT</span> <span class="o">-</span> <span class="n">This</span> <span class="n">test</span> <span class="n">timed</span> <span class="n">out</span> <span class="p">(</span><span class="n">MyTest_001</span> <span class="p">[</span><span class="n">CYCLE</span> <span class="mi">03</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>which is similar to output from “make” and so should be parseable by many tools and IDEs.</p>
@@ -284,7 +286,7 @@ value other than “false”).</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pysys.writer.outcomes.html" class="btn btn-neutral float-right" title="pysys.writer.outcomes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pysys.writer.coverage.html" class="btn btn-neutral float-right" title="pysys.writer.coverage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pysys.writer.ci.html" class="btn btn-neutral float-left" title="pysys.writer.ci" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -296,7 +298,7 @@ value other than “false”).</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

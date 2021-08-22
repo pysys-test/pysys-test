@@ -8,6 +8,12 @@ pysys.utils.misc
 
 
 
+quoteString
+===========
+
+.. autofunction:: quoteString
+
+
 compareVersions
 ===============
 

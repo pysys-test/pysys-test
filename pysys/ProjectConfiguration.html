@@ -1,0 +1,648 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Project Configuration &mdash; PySys v2.0.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Test Descriptors" href="TestDescriptors.html" />
+    <link rel="prev" title="User Guide" href="UserGuide.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Project Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#header">Header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-properties">Project properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#special-project-properties">Special project properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-plugins">Configuring plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writers">Writers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-for-how-tests-execute">Configuration for how tests execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-descriptor-defaults">Test descriptor defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pysys-run-log-and-console-formatters">PySys run.log and console formatters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-specific-help-information">Project-specific help information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v2.0.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Project Configuration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/pysys/ProjectConfiguration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="project-configuration">
+<h1>Project Configuration<a class="headerlink" href="#project-configuration" title="Permalink to this headline">¶</a></h1>
+<p>Each PySys project has a configuration file called <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> at the top level. This file contains
+<code class="docutils literal notranslate"><span class="pre">property</span></code> elements for any user-defined properties that will be used by your tests such as credentials, server
+names, which are available to your tests using <a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.project</span></code></a>.
+The project file also contains allows customization of how PySys executes tests and reports on the results.</p>
+<p>When starting a new PySys test project you should create a minimal project file from scratch using
+<code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">makeproject</span></code>, then add any additional elements you require.</p>
+<p>To illustrate the range of available elements, here is a large project file that demonstrates all the main
+functionality.</p>
+<div class="section" id="header">
+<h2>Header<a class="headerlink" href="#header" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;pysysproject&gt;</span>
+
+      <span class="c">&lt;!-- This is a sample project file (from the &quot;cookbook&quot; sample) with snippets to use in your own project.</span>
+
+<span class="c">      Do not copy the whole file; instead, run &quot;pysys makeproject&quot; and then copy in just the bits you need.</span>
+<span class="c">      --&gt;</span>
+      <span class="c">&lt;!-- Specify a minimum required PySys version to run these tests. Update this each time you upgrade your project</span>
+<span class="c">      so that everyone gets a clear message if accidentally running tests using an old version. --&gt;</span>
+      <span class="nt">&lt;requires-pysys&gt;</span>2.0<span class="nt">&lt;/requires-pysys&gt;</span>
+
+      <span class="c">&lt;!-- Specify a minimum required python version to run these tests. --&gt;</span>
+      <span class="nt">&lt;requires-python&gt;</span>3.6<span class="nt">&lt;/requires-python&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="project-properties">
+<h2>Project properties<a class="headerlink" href="#project-properties" title="Permalink to this headline">¶</a></h2>
+<p>The following standard project properties are always defined and can be accessed through ${prop} syntax:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">${testRootDir}</span></code> - Path of the root directory containing the pysysproject.xml file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${outDirName}</span></code>  - The basename (with parent dirs removed) from the outdir for this test run.
+This may be the name of the current OS or a unique user-specified name for the test run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${os}</span></code>          - The operating system name e.g. <code class="docutils literal notranslate"><span class="pre">windows</span></code>, <code class="docutils literal notranslate"><span class="pre">linux</span></code>, <code class="docutils literal notranslate"><span class="pre">darwin</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${osfamily}</span></code>    - The operating system family, either <code class="docutils literal notranslate"><span class="pre">windows</span></code> or <code class="docutils literal notranslate"><span class="pre">unix</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${startDate}</span></code>   - The date that this test run was started, in a form that can be used in filenames.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${startTime}</span></code>   - The (local) time that this test run was started, in a form that can be used in filenames.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${hostname}</span></code>    - The (non-qualified) name of the host this is running on, suitable for including in filenames.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${username}</span></code>    - The (lowercase) username of the account executing PySys.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${/}</span></code>           - The backslash or forward-slash character used on this OS.</p></li>
+</ul>
+</div></blockquote>
+<p>Python expressions can be evaluated using <code class="docutils literal notranslate"><span class="pre">${eval:</span> <span class="pre">...}</span></code> (and can use project properties
+as Python variables, and/or from a dictionary named <code class="docutils literal notranslate"><span class="pre">properties</span></code>).</p>
+<p>In addition, within this file <code class="docutils literal notranslate"><span class="pre">${env:VARNAME}</span></code> (or <code class="docutils literal notranslate"><span class="pre">${env.VARNAME}</span></code>) syntax can be used to access
+environment variables.</p>
+<p>Project properties can be used as substitution variables within the project file, and
+are set as attributes on the <a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.project.Project</span></code></a> class for use by tests - so in the example below,
+the <code class="docutils literal notranslate"><span class="pre">appHome</span></code> property would be available to tests as <code class="docutils literal notranslate"><span class="pre">self.project.appHome</span></code></p>
+<p>If a property value contains any properties or environment variables that do not exist,
+the <code class="docutils literal notranslate"><span class="pre">default</span></code> is used instead (or “” if a default is not explicitly specified). If the default
+also contains undefined properties the project will fail to load.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pathMustExist=true</span></code> attribute can be used to stop the project loading if the property specifies a
+path that does not exist.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="c">&lt;!-- Property identifying the home directory of the application build being tested.</span>
+
+<span class="c">Binaries and configuration files can be specified relative to this directory</span>
+<span class="c">to avoid having to hardcode locations inside each individual testcase.</span>
+
+<span class="c">Tests can be run against a different directory by setting the environment variable PYSYS_APP_HOME.</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;appHome&quot;</span> <span class="na">value=</span><span class="s">&quot;${env.PYSYS_APP_HOME}&quot;</span> <span class="na">default=</span><span class="s">&quot;${testRootDir}/..&quot;</span> <span class="na">pathMustExist=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!-- This is an example of putting connection credentials into a project property, which can be overridden</span>
+<span class="c">using an environment variable if desired. --&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;myCredentials&quot;</span> <span class="na">value=</span><span class="s">&quot;${env.MYORG_CREDENTIALS}&quot;</span> <span class="na">default=</span><span class="s">&quot;testuser:testpassword&quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!-- This is an example of using a ${eval: ... } substitution to convert a path into a URL. --&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;logConfigURL&quot;</span> <span class="na">value=</span><span class="s">&#39;${eval: &quot;file:///&quot;+os.path.abspath(appHome).replace(&quot;\\&quot;, &quot;/&quot;)+&quot;/logConfig.xml&quot;}&#39;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!--</span>
+<span class="c">Import project properties from any file, using the specified prefix for namespacing.</span>
+
+<span class="c">If pathMustExist=true, the project will fail to load if the specified file does not</span>
+<span class="c">exist. If pathMustExist=false the project will silently ignore a missing properties file,</span>
+<span class="c">which can be useful when using this feature to provide optional user-specific overrides.</span>
+
+<span class="c">The properties file should be of the format name=value (one pair specified per line).</span>
+<span class="c">Each imported property line is handled just the same as a standard &quot;property&quot; element,</span>
+<span class="c">so for example other project properties can be referenced within the values</span>
+<span class="c">using ${...} syntax.</span>
+
+<span class="c">The set of property keys that are imported can be filtered with a regular expression using</span>
+<span class="c">the optional includes=&quot;regex&quot; and excludes=&quot;regex&quot; .</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">file=</span><span class="s">&quot;pysys-extensions/myproject-${osfamily}.properties&quot;</span> <span class="na">pathMustExist=</span><span class="s">&quot;true&quot;</span> <span class="na">prefix=</span><span class="s">&quot;os_&quot;</span>
+        <span class="na">includes=</span><span class="s">&quot;.*(Dir|Version)$&quot;</span> <span class="na">excludes=</span><span class="s">&quot;&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="special-project-properties">
+<h2>Special project properties<a class="headerlink" href="#special-project-properties" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="c">&lt;!-- If provided, the specified command line will be executed (in testRootDir) to populate the vcsCommit field</span>
+<span class="c">in runner.runDetails with the current commit number from your version control system.</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;versionControlGetCommitCommand&quot;</span> <span class="na">value=</span><span class="s">&quot;git show -s --format=%h&quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!--</span>
+<span class="c">Set default LANG for child processes on Unix (ignored on Windows).</span>
+<span class="c">Useful for making all machines behave the same. Ensure that the specified</span>
+<span class="c">locale is installed on all machines.</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;defaultEnvironsDefaultLang&quot;</span> <span class="na">value=</span><span class="s">&quot;en_US.UTF-8&quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!--</span>
+<span class="c">Set environment variables to encourage temporary files from test processes to go to the test output directory</span>
+<span class="c">rather than the OS or user&#39;s default temporary folder. This ensures tests are truly independent from each other</span>
+<span class="c">and from previous runs, and also avoids the danger of disk space being used up by temporary files from test runs.</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;defaultEnvironsTempDir&quot;</span> <span class="na">value=</span><span class="s">&quot;self.output&quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!--</span>
+<span class="c">The defaultEnvirons. prefix can be used to provide a default environment variable for use by</span>
+<span class="c">all processes that PySys starts. For example, to set Java(R)&#39;s JAVA_TOOL_OPTIONS environment variable:</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;defaultEnvirons.JAVA_TOOL_OPTIONS&quot;</span> <span class="na">value=</span><span class="s">&quot;-Xmx512M&quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!--</span>
+<span class="c">If you prefer spaces to tabs in Python source files, set this property to the spaces you want to use for each</span>
+<span class="c">string. This affects Python files generated by pysys make.</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;pythonIndentationSpacesPerTab&quot;</span> <span class="na">value=</span><span class="s">&quot;    &quot;</span><span class="nt">/&gt;</span>
+
+<span class="c">&lt;!--</span>
+<span class="c">If you prefer a different length or style for the line length marker added under the __pysys_title__ in the</span>
+<span class="c">default make test template, specify the string to use here. The following is an example for users who prefer</span>
+<span class="c">to encourage a limit of 120 characters for the test title (rather than the default of 80),</span>
+<span class="c">--&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;pysystestTemplateLineLengthGuide&quot;</span> <span class="na">value=</span><span class="s">&quot;${eval: 120 * &#39;-&#39; }&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuring-plugins">
+<h2>Configuring plugins<a class="headerlink" href="#configuring-plugins" title="Permalink to this headline">¶</a></h2>
+<p>See also <a class="reference internal" href="UserGuide.html#sharing-logic-across-tests-using-plugins"><span class="std std-ref">Sharing logic across tests using plugins</span></a>.
+If you want to provide some custom plugins/extensions you need to add them to the PYTHONPATH used by PySys
+as shown below. Usually the specified directory should contain a Python module named after your organization and
+containing an empty __init__.py file to mark it as a Python package (such as <code class="docutils literal notranslate"><span class="pre">pysys-extensions/myorg/__init__.py</span></code>).</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;pythonpath</span> <span class="na">value=</span><span class="s">&quot;${testRootDir}/pysys-extensions&quot;</span> <span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>Test plugins are additional classes instantiated when each test’s BaseTest is instantiated, and accessible
+to testcases (using the specified alias) as a field of the BaseTest. They provide a way to expose extra
+functionality for use by your testcases, for example support for additional languages and technologies.</p>
+<p>Each plugin class must provide a <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">testObj)</span></code> method that accepts the owner testObj (BaseTest instance)
+as a parameter. Any configuration properties are assigned as attributes before setup is called.</p>
+<p>Each plugin class must provide a constructor that accepts the parent testObj (BaseTest instance) as a parameter.
+The plugin instance is assigned as a field of the test object using the specified “alias” so that its
+methods and fields are available for use. The alias can be any valid Python identifier but must not conflict
+with other plugins or fields that PySys sets on the BaseTest; usually a brief lowercase name
+identifying your organization or the purpose of the plugin is best.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;test-plugin</span> <span class="na">classname=</span><span class="s">&quot;myorg.mytestplugin.MyTestPlugin&quot;</span> <span class="na">alias=</span><span class="s">&quot;mytestplugin&quot;</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- &lt;property name=&quot;myProp&quot; value=&quot;...&quot;/&gt; --&gt;</span>
+<span class="nt">&lt;/test-plugin&gt;</span>
+</pre></div>
+</div>
+<p>Runner plugins are classes that are instantiated when the BaseRunner performs its setup() at
+the beginning of a test run. They can provide extra functionality both at the beginning of a test
+run, and also (by calling <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.addCleanupFunction" title="pysys.baserunner.BaseRunner.addCleanupFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanupFunction()</span></code></a> from <code class="docutils literal notranslate"><span class="pre">setup()</span></code>)
+at the end after testing has finished. For example, a runner plugin could be used to add support for starting a
+database server or virtual machine to be shared by all tests.</p>
+<p>Each plugin class must provide a <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">runner)</span></code> method that accepts the owner runner (BaseRunner instance)
+as a parameter. Any configuration properties are assigned as attributes before setup is called.</p>
+<p>The plugin instance can optionally be assigned as a field of the runner using the specified “alias” so that its
+methods and fields are available for use by tests. The alias can be any valid Python identifier but must not
+conflict with other plugins or fields that PySys sets on the BaseRunner; usually a brief lowercase name
+identifying your organization or the purpose of the plugin is best.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;runner-plugin</span> <span class="na">classname=</span><span class="s">&quot;myorg.myrunnerplugin.MyRunnerPlugin&quot;</span> <span class="na">alias=</span><span class="s">&quot;myrunnerplugin&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;myPluginProperty&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/runner-plugin&gt;</span>
+</pre></div>
+</div>
+<p>For advanced cases it is possible to provide a custom <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> subclass. However, in most
+cases this isn’t necessary so always consider whether the composition “runner-plugin” approach would do the job
+before using runner inheritance.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;runner</span> <span class="na">classname=</span><span class="s">&quot;myorg.myrunner.MyRunner&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>Use a custom maker class for constructing new testcases. Custom maker classes can extend from the
+<a class="reference internal" href="../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker" title="pysys.launcher.console_make.DefaultTestMaker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.launcher.console_make.DefaultTestMaker</span></code></a> class in order to customize details such as the automatic
+validation of new test ids.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;maker</span> <span class="na">classname=</span><span class="s">&quot;myorg.mymaker.MyTestMaker&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="writers">
+<h2>Writers<a class="headerlink" href="#writers" title="Permalink to this headline">¶</a></h2>
+<p>Configures the writers that implement reporting of test outcomes, typically to disk, to the console, or
+to a CI system.</p>
+<p>For full details of the configuration properties of each writer, and the API for creating custom writers,
+see <a class="reference internal" href="../autodocgen/pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a> in the API reference.</p>
+<p>Each writer element specifies the classname (which should be available on the pythonpath).</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;writers&gt;</span>
+        <span class="c">&lt;!-- This writer is useful for creating zip archives of failed test output directories when</span>
+<span class="c">        running in record mode on a machine where it is not otherwise easy to access the output</span>
+<span class="c">        directories. The destDir could then be uploaded to a CI system (some CI writers</span>
+<span class="c">        implement this automatically) or manually copied to a file share.</span>
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.testoutput.TestOutputArchiveWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;destDir&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_output_archives.${outDirName}/&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;maxTotalSizeMB&quot;</span> <span class="na">value=</span><span class="s">&quot;1024.0&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;maxArchiveSizeMB&quot;</span> <span class="na">value=</span><span class="s">&quot;200.0&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;maxArchives&quot;</span> <span class="na">value=</span><span class="s">&quot;50&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;archiveAtEndOfRun&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;includeNonFailureOutcomes&quot;</span> <span class="na">value=</span><span class="s">&quot;REQUIRES INSPECTION, NOT VERIFIED&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- This writer is useful for collecting output files (e.g. logs, graphs, etc) from all tests into a</span>
+<span class="c">        single directory or archive for manual examination at the end of the test run.</span>
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.testoutput.CollectTestOutputWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;destDir&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_collect_perf_graphs.${outDirName}/&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;destArchive&quot;</span> <span class="na">value=</span><span class="s">&quot;perfgraphs.${outDirName}.zip&quot;</span><span class="nt">/&gt;</span>
+
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;fileIncludesRegex&quot;</span> <span class="na">value=</span><span class="s">&quot;.*[.](svg|pdf)&quot;</span><span class="nt">/&gt;</span>
+
+                <span class="c">&lt;!-- This causes the archive to be published to any interested writers with the specified category</span>
+<span class="c">                        name (e.g. some CI systems have a mechanism for publishing arifacts) --&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;publishArtifactArchiveCategory&quot;</span> <span class="na">value=</span><span class="s">&quot;performanceGraphsArchive&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- CI writers automatically enable themselves only if running under</span>
+<span class="c">        the associated CI environment.</span>
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.ci.GitHubActionsCIWriter&quot;</span><span class="nt">&gt;&lt;/writer&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.ci.TravisCIWriter&quot;</span><span class="nt">&gt;&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!--</span>
+<span class="c">        Writes each test outcomes to a separate XML file in the widely-used Apache Ant JUnit XML format.</span>
+<span class="c">        Only enabled when the record flag is specified.</span>
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.outcomes.JUnitXMLResultsWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="c">&lt;!-- Use the outputDir property to define the output directory for the JUnit test summary files (the writer will</span>
+<span class="c">                produce one file per test into this output directory). By default the output directory is located under the</span>
+<span class="c">                test root dir (or the outdir if specified on the pysys run command).</span>
+<span class="c">                --&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;outputDir&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_junit_xml&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- Writes all outcomes to a single XML file; only enabled when the record flag is specified. --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.outcomes.XMLResultsWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="c">&lt;!--</span>
+<span class="c">                Set properties on the XML test output writer class.</span>
+
+<span class="c">                The filename pattern above is processed through time.strftime so that time information can</span>
+<span class="c">                be set into the filename, e.g. a filename template of &#39;testsummary.%Y-%m-%d_%H.%M.%S&#39; will result</span>
+<span class="c">                in a file created with a name of testsummary_2008-10-25_21.33.08.xml etc.</span>
+
+<span class="c">                By default the parent directory is the test root dir (or the outdir if specified on the pysys run command).</span>
+<span class="c">                --&gt;</span>
+
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;file&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml&quot;</span><span class="nt">/&gt;</span>
+
+                <span class="c">&lt;!--  Use file URLs in all references to resources on the local disk. --&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;useFileURL&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- Writes all outcomes to a text file; only enabled when the record flag is specified. --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.outcomes.TextResultsWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;file&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- Writes all outcomes to a CSV file; only enabled when the record flag is specified.</span>
+<span class="c">        The CSV contains id, title, cycle, startTime, duration, outcome. --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.outcomes.CSVResultsWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;file&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- Write a code coverage report for .py files; enabled by -XcodeCoverage. --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.coverage.PythonCoverageWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;destDir&quot;</span> <span class="na">value=</span><span class="s">&quot;__coverage_python.${outDirName}&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;destArchive&quot;</span> <span class="na">value=</span><span class="s">&quot;coverage_python.${outDirName}.zip&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;pythonCoverageArgs&quot;</span> <span class="na">value=</span><span class="s">&quot;&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run,</span>
+<span class="c">        optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers</span>
+<span class="c">        list if no other &quot;summary&quot; writer is explicitly configured.</span>
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.console.ConsoleSummaryResultsWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;showTestTitle&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;pysys.writer.console.ConsoleProgressResultsWriter&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+
+        <span class="c">&lt;!-- Example of a custom writer. --&gt;</span>
+        <span class="nt">&lt;writer</span> <span class="na">classname=</span><span class="s">&quot;myorg.mywriter.MyResultsWriter&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;outputFile&quot;</span> <span class="na">value=</span><span class="s">&quot;__pysys_myresults.${outDirName}.json&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/writer&gt;</span>
+<span class="nt">&lt;/writers&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuration-for-how-tests-execute">
+<h2>Configuration for how tests execute<a class="headerlink" href="#configuration-for-how-tests-execute" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;default-file-encodings&gt;</span>
+        <span class="c">&lt;!--</span>
+<span class="c">        Specify the file encoding to be used for reading/writing text files.</span>
+
+<span class="c">        The first pattern that matches is used to determine the encoding. The pattern is a glob-style expression to be</span>
+<span class="c">        matched case-insensitively against either the full path or the basename using Python&#39;s fnmatch.fnmatch method.</span>
+
+<span class="c">        The defaults specified here can be overridden or added to by the runner or basetest getDefaultFileEncoding()</span>
+<span class="c">        method. See pysys.process.user.ProcessUser.getDefaultFileEncoding for more details.</span>
+
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;default-file-encoding</span> <span class="na">pattern=</span><span class="s">&quot;run.log&quot;</span> <span class="na">encoding=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">/&gt;</span>
+
+        <span class="nt">&lt;default-file-encoding</span> <span class="na">pattern=</span><span class="s">&quot;*.xml&quot;</span> <span class="na">encoding=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;default-file-encoding</span> <span class="na">pattern=</span><span class="s">&quot;*.json&quot;</span> <span class="na">encoding=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;default-file-encoding</span> <span class="na">pattern=</span><span class="s">&quot;*.yaml&quot;</span> <span class="na">encoding=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/default-file-encodings&gt;</span>
+
+<span class="nt">&lt;execution-order</span> <span class="na">secondaryModesHintDelta=</span><span class="s">&quot;+100.0&quot;</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!--</span>
+<span class="c">        The execution-order elements provide a way to globally change the ordering hints specified on individual</span>
+<span class="c">        tests by adding or subtracting a value from the hints specified on test descriptors in a specified group</span>
+<span class="c">        and/or mode. For example, set a value less than 0 for performance tests so that they execute towards the</span>
+<span class="c">        end of the test run rather than beginning.</span>
+
+<span class="c">        Groups and modes can be identified with a full name or a regular expression.</span>
+
+<span class="c">        The secondaryModesHintDelta value is used to order tests so that all tests execute in their primary</span>
+<span class="c">        mode before any secondary modes are executed. The 2nd mode (the one following the primary mode) has its</span>
+<span class="c">        execution order hint incremented by secondaryModesHintDelta, the third by 2*secondaryModesHintDelta etc,</span>
+<span class="c">        which ensures the modes are spaced out. To disable this behaviour and execute all modes of each test</span>
+<span class="c">        before moving on to the next test set it to 0.0. If not specified, the default value is +100.0.</span>
+<span class="c">        --&gt;</span>
+
+        <span class="nt">&lt;execution-order</span> <span class="na">hint=</span><span class="s">&quot;-20.0&quot;</span> <span class="na">forMode=</span><span class="s">&quot;MyMode_.*&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;execution-order</span> <span class="na">hint=</span><span class="s">&quot;+10.5&quot;</span> <span class="na">forGroup=</span><span class="s">&quot;performance&quot;</span> <span class="na">forMode=</span><span class="s">&quot;MyMode&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/execution-order&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-descriptor-defaults">
+<h2>Test descriptor defaults<a class="headerlink" href="#test-descriptor-defaults" title="Permalink to this headline">¶</a></h2>
+<p>A project file can contain a <code class="docutils literal notranslate"><span class="pre">pysysdirconfig</span></code> element to configure directory-level defaults that will apply to
+all test descriptors. See the <a class="reference internal" href="TestDescriptors.html#sample-pysysdirconfig-xml"><span class="std std-ref">Sample pysysdirconfig.xml</span></a> documentation for more information about the available options,
+including how to customize how new tests are created using maker templates.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;pysysdirconfig&gt;</span>
+
+                <span class="c">&lt;!-- Recommended to specify this for new projects - input files are stored in the testDir alongside pysystest.py --&gt;</span>
+                <span class="nt">&lt;input-dir&gt;</span>.<span class="nt">&lt;/input-dir&gt;</span>
+
+                <span class="c">&lt;!-- The default for PySys projects created before 2.0 --&gt;</span>
+                <span class="c">&lt;!-- &lt;input-dir&gt;Input&lt;/input-dir&gt; --&gt;</span>
+                <span class="c">&lt;!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour</span>
+<span class="c">                        without the need to update or potentially create bugs in existing tests</span>
+<span class="c">                --&gt;</span>
+                <span class="c">&lt;!-- &lt;input-dir&gt;!Input_dir_if_present_else_testDir!&lt;/input-dir&gt; --&gt;</span>
+        <span class="c">&lt;!-- Could optionally override the default directory names for reference and output too. The following are the</span>
+<span class="c">                default values and do not need to be specified explicitly.</span>
+<span class="c">        --&gt;</span>
+        <span class="nt">&lt;output-dir&gt;</span>Output<span class="nt">&lt;/output-dir&gt;</span>
+        <span class="nt">&lt;reference-dir&gt;</span>Reference<span class="nt">&lt;/reference-dir&gt;</span>
+<span class="nt">&lt;/pysysdirconfig&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pysys-run-log-and-console-formatters">
+<h2>PySys run.log and console formatters<a class="headerlink" href="#pysys-run-log-and-console-formatters" title="Permalink to this headline">¶</a></h2>
+<p>In most projects there is no reason to customize this, but it can be used if you real want a different
+log line format (incl date/time format) or console coloring.</p>
+<p>Specify custom formatters for logging to the console or run.log, and/or configure the formatter
+appropriately through custom properties. Custom formatters should be defined using the classname
+and module attributes and should extend the <a class="reference internal" href="../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter" title="pysys.utils.logutils.BaseLogFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.BaseLogFormatter</span></code></a> class. If no
+classname and module is given the default <a class="reference internal" href="../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter" title="pysys.utils.logutils.ColorLogFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.ColorLogFormatter</span></code></a> is assumed.</p>
+<p>The ColorLogFormatter allows specification of the message and date strings using the messagefmt and
+datafmt attributes. Enabling color to the console (stdout) formatter can be done using the color
+property, and the colors for supported message types can be specified via the color:&lt;category&gt; property.
+See below for more details for the default color types and categories. Supported colors are BLUE,
+GREEN, YELLOW, RED, MAGENTA, CYAN, WHITE and BLACK.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;formatters&gt;</span>
+        <span class="nt">&lt;formatter</span> <span class="na">name=</span><span class="s">&quot;stdout&quot;</span> <span class="na">classname=</span><span class="s">&quot;pysys.utils.logutils.ColorLogFormatter&quot;</span>
+                <span class="na">messagefmt=</span><span class="s">&quot;%(asctime)s %(levelname)-5s %(message)s&quot;</span> <span class="na">datefmt=</span><span class="s">&quot;%H:%M:%S&quot;</span>
+        <span class="nt">&gt;</span>
+                <span class="c">&lt;!--</span>
+<span class="c">                &lt;property name=&quot;color&quot; value=&quot;true&quot;/&gt;</span>
+<span class="c">                --&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:warn&quot;</span> <span class="na">value=</span><span class="s">&quot;MAGENTA&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:error&quot;</span> <span class="na">value=</span><span class="s">&quot;RED&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:traceback&quot;</span> <span class="na">value=</span><span class="s">&quot;RED&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:debug&quot;</span> <span class="na">value=</span><span class="s">&quot;BLUE&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:filecontents&quot;</span> <span class="na">value=</span><span class="s">&quot;BLUE&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:details&quot;</span> <span class="na">value=</span><span class="s">&quot;CYAN&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:outcomereason&quot;</span> <span class="na">value=</span><span class="s">&quot;CYAN&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:progress&quot;</span> <span class="na">value=</span><span class="s">&quot;CYAN&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:performance&quot;</span> <span class="na">value=</span><span class="s">&quot;CYAN&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:timed out&quot;</span> <span class="na">value=</span><span class="s">&quot;MAGENTA&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:failed&quot;</span> <span class="na">value=</span><span class="s">&quot;RED&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:passed&quot;</span> <span class="na">value=</span><span class="s">&quot;GREEN&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;color:skipped&quot;</span> <span class="na">value=</span><span class="s">&quot;YELLOW&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/formatter&gt;</span>
+
+        <span class="nt">&lt;formatter</span> <span class="na">name=</span><span class="s">&quot;runlog&quot;</span> <span class="na">classname=</span><span class="s">&quot;pysys.utils.logutils.BaseLogFormatter&quot;</span>
+                <span class="na">messagefmt=</span><span class="s">&quot;%(asctime)s %(levelname)-5s %(message)s&quot;</span> <span class="na">datefmt=</span><span class="s">&quot;&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/formatters&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="project-specific-help-information">
+<h2>Project-specific help information<a class="headerlink" href="#project-specific-help-information" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span>      <span class="nt">&lt;project-help&gt;</span>
+              <span class="c">&lt;!-- Add project-specific text to be appended to the &quot;pysys run -h&quot;.</span>
+
+<span class="c">              You can use ${...} project properties, or ${$} to escape the $ character.</span>
+
+<span class="c">              --&gt;</span>
+
+              My project
+              ----------
+                 -Xiterations=N   Override the number of request/response iterations performed
+                                  during execution of each performance test.
+
+              The application being tested is at &quot;${appHome}&quot;; to override use ${$}{PYSYS_APP_HOME}.
+
+              Don&#39;t forget to execute the MyProject build before running the tests!
+      <span class="nt">&lt;/project-help&gt;</span>
+<span class="nt">&lt;/pysysproject&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="TestDescriptors.html" class="btn btn-neutral float-right" title="Test Descriptors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="UserGuide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.monitor &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.process.monitor &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -154,7 +155,7 @@
             
   <h1>Source code for pysys.process.monitor</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -185,7 +186,7 @@
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
 
 
-<span class="k">if</span> <span class="n">PLATFORM</span><span class="o">==</span><span class="s1">&#39;win32&#39;</span> <span class="ow">and</span> <span class="s1">&#39;epydoc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">PLATFORM</span><span class="o">==</span><span class="s1">&#39;win32&#39;</span> <span class="ow">and</span> <span class="s1">&#39;sphinx&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
 	<span class="kn">import</span> <span class="nn">win32api</span><span class="o">,</span> <span class="nn">win32pdh</span><span class="o">,</span> <span class="nn">win32con</span><span class="o">,</span> <span class="nn">win32process</span> <span class="c1"># pragma: no cover</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.processmonitor&#39;</span><span class="p">)</span>
@@ -301,6 +302,25 @@
 <span class="sd">	</span>
 <span class="sd">	If any value cannot be retrieved or is unavailable on this operating </span>
 <span class="sd">	system, a -1 value will be written instead. </span>
+<span class="sd">	</span>
+<span class="sd">	Uses default values set on the instance unless keyword overrides </span>
+<span class="sd">	are provided; see L{setDefaults}.</span>
+
+<span class="sd">	:param str file: An absolute path string or open file handle to which </span>
+<span class="sd">		process monitor data lines will be written. </span>
+<span class="sd">	</span>
+<span class="sd">	:param list[str] columns: An ordered list of the columns from L{ProcessMonitorKey} that </span>
+<span class="sd">		should be included in the file. If not specified, the columns specified </span>
+<span class="sd">		by L{DEFAULT_COLUMNS} will be used. </span>
+<span class="sd">	</span>
+<span class="sd">	:param str delimiter: The delimiter string used between each column. </span>
+<span class="sd">		If not specified, the string specified by L{DEFAULT_DELIMITER} will be </span>
+<span class="sd">		used. </span>
+<span class="sd">	</span>
+<span class="sd">	:param bool writeHeaderLine: Determines whether a header line prefixed </span>
+<span class="sd">		by `#` will be written at the start of the file. If not overridden, the </span>
+<span class="sd">		default is taken from L{DEFAULT_WRITE_HEADER_LINE}.</span>
+
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">DEFAULT_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
@@ -364,27 +384,6 @@
 		<span class="k">if</span> <span class="n">delimiter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">ProcessMonitorTextFileHandler</span><span class="o">.</span><span class="n">DEFAULT_DELIMITER</span> <span class="o">=</span> <span class="n">delimiter</span></div>
 	
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">writeHeaderLine</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Constructor. </span>
-<span class="sd">		</span>
-<span class="sd">		Uses default values set on the instance unless keyword overrides </span>
-<span class="sd">		are provided; see L{setDefaults}.</span>
-
-<span class="sd">		:param file: An absolute path string or open file handle to which </span>
-<span class="sd">			process monitor data lines will be written. </span>
-<span class="sd">		</span>
-<span class="sd">		:param columns: An ordered list of the columns from L{ProcessMonitorKey} that </span>
-<span class="sd">			should be included in the file. If not specified, the columns specified </span>
-<span class="sd">			by L{DEFAULT_COLUMNS} will be used. </span>
-<span class="sd">		</span>
-<span class="sd">		:param delimiter: The delimiter string used between each column. </span>
-<span class="sd">			If not specified, the string specified by L{DEFAULT_DELIMITER} will be </span>
-<span class="sd">			used. </span>
-<span class="sd">		</span>
-<span class="sd">		:param writeHeaderLine: Determines whether a header line prefixed </span>
-<span class="sd">			by `#` will be written at the start of the file. If not overridden, the </span>
-<span class="sd">			default is taken from L{DEFAULT_WRITE_HEADER_LINE}.</span>
-<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_COLUMNS</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span> <span class="o">=</span> <span class="n">delimiter</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_DELIMITER</span>
 		<span class="k">if</span> <span class="n">PY2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
@@ -438,25 +437,22 @@
 
 <span class="sd">	Monitors are automatically terminated during cleanup at the end </span>
 <span class="sd">	of a test, or can be manually stopped before that using the L{stop} method. </span>
+
+<span class="sd">	:param owner: The BaseTest owning this monitor. </span>
+<span class="sd">	</span>
+<span class="sd">	:param process: The process wrapper object. A numeric pid can be specified </span>
+<span class="sd">		instead but with reduced functionality, so use a process object if you </span>
+<span class="sd">		have one. </span>
+<span class="sd">	</span>
+<span class="sd">	:param interval: The interval in seconds between polling for each data </span>
+<span class="sd">		sample. </span>
+<span class="sd">	</span>
+<span class="sd">	:param pmargs: Keyword arguments to allow parameterization of the </span>
+<span class="sd">		returned data. An exception will be raised for any arguments not </span>
+<span class="sd">		expected by this class. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">pmargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Construct an instance of the process monitor.</span>
-<span class="sd">		</span>
-<span class="sd">		:param owner: The BaseTest owning this monitor. </span>
-<span class="sd">		</span>
-<span class="sd">		:param process: The process wrapper object. A numeric pid can be specified </span>
-<span class="sd">			instead but with reduced functionality, so use a process object if you </span>
-<span class="sd">			have one. </span>
-<span class="sd">		</span>
-<span class="sd">		:param interval: The interval in seconds between polling for each data </span>
-<span class="sd">			sample. </span>
-<span class="sd">		</span>
-<span class="sd">		:param pmargs: Keyword arguments to allow parameterization of the </span>
-<span class="sd">			returned data. An exception will be raised for any arguments not </span>
-<span class="sd">			expected by this class. </span>
-<span class="sd">		&quot;&quot;&quot;</span>
-		
 		<span class="c1"># NB: this could be subclassed to support different platforms and/or add extra </span>
 		<span class="c1"># data</span>
 		
@@ -579,13 +575,17 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span></div>
 
 	
-<div class="viewcode-block" id="BaseProcessMonitor.stop"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseProcessMonitor.stop"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;Request the process monitor thread to terminate.</span>
 <span class="sd">		</span>
-<span class="sd">		Does not wait for the termination to complete. </span>
+<span class="sd">		Waits for the termination to complete if possible, but does not throw an exception if it fails. </span>
+<span class="sd">		</span>
+<span class="sd">		:param float timeout: Overrides the maximum time we will wait for the monitor to stop. By default this is </span>
+<span class="sd">			``[&#39;WaitForProcessStop&#39;]`` from `constants.TIMEOUTS`. </span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 	<span class="c1"># for implementation by subclasses</span>
 
@@ -622,7 +622,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

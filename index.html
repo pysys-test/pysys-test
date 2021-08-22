@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to PySys! &mdash; PySys v1.6.1  documentation</title>
+  <title>Welcome to PySys! &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -50,7 +50,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> PySys v1.6.1
+            <a href="#" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -83,9 +83,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
@@ -103,7 +104,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">PySys v1.6.1</a>
+          <a href="#">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -163,29 +164,29 @@ correctness, performance, soak/robustness testing, unit testing and manual testi
 <p>Whatever language the application you’re testing is written in, and whatever platforms it needs to run on,
 PySys can help!</p>
 <p>Key features include:</p>
-<ul>
+<ul class="simple">
 <li><p>A comprehensive library of assertion methods appropriate for system-level
 testing, such as checking for error/success messages in log files and
 comparing the contents of output files.</p></li>
 <li><p>A comprehensive library of methods to automate platform-independent process
 starting, orchestration, and cleanup, for both Windows and Unix-based
 systems. Includes common operations such as:</p>
-<blockquote>
-<div><ul class="simple">
+<ul>
 <li><p>dynamically picking a free TCP/IP port,</p></li>
 <li><p>waiting until a server is running on a specified port,</p></li>
 <li><p>waiting until a file contains a specified message,</p></li>
 <li><p>powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)</p></li>
 <li><p>aborting early with a clear failure messages if an error is detected in a log file</p></li>
 </ul>
-</div></blockquote>
 </li>
 <li><p>Support for executing tests in parallel to significantly speed up execution
 time, with a flexible mechanism for controlling execution order.</p></li>
 <li><p>Ability to cycle a test many times (and in parallel) to reproduce rare race
 conditions.</p></li>
 <li><p>Support for executing the same test in several modes during your test
-run (for example against different web browsers, databases, etc).</p></li>
+run (for example against different web browsers, databases, etc). Python
+lambda expressions give the power to easily create complex and dynamic lists of
+modes that combine multi-dimensional parameter matrices.</p></li>
 <li><p>A process memory monitoring framework to check for memory leaks when soak
 testing your application.</p></li>
 <li><p>A performance monitoring framework for recording and aggregating latency,
@@ -201,7 +202,7 @@ application is also written in Python.</p></li>
 classification groups.</p></li>
 <li><p>Support for Windows, Linux, macOS and Solaris.</p></li>
 </ul>
-<p>PySys was created by Moray Grieve. The current maintainer is Ben Spiller.
+<p>PySys was created by Moray Grieve. The maintainer is now Ben Spiller.
 This is a community project so we welcome your contributions, whether
 enhancement issues or GitHub pull requests!</p>
 <div class="admonition note">
@@ -220,32 +221,52 @@ request in the PySys test framework. For how-tos and advice,
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#implementing-your-test-class">Implementing your test class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#test-configuration">Test configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#assertions-and-outcomes">Assertions and outcomes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#processes">Processes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#waiting">Waiting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#files">Files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#miscellaneous">Miscellaneous</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#all-basetest-members">All BaseTest members</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/BaseTest.html">The BaseTest Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#implementing-your-test-class">Implementing your test class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#test-configuration">Test configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#assertions-and-outcomes">Assertions and outcomes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#processes">Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#waiting">Waiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#miscellaneous">Miscellaneous</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/BaseTest.html#all-basetest-members">All BaseTest members</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#platform-detection">Platform detection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#skipping-tests">Skipping tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#checking-for-error-messages-in-log-files">Checking for error messages in log files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#sharing-logic-across-tests-using-plugins">Sharing logic across tests using plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#producing-code-coverage-reports">Producing code coverage reports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#running-tests-in-multiple-modes">Running tests in multiple modes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#controlling-execution-order">Controlling execution order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/UserGuide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#platform-detection">Platform detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#skipping-tests">Skipping tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#customizing-pysys-make">Customizing pysys make</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#checking-for-error-messages-in-log-files">Checking for error messages in log files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#sharing-logic-across-tests-using-plugins">Sharing logic across tests using plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#thread-safety">Thread-safety</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#producing-code-coverage-reports">Producing code coverage reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#running-tests-in-multiple-modes">Running tests in multiple modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#controlling-execution-order">Controlling execution order</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/ProjectConfiguration.html">Project Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#header">Header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#project-properties">Project properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#special-project-properties">Special project properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#configuring-plugins">Configuring plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#writers">Writers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#configuration-for-how-tests-execute">Configuration for how tests execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#test-descriptor-defaults">Test descriptor defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#pysys-run-log-and-console-formatters">PySys run.log and console formatters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#project-specific-help-information">Project-specific help information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/TestDescriptors.html">Test Descriptors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pysys/TestDescriptors.html#sample-pysystest-py">Sample pysystest.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/TestDescriptors.html#sample-pysystest-xml">Sample pysystest.xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/TestDescriptors.html#sample-pysysdirconfig-xml">Sample pysysdirconfig.xml</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.launcher.html">pysys.launcher</a></li>
@@ -254,11 +275,11 @@ request in the PySys test framework. For how-tos and advice,
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-2-0">What’s new in 2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-1-6-1">What’s new in 1.6.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-1-6-0">What’s new in 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#release-history">Release History</a></li>
@@ -287,7 +308,7 @@ request in the PySys test framework. For how-tos and advice,
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

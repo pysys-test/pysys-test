@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.filegrep &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.filegrep &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -114,11 +116,11 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -137,7 +139,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -198,19 +200,22 @@
 <h2>getmatches<a class="headerlink" href="#getmatches" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pysys.utils.filegrep.getmatches">
-<code class="sig-prename descclassname">pysys.utils.filegrep.</code><code class="sig-name descname">getmatches</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">regexpr</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filegrep.html#getmatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filegrep.getmatches" title="Permalink to this definition">¶</a></dt>
-<dd><p>Look for matches on a regular expression in an input file, return a sequence of the matches.</p>
+<code class="sig-prename descclassname">pysys.utils.filegrep.</code><code class="sig-name descname">getmatches</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">regexpr</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">returnFirstOnly</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filegrep.html#getmatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filegrep.getmatches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look for matches on a regular expression in an input file, return a sequence of the matches 
+(or if returnFirstOnly=True, just the first).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file</strong> – The full path to the input file</p></li>
 <li><p><strong>regexpr</strong> – The regular expression used to search for matches</p></li>
-<li><p><strong>ignores</strong> – A list of regexes which will cause matches to be discarded</p></li>
+<li><p><strong>mappers</strong> – A list of lambdas or generator functions used to pre-process the file’s lines before looking for matches.</p></li>
+<li><p><strong>ignores</strong> – A list of regexes which will cause matches to be discarded. These are applied <em>after</em> any mappers.</p></li>
 <li><p><strong>encoding</strong> – Specifies the encoding to be used for opening the file, or None for default.</p></li>
+<li><p><strong>returnFirstOnly</strong> – If True, stops reading the file as soon as the first match is found and returns it.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A list of the match objects</p>
+<dd class="field-even"><p>A list of the match objects, or the match object or None if returnFirstOnly is True</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
@@ -226,7 +231,7 @@
 <h2>filegrep<a class="headerlink" href="#filegrep" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pysys.utils.filegrep.filegrep">
-<code class="sig-prename descclassname">pysys.utils.filegrep.</code><code class="sig-name descname">filegrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">returnMatch</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filegrep.html#filegrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filegrep.filegrep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pysys.utils.filegrep.</code><code class="sig-name descname">filegrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">returnMatch</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filegrep.html#filegrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filegrep.filegrep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search for matches to a regular expression in an input file, returning true if a match occurs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -327,7 +332,7 @@ with contents</p>
 <dl class="py function">
 <dt id="pysys.utils.filegrep.logContents">
 <code class="sig-prename descclassname">pysys.utils.filegrep.</code><code class="sig-name descname">logContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em>, <em class="sig-param"><span class="n">list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filegrep.html#logContents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filegrep.logContents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Log a list of strings, prepending the line number to each line in the log output.</p>
+<dd><p>Log a list of strings at debug, prepending the line number to each line in the log output.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>list</strong> – The list of strings to log</p>
@@ -358,7 +363,7 @@ with contents</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

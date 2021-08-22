@@ -8,6 +8,12 @@ pysys.utils.allocport
 
 
 
+excludedTCPPorts
+================
+
+.. autodata:: excludedTCPPorts
+
+
 TCPPortOwner
 ============
 
@@ -25,3 +31,9 @@ getServerTCPPorts
 =================
 
 .. autofunction:: getServerTCPPorts
+
+
+logPortAllocationStats
+======================
+
+.. autofunction:: logPortAllocationStats

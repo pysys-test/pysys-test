@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.allocport &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.allocport &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -97,9 +99,11 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="pysys.utils.html">pysys.utils</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.allocport</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#excludedtcpports">excludedTCPPorts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tcpportowner">TCPPortOwner</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#getephemeraltcpportrange">getEphemeralTCPPortRange</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#getservertcpports">getServerTCPPorts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logportallocationstats">logPortAllocationStats</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.filediff.html">pysys.utils.filediff</a></li>
@@ -112,11 +116,11 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -135,7 +139,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -192,8 +196,22 @@
   <div class="section" id="module-pysys.utils.allocport">
 <span id="pysys-utils-allocport"></span><h1>pysys.utils.allocport<a class="headerlink" href="#module-pysys.utils.allocport" title="Permalink to this headline">¶</a></h1>
 <p>Dynamic TCP port allocation.</p>
-<p>This is used by the <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser" title="pysys.process.user.ProcessUser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser</span></code></a> class (and its subclasses e.g. BaseTest) which should 
-usually be used to access this functionality.</p>
+<p>This is used by <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.getNextAvailableTCPPort</span></code></a> which should usually be used to access this 
+functionality.</p>
+<div class="section" id="excludedtcpports">
+<h2>excludedTCPPorts<a class="headerlink" href="#excludedtcpports" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.utils.allocport.excludedTCPPorts">
+<code class="sig-prename descclassname">pysys.utils.allocport.</code><code class="sig-name descname">excludedTCPPorts</code><em class="property"> = {1719, 1720, 1723, 2049, 3659, 4045, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6697, 10080}</em><a class="headerlink" href="#pysys.utils.allocport.excludedTCPPorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set containing TCP server ports which will never be allocated by <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.getNextAvailableTCPPort</span></code></a> 
+(or <a class="reference internal" href="#pysys.utils.allocport.TCPPortOwner" title="pysys.utils.allocport.TCPPortOwner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TCPPortOwner</span></code></a>).</p>
+<p>By default this contains blocked ports that some web browsers do not permit connections 
+to for security reasons, which would therefore cause browser-driven tests to fail.</p>
+<p>If desired you can modify this set from a custom <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> module (before the <code class="docutils literal notranslate"><span class="pre">BaseRunner</span></code> 
+constructor is executed).</p>
+</dd></dl>
+
+</div>
 <div class="section" id="tcpportowner">
 <h2>TCPPortOwner<a class="headerlink" href="#tcpportowner" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -260,10 +278,10 @@ variables, this function is not called.</p>
 <code class="sig-prename descclassname">pysys.utils.allocport.</code><code class="sig-name descname">getServerTCPPorts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/allocport.html#getServerTCPPorts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.allocport.getServerTCPPorts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the TCP ports that PySys tests can use when starting servers that listen on a port.</p>
 <p>This function is usually called when <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> is constructed to help decide the 
-pool of available ports that can be allocated by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.getNextAvailableTCPPort()</span></code></a>.</p>
+pool of available ports that can be allocated by <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.getNextAvailableTCPPort()</span></code></a>.</p>
 <p>PySys treats all ports from 1024-65536 as server ports except for the client-side ephemeral/dynamic port range 
-as determined by <a class="reference internal" href="#pysys.utils.allocport.getEphemeralTCPPortRange" title="pysys.utils.allocport.getEphemeralTCPPortRange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getEphemeralTCPPortRange()</span></code></a>. Alternatively, the set of server ports can be overridden by the 
-following environment variables:</p>
+as determined by <a class="reference internal" href="#pysys.utils.allocport.getEphemeralTCPPortRange" title="pysys.utils.allocport.getEphemeralTCPPortRange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getEphemeralTCPPortRange()</span></code></a> and specific ports in the <code class="docutils literal notranslate"><span class="pre">excludedTCPPorts</span></code> set. 
+Alternatively, the set of server ports can be overridden by the following environment variables:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">PYSYS_PORTS=minport-maxport,port,...</span></code> PySys will use the specified ports and/or port ranges (inclusive) 
@@ -273,14 +291,31 @@ allocating server ports.</p></li>
 </div></blockquote>
 <p>If using these variables, be sure to avoid none of the ports reserved for ephemeral use is in the set of server 
 ports you specify.</p>
+<p>See <a class="reference internal" href="#pysys.utils.allocport.logPortAllocationStats" title="pysys.utils.allocport.logPortAllocationStats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logPortAllocationStats()</span></code></a> for information about how to log statistics showing how many server ports your tests 
+are using.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A list or set of all the server ports that can be used, e.g. [1024, 1025, …].</p>
+<dd class="field-odd"><p>A list of all the server ports that can be used, e.g. [1024, 1025, …].</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><strong>Exception</strong> – If the port range cannot be determined, which will prevent PySys from running any tests.</p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="logportallocationstats">
+<h2>logPortAllocationStats<a class="headerlink" href="#logportallocationstats" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.allocport.logPortAllocationStats">
+<code class="sig-prename descclassname">pysys.utils.allocport.</code><code class="sig-name descname">logPortAllocationStats</code><span class="sig-paren">(</span><em class="sig-param">logger=&lt;Logger pysys.portAllocationStats (INFO)&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/allocport.html#logPortAllocationStats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.allocport.logPortAllocationStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs a DEBUG level message indicating how many server ports were allocated so far over the lifetime of this 
+PySys process, and the peak number in use any one time.</p>
+<p>This method is called before PySys terminates after running all tests.</p>
+<p>To see these messages, run PySys with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">-</span><span class="n">v</span> <span class="n">portAllocationStats</span><span class="o">=</span><span class="n">DEBUG</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -306,7 +341,7 @@ ports you specify.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

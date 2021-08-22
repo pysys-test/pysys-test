@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.fileutils &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.fileutils &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -107,6 +109,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#pathexists">pathexists</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mkdir">mkdir</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#deletedir">deletedir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deletefile">deletefile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#listdircontents">listDirContents</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#loadproperties">loadProperties</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#loadjson">loadJSON</a></li>
 </ul>
@@ -116,11 +120,11 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -139,7 +143,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -205,31 +209,29 @@ support for long paths on Windows. Also some simple utilities for loading proper
 <dd><p>Converts the specified path string to a form suitable for passing to API 
 calls if it exceeds the maximum path length on this OS.</p>
 <p>Currently, this is necessary only on Windows, where a unicode string 
-starting with ?must be used to get correct behaviour for long paths. 
+starting with \?must be used to get correct behaviour for long paths. 
 On Windows this function also normalizes the capitalization of drive 
 letters so they are always upper case regardless of OS version and current 
 working directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> – A path. Must not be a relative path. Can be None/empty. Can 
-contain “..” sequences. If possible, use a unicode character string. 
-On Python 2, byte strings are permitted and converted using 
-<code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>.</p></li>
-<li><p><strong>onlyIfNeeded</strong> – Set to True to only adds the long path support if this 
+<li><p><strong>path</strong> (<em>str</em>) – A path. Must not be a relative path. Can be None/empty. Can 
+contain “..” sequences. Note that no normalization of “..” 
+sequences and slashes is performed if the OS starts with <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> already 
+or is non-Windows so if in doubt run the path through <code class="docutils literal notranslate"><span class="pre">os.path.normpath</span></code> 
+before calling this method on it (<code class="docutils literal notranslate"><span class="pre">\\?\</span></code> paths with incorrect slashes or .. sequences 
+are not permitted by Windows).</p></li>
+<li><p><strong>onlyIfNeeded</strong> (<em>bool</em>) – Set to True to only adds the long path support if this 
 path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
 this at False if you will be adding extra characters on to the end of the 
 returned string.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The passed-in path, possibly with a <code class="docutils literal notranslate"><span class="pre">\?\</span></code> prefix added, 
+<dd class="field-even"><p>The passed-in path, possibly with a <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> prefix added, 
 forward slashes converted to backslashes on Windows, and converted to 
-a unicode string. Trailing slashes may be removed. 
-Note that the conversion to unicode requires a lot of care on Python 2 
-where byte strings are more common, since it is not possible to combine 
-unicode and byte strings (if they have non-ascii characters), for example 
-for a log statement.</p>
+a unicode string. Trailing slashes may be removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -240,10 +242,10 @@ for a log statement.</p>
 <dl class="py function">
 <dt id="pysys.utils.fileutils.fromLongPathSafe">
 <code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">fromLongPathSafe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#fromLongPathSafe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.fromLongPathSafe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Strip off <code class="docutils literal notranslate"><span class="pre">\?\</span></code> prefixes added by <a class="reference internal" href="#pysys.utils.fileutils.toLongPathSafe" title="pysys.utils.fileutils.toLongPathSafe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toLongPathSafe</span></code></a>.</p>
+<dd><p>Strip off <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> prefixes added by <a class="reference internal" href="#pysys.utils.fileutils.toLongPathSafe" title="pysys.utils.fileutils.toLongPathSafe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toLongPathSafe</span></code></a>.</p>
 <p>Note that this function does not convert unicode strings back to byte 
 strings, so if you want a complete reversal of toLongPathSafe you will 
-additionally have to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">result.encode(locale.getpreferredencoding())</span></code>.</p>
+additionally have to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">result.encode(PREFERRED_ENCODING)</span></code>.</p>
 </dd></dl>
 
 </div>
@@ -258,8 +260,7 @@ as returned by <code class="xref py py-obj docutils literal notranslate"><span c
 character limit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> – If None or empty, returns True. Only Python 2, can be a 
-unicode or byte string.</p>
+<dd class="field-odd"><p><strong>path</strong> – If None or empty, returns True.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -302,21 +303,75 @@ deleting. See the documentation for <code class="docutils literal notranslate"><
 </dd></dl>
 
 </div>
+<div class="section" id="deletefile">
+<h2>deletefile<a class="headerlink" href="#deletefile" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.deletefile">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">deletefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">retries</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ignore_errors</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#deletefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.deletefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the specified file, with optional retries.</p>
+<p>Does nothing if it does not exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The path to be deleted. Will be converted to be long-path safe on Windows.</p></li>
+<li><p><strong>retries</strong> (<em>int</em>) – The number of retries to attempt. This can be useful to 
+work around temporary failures causes by Windows file locking.</p></li>
+<li><p><strong>ignore_errors</strong> (<em>bool</em>) – If True, an exception is raised if the path exists but cannot be deleted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="listdircontents">
+<h2>listDirContents<a class="headerlink" href="#listdircontents" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.listDirContents">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">listDirContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">recurse</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#listDirContents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.listDirContents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable 
+for diffing.</p>
+<p>The contents are returned in a normalized form suitable for diffing: relative to the scanned path, with forward 
+slashes on all platforms, a trailing slash for directories, and sorted to ensure deterministic results. 
+Symbolic links are not searched.</p>
+<p>For example this can be used with <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertDiff</span></code></a> like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertDiff</span><span class="p">(</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s1">&#39;MyDir-contents.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fileutils</span><span class="o">.</span><span class="n">listDirContents</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/MyDir&#39;</span><span class="p">)</span>
+<span class="p">)))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The absolute path to search.</p></li>
+<li><p><strong>recurse</strong> (<em>bool</em>) – Set this to False to just include the specified directory but not any children.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of strings with the relative paths found, e.g. <code class="docutils literal notranslate"><span class="pre">[&quot;mysubdir/myfile.txt&quot;,</span> <span class="pre">&quot;mysubdir/mysubsubdir/&quot;]</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.</span></p>
+</div>
+</dd></dl>
+
+</div>
 <div class="section" id="loadproperties">
 <h2>loadProperties<a class="headerlink" href="#loadproperties" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pysys.utils.fileutils.loadProperties">
 <code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">loadProperties</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">'utf-8-sig'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#loadProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.loadProperties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads keys and values from the specified <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file.</p>
-<p>Support <code class="docutils literal notranslate"><span class="pre">#</span></code> and <code class="docutils literal notranslate"><span class="pre">!</span></code> comments but does not perform any special handling of backslash <code class="docutils literal notranslate"><span class="pre">\</span></code> characters 
+<p>Support <code class="docutils literal notranslate"><span class="pre">#</span></code> and <code class="docutils literal notranslate"><span class="pre">!</span></code> comments but does not perform any special handling of backslash <code class="docutils literal notranslate"><span class="pre">\\</span></code> characters 
 (either for escaping or for line continuation). Leading and trailing whitespace around keys and values 
-is stripped. If you need handling of <code class="docutils literal notranslate"><span class="pre">\</span></code> escapes and/or expansion of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> placeholders this should be 
+is stripped. If you need handling of <code class="docutils literal notranslate"><span class="pre">\\</span></code> escapes and/or expansion of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> placeholders this should be 
 performed manually on the returned values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>str</em>) – The absolute path to the properties file.</p></li>
-<li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use (unless running under Python 2 in which case byte strings are always returned). 
+<li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use. 
 The default is UTF-8 (with optional Byte Order Mark).</p></li>
 </ul>
 </dd>
@@ -370,7 +425,7 @@ The default is UTF-8 (with optional Byte Order Mark).</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

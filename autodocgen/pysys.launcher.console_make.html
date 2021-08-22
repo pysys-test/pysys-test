@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.launcher.console_make &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.launcher.console_make &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,15 +84,20 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.launcher.console_make</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#defaulttestmaker">DefaultTestMaker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proposenewtestidnumericsuffixexception">ProposeNewTestIdNumericSuffixException</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#legacyconsolemaketesthelper">LegacyConsoleMakeTestHelper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#consolemaketesthelper">ConsoleMakeTestHelper</a></li>
 </ul>
 </li>
@@ -103,7 +108,6 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -122,7 +126,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -179,32 +183,132 @@
   <div class="section" id="module-pysys.launcher.console_make">
 <span id="pysys-launcher-console-make"></span><h1>pysys.launcher.console_make<a class="headerlink" href="#module-pysys.launcher.console_make" title="Permalink to this headline">¶</a></h1>
 <p>Implements <code class="docutils literal notranslate"><span class="pre">pysys.py</span> <span class="pre">make</span></code> to create new testcases.</p>
-<div class="section" id="consolemaketesthelper">
-<h2>ConsoleMakeTestHelper<a class="headerlink" href="#consolemaketesthelper" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="defaulttestmaker">
+<h2>DefaultTestMaker<a class="headerlink" href="#defaulttestmaker" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pysys.launcher.console_make.ConsoleMakeTestHelper">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.launcher.console_make.</code><code class="sig-name descname">ConsoleMakeTestHelper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#ConsoleMakeTestHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.ConsoleMakeTestHelper" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.launcher.console_make.DefaultTestMaker">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.launcher.console_make.</code><code class="sig-name descname">DefaultTestMaker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'make'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#DefaultTestMaker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.DefaultTestMaker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>The default implementation of <code class="docutils literal notranslate"><span class="pre">pysys.py</span> <span class="pre">make</span></code>.</p>
-<p>A custom subclass can be specified in the project if required.</p>
+<p>The default implementation of <code class="docutils literal notranslate"><span class="pre">pysys.py</span> <span class="pre">make</span></code>, which creates tests and other assets using templates configurable 
+on a per-directory basis using <code class="docutils literal notranslate"><span class="pre">&lt;maker-template&gt;</span></code> configuration in <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> (and project) files.</p>
+<p>See <a class="reference internal" href="../pysys/TestDescriptors.html"><span class="doc">Test Descriptors</span></a> for information about how to configure templates.</p>
+<p>A subclass can be specified in the project if further customization is required using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">maker</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;myorg.MyTestMaker&quot;</span><span class="o">/&gt;</span>
+</pre></div>
+</div>
 <dl class="py method">
-<dt id="pysys.launcher.console_make.ConsoleMakeTestHelper.printUsage">
-<code class="sig-name descname">printUsage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#ConsoleMakeTestHelper.printUsage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.ConsoleMakeTestHelper.printUsage" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.launcher.console_make.DefaultTestMaker.printUsage">
+<code class="sig-name descname">printUsage</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#DefaultTestMaker.printUsage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.DefaultTestMaker.printUsage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print help info and exit.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.launcher.console_make.ConsoleMakeTestHelper.parseArgs">
-<code class="sig-name descname">parseArgs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#ConsoleMakeTestHelper.parseArgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.ConsoleMakeTestHelper.parseArgs" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.launcher.console_make.DefaultTestMaker.validateTestId">
+<code class="sig-name descname">validateTestId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parentDir</span></em>, <em class="sig-param"><span class="n">prefix</span></em>, <em class="sig-param"><span class="n">numericSuffix</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#DefaultTestMaker.validateTestId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.DefaultTestMaker.validateTestId" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method can be overridden to provide customized validation of a proposed new test directory name, for example 
+to prevent clashes with existing tests committed to version control.</p>
+<p>The default implementation of this method does nothing.</p>
+<p>If validation fails, an exception should be thrown. The method can propose a new numericSuffix 
+that will be used instead (only if auto-generating the test id) by raising an 
+<a class="reference internal" href="#pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException" title="pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProposeNewTestIdNumericSuffixException</span></code></a> exception.</p>
+<p>The command line option <code class="docutils literal notranslate"><span class="pre">--skipValidation</span></code> can be used to disable this checking, for example when 
+disconnected from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parentDir</strong> (<em>str</em>) – The absolute path of the directory in which the test is to be created.</p></li>
+<li><p><strong>prefix</strong> (<em>str</em>) – The proposed test id, excluding any numeric suffix.</p></li>
+<li><p><strong>numericSuffix</strong> (<em>str</em>) – The numeric suffix (including padding), if any, or ‘’ if this is not a numeric test id.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException" title="pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException"><strong>ProposeNewTestIdNumericSuffixException</strong></a> – If an alternative numeric suffix would be acceptable. This is used 
+when auto-generating test ids.</p></li>
+<li><p><strong>Exception</strong> – If the specific test id is not acceptable.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.launcher.console_make.DefaultTestMaker.parseArgs">
+<code class="sig-name descname">parseArgs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#DefaultTestMaker.parseArgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.DefaultTestMaker.parseArgs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse the command line arguments after <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.launcher.console_make.ConsoleMakeTestHelper.makeTest">
-<code class="sig-name descname">makeTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reference</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">descriptor</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">testclass</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">module</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">constantsImport</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basetestImport</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basetest</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">teststring</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#ConsoleMakeTestHelper.makeTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.ConsoleMakeTestHelper.makeTest" title="Permalink to this definition">¶</a></dt>
+<dt id="pysys.launcher.console_make.DefaultTestMaker.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source</span></em>, <em class="sig-param"><span class="n">dest</span></em>, <em class="sig-param"><span class="n">replace</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#DefaultTestMaker.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.DefaultTestMaker.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the specified source file/dir to the specified dest file/dir.</p>
+<p>Can be overridden if any advanced post-processing is required.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.launcher.console_make.DefaultTestMaker.makeTest">
+<code class="sig-name descname">makeTest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#DefaultTestMaker.makeTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.DefaultTestMaker.makeTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the previously parsed arguments to create a new test (or related asset) on disk in <code class="docutils literal notranslate"><span class="pre">self.dest</span></code>.</p>
+<p>Can be overridden if additional post-processing steps are required for some templates.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="proposenewtestidnumericsuffixexception">
+<h2>ProposeNewTestIdNumericSuffixException<a class="headerlink" href="#proposenewtestidnumericsuffixexception" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.launcher.console_make.</code><code class="sig-name descname">ProposeNewTestIdNumericSuffixException</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reason</span></em>, <em class="sig-param"><span class="n">newNumericSuffix</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#ProposeNewTestIdNumericSuffixException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>This exception should be thrown by <a class="reference internal" href="#pysys.launcher.console_make.DefaultTestMaker.validateTestId" title="pysys.launcher.console_make.DefaultTestMaker.validateTestId"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefaultTestMaker.validateTestId</span></code></a> if the specific test id cannot be used but 
+the validator can propose an acceptable numeric suffix to use instead, typically with a higher number to avoid 
+conflicts with tests committed to version control elsewhere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reason</strong> (<em>str</em>) – The error message to use if not auto-generating a new id.</p></li>
+<li><p><strong>newNumericSuffix</strong> (<em>int</em>) – The new numeric suffix</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="legacyconsolemaketesthelper">
+<h2>LegacyConsoleMakeTestHelper<a class="headerlink" href="#legacyconsolemaketesthelper" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.launcher.console_make.LegacyConsoleMakeTestHelper">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.launcher.console_make.</code><code class="sig-name descname">LegacyConsoleMakeTestHelper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#LegacyConsoleMakeTestHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.LegacyConsoleMakeTestHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The legacy and deprecated implementation of <code class="docutils literal notranslate"><span class="pre">pysys.py</span> <span class="pre">make</span></code> - used only by existing custom subclasses.</p>
+<p>Also known by its alias <code class="docutils literal notranslate"><span class="pre">ConsoleMakeTestHelper</span></code>.</p>
+<dl class="py method">
+<dt id="pysys.launcher.console_make.LegacyConsoleMakeTestHelper.printUsage">
+<code class="sig-name descname">printUsage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#LegacyConsoleMakeTestHelper.printUsage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.printUsage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print help info and exit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.launcher.console_make.LegacyConsoleMakeTestHelper.parseArgs">
+<code class="sig-name descname">parseArgs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#LegacyConsoleMakeTestHelper.parseArgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.parseArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the command line arguments after <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.launcher.console_make.LegacyConsoleMakeTestHelper.makeTest">
+<code class="sig-name descname">makeTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reference</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">descriptor</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">testclass</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">module</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">constantsImport</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basetestImport</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basetest</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">teststring</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/launcher/console_make.html#LegacyConsoleMakeTestHelper.makeTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.makeTest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes a new test on disk.</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="consolemaketesthelper">
+<h2>ConsoleMakeTestHelper<a class="headerlink" href="#consolemaketesthelper" title="Permalink to this headline">¶</a></h2>
+<dl class="py attribute">
+<dt id="pysys.launcher.console_make.ConsoleMakeTestHelper">
+<code class="sig-prename descclassname">pysys.launcher.console_make.</code><code class="sig-name descname">ConsoleMakeTestHelper</code><a class="headerlink" href="#pysys.launcher.console_make.ConsoleMakeTestHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pysys.launcher.console_make.LegacyConsoleMakeTestHelper" title="pysys.launcher.console_make.LegacyConsoleMakeTestHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.launcher.console_make.LegacyConsoleMakeTestHelper</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -230,7 +334,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

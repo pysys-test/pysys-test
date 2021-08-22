@@ -17,7 +17,7 @@ For finer grained platform detection we recommend using the facilities built int
 
 Skipping tests
 --------------
-If your ``run.py`` logic detects that a test should not be executed for this 
+If your tests' ``.py`` logic detects that a test should not be executed for this 
 platform or mode, simply use `self.skipTest(...) <BaseTest.skipTest>` near the top of the test's 
 `execute() <BaseTest.execute>` method, specifying the reason for the skip::
 
@@ -28,9 +28,71 @@ ensuring that the rest of `execute() <BaseTest.execute>` and
 `validate() <BaseTest.validate>` do not get executed. 
 
 Alternatively if the test should be skipped regardless of platform/mode etc, 
-it is best to specify that statically in your `pysystest.xml` file::
+it is best to specify that statically in your `pysystest.*` file::
 
-	<skipped reason="Skipped until bug #12345 is fixed"/>
+	__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed" 
+
+Or::
+
+	<skipped reason="Skipped until Bug-1234 is fixed"/>
+
+Customizing pysys make
+----------------------
+You can define templates that ``pysys make`` will use to create new tests specific to your project, or even multiple 
+templates for individual directories within your project. This helps to encourage teams to follow the latest best 
+practice by ensuring new tests are copying known good patterns, and also saves looking up how to do common things when 
+creating new tests. 
+
+The ``pysys make`` command line comes with a ``pysys-default-test`` template for creating a simple PySys test, you can 
+add your own by adding ``<maker-template>`` elements to ``pysysdirconfig.xml`` in any directory under your project, 
+or to a ``<pysysdirconfig>`` element in your ``pysysproject.xml`` file. Here are a couple of examples (taken from 
+the cookbook sample)::
+
+	<pysysdirconfig>
+		
+		<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
+			copy="./_pysys_templates/MyTemplateTest/*" />
+
+		<maker-template name="perf-test" description="a performance test including configuration for my fictional performance tool" 
+			copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+
+		<maker-template name="foobar-test" description="an advanced test based on the existing XXX test" 
+			copy="./PySysDirConfigSample/*" 
+			mkdir="ExtraDir1, ExtraDir2"
+		>
+			<replace regex='__pysys_title__ *= r"""[^"]*"""' with='__pysys_title__   = r""" Foobar - My new @{DIR_NAME} test title TODO """'/>
+			<replace regex='__pysys_authors__ *= "[^"]*"'    with='__pysys_authors__ = "@{USERNAME}"'/>
+			<replace regex='__pysys_created__ *= "[^"]*"'    with='__pysys_created__ = "@{DATE}"'/>
+			<replace regex='@@DIR_NAME@@'                    with='@{DIR_NAME}'/>
+		</maker-template>
+
+	</pysysdirconfig>
+
+For customizing the PySysTest class the best approach is usually to create a ``pysystest.py`` template test 
+containing ``@@DEFAULT_DESCRIPTOR@@`` to include the default PySys descriptor values (this means your template will 
+automatically benefit from any future changes to the defaults), and put it in a ``_pysys_templates/<templatename>`` 
+directory alongside the ``pysystestdir.xml`` file. The ``_pysys_templates`` directory should contain a file 
+named ``.pysysignore`` file (which avoids the template being loaded as a real test). 
+
+other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
+``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
+using ``${pysysTemplatesDir}/default-test/*``, or copying from a path relative to the XML file where the template is 
+defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
+
+See :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml` for more information about how to configure templates in 
+a ``pysysdirconfig.xml`` file. 
+
+When creating tests using ``pysys make``, by default the first template (from the most specific ``pysysdirconfig.xml``) 
+is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
+templates for the current directory using ``--help``. 
+
+It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
+The main reason to do that is to provide a `pysys.launcher.console_make.DefaultTestMaker.validateTestId` method 
+to check that new test ids do not conflict with others used by others in a remote version control system (to avoid 
+merge conflicts). 
+
+By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
+just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
 
 Checking for error messages in log files
 -----------------------------------------
@@ -112,8 +174,8 @@ A test plugin could look like this::
 		# A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
 		# That approach allows you to later customize the logic by changing just one single place, and also to omit 
 		# it for specific tests where it is not wanted. 
-		def checkLogsForErrors(self):
-			self.assertGrep('myapp.log', ' ERROR .*', contains=False)
+		def checkLogsForErrors(self, logfile="my_server.log"):
+			self.assertGrep(logfile, ' (ERROR|FATAL) .*', contains=False)
 
 With configuration like this::
 
@@ -146,7 +208,7 @@ A prefix of double underscore ``__pysys`` is recommended under testRootDir to di
 directories (ignored by version control) from the testcase directories (checked into version control). 
 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
-its constructor, see the sample Project Configuration file. 
+its constructor, see :doc:`/pysys/ProjectConfiguration`. 
 
 Configuring and overriding test options
 ---------------------------------------
@@ -205,7 +267,7 @@ project properties.
 To use a project property that can be overridden with an environment variable, 
 add a ``property`` element to your ``pysysproject.xml`` file::
 
-	<property name="myCredentials" value="${env.MYCOMPANY_CREDENTIALS}" default="testuser:testpassword"/>
+	<property name="myCredentials" value="${env.MYORG_CREDENTIALS}" default="testuser:testpassword"/>
 
 This property can will take the value of the specified environment variable, 
 or else the default if any undefined properties/env vars are included in value. Note that if the value contains 
@@ -214,28 +276,46 @@ unresolved variables and there is no valid default, the project will fail to loa
 You may want to set the attribute ``pathMustExist="true"`` when defining properties that refer to a path such as a 
 build output directory that should always be present. 
 
-Another way to specify default project property values is to put them into a 
-Java-style ``.properties`` file. You can use properties to specify which file is 
-loaded, so it would be possible to customize using environment variables::
+Another way to specify default project property values is to put them into a ``.properties`` file. You can use 
+properties to specify which file is loaded, so it would be possible to customize using environment variables::
 
-	<property name="myProjectPropertiesFile" value="${env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
+	<property name="myProjectPropertiesFile" value="${env.MYORG_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
 	<property file="${myProjectPropertiesFile}" pathMustExist="true"/>
 
 To use projects properties in your testcase, just access the attributes on 
-`self.project <pysys.xml.project.Project>` from either a test instance or a runner::
+`self.project <pysys.config.project.Project>` from either a test instance or a runner::
 
 	def execute(self):
-		self.log.info('Using username=%s and password %s' % self.project.myCredentials.split(':'))
+		username, password = self.project.myCredentials.split(':')
+		self.log.info('Using username=%s and password=%s', username, password)
 
-Property properties will always be of string type. 
+Project properties are always be of string type, but `pysys.config.project.Project.getProperty()` can be used to 
+convert the value to other types when needed. 
+
+Thread-safety
+-------------
+As your testsuite grows, the ability to run tests in parallel will be increasingly important, so make sure your 
+tests and any shared plugin code do not manipulate shared data structures or files in a way that could cause 
+race conditions.
+
+Most Python library functions are safe to use, but you should avoid calling ``locale.getpreferredencoding()`` 
+(use `pysys.constants.PREFERRED_ENCODING` instead) and ``shutil.make_archive`` which are not. 
+
+It is also important not to change to the working directory of the PySys process or its environment (``os.environ``) 
+while tests are executing. Any setup that might involve changing the environment - including initialization of 
+some libraries (e.g. Matplotlib) must be performed before tests start in the ``setup`` of a runner plugin (or runner), 
+so that everything is stable ready for tests to be executed. 
+
+To avoid dangerous and hard-to-debug race conditions, PySys has built-in checking for changes to the working directory 
+and os.environ and the test run will fail if either is detected. 
 
 Producing code coverage reports
 -------------------------------
 PySys can be extended to produce code coverage reports for any language, by creating a writer plugin. 
 
 There is an existing writer that produces coverage reports for programs written in Python called 
-`pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
-``<writer>`` to your project (see the sample ``pysysproject.xml`` for an example) and make sure you're starting 
+`pysys.writer.coverage.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
+``<writer>`` to your project (see the sample :doc:`/pysys/ProjectConfiguration` for an example) and make sure you're starting 
 your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
 
 The usual way to enable code coverage (for all supported languages) is to set ``-XcodeCoverage`` when running your 
@@ -251,7 +331,7 @@ If you wish to produce coverage reports using any other language, this is easy t
   variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods 
   for starting your application is in a custom test plugin class. 
   
-  When starting your process, you can detect whether to enable code coverage like this:
+  When starting your process, you can detect whether to enable code coverage like this::
   
     if self.runner.getBoolProperty('mylanguageCoverage', default=self.runner.getBoolProperty('codeCoverage')) and not self.disableCoverage:
 	  ...
@@ -280,85 +360,162 @@ If you wish to produce coverage reports using any other language, this is easy t
 
 Running tests in multiple modes
 -------------------------------
-One of the most powerful features of PySys is the ability to run the same test 
+One of the powerful features of PySys is the ability to run the same test 
 in multiple modes from a single execution. This could be useful for cases such 
-as a web test that needs to pass against multiple supported web browsers, 
-or a set of tests that should be run against various different database but 
+as a set of tests that should be run against various different databases but 
 can also be run against a mocked database for quick local development. 
+Another common use case is executing the same PySysTest class in different 
+modes to test different scenarios. 
 
-Using modes is fairly straightforward. First edit the ``pysystest.xml`` files for tests that 
-need to run in multiple modes, and add a list of the supported modes::
+To define some modes, first edit the ``pysystest.*`` file for your test, and provide a string 
+containing a Python lambda that will be evaluated when the test descriptors are loaded to 
+return a list of named modes that the test can run in:
 
-   <classification>
-	<groups>...</groups>
-	<modes inherit="true">
-		<mode>MockDatabase_Firefox</mode>
-		<mode>MyDatabase2.0_Chrome</mode>
-	</modes>
-   </classification>
+.. code-block:: python
+	
+	__pysys_modes__ = r""" 
+		lambda helper: helper.inheritedModes+[
+			{'mode':'CompressionGZip', 'compressionType':'gzip'},
+		]
+	"""
 
-When naming modes, TitleCase is recommended, and dot and underscore characters 
-may be used; typically dot is useful for version numbers and underscore is 
-useful for separating out different dimensions e.g. database vs web browser 
-as in the above example. PySys will give an error if you use different 
-capitalization for the same mode in different places, as this would likely 
-result in test bugs. 
+The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper` which provides 
+access to the list of inherited modes (and more). 
 
-The first mode listed is designated the "primary" mode which means it's the 
-one that is used by default when running your tests without a ``--mode`` 
-argument. It's best to choose either the fastest mode or else the one that 
-is most likely to show up interesting issues as the primary mode. 
+When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
+may be used. Typically dot is useful for version numbers and underscore ``_`` is 
+useful for separating out different dimensions (e.g. compression vs authentication type 
+in the example described later in this section); separating dimensions cleanly will make it 
+much easier to include/exclude the test modes you want. PySys will give an error if you use different 
+capitalization for the same mode in different places, as this can result in test bugs. 
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
-file in a parent directory rather than in ``pysystest.xml``, which will by 
-default be inherited by all nested testcases (unless ``inherit="false"`` is 
-specified in the ``<modes>`` element), and so there's a single place to 
-edit the modes list if you need to change them later. It's also possible to 
-create a custom DescriptorLoader subclass that dynamically adds modes 
-from Python code, perhaps based on the groups specified in each descriptor 
-or runtime information such as the current operating system.  
+file in a parent directory rather than in ``pysystest.*``, which will by 
+default be inherited by all nested testcases (unless an explicit modes 
+configuration is provided), and so that there's a single place to edit the modes 
+list if you need to change them later. 
 
-You can find the mode that this test is running in using `self.mode <BaseTest>`.
-To ensure typos and inconsistencies in individual test descriptor modes do 
-no go unnoticed, it is best to provide constants for the possible mode values 
-and/or do validation and unpacking of modes in a test plugin like this::
+By default the first mode in each list is "primary", so the test will only run in that one primary mode by 
+default during local test runs (i.e. unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+using modes to validate the same behaviour/conditions in different execution environments e.g. 
+browsers/databases etc. It's best to choose either the fastest mode or else the one that 
+is most likely to show up interesting issues as the primary mode. 
+
+However when using modes to validate different *behaviours/conditions* (e.g. testing 
+out different command line options) using a single PySysTest class, then you should designate all your modes as 
+"primary" as you want *all of them* to execute by default in a quick local test run. 
+The `pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary` helper function can do this. 
+
+Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
+type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
+Rather than writing out every combination manually, you can use the function 
+`pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` to automatically generate the combinations, 
+passing it each dimension (e.g. each compression type) as a separate list. 
+
+Here is an example of multi-dimensional modes (taken from the getting-started sample):
+
+.. code-block:: python
+	
+	__pysys_modes__ = r""" 
+
+	lambda helper: [
+			mode for mode in 
+				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+					helper.inheritedModes,
+					{
+							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
+							'CompressionGZip': {'compressionType':'gzip'},
+					}, 
+					[
+						{'auth':None}, # Mode name is optional
+						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+					], 
+					
+					# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
+					# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+					# using modes to validate the same behaviour/conditions in different execution environments e.g. 
+					# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
+					# out different command line options) using a single PySysTest class, then you should have all your modes as 
+					# "primary" as you want all of them to execute by default in a quick local test run. 
+					helper.makeAllPrimary(
+						{
+							'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+							'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+							'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+						}), 
+					)
+				
+			# This is Python list comprehension syntax for filtering the items in the list
+			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
+		]
+	"""
+
+This will create the following modes::
+
+	CompressionNone_Auth=None_Usage       [PRIMARY]
+	CompressionNone_Auth=None_BadPort     [PRIMARY]
+	CompressionNone_Auth=None_MissingPort [PRIMARY]
+	CompressionGZip_Auth=None_Usage
+	CompressionGZip_Auth=None_BadPort
+	CompressionGZip_Auth=None_MissingPort
+	CompressionNone_OS_Usage
+	CompressionNone_OS_BadPort
+	CompressionNone_OS_MissingPort
+	CompressionGZip_OS_Usage
+	CompressionGZip_OS_BadPort
+	CompressionGZip_OS_MissingPort
+
+When creating multi-dimensional modes you can explicitly specify the name of each mode using ``'mode':..``, but 
+if you want to avoid repeating the value of your parameters you can let PySys generate a default mode, which 
+it does by taking each parameter concatenated with ``_``; parameters with non-string values (e.g. ``None`` in 
+the above example) are additionally qualified with ``paramName=`` to make the meaning clear. 
+
+The above example also shows how a Python list comprehension can be used to filter prevent the Auth=OS modes 
+from being added on some operation systems (in this example, on all non-fictional operating systems!). 
+
+You can find the mode that this test is running in using `self.mode <BaseTest>`, which returns an instance of 
+`pysys.config.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
+via a ``params`` field. 
+
+Here's an example showing how a test plugin might use modes configuration to configure the test object 
+during test setup::
 
 	class MyTestPlugin(object):
 		def setup(self, testObj):
-			# Unpack and validate mode
-			testObj.databaseMode, testObj.browserMode = testObj.mode.split('_')
-			assert testObj.browserMode in ['Chrome', 'Firefox'], testObj.browserMode
-			
 			# This is a convenient pattern for specifying the method or class 
 			# constructor to call for each mode, and to get an exception if an 
 			# invalid mode is specified
 			dbHelperFactory = {
 				'MockDatabase': MockDB,
 				'MyDatabase2.0': lambda: self.startMyDatabase('2.0')
-			}[testObj.databaseMode]
+			}[testObj.mode.params['database']]
 			...
 			# Call the supplied method to start/configure the database
 			testObj.db = dbHelperFactory() 
 
 Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
-primary mode (for tests with no mode, the primary mode is ``self.mode==None``) - 
+primary modes (for tests with no mode, the primary mode is ``self.mode==None``) - 
 which is great for quick checks during development of your application and 
 testcases. 
 
 Your main test run (perhaps in a CI job) probably wants to run tests in all 
 modes::
 
-  pysys run --mode ALL --threads auto
+  pysys run --mode ALL
+
+(In practice you would use ``--ci`` which does the above and also sets some other useful defaults). 
 
 You can also specify specifies modes to run in, or to run everything except 
-specified modes::
+specified modes, or even use regular expressions for even more flexibility::
 
   pysys run --mode MyMode1,MyMode2
   pysys run --mode !MyMode3,!MyMode4
+  pysys run --mode MyMode.*
 
-After successfully getting all your tests passing in their primary mode, it could 
-be useful to run them in every mode other than the primary one::
+
+After successfully getting all your tests passing in their primary modes, it could 
+be useful to run them in every mode other than the primary::
 
   pysys run --mode !PRIMARY
 
@@ -366,8 +523,7 @@ For reporting purposes, all testcases must have a unique id. With a multiple
 mode test this is achieved by having the id automatically include a ``~Mode`` 
 suffix. If you are reporting performance results from a multi-mode test, make 
 sure you include the mode in the ``resultKey`` when you all `BaseTest.reportPerformanceResult`, 
-since the ``resultKey`` must be 
-globally unique. 
+since the ``resultKey`` must be globally unique. 
 
 In addition to the ``--mode`` argument which affects all selected tests, it is 
 possible to run a specific test in a specific mode. This can be useful when you 
@@ -380,7 +536,7 @@ Test ids and structuring large projects
 ---------------------------------------
 Each test has a unique ``id`` which is used in various places such as when 
 reporting passed/failed outcomes. By default the id is just the name of the 
-directory containing the ``pysystest.xml`` file. 
+directory containing the ``pysystest.*`` file. 
 
 You can choose a suitable naming convention for your tests. For example, 
 you might wish to differentiate with just a numeric suffix such as::
@@ -474,13 +630,12 @@ This serves several useful purposes:
 
 By default both modes and groups are inherited from ``pysysdirconfig.xml`` files 
 in parent directories, but inheriting can be disabled in an individual 
-descriptor by setting ``inherit="false"``, in case you have a few tests that only 
+descriptor by providing an explicit list of modes, in case you have a few tests that only 
 make sense in one mode. Alternatively, you could allow the tests to exist 
 in all modes but call ``self.skipTest <BaseTest.skipTest>`` at the start of the test `BaseTest.execute` method 
 if the test cannot execute in the current mode. 
 
-See the ``pysysdirconfig.xml`` sample in ``pysys/xml/templates/dirconfig`` 
-for a full example of a directory configuration file. 
+See the :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml` for a full example of a directory configuration file. 
 
 Controlling execution order
 ---------------------------
@@ -491,8 +646,8 @@ something has gone wrong, and perhaps to prioritize running fast unit and
 correctness tests before commencing on longer running performance or soak tests. 
 
 By default, PySys runs tests based on the sorting them by the full path of 
-the `pysystest.xml` files. If you have tests with multiple modes, PySys will 
-run all tests in their primary mode first, then any/all tests which list a 
+the `pysystest.*` files. If you have tests with multiple modes, PySys will 
+run all tests in their primary modes first, then any/all tests which list a 
 second mode, followed by 3rd, 4th, etc. 
 
 All of this can be customized using the concept of an execution order hint. 
@@ -500,14 +655,14 @@ Every test descriptor is assigned an execution order hint, which is a positive
 or negative floating point number which defaults to 0.0, and is used to sort 
 the descriptors before execution. Higher execution order hints mean later 
 execution. If two tests have the same hint, PySys falls back on using the 
-path of the `pysystest.xml` file to determine a canonical order. 
+path of the ``pysystest.*`` file to determine a canonical order. 
 
 The hint for each test is generated by adding together hint components from the 
 following:
 
-  - A test-specific hint from the ``pysystest.xml`` file's 
+  - A test-specific hint from the ``pysystest.*`` file's ``__pysys_execution_order_hint__ = `` or 
     ``<execution-order hint="..."/>``. If the hint is 
-    blank (the default), the test inherits any hint specified in a 
+    not specified (the default), the test inherits any hint specified in a 
     ``pysysdirconfig.xml`` file in an ancestor folder, or 0.0 if there aren't 
     any. Note that hints from ``pysysdirconfig.xml`` files are not added 
     together; instead, the most specific wins. 
@@ -516,15 +671,15 @@ following:
     match the mode and/or group of the test. The project configuration 
     is the place to put mode-specific execution order hints, such as putting 
     a particular database or web browser mode earlier/later. See the 
-    sample ``pysysproject.xml`` file for details. 
+    sample :doc:`/pysys/ProjectConfiguration` file for details. 
   
   - For multi-mode tests, the ``secondaryModesHintDelta`` specified in the project 
     configuration (unless it's set to zero), multiplied by a number indicating 
     which mode this is. If a test had 3 modes Mode1, Mode2 and Mode3 then 
-    the primary mode (Mode1) would get no additional hint, Mode2 would get 
+    the primary mode(s) (Mode1) would get no additional hint, Mode2 would get 
     ``secondaryModesHintDelta`` added to its hint and Mode3 would get
     ``2 x secondaryModesHintDelta`` added to its hint. This is the mechanism 
-    PySys uses to ensure all tests run first in their primary mode before 
+    PySys uses to ensure all tests run first in their primary modes before 
     any tests run in their secondary modes. Usually the default value of 
     ``secondaryModesHintDelta = +100.0`` is useful and avoids the need for too 
     much mode-specific hint configuration (see above). However if you prefer to 
@@ -534,4 +689,5 @@ following:
 
 For really advanced cases, you can programmatically set the 
 ``executionOrderHint`` on each descriptor by providing a custom 
-`pysys.xml.descriptor.DescriptorLoader` or in the constructor of a custom `pysys.baserunner.BaseRunner` class. 
+`pysys.config.descriptor.DescriptorLoader` or in the constructor of a 
+custom `pysys.baserunner.BaseRunner` class or plugin. 

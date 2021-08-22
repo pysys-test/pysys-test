@@ -20,6 +20,12 @@ PLATFORM
 .. autodata:: PLATFORM
 
 
+PREFERRED\_ENCODING
+===================
+
+.. autodata:: PREFERRED_ENCODING
+
+
 IS\_WINDOWS
 ===========
 
@@ -30,6 +36,12 @@ PYTHON\_EXE
 ===========
 
 .. autodata:: PYTHON_EXE
+
+
+EXE\_SUFFIX
+===========
+
+.. autodata:: EXE_SUFFIX
 
 
 BACKGROUND
@@ -114,6 +126,12 @@ LOOKUP
 ======
 
 .. autodata:: LOOKUP
+
+
+OSWALK\_IGNORES
+===============
+
+.. autodata:: OSWALK_IGNORES
 
 
 DEFAULT\_TIMEOUT

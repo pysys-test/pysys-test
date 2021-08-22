@@ -1,0 +1,14 @@
+
+pysys.utils.safeeval
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.safeeval
+
+.. currentmodule:: pysys.utils.safeeval
+
+
+
+safeEval
+========
+
+.. autofunction:: safeEval

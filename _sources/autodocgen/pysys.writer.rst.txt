@@ -13,5 +13,6 @@ pysys.writer
   pysys.writer.api
   pysys.writer.ci
   pysys.writer.console
+  pysys.writer.coverage
   pysys.writer.outcomes
   pysys.writer.testoutput

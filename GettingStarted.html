@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; PySys v1.6.1  documentation</title>
+  <title>Getting Started &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="The BaseTest Class" href="BaseTest.html" />
+    <link rel="next" title="The BaseTest Class" href="pysys/BaseTest.html" />
     <link rel="prev" title="Installation" href="Installation.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,9 +84,10 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
@@ -104,7 +105,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PySys v1.6.1</a>
+          <a href="index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -161,14 +162,12 @@
 </pre></div>
 </div>
 <p>The script has four main commands:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">makeproject</span></code> to create your top-level testing project configuration file,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span></code> to create individual testcases,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">run</span></code> to execute them, and</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">clean</span></code> to delete testcase output after execution.</p></li>
 </ul>
-</div></blockquote>
 <p>For detailed information, see the <code class="docutils literal notranslate"><span class="pre">--help</span></code> command line.</p>
 <p>To get started, create a new directory to hold your tests. Then run the
 <code class="docutils literal notranslate"><span class="pre">makeproject</span></code> command from that directory to add a <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>
@@ -182,22 +181,22 @@ file which will hold default settings your all your tests:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pysys</span><span class="o">.</span><span class="n">py</span> <span class="n">make</span> <span class="n">MyApplication_001</span>
 </pre></div>
 </div>
-<p>This will create a <code class="docutils literal notranslate"><span class="pre">MyApplication_001</span></code> subdirectory with a <code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code>
-file holding metadata about the test such as its title, and a <code class="docutils literal notranslate"><span class="pre">run.py</span></code>
-where you can add the logic to <code class="docutils literal notranslate"><span class="pre">execute</span></code> your test, and to <code class="docutils literal notranslate"><span class="pre">validate</span></code> that
+<p>This will create a <code class="docutils literal notranslate"><span class="pre">MyApplication_001</span></code> subdirectory with a <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> file “descriptor” metadata about the test
+such as its title, and Python class where you can add the logic to <code class="docutils literal notranslate"><span class="pre">execute</span></code> your test, and to <code class="docutils literal notranslate"><span class="pre">validate</span></code> that
 the results are as expected.</p>
 <p>To run your testcases, simply execute:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pysys</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span>
 </pre></div>
 </div>
-<p>To give a flavour for what’s possible, here’s a system test for checking the behaviour of a server application, which
-shows of the most common PySys methods:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PySysTest</span><span class="p">(</span><span class="n">pysys</span><span class="o">.</span><span class="n">basetest</span><span class="o">.</span><span class="n">BaseTest</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot; This is a system test for a server process called MyServer. It checks that the server can be started and</span>
-<span class="sd">    respond to basic requests. &quot;&quot;&quot;</span>
+<p>To give a flavour for what’s possible, here’s a system test for checking the behaviour of a server application
+called MyServer, which shows of the most common PySys methods:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_title__</span>   <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot; MyServer startup - basic sanity test (+ demo of PySys basics) &quot;&quot;&quot;</span>
 
+<span class="n">__pysys_purpose__</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot; To demonstrate that MyServer can startup and response to basic requests.</span>
+<span class="s2">  &quot;&quot;&quot;</span>
+
+<span class="k">class</span> <span class="nc">PySysTest</span><span class="p">(</span><span class="n">pysys</span><span class="o">.</span><span class="n">basetest</span><span class="o">.</span><span class="n">BaseTest</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
     <span class="c1"># Ask PySys to allocate a free TCP port to start the server on (this allows running many tests in</span>
     <span class="c1"># parallel without clashes)</span>
     <span class="n">serverPort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNextAvailableTCPPort</span><span class="p">()</span>
@@ -234,6 +233,11 @@ shows of the most common PySys methods:</p>
     <span class="c1"># It&#39;s good practice to check for unexpected errors and warnings so they don&#39;t go unnoticed</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;my_server.out&#39;</span><span class="p">,</span> <span class="s1">&#39; (ERROR|FATAL|WARN) .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+    <span class="c1"># Checking for exception stack traces is also a good idea; and joining them into a single line with a mapper will</span>
+    <span class="c1"># give a more descriptive error if the test fails</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;my_server.out&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Traceback [(]most recent call last[)]&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="n">mappers</span><span class="o">=</span><span class="p">[</span><span class="n">pysys</span><span class="o">.</span><span class="n">mappers</span><span class="o">.</span><span class="n">JoinLines</span><span class="o">.</span><span class="n">PythonTraceback</span><span class="p">()])</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s1">&#39;message == expected&#39;</span><span class="p">,</span>
       <span class="n">message</span><span class="o">=</span><span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fileutils</span><span class="o">.</span><span class="n">loadJSON</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/httpget_myfile.out&#39;</span><span class="p">)[</span><span class="s1">&#39;message&#39;</span><span class="p">],</span>
       <span class="n">expected</span><span class="o">=</span><span class="s2">&quot;Hello world!&quot;</span><span class="p">,</span>
@@ -244,19 +248,18 @@ shows of the most common PySys methods:</p>
 </div>
 <p>If you’re curious about any of the functionality demonstrated above, there’s lots of helpful information on these
 methods and further examples in the documentation:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.getNextAvailableTCPPort()</span></code></a></p></li>
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy()</span></code></a></p></li>
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.startProcess" title="pysys.basetest.BaseTest.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcess()</span></code></a> (+ <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.createEnvirons" title="pysys.basetest.BaseTest.createEnvirons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.createEnvirons()</span></code></a> and <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.startPython" title="pysys.basetest.BaseTest.startPython"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startPython()</span></code></a>)</p></li>
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.waitForGrep" title="pysys.basetest.BaseTest.waitForGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.waitForGrep()</span></code></a></p></li>
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertGrep()</span></code></a></p></li>
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertThat()</span></code></a></p></li>
-<li><p><a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.logFileContents" title="pysys.basetest.BaseTest.logFileContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.logFileContents()</span></code></a></p></li>
+<ul class="simple">
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.getNextAvailableTCPPort()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.startProcess" title="pysys.basetest.BaseTest.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcess()</span></code></a> (+ <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.createEnvirons" title="pysys.basetest.BaseTest.createEnvirons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.createEnvirons()</span></code></a> and <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.startPython" title="pysys.basetest.BaseTest.startPython"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startPython()</span></code></a>)</p></li>
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.waitForGrep" title="pysys.basetest.BaseTest.waitForGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.waitForGrep()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertGrep()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertThat()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.logFileContents" title="pysys.basetest.BaseTest.logFileContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.logFileContents()</span></code></a></p></li>
+<li><p><a class="reference internal" href="autodocgen/pysys.mappers.html#module-pysys.mappers" title="pysys.mappers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers</span></code></a></p></li>
 </ul>
-</div></blockquote>
-<p>Now take a look at <a class="reference internal" href="BaseTest.html#module-pysys.basetest" title="pysys.basetest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest</span></code></a> to begin exploring more of the powerful functionality
-PySys provides to help you implement your own <code class="docutils literal notranslate"><span class="pre">run.py</span></code> system tests.</p>
+<p>Now take a look at <a class="reference internal" href="pysys/BaseTest.html#module-pysys.basetest" title="pysys.basetest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest</span></code></a> to begin exploring more of the powerful functionality
+PySys provides to help you implement your own <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> system tests.</p>
 <p>The sample projects under <a class="reference external" href="https://github.com/pysys-test">https://github.com/pysys-test</a> are a great starting point for learning more about PySys, and
 for creating your first project.</p>
 </div>
@@ -269,7 +272,7 @@ for creating your first project.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="BaseTest.html" class="btn btn-neutral float-right" title="The BaseTest Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pysys/BaseTest.html" class="btn btn-neutral float-right" title="The BaseTest Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -281,7 +284,7 @@ for creating your first project.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

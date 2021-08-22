@@ -11,7 +11,8 @@ pysys.process.user
 STDOUTERR\_TUPLE
 ================
 
-.. autodata:: STDOUTERR_TUPLE
+.. autoclass:: STDOUTERR_TUPLE
+   :members:
 
 
 ProcessUser

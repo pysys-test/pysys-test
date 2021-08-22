@@ -1,0 +1,15 @@
+
+pysys.writer.coverage
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.writer.coverage
+
+.. currentmodule:: pysys.writer.coverage
+
+
+
+PythonCoverageWriter
+====================
+
+.. autoclass:: PythonCoverageWriter
+   :members:

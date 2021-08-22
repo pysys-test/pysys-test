@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.api &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.writer.api &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.writer.api</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -438,7 +439,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TestOutputVisitor.visitTestOutputFile"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutputVisitor.visitTestOutputFile">[docs]</a>	<span class="k">def</span> <span class="nf">visitTestOutputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called after execution of each test (and before purging of files) for each file found in the output </span>
 <span class="sd">		directory. </span>
 <span class="sd">		</span>
@@ -597,8 +598,12 @@
 						<span class="k">if</span> <span class="n">showOutcomeReason</span> <span class="ow">and</span> <span class="n">reason</span><span class="p">:</span>
 							<span class="n">log</span><span class="p">(</span><span class="s2">&quot;      </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_OUTCOMES</span><span class="p">))</span>
 							
-						<span class="n">outputdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">outputdir</span><span class="p">))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
-						<span class="n">testDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">testDir</span><span class="p">))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">outputdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">outputdir</span><span class="p">)))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
+							<span class="n">testDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testDir</span><span class="p">)))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
+						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># relpath can fail if on different Windows drives</span>
+							<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to generate relative paths for &quot;</span><span class="si">%s</span><span class="s1">&quot; and &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">outputdir</span><span class="p">,</span> <span class="n">testDir</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+							
 						<span class="k">if</span> <span class="n">showTestDir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">showOutputDir</span> <span class="ow">and</span> <span class="n">outputdir</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">testDir</span><span class="p">)):</span>
 							<span class="c1"># don&#39;t confuse things by showing the testDir unless its information is not present in the outputDir (due to --outdir)</span>
 							<span class="n">log</span><span class="p">(</span><span class="s2">&quot;      </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">testDir</span><span class="p">)</span>
@@ -681,7 +686,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.process &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -103,7 +105,6 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -122,7 +123,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -184,13 +185,13 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pysys.process.monitor.html#module-pysys.process.monitor" title="pysys.process.monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor</span></code></a></p></td>
-<td><p>Contains the process monitoring API used by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p></td>
+<td><p>Contains the process monitoring API used by <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pysys.process.monitorimpl.html#module-pysys.process.monitorimpl" title="pysys.process.monitorimpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitorimpl</span></code></a></p></td>
 <td><p>Contains implementations of the <a class="reference internal" href="pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a> interface.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pysys.process.user.html#module-pysys.process.user" title="pysys.process.user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user</span></code></a></p></td>
-<td><p>Contains <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser" title="pysys.process.user.ProcessUser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser</span></code></a> which supports using processes from PySys, and provides the  shared functionality of subclasses <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> and <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>.</p></td>
+<td><p>Contains <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser" title="pysys.process.user.ProcessUser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser</span></code></a> which supports using processes from PySys, and provides the  shared functionality of subclasses <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> and <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -201,16 +202,14 @@
 <em class="property">class </em><code class="sig-prename descclassname">pysys.process.</code><code class="sig-name descname">Process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">command</span></em>, <em class="sig-param"><span class="n">arguments</span></em>, <em class="sig-param"><span class="n">environs</span></em>, <em class="sig-param"><span class="n">workingDir</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">timeout</span></em>, <em class="sig-param"><span class="n">stdout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stderr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expectedExitStatus</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">info</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents a process that PySys has started (or can start).</p>
-<p>Instances of a platform-specific implementation of this interface are returned 
+<p>A platform-specific implementation subclass of this interface is returned 
 by <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser.startProcess" title="pysys.process.user.ProcessUser.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.startProcess</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>command</strong> (<em>str</em>) – The full path to the executable.</p></li>
 <li><p><strong>arguments</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – A list of arguments to the command.</p></li>
-<li><p><strong>environs</strong> (<em>dict</em><em>(</em><em>str</em><em>,</em><em>str</em><em>)</em>) – A dictionary of environment variables (key, value) for the process context execution. 
-Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
-automatically to unicode using utf-8.</p></li>
+<li><p><strong>environs</strong> (<em>dict</em><em>(</em><em>str</em><em>,</em><em>str</em><em>)</em>) – A dictionary of environment variables (key, value) for the process context execution.</p></li>
 <li><p><strong>workingDir</strong> (<em>str</em>) – The working directory for the process</p></li>
 <li><p><strong>state</strong> – The state of the process.</p></li>
 <li><p><strong>timeout</strong> (<em>int</em>) – The time in seconds for a foreground process to complete.</p></li>
@@ -272,7 +271,7 @@ addNewLine to false.</p>
 As only binary data can be written to a process stdin, 
 if a character string rather than a byte object is passed as the data,
 it will be automatically converted to a bytes object using the encoding 
-given by <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>.</p></li>
+given by <code class="docutils literal notranslate"><span class="pre">PREFERRED_ENCODING</span></code>.</p></li>
 <li><p><strong>addNewLine</strong> – True if a new line character is to be added to the end of 
 the data string</p></li>
 </ul>
@@ -296,7 +295,7 @@ the data string</p></li>
 <code class="sig-name descname">wait</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.wait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for a process to complete execution, raising an exception on timeout.</p>
 <p>This method provides basic functionality but does not check the exit status or log any messages; 
-see <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.waitProcess" title="pysys.basetest.BaseTest.waitProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.waitProcess</span></code></a> for a wrapper that adds additional functionality.</p>
+see <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.waitProcess" title="pysys.basetest.BaseTest.waitProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.waitProcess</span></code></a> for a wrapper that adds additional functionality.</p>
 <p>Note that this method will not terminate the process if the timeout is exceeded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -347,7 +346,7 @@ see <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

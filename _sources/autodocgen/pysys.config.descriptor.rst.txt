@@ -1,0 +1,36 @@
+
+pysys.config.descriptor
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.config.descriptor
+
+.. currentmodule:: pysys.config.descriptor
+
+
+
+TestDescriptor
+==============
+
+.. autoclass:: TestDescriptor
+   :members:
+
+
+TestModesConfigHelper
+=====================
+
+.. autoclass:: TestModesConfigHelper
+   :members:
+
+
+TestMode
+========
+
+.. autoclass:: TestMode
+   :members:
+
+
+DescriptorLoader
+================
+
+.. autoclass:: DescriptorLoader
+   :members:

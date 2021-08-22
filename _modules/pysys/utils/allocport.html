@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.allocport &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.allocport &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.utils.allocport</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -171,8 +172,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dynamic TCP port allocation. </span>
 
-<span class="sd">This is used by the `pysys.process.user.ProcessUser` class (and its subclasses e.g. BaseTest) which should </span>
-<span class="sd">usually be used to access this functionality. </span>
+<span class="sd">This is used by `pysys.basetest.BaseTest.getNextAvailableTCPPort` which should usually be used to access this </span>
+<span class="sd">functionality. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">sys</span>
@@ -190,6 +191,21 @@
 <span class="n">tcpServerPortPool</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.allocport&#39;</span><span class="p">)</span>
+
+<span class="n">excludedTCPPorts</span> <span class="o">=</span> <span class="p">{</span>
+	<span class="c1">#	nb we don&#39;t bother listing ports lower than 1024 since they wouldn&#39;t be selected anyway</span>
+	<span class="mi">1719</span><span class="p">,</span> <span class="mi">1720</span><span class="p">,</span> <span class="mi">1723</span><span class="p">,</span> <span class="mi">2049</span><span class="p">,</span> <span class="mi">3659</span><span class="p">,</span> <span class="mi">4045</span><span class="p">,</span> <span class="mi">5060</span><span class="p">,</span> <span class="mi">5061</span><span class="p">,</span> <span class="mi">6000</span><span class="p">,</span> <span class="mi">6566</span><span class="p">,</span> <span class="mi">6665</span><span class="p">,</span> <span class="mi">6666</span><span class="p">,</span> <span class="mi">6667</span><span class="p">,</span> <span class="mi">6668</span><span class="p">,</span> <span class="mi">6669</span><span class="p">,</span> <span class="mi">6697</span><span class="p">,</span> <span class="mi">10080</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A set containing TCP server ports which will never be allocated by `pysys.basetest.BaseTest.getNextAvailableTCPPort` </span>
+<span class="sd">(or `TCPPortOwner`). </span>
+
+<span class="sd">By default this contains blocked ports that some web browsers do not permit connections </span>
+<span class="sd">to for security reasons, which would therefore cause browser-driven tests to fail. </span>
+
+<span class="sd">If desired you can modify this set from a custom `pysys.baserunner.BaseRunner` module (before the ``BaseRunner`` </span>
+<span class="sd">constructor is executed). </span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="getEphemeralTCPPortRange"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.getEphemeralTCPPortRange">[docs]</a><span class="k">def</span> <span class="nf">getEphemeralTCPPortRange</span><span class="p">():</span>
 	<span class="sd">&quot;&quot;&quot;Returns the minimum and maximum TCP ports this operating system uses to allocate</span>
@@ -276,8 +292,8 @@
 <span class="sd">	pool of available ports that can be allocated by `pysys.basetest.BaseTest.getNextAvailableTCPPort()`. </span>
 
 <span class="sd">	PySys treats all ports from 1024-65536 as server ports except for the client-side ephemeral/dynamic port range </span>
-<span class="sd">	as determined by `getEphemeralTCPPortRange()`. Alternatively, the set of server ports can be overridden by the </span>
-<span class="sd">	following environment variables:</span>
+<span class="sd">	as determined by `getEphemeralTCPPortRange()` and specific ports in the ``excludedTCPPorts`` set. </span>
+<span class="sd">	Alternatively, the set of server ports can be overridden by the following environment variables:</span>
 <span class="sd">	</span>
 <span class="sd">	  - ``PYSYS_PORTS=minport-maxport,port,...`` PySys will use the specified ports and/or port ranges (inclusive) </span>
 <span class="sd">	    allocating server ports.  </span>
@@ -285,8 +301,11 @@
 
 <span class="sd">	If using these variables, be sure to avoid none of the ports reserved for ephemeral use is in the set of server </span>
 <span class="sd">	ports you specify. </span>
+<span class="sd">	</span>
+<span class="sd">	See `logPortAllocationStats()` for information about how to log statistics showing how many server ports your tests </span>
+<span class="sd">	are using. </span>
 
-<span class="sd">	:return: A list or set of all the server ports that can be used, e.g. [1024, 1025, ...]. </span>
+<span class="sd">	:return: A list of all the server ports that can be used, e.g. [1024, 1025, ...]. </span>
 <span class="sd">	:raises Exception: If the port range cannot be determined, which will prevent PySys from running any tests. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_PORTS&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
@@ -304,19 +323,21 @@
 			<span class="n">fallback_low</span><span class="p">,</span> <span class="n">fallback_high</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">49152</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 			<span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;PySys has detected that only </span><span class="si">%d</span><span class="s1"> ports are remaining for starting servers, after removing the </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1"> ephemeral/dynamic port range on this machine (</span><span class="si">%s</span><span class="s1">). To ensure enough ports are available, PySys is falling back to using the server port range </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1">, however this may result in clashes between server ports and ephemeral ports so it is recommended to change your TCP configuration on this machine to provide more balance between the number of ephemeral vs server ports. &#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ports</span><span class="p">),</span> <span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">,</span> <span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">(),</span> <span class="n">fallback_low</span><span class="p">,</span> <span class="n">fallback_high</span><span class="p">)</span>
 			<span class="n">ports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">fallback_low</span><span class="p">,</span> <span class="n">fallback_high</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-		<span class="k">return</span> <span class="n">ports</span>
+		<span class="n">specs</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="k">if</span> <span class="n">specs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="n">ports</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+		<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">:</span>
+			<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+			
+			<span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+				<span class="n">envrange</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+				<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">envrange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">envrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+					<span class="n">ports</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">ports</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
 
-	<span class="n">ports</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-	<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">:</span>
-		<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
-		
-		<span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
-			<span class="n">envrange</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
-			<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">envrange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">envrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-				<span class="n">ports</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="n">ports</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+	<span class="n">ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ports</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludedTCPPorts</span><span class="p">]</span>
 	<span class="k">return</span> <span class="n">ports</span></div>
 
 
@@ -331,10 +352,12 @@
 <span class="sd">	:meta private: Not public API</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">global</span> <span class="n">tcpServerPortPool</span>
+	<span class="k">global</span> <span class="n">tcpServerPortPool</span><span class="p">,</span> <span class="n">__totalServerPorts</span>
 	<span class="k">assert</span> <span class="n">tcpServerPortPool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Cannot call initializePortPool() more than once per process&#39;</span>
 
-	<span class="n">tcpServerPortPool</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">getServerTCPPorts</span><span class="p">())</span>
+	<span class="n">tcpServerPortPool</span> <span class="o">=</span> <span class="n">getServerTCPPorts</span><span class="p">()</span>
+	
+	<span class="n">__totalServerPorts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcpServerPortPool</span><span class="p">)</span>
 
 	<span class="c1"># Randomize the port set to reduce the chance of clashes between</span>
 	<span class="c1"># simultaneous runs on the same machine</span>
@@ -384,6 +407,9 @@
 			<span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 	<span class="k">return</span> <span class="kc">False</span>
 
+<span class="n">__peakAllocatedPorts</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">__totalAllocatedPorts</span> <span class="o">=</span> <span class="mi">0</span>
+
 <span class="k">def</span> <span class="nf">allocateTCPPort</span><span class="p">(</span><span class="n">hosts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">],</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 	<span class="c1"># nb: expose socket type and protocol number here but not higher up the stack just in case someone needs them, but </span>
 	<span class="c1"># not very likely</span>
@@ -404,6 +430,8 @@
 				<span class="n">haslogged</span> <span class="o">=</span> <span class="kc">True</span>
 			<span class="k">continue</span>
 		
+		<span class="k">if</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">excludedTCPPorts</span><span class="p">:</span> <span class="k">continue</span> <span class="c1"># in case excludedTCPPorts was added to after the pool was initialized; no point returning this to the pool</span>
+		
 		<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">portIsInUse</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socketAddressFamily</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">)</span> <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="p">):</span>
 			<span class="c1"># Toss the port back at the end of the queue</span>
 			<span class="n">tcpServerPortPool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
@@ -411,8 +439,31 @@
 		<span class="k">else</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">haslogged</span><span class="p">:</span>
 				<span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;   successfully allocated TCP port </span><span class="si">%d</span><span class="s1"> after </span><span class="si">%0.1f</span><span class="s1">s&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span><span class="p">)</span>
+			<span class="k">global</span> <span class="n">__totalAllocatedPorts</span><span class="p">,</span> <span class="n">__peakAllocatedPorts</span>
+			<span class="n">__totalAllocatedPorts</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1"># sufficiently thread-safe for statistics reporting due to GIL (minor errors tolerated)</span>
+			<span class="n">__peakAllocatedPorts</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">__peakAllocatedPorts</span><span class="p">,</span> <span class="n">__totalServerPorts</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">tcpServerPortPool</span><span class="p">))</span>
 			<span class="k">return</span> <span class="n">port</span>
 	<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Timed out trying to allocate a free TCP server port after </span><span class="si">%0.1f</span><span class="s1"> secs; other tests are currently using all the available ports (hint: check that PySys has correctly detected the range of ephemeral vs server ports by running with -vDEBUG)&#39;</span><span class="o">%</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForAvailableTCPPort&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="logPortAllocationStats"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.logPortAllocationStats">[docs]</a><span class="k">def</span> <span class="nf">logPortAllocationStats</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.portAllocationStats&#39;</span><span class="p">)):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Logs a DEBUG level message indicating how many server ports were allocated so far over the lifetime of this </span>
+<span class="sd">	PySys process, and the peak number in use any one time. </span>
+<span class="sd">	</span>
+<span class="sd">	This method is called before PySys terminates after running all tests. </span>
+
+<span class="sd">	To see these messages, run PySys with::</span>
+<span class="sd">	</span>
+<span class="sd">		pysys run -v portAllocationStats=DEBUG</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;TCP server port allocation stats: portPoolSize=</span><span class="si">%s</span><span class="s1">, peakAllocatedPorts=</span><span class="si">%s</span><span class="s1">, lifetimeTotalAllocatedPorts=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+		<span class="n">__peakAllocatedPorts</span><span class="p">,</span> <span class="n">__totalServerPorts</span><span class="p">,</span> <span class="n">__totalAllocatedPorts</span><span class="p">)</span>
+	<span class="k">return</span> <span class="p">{</span> <span class="c1"># undocumented for now, but might be useful for hacking around</span>
+		<span class="s1">&#39;totalServerPorts&#39;</span><span class="p">:</span> <span class="n">__totalServerPorts</span><span class="p">,</span>
+		<span class="s1">&#39;peakAllocatedPorts&#39;</span><span class="p">:</span> <span class="n">__peakAllocatedPorts</span><span class="p">,</span>
+		<span class="s1">&#39;lifetimeTotalAllocatedPorts&#39;</span><span class="p">:</span> <span class="n">__totalAllocatedPorts</span><span class="p">,</span>
+	<span class="p">}</span></div>
 
 <div class="viewcode-block" id="TCPPortOwner"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.TCPPortOwner">[docs]</a><span class="k">class</span> <span class="nc">TCPPortOwner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -453,7 +504,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

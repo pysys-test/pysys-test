@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.pycompat &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.pycompat &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pysys.utils.threadutils" href="pysys.utils.threadutils.html" />
+    <link rel="next" title="pysys.utils.safeeval" href="pysys.utils.safeeval.html" />
     <link rel="prev" title="pysys.utils.perfreporter" href="pysys.utils.perfreporter.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -107,17 +109,15 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.pycompat</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#enum">Enum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#isstring">isstring</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#quotestring">quotestring</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#openfile">openfile</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -136,7 +136,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -192,47 +192,16 @@
             
   <div class="section" id="module-pysys.utils.pycompat">
 <span id="pysys-utils-pycompat"></span><h1>pysys.utils.pycompat<a class="headerlink" href="#module-pysys.utils.pycompat" title="Permalink to this headline">¶</a></h1>
-<p>Compatibility utilities to allow PySys to support both Python 2 and 3.</p>
-<div class="section" id="enum">
-<h2>Enum<a class="headerlink" href="#enum" title="Permalink to this headline">¶</a></h2>
-<dl class="py data">
-<dt id="pysys.utils.pycompat.Enum">
-<code class="sig-prename descclassname">pysys.utils.pycompat.</code><code class="sig-name descname">Enum</code><em class="property"> = &lt;enum 'Enum'&gt;</em><a class="reference internal" href="../_modules/enum.html#Enum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.pycompat.Enum" title="Permalink to this definition">¶</a></dt>
-<dd><p>In Python 2 an enumeration can be simulated by just assigning 
-constant values with a unique value (perhaps a string) as 
-statics in a simple object, e.g.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyEnum</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-        <span class="n">OPTION1</span> <span class="o">=</span> <span class="s1">&#39;MyEnum.OPTION1&#39;</span>
-        <span class="n">OPTION2</span> <span class="o">=</span> <span class="s1">&#39;MyEnum.OPTION2&#39;</span>
-
-<span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">MyEnum</span><span class="p">,</span> <span class="s1">&#39;option1&#39;</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Bad option: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%...</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</div>
+<p>Compatibility utilities for older Python versions.</p>
+<p>This module is now deprecated as all functionality can be provided by the Python standard library.</p>
+<p>Instead of <code class="docutils literal notranslate"><span class="pre">quotestring</span></code> use <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.quoteString" title="pysys.utils.misc.quoteString"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.quoteString</span></code></a>.</p>
 <div class="section" id="isstring">
 <h2>isstring<a class="headerlink" href="#isstring" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pysys.utils.pycompat.isstring">
 <code class="sig-prename descclassname">pysys.utils.pycompat.</code><code class="sig-name descname">isstring</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/pycompat.html#isstring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.pycompat.isstring" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns True if the specified object is a python string. 
-On Python 2 this could be a unicode character string or a byte str, 
-on python 3 this must be a character str.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="quotestring">
-<h2>quotestring<a class="headerlink" href="#quotestring" title="Permalink to this headline">¶</a></h2>
-<dl class="py function">
-<dt id="pysys.utils.pycompat.quotestring">
-<code class="sig-prename descclassname">pysys.utils.pycompat.</code><code class="sig-name descname">quotestring</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/pycompat.html#quotestring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.pycompat.quotestring" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds double quotation marks around the specified character or byte string, 
-and additional escaping only if needed to make the meaning clear, but trying to 
-avoid double-slashes unless actually needed since it makes paths harder to read</p>
-<p>If a byte string is provided and this is Python 3+ then the 
-<code class="docutils literal notranslate"><span class="pre">repr()</span></code> representation is used instead.</p>
+<dd><p>Returns True if the specified object is a python string.</p>
+<p>Deprecated - use <code class="docutils literal notranslate"><span class="pre">isinstance(s,</span> <span class="pre">str)</span></code> instead.</p>
 </dd></dl>
 
 </div>
@@ -245,13 +214,10 @@ avoid double-slashes unless actually needed since it makes paths harder to read<
 “open()” semantics for this Python version unless an encoding is 
 explicitly specified, in which case a file stream 
 yielding (unicode) character strings is always returned.</p>
-<p>Specifically:</p>
-<p>On Python 3 this method returns a file stream yielding character strings 
+<p>This method returns a file stream yielding character strings 
 unless a binary mode was specified in which case a stream yielding 
 bytes is returned.</p>
-<p>On Python 2 this method returns a file stream yielding unicode 
-character strings only if an encoding was explicitly specified; 
-otherwise it returns a file stream yielding “str” bytes objects.</p>
+<p>Deprecated - use <code class="docutils literal notranslate"><span class="pre">io.open(pysys.utils.fileutils.toLongPathSafe(path),</span> <span class="pre">...)</span></code> instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -265,8 +231,7 @@ is specified then the returned stream is always a unicode character stream.
 This must be None if the mode specifies binary.</p></li>
 <li><p><strong>errors</strong> – Optional string that specifies how encoding/decoding errors 
 are handled, such as ‘strict’, ‘ignore’, ‘replace’; see documentation of 
-io module for more details. The value of this attribute is ignored 
-if using the python 2 open() built-in with bytes mode that does not support it.</p></li>
+io module for more details.</p></li>
 <li><p><strong>kwargs</strong> – Any additional args to be passed to open() or io.open().</p></li>
 </ul>
 </dd>
@@ -288,7 +253,7 @@ This stream should be closed when no longer required.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pysys.utils.threadutils.html" class="btn btn-neutral float-right" title="pysys.utils.threadutils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pysys.utils.safeeval.html" class="btn btn-neutral float-right" title="pysys.utils.safeeval" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pysys.utils.perfreporter.html" class="btn btn-neutral float-left" title="pysys.utils.perfreporter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -300,7 +265,7 @@ This stream should be closed when no longer required.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

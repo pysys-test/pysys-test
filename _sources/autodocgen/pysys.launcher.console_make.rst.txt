@@ -8,6 +8,27 @@ pysys.launcher.console\_make
 
 
 
+DefaultTestMaker
+================
+
+.. autoclass:: DefaultTestMaker
+   :members:
+
+
+ProposeNewTestIdNumericSuffixException
+======================================
+
+.. autoclass:: ProposeNewTestIdNumericSuffixException
+   :members:
+
+
+LegacyConsoleMakeTestHelper
+===========================
+
+.. autoclass:: LegacyConsoleMakeTestHelper
+   :members:
+
+
 ConsoleMakeTestHelper
 =====================
 

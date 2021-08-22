@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.mappers &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.mappers &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,26 +84,30 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.mappers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#regexreplace">RegexReplace</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#includelinesbetween">IncludeLinesBetween</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#joinlines">JoinLines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#includelinesmatching">IncludeLinesMatching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#excludelinesmatching">ExcludeLinesMatching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sortlines">SortLines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#applymappers">applyMappers</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -122,7 +126,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -176,7 +180,9 @@
             
   <div class="section" id="module-pysys.mappers">
 <span id="pysys-mappers"></span><h1>pysys.mappers<a class="headerlink" href="#module-pysys.mappers" title="Permalink to this headline">¶</a></h1>
-<p>Mappers that filter or transform lines of input, for use with methods such as <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy</span></code></a>.</p>
+<p>Mapper filter or transform lines of input, for use with methods such as <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy</span></code></a> 
+and <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertGrep</span></code></a>.</p>
+<p>This package contains several pre-defined mappers:</p>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -195,8 +201,34 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.ExcludeLinesMatching" title="pysys.mappers.ExcludeLinesMatching"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExcludeLinesMatching</span></code></a>(regex)</p></td>
 <td><p>Mapper that filters lines by excluding/ignoring lines matching the specified regular expression.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines" title="pysys.mappers.JoinLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines</span></code></a>([startAt, continueWhile, …])</p></td>
+<td><p>Mapper that joins/concatenates consecutive related lines together into a single line.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.PythonTraceback" title="pysys.mappers.JoinLines.PythonTraceback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.PythonTraceback</span></code></a>()</p></td>
+<td><p>Mapper that joins the lines of a typical Python traceback (starting <code class="docutils literal notranslate"><span class="pre">Traceback</span> <span class="pre">(most</span> <span class="pre">recent</span> <span class="pre">call</span> <span class="pre">last):</span></code>)  into a single line, for easier grepping and self-contained test outcome failure reasons.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.JavaStackTrace" title="pysys.mappers.JoinLines.JavaStackTrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.JavaStackTrace</span></code></a>([combiner, …])</p></td>
+<td><p>Mapper that joins the lines of a typical Java(R) stack trace (from stderr or a log file) into a single line,  for easier grepping and self-contained test outcome failure reasons.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.AntBuildFailure" title="pysys.mappers.JoinLines.AntBuildFailure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.AntBuildFailure</span></code></a>()</p></td>
+<td><p>Mapper that joins the lines of an ant’s stderr BUILD FAILED output to actually include the failure message(s),  for easier grepping and self-contained test outcome failure reasons.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.SortLines" title="pysys.mappers.SortLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SortLines</span></code></a>([key])</p></td>
+<td><p>Mapper that sorts all lines.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.applyMappers" title="pysys.mappers.applyMappers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">applyMappers</span></code></a>(iterator, mappers)</p></td>
+<td><p>A generator function that applies zero or more mappers to each line from an iterator and yields each fully mapped line.</p></td>
+</tr>
 </tbody>
 </table>
+<p>In addition to the above, you can create custom mappers, which are usually callables (functions, lambdas, or classes 
+with a <code class="docutils literal notranslate"><span class="pre">__call__()</span></code> method) that return the transformed copy of each incoming line.</p>
+<p>For advanced cases you can provide a generator function that accepts a line iterator as input and yields the mapped 
+lines; this allows for stateful transformation and avoids the limitation of having a 1:1 (or 1:0) relationship between 
+input and output lines.</p>
+<p>All lines passed to/from mappers end with a <code class="docutils literal notranslate"><span class="pre">\n</span></code> character (on all platforms), except for the last line of the 
+file which will only have the <code class="docutils literal notranslate"><span class="pre">\n</span></code> if the file ends with a blank line. 
+Mappers must always preserve the final <code class="docutils literal notranslate"><span class="pre">\n</span></code> of each line (if present).</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 1.6.0.</span></p>
 </div>
@@ -228,8 +260,8 @@ regex; see <code class="docutils literal notranslate"><span class="pre">re.sub()
 <span class="go">&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">RegexReplace</span><span class="p">(</span><span class="n">RegexReplace</span><span class="o">.</span><span class="n">DATETIME_REGEX</span><span class="p">,</span> <span class="s1">&#39;&lt;timestamp&gt;&#39;</span><span class="p">)(</span><span class="s1">&#39;Test string x=20200715T192234Z.&#39;</span><span class="p">)</span>
-<span class="go">&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">RegexReplace</span><span class="p">(</span><span class="n">RegexReplace</span><span class="o">.</span><span class="n">DATETIME_REGEX</span><span class="p">,</span> <span class="s1">&#39;&lt;timestamp&gt;&#39;</span><span class="p">)(</span><span class="s1">&#39;Test string x=20200715T192234Z.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39;Test string x=&lt;timestamp&gt;.\n&#39;</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">RegexReplace</span><span class="p">(</span><span class="n">RegexReplace</span><span class="o">.</span><span class="n">NUMBER_REGEX</span><span class="p">,</span> <span class="s1">&#39;&lt;number&gt;&#39;</span><span class="p">)(</span><span class="s1">&#39;Test string x=123.&#39;</span><span class="p">)</span>
@@ -252,9 +284,9 @@ regex; see <code class="docutils literal notranslate"><span class="pre">re.sub()
 <dl class="py attribute">
 <dt id="pysys.mappers.RegexReplace.NUMBER_REGEX">
 <code class="sig-name descname">NUMBER_REGEX</code><em class="property"> = '[+-]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?'</em><a class="headerlink" href="#pysys.mappers.RegexReplace.NUMBER_REGEX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mapper that transforms lines, replacing all integer or floating point numbers with “&lt;number&gt;”.</p>
-<p>This is useful for removing ids that would diff-ing files more difficult, if you only care about validating 
-the non-numeric text.</p>
+<dd><p>A regular expression that can be used to match integer or floating point numbers. This could be used in a 
+mapper to replace all numbers with with “&lt;number&gt;” to remove ids that would make diff-ing files more difficult, if 
+you only care about validating the non-numeric text.</p>
 </dd></dl>
 
 </dd></dl>
@@ -264,18 +296,20 @@ the non-numeric text.</p>
 <h2>IncludeLinesBetween<a class="headerlink" href="#includelinesbetween" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pysys.mappers.IncludeLinesBetween">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">IncludeLinesBetween</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">startAt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopAfter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopBefore</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#IncludeLinesBetween"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.IncludeLinesBetween" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">IncludeLinesBetween</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">startAt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopAfter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startAfter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopBefore</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#IncludeLinesBetween"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.IncludeLinesBetween" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Mapper that filters out all lines except those within a range of expressions.</p>
 <p>This is useful when a log file contains lots of data you don’t care about, in addition to some multi-line sequences 
-that you want to extract (with <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy</span></code></a>) ready for <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertDiff</span></code></a>.</p>
-<p>As this mapper is stateful, so not use a single instance of it in multiple tests (or multiple threads).</p>
+that you want to extract (with <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy</span></code></a>) ready for <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertDiff</span></code></a>.</p>
+<p>As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads).</p>
 <p>The following parameters can be either a callable/lambda that accepts an input line and returns a boolean, or a 
 regular expression string to search for in the specified line.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>startAt</strong> (<em>str|callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;bool</em>) – If it matches then the current line and subsequent lines are included 
+(not filtered out). If not specified, lines from the start of the file onwards are matched.</p></li>
+<li><p><strong>startAfter</strong> (<em>str|callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;bool</em>) – If it matches then the subsequent lines are included 
 (not filtered out). If not specified, lines from the start of the file onwards are matched.</p></li>
 <li><p><strong>stopAfter</strong> (<em>str|callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;bool</em>) – If it matches then lines after the current one are filtered out 
 (unless/until a line matching startAt is found). Includes the stop line.</p></li>
@@ -284,23 +318,184 @@ regular expression string to search for in the specified line.</p>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">test_IncludeLinesBetween</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">mapper</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_IncludeLinesBetween</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="s1">&#39;start.*&#39;</span><span class="p">,</span> <span class="s1">&#39;stopafter.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a,start line,b,c,stopafter line,d,start line2,e&#39;</span><span class="p">)</span>
-<span class="go">&#39;start line,b,c,stopafter line,start line2,e&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">_mapperUnitTest</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">applyMappers</span><span class="p">([</span><span class="n">line</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;tab&gt;&#39;</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)],</span> <span class="p">[</span><span class="n">mapper</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="s1">&#39;start.*&#39;</span><span class="p">,</span> <span class="s1">&#39;stopafter.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a|start line|b|c|stopafter line|d|start line2|e&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;start line|b|c|stopafter line|start line2|e&#39;</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">test_IncludeLinesBetween</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;start.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a,start line,b,c&#39;</span><span class="p">)</span>
-<span class="go">&#39;start line,b,c&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;start.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a|start line|b|c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;start line|b|c&#39;</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">test_IncludeLinesBetween</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">stopAfter</span><span class="o">=</span><span class="s1">&#39;stopafter.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a,stopafter,b,c&#39;</span><span class="p">)</span>
-<span class="go">&#39;a,stopafter&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">startAfter</span><span class="o">=</span><span class="s1">&#39;start.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a|start line|b|c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;b|c&#39;</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">test_IncludeLinesBetween</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">stopBefore</span><span class="o">=</span><span class="s1">&#39;stopbefore.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a,b,stopbefore,c&#39;</span><span class="p">)</span>
-<span class="go">&#39;a,b&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">)),</span> <span class="s1">&#39;a|start line|b|c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;start line|b|c&#39;</span>
 </pre></div>
 </div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">stopAfter</span><span class="o">=</span><span class="s1">&#39;stopafter.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a|stopafter|b|c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;a|stopafter&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="n">stopBefore</span><span class="o">=</span><span class="s1">&#39;stopbefore.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a|b|stopbefore|c&#39;</span><span class="p">)</span>
+<span class="go">&#39;a\n|b\n&#39;</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0: </span>Added startAfter</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="joinlines">
+<h2>JoinLines<a class="headerlink" href="#joinlines" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.mappers.JoinLines">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">JoinLines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">startAt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">continueWhile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopAfter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopBefore</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">combiner</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#JoinLines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.JoinLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mapper that joins/concatenates consecutive related lines together into a single line. Useful for combining error or 
+stack trace lines together for easier grepping and for more meaingful test failure reasons.</p>
+<p>There are static factory methods on this class to create pre-configured instances for common languages e.g. 
+<a class="reference internal" href="#pysys.mappers.JoinLines.JavaStackTrace" title="pysys.mappers.JoinLines.JavaStackTrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.JavaStackTrace</span></code></a>, <a class="reference internal" href="#pysys.mappers.JoinLines.PythonTraceback" title="pysys.mappers.JoinLines.PythonTraceback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.PythonTraceback</span></code></a>, or you can create your own. See 
+<a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertGrep</span></code></a> for an example.</p>
+<p>As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads).</p>
+<p>The following parameters can be either a callable/lambda that accepts an input line and returns a boolean, or a 
+regular expression string to search for in the specified line. Note that a lambda with a simple string operation such 
+as <code class="docutils literal notranslate"><span class="pre">startswith(...)</span></code> is usually a lot more efficient than a regular expression.</p>
+<p>Typically you would use startAt and just one of continueWhile/stopAfter/stopBefore.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>startAt</strong> (<em>str|callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;bool</em>) – If it matches then the current line then subsequent lines are joined into one. 
+Can be a regular expression or a function with argument <code class="docutils literal notranslate"><span class="pre">line</span></code>.</p></li>
+<li><p><strong>continueWhile</strong> (<em>str|callable</em><em>[</em><em>str</em><em>,</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>-&gt;bool</em>) – After joining has started, then all consecutive lines 
+matching this will be included in the current join, and it will be stopped as soon as a non-matching line is found. 
+Can be a regular expression or a function with arguments <code class="docutils literal notranslate"><span class="pre">(line,</span> <span class="pre">buffer)</span></code> where <code class="docutils literal notranslate"><span class="pre">buffer</span></code> is the list of 
+previous lines accumulated from the current startAt match.</p></li>
+<li><p><strong>stopAfter</strong> (<em>str|callable</em><em>[</em><em>str</em><em>,</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>-&gt;bool</em>) – After joining has started, if this matches then this is the last line to be 
+included in the current join. Includes the stop line.
+Can be a regular expression or a function with arguments <code class="docutils literal notranslate"><span class="pre">(line,</span> <span class="pre">buffer)</span></code> where <code class="docutils literal notranslate"><span class="pre">buffer</span></code> is the list of 
+previous lines accumulated from the current startAt match.</p></li>
+<li><p><strong>stopBefore</strong> (<em>str|callable</em><em>[</em><em>str</em><em>,</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>-&gt;bool</em>) – After joining has started, if this matches, then the preceding line is 
+the last line to be included in the current join. Excludes the stop line. 
+Can be a regular expression or a function with arguments <code class="docutils literal notranslate"><span class="pre">(line,</span> <span class="pre">buffer)</span></code> where <code class="docutils literal notranslate"><span class="pre">buffer</span></code> is the list of 
+previous lines accumulated from the current startAt match.</p></li>
+<li><p><strong>combiner</strong> (<em>callable</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>-&gt;str</em>) – A function that combines the joined lines from a given sequence 
+into a single line. The implementation is <a class="reference internal" href="#pysys.mappers.JoinLines.defaultCombiner" title="pysys.mappers.JoinLines.defaultCombiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">defaultCombiner</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">_mapperUnitTest</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">applyMappers</span><span class="p">([</span><span class="n">line</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;tab&gt;&#39;</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)],</span> <span class="p">[</span><span class="n">mapper</span><span class="p">])))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;startat.*&#39;</span><span class="p">,</span> <span class="n">stopAfter</span><span class="o">=</span><span class="s1">&#39;stopafter.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a| startat START|  stack1|  stack2 | stopafter STOP | d|startat2| e | f &#39;</span><span class="p">)</span>
+<span class="go">&#39;a|startat START / stack1 / stack2 / stopafter STOP| d|startat2 / e / f|&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;startat.*&#39;</span><span class="p">,</span> <span class="n">continueWhile</span><span class="o">=</span><span class="s1">&#39;stack.*&#39;</span><span class="p">),</span> <span class="s1">&#39;startat START|  stack1|  stack2 | stopbefore NEXT LINE|d|startat2|stopbefore2&#39;</span><span class="p">)</span>
+<span class="go">&#39;startat START / stack1 / stack2| stopbefore NEXT LINE|d|startat2|stopbefore2|&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;startat.*&#39;</span><span class="p">,</span> <span class="n">stopAfter</span><span class="o">=</span><span class="s1">&#39;stopafter.*&#39;</span><span class="p">),</span> <span class="s1">&#39;a| startat START|  stack1|  |  stack2 | stopafter STOP |d|startat2| stopafter e | f &#39;</span><span class="p">)</span>
+<span class="go">&#39;a|startat START / stack1 / stack2 / stopafter STOP|d|startat2 / stopafter e| f |&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="p">(</span><span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;startat.*&#39;</span><span class="p">,</span> <span class="n">stopBefore</span><span class="o">=</span><span class="s1">&#39;stopbefore.*&#39;</span><span class="p">),</span> <span class="s1">&#39;startat START|  stack1|  stack2 | stopbefore NEXT LINE|d|startat2|stopbefore2&#39;</span><span class="p">)</span>
+<span class="go">&#39;startat START / stack1 / stack2| stopbefore NEXT LINE|d|startat2|stopbefore2|&#39;</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.</span></p>
+</div>
+<dl class="py method">
+<dt id="pysys.mappers.JoinLines.defaultCombiner">
+<em class="property">static </em><code class="sig-name descname">defaultCombiner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lines</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#JoinLines.defaultCombiner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.JoinLines.defaultCombiner" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default “combiner” function used by <a class="reference internal" href="#pysys.mappers.JoinLines" title="pysys.mappers.JoinLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines</span></code></a>, which joins the lines with the delimiter <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">/</span> <span class="pre">&quot;</span></code> after 
+stripping leading/trailing whitespace and blank lines.</p>
+<p>If you want different behaviour, create your own function with this signature and pass it in as the <code class="docutils literal notranslate"><span class="pre">combiner=</span></code> 
+argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lines</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – The lines to be joined.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A single string representing all of these lines.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.mappers.JoinLines.PythonTraceback">
+<em class="property">static </em><code class="sig-name descname">PythonTraceback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#JoinLines.PythonTraceback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.JoinLines.PythonTraceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mapper that joins the lines of a typical Python traceback (starting <code class="docutils literal notranslate"><span class="pre">Traceback</span> <span class="pre">(most</span> <span class="pre">recent</span> <span class="pre">call</span> <span class="pre">last):</span></code>) 
+into a single line, for easier grepping and self-contained test outcome failure reasons.</p>
+<p>The combiner is configured to put the actual exception class and message (which is the most important information) 
+at the start of the joined line rather than at the end (after the traceback).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">_mapperUnitTest</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">applyMappers</span><span class="p">([</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">|&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;tab&gt;&#39;</span><span class="p">,</span><span class="nb">chr</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)],</span> <span class="p">[</span><span class="n">mapper</span><span class="p">])))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">PythonTraceback</span><span class="p">(),</span> <span class="s1">&#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)|KeyError: &quot;foo bar&quot;|Normal operation is resumed&#39;</span><span class="p">)</span>
+<span class="go">&#39;a|KeyError: &quot;foo bar&quot; / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">PythonTraceback</span><span class="p">(),</span> <span class="s1">&#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)|AssertionError|Normal operation is resumed&#39;</span><span class="p">)</span>
+<span class="go">&#39;a|AssertionError / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">PythonTraceback</span><span class="p">(),</span> <span class="s1">&#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)||KeyError: &quot;foo bar&quot;|Normal operation is resumed&#39;</span><span class="p">)</span>
+<span class="go">&#39;a|KeyError: &quot;foo bar&quot; / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">PythonTraceback</span><span class="p">(),</span> <span class="s1">&#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |&lt;tab&gt;raise KeyError (&quot;foo bar&quot;)||KeyError: &quot;foo bar&quot;|OtherError: baz|Normal operation is resumed&#39;</span><span class="p">)</span>
+<span class="go">&#39;a|KeyError: &quot;foo bar&quot; / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|OtherError: baz|Normal operation is resumed&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">PythonTraceback</span><span class="p">(),</span> <span class="s1">&#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span><span class="p">)</span>
+<span class="go">&#39;a|Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.mappers.JoinLines.JavaStackTrace">
+<em class="property">static </em><code class="sig-name descname">JavaStackTrace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">combiner</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">errorLogLineRegex</span><span class="o">=</span><span class="default_value">'(ERROR|FATAL) '</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#JoinLines.JavaStackTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.JoinLines.JavaStackTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mapper that joins the lines of a typical Java(R) stack trace (from stderr or a log file) into a single line, 
+for easier grepping and self-contained test outcome failure reasons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>combiner</strong> (<em>callable</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>-&gt;str</em>) – See <a class="reference internal" href="#pysys.mappers.JoinLines" title="pysys.mappers.JoinLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines</span></code></a>.</p></li>
+<li><p><strong>errorLogLineRegex</strong> (<em>str</em>) – A regular expression used to match log lines which could (optionally) be followed 
+by a stack trace.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">_mapperUnitTest</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">applyMappers</span><span class="p">([</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;tab&gt;&#39;</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)],</span> <span class="p">[</span><span class="n">mapper</span><span class="p">])))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">JavaStackTrace</span><span class="p">(),</span> <span class="s1">&#39;java.lang.AssertionError: Invalid state|&lt;tab&gt;at org.junit.Assert.fail(Assert.java:100)|Caused by: java.lang.RuntimeError: Oh dear |&lt;tab&gt;at org.myorg.TestMyClass2|Normal operation has resumed &#39;</span><span class="p">)</span>
+<span class="go">&#39;java.lang.AssertionError: Invalid state / at org.junit.Assert.fail(Assert.java:100) / Caused by: java.lang.RuntimeError: Oh dear / at org.myorg.TestMyClass2|Normal operation has resumed &#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">JavaStackTrace</span><span class="p">(),</span> <span class="s1">&#39;2021-05-25 ERROR [Thread1] The operation failed|java.lang.AssertionError: Invalid state|&lt;tab&gt;at org.junit.Assert.fail(Assert.java:100)|Caused by: java.lang.RuntimeError: Oh dear |&lt;tab&gt;at org.myorg.TestMyClass2|2021-05-25 ERROR [Thread1] Another error|2021-05-25 INFO [Thread1] normal operation&#39;</span><span class="p">)</span>
+<span class="go">&#39;2021-05-25 ERROR [Thread1] The operation failed / java.lang.AssertionError: Invalid state / at org.junit.Assert.fail(Assert.java:100) / Caused by: java.lang.RuntimeError: Oh dear / at org.myorg.TestMyClass2|2021-05-25 ERROR [Thread1] Another error|2021-05-25 INFO [Thread1] normal operation&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">JavaStackTrace</span><span class="p">(),</span> <span class="s1">&#39;Exception in thread &quot;main&quot; java.lang.RuntimeException: Main exception|&lt;tab&gt;at scratch.ExceptionTest.main(ExceptionTest.java:16)&#39;</span><span class="p">)</span>
+<span class="go">&#39;Exception in thread &quot;main&quot; java.lang.RuntimeException: Main exception / at scratch.ExceptionTest.main(ExceptionTest.java:16)&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.mappers.JoinLines.AntBuildFailure">
+<em class="property">static </em><code class="sig-name descname">AntBuildFailure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#JoinLines.AntBuildFailure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.JoinLines.AntBuildFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mapper that joins the lines of an ant’s stderr BUILD FAILED output to actually include the failure message(s), 
+for easier grepping and self-contained test outcome failure reasons.</p>
+<p>As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">_mapperUnitTest</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">applyMappers</span><span class="p">([</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)],</span> <span class="p">[</span><span class="n">mapper</span><span class="p">])))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">AntBuildFailure</span><span class="p">(),</span> <span class="s1">&#39;BUILD FAILED|~/build.xml:13: Unknown attribute [dodgyattribute]||Total time: 0 seconds&#39;</span><span class="p">)</span>
+<span class="go">&#39;BUILD FAILED / ~/build.xml:13: Unknown attribute [dodgyattribute]||Total time: 0 seconds&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -313,16 +508,16 @@ regular expression string to search for in the specified line.</p>
 <p>Mapper that filters lines by including only lines matching the specified regular expression.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>regex</strong> (<em>str|compiled_regex</em>) – The regular expression to match (use <code class="docutils literal notranslate"><span class="pre">.*</span></code> at the beginning to allow extra 
-characters at the start of the line).  Multiple expressions can be combined using 
-<code class="docutils literal notranslate"><span class="pre">(expr1|expr2)</span></code> syntax.</p>
+<dd class="field-odd"><p><strong>regex</strong> (<em>str|compiled_regex</em>) – The regular expression to match (this is a match not a search, so 
+use <code class="docutils literal notranslate"><span class="pre">.*</span></code> at the beginning if you want to allow extra characters at the start of the line).  
+Multiple expressions can be combined using <code class="docutils literal notranslate"><span class="pre">(expr1|expr2)</span></code> syntax.</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeLinesMatching</span><span class="p">(</span><span class="s1">&#39;Foo.*&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar&#39;</span><span class="p">)</span>
-<span class="go">&#39;Foo bar&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeLinesMatching</span><span class="p">(</span><span class="s1">&#39;Foo.*&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39;Foo bar\n&#39;</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeLinesMatching</span><span class="p">(</span><span class="s1">&#39;bar.*&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeLinesMatching</span><span class="p">(</span><span class="s1">&#39;bar.*&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -354,6 +549,74 @@ characters at the start of the line).  Multiple expressions can be combined usin
 </dd></dl>
 
 </div>
+<div class="section" id="sortlines">
+<h2>SortLines<a class="headerlink" href="#sortlines" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.mappers.SortLines">
+<code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">SortLines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#SortLines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.SortLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mapper that sorts all lines.</p>
+<p>Note that unlike most mappers this will read the entire input into memory to perform the sort, so only use this 
+when you know the file size isn’t enormous.</p>
+<p>As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;str</em>) – A callable that returns the sort key to use for each line, in case you want 
+something other than the default lexicographic sorting.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">_mapperUnitTest</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">applyMappers</span><span class="p">([</span><span class="n">line</span><span class="o">+</span><span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)],</span> <span class="p">[</span><span class="n">mapper</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">SortLines</span><span class="p">(),</span> <span class="s1">&#39;a|z|A|B|aa|c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;A|B|a|aa|c|z&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">SortLines</span><span class="p">(</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="p">),</span> <span class="s1">&#39;100|1|10|22|2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;1|2|10|22|100&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_mapperUnitTest</span><span class="p">(</span> <span class="n">SortLines</span><span class="p">(),</span> <span class="s1">&#39;a</span><span class="se">\n</span><span class="s1">|c</span><span class="se">\n</span><span class="s1">|b&#39;</span><span class="p">)</span>
+<span class="go">&#39;a\n|b\n|c\n&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="applymappers">
+<h2>applyMappers<a class="headerlink" href="#applymappers" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.mappers.applyMappers">
+<code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">applyMappers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iterator</span></em>, <em class="sig-param"><span class="n">mappers</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#applyMappers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.applyMappers" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generator function that applies zero or more mappers to each line from an iterator and yields each fully mapped line.</p>
+<p>If a mapper function returns None for a line that line is dropped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iterator</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – An iterable such as a file object that yields lines to be mapped. 
+Trailing newline characters are preserved, but not passed to the mappers.</p></li>
+<li><p><strong>mappers</strong> (<em>List</em><em>[</em><em>callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;str</em><em> or </em><em>callable</em><em>[</em><em>iterator</em><em>]</em><em>-&gt;Generator</em><em>[</em><em>str</em><em>,</em><em>None</em><em>,</em><em>None</em><em>] </em><em>]</em>) – <p>A list of filter functions that will be used to pre-process each 
+line from the file (returning None if the line is to be filtered out). 
+For advanced cases where stateful mappings are needed, instead of a function to filter individual lines, you can 
+provide a generator function which accepts an iterable of all input lines from each file and yields output lines 
+(including potentially some additional lines).</p>
+<p>Mappers must always preserve the final <code class="docutils literal notranslate"><span class="pre">\n</span></code> of each line (if present).</p>
+<p>Do not share mapper instances across multiple tests or threads as this can cause race conditions.</p>
+<p>As a convenience to make conditionalization easier, any <code class="docutils literal notranslate"><span class="pre">None</span></code> items in the mappers list are 
+simply ignored.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Iterable[str]</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.</span></p>
+</div>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -376,7 +639,7 @@ characters at the start of the line).  Multiple expressions can be combined usin
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

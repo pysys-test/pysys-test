@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.misc &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.misc &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.utils.misc</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -169,17 +170,41 @@
 <span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Miscellanous utilities such as `pysys.utils.misc.compareVersions` and `pysys.utils.misc.setInstanceVariablesFromDict`.</span>
+<span class="sd">Miscellanous utilities such as `pysys.utils.misc.compareVersions`, `pysys.utils.misc.setInstanceVariablesFromDict`, </span>
+<span class="sd">and `pysys.utils.misc.quoteString`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
 	<span class="s1">&#39;setInstanceVariablesFromDict&#39;</span><span class="p">,</span>
-	<span class="s1">&#39;compareVersions&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;compareVersions&#39;</span><span class="p">,</span> 
+	<span class="s1">&#39;quoteString&#39;</span><span class="p">,</span>
 <span class="p">]</span>
+
+<div class="viewcode-block" id="quoteString"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.misc.html#pysys.utils.misc.quoteString">[docs]</a><span class="k">def</span> <span class="nf">quoteString</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; Adds double quotation marks around the specified character or byte string, </span>
+<span class="sd">	and additional escaping only if needed to make the meaning clear, but trying to </span>
+<span class="sd">	avoid double-slashes unless actually needed since it makes paths harder to read. </span>
+<span class="sd">	</span>
+<span class="sd">	If a byte string is provided then the </span>
+<span class="sd">	``repr()`` representation is used instead. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># this function exists primarily to provide the same quoting behaviour </span>
+	<span class="c1"># for str/unicode in Python 2 and str in Python 3, but avoiding </span>
+	<span class="c1"># the confusing &quot;b&#39;valuehere&#39;&quot; representation that &quot;%s&quot; would </span>
+	<span class="c1"># produce for python 3 bytes objects</span>
+	<span class="n">r</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="k">return</span> <span class="n">r</span>
+	
+	<span class="k">if</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="c1"># if it contains escape sequences like \n to \&quot; we&#39;d better just use repr so it&#39;s unambiguous</span>
+		<span class="k">return</span> <span class="n">r</span>
+	
+	<span class="c1"># repr uses single quotes, so using double quotes is a good way to make it distinguishable </span>
+	<span class="c1"># (the other option would be using r&#39;...&#39; since essentially this is like a Python raw string</span>
+
+	<span class="k">return</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">s</span></div>
 
 <div class="viewcode-block" id="compareVersions"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.misc.html#pysys.utils.misc.compareVersions">[docs]</a><span class="k">def</span> <span class="nf">compareVersions</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot; Compares two alphanumeric dotted version strings to see which is more recent. </span>
@@ -189,7 +214,7 @@
 	
 	<span class="k">def</span> <span class="nf">normversion</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
 		<span class="c1"># convert from bytes to strings if necessary</span>
-		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">):</span> <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span> <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 		
 		<span class="c1"># normalize versions into a list of components, with integers for the numeric bits</span>
 		<span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;([0-9]+|[.])&#39;</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">!=</span> <span class="sa">u</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="p">]</span>
@@ -230,6 +255,8 @@
 <span class="sd">		If this is an empty string then depending on the type of default, a boolean False, empty list[] or empty string will be returned; </span>
 <span class="sd">		if instead you wish empty string to result in the default being returned, pass ``value or default`` instead of ``value``. </span>
 <span class="sd">		</span>
+<span class="sd">		List entries are delimited by newline and/or commas and stripped of whitespace. </span>
+<span class="sd">		</span>
 <span class="sd">	:param bool/int/float/str/list[str] default: The default value to return if the property is not set or is an empty string. </span>
 <span class="sd">		The type of the default parameter will be used to convert the property value from a string if it is </span>
 <span class="sd">		provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. </span>
@@ -238,7 +265,7 @@
 <span class="sd">	:raises Exception: If the value cannot be converted to default.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">default</span>
-	<span class="k">if</span> <span class="ow">not</span> <span class="n">isstring</span><span class="p">(</span><span class="n">value</span><span class="p">):</span> <span class="k">return</span> <span class="n">value</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="k">return</span> <span class="n">value</span>
 	<span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
 		<span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="kc">True</span>
 		<span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;false&#39;</span> <span class="ow">or</span> <span class="n">value</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
@@ -248,8 +275,8 @@
 	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
 		<span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-		<span class="k">return</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
-	<span class="k">elif</span> <span class="n">isstring</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
+		<span class="k">return</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 		<span class="k">return</span> <span class="n">value</span> <span class="c1"># nothing to do. allow it to be empty string</span>
 	<span class="k">else</span><span class="p">:</span>
 		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unsupported type for &quot;</span><span class="si">%s</span><span class="s1">&quot; value default: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
@@ -272,7 +299,7 @@
 		<span class="k">if</span> <span class="n">errorOnMissingVariables</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 			<span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Cannot set unexpected property &quot;</span><span class="si">%s</span><span class="s1">&quot; on </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 		<span class="n">defvalue</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-		<span class="k">if</span> <span class="n">defvalue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">isstring</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">defvalue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 			<span class="c1"># attempt type coersion to keep the type the same</span>
 			<span class="n">val</span> <span class="o">=</span> <span class="n">getTypedValueOrDefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">defvalue</span><span class="p">)</span>
 		<span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span></div>
@@ -289,7 +316,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

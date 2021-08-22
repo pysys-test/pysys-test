@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.constants &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.constants &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v1.6.1</a>
+          <a href="../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.constants</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -176,19 +177,12 @@
 <span class="sd">be referenced directly. </span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT</span>
+<span class="c1"># undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, PROJECT</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">traceback</span>
-
-<span class="c1"># if set is not available (&gt;python 2.6) fall back to the sets module</span>
-<span class="k">try</span><span class="p">:</span>  
-	<span class="nb">set</span>  
-<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>  
-	<span class="kn">import</span> <span class="nn">sets</span>
-	<span class="kn">from</span> <span class="nn">sets</span> <span class="kn">import</span> <span class="n">Set</span> <span class="k">as</span> <span class="nb">set</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">locale</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
 
 <span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">stdoutHandler</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">Enum</span>
 
 <span class="c1"># set the platform and platform related constants</span>
 <span class="n">HOSTNAME</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getfqdn</span><span class="p">()</span>
@@ -200,7 +194,7 @@
 <span class="sd">	It is recommended to use standard Python functions such as ``sys.platform`` rather than this constant. &quot;&quot;&quot;</span>
 	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;windows&#39;</span>
 	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;nul&#39;</span>
-	<span class="n">WINDIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;windir&#39;</span><span class="p">,</span> <span class="s1">&#39;c:\WINDOWS&#39;</span><span class="p">)</span>
+	<span class="n">WINDIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;windir&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;c:\WINDOWS&#39;</span><span class="p">)</span>
 	<span class="n">PATH</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">;</span><span class="si">%s</span><span class="s1">\system32;</span><span class="si">%s</span><span class="s1">\System32\Wbem&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">WINDIR</span><span class="p">,</span> <span class="n">WINDIR</span><span class="p">,</span> <span class="n">WINDIR</span><span class="p">)</span>
 	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -233,8 +227,8 @@
 	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
 	<span class="n">PATH</span> <span class="o">=</span> <span class="s1">&#39;/bin:/usr/bin:/usr/sbin:/usr/local/bin&#39;</span>
 	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;/usr/lib:/usr/local/lib&#39;</span>
-	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;DYLD_LIBRARY_PATH&#39;</span>
+	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;$(HOME)/lib:/usr/local/lib:/lib:/usr/lib&#39;</span>
+	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;DYLD_FALLBACK_LIBRARY_PATH&#39;</span>
 	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;python</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 	<span class="c1"># Fall back to assumed UNIX-like platform</span>
@@ -247,6 +241,21 @@
 	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;LD_LIBRARY_PATH&#39;</span>
 	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;python</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
 
+<span class="n">PREFERRED_ENCODING</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The operating system&#39;s preferred/default encoding for reading/writing the contents of text data in files and </span>
+<span class="sd">process stdout/stderr for the current environment (or machine). </span>
+
+<span class="sd">This returns the same value as Python&#39;s ``locale.getpreferredencoding()`` method, but as that method is not thread-safe, </span>
+<span class="sd">this constant must always be used in test cases to avoid race conditions when running tests in parallel. </span>
+
+<span class="sd">The OS preferred encoding should not be confused with Python&#39;s &#39;default&#39; encoding (``sys.getdefaultencoding()``) which </span>
+<span class="sd">is usually not relevant for testing purposes. </span>
+
+<span class="sd">See also `pysys.basetest.BaseTest.getDefaultFileEncoding()`.</span>
+
+<span class="sd">.. versionadded:: 2.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">ENVSEPERATOR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span>
 <span class="sd">&quot;&quot;&quot; Deprecated. </span>
@@ -258,6 +267,10 @@
 <span class="n">PYTHON_EXE</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span> <span class="c1"># alias to increase readability</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The path to the current Python executable (=``sys.executable``). </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">EXE_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;.exe&#39;</span> <span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot; The suffix added to binary executables, that is ``.exe`` on Windows, and empty string on Unix. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># constants used in testing</span>
@@ -351,23 +364,24 @@
 
 <span class="c1"># set the default descriptor filename, input, output and reference directory names</span>
 <span class="n">DEFAULT_PROJECTFILE</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pysysproject.xml&#39;</span><span class="p">]</span>
-<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pysystest.xml&#39;</span><span class="p">]</span> <span class="c1"># can be customized with the pysysTestDescriptorFileNames project property</span>
-<span class="n">DEFAULT_MODULE</span> <span class="o">=</span> <span class="s1">&#39;run&#39;</span>
+<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pysystest.xml&#39;</span><span class="p">]</span> <span class="c1"># deprecated, do not use this. For customization use the pysysTestDescriptorFileNames project property. </span>
+<span class="n">DEFAULT_MODULE</span> <span class="o">=</span> <span class="s1">&#39;run.py&#39;</span> <span class="c1"># deprecated, do not use this. </span>
 <span class="n">DEFAULT_GROUP</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 <span class="n">DEFAULT_TESTCLASS</span> <span class="o">=</span> <span class="s1">&#39;PySysTest&#39;</span>
 <span class="n">DEFAULT_INPUT</span> <span class="o">=</span> <span class="s1">&#39;Input&#39;</span>
 <span class="n">DEFAULT_OUTPUT</span> <span class="o">=</span> <span class="s1">&#39;Output&#39;</span>
 <span class="n">DEFAULT_REFERENCE</span> <span class="o">=</span> <span class="s1">&#39;Reference&#39;</span>
 <span class="n">DEFAULT_RUNNER</span> <span class="o">=</span> <span class="s1">&#39;pysys.baserunner.BaseRunner&#39;</span>
-<span class="n">DEFAULT_MAKER</span> <span class="o">=</span> <span class="s1">&#39;pysys.launcher.console.ConsoleMakeTestHelper&#39;</span>
+<span class="n">DEFAULT_MAKER</span> <span class="o">=</span> <span class="s1">&#39;pysys.launcher.console.DefaultTestMaker&#39;</span>
 <span class="n">DEFAULT_STYLESHEET</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># deprecated</span>
 <span class="n">DEFAULT_FORMAT</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> </span><span class="si">%(levelname)-5s</span><span class="s1"> </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
 <span class="n">DEFAULT_OUTDIR</span> <span class="o">=</span> <span class="s1">&#39;win&#39;</span> <span class="k">if</span> <span class="n">PLATFORM</span><span class="o">==</span><span class="s1">&#39;win32&#39;</span> <span class="k">else</span> <span class="n">PLATFORM</span> <span class="c1"># this constant is not currently public API</span>
 
-<span class="n">OSWALK_IGNORES</span> <span class="o">=</span> <span class="p">[</span> <span class="n">DEFAULT_INPUT</span><span class="p">,</span> <span class="n">DEFAULT_OUTPUT</span><span class="p">,</span> <span class="n">DEFAULT_REFERENCE</span><span class="p">,</span> <span class="s1">&#39;CVS&#39;</span><span class="p">,</span> <span class="s1">&#39;.svn&#39;</span><span class="p">,</span> <span class="s1">&#39;__pycache__&#39;</span><span class="p">,</span> <span class="s1">&#39;.git&#39;</span> <span class="p">]</span>
+<span class="n">OSWALK_IGNORES</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;.git&#39;</span><span class="p">,</span> <span class="s1">&#39;.svn&#39;</span><span class="p">,</span> <span class="s1">&#39;__pycache__&#39;</span><span class="p">,</span> <span class="s1">&#39;CVS&#39;</span><span class="p">,</span> <span class="p">]</span>
 <span class="sd">&quot;&quot;&quot; A list of directory names to exclude when recursively walking a directory tree. </span>
 
-<span class="sd">:meta private: Hidden since 1.5.1, not something end-users need to be concerned with. &quot;&quot;&quot;</span>
+<span class="sd">This is used by PySys during test loading, and can also be used for subsequent directory walking operations. </span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">DEFAULT_TIMEOUT</span> <span class="o">=</span> <span class="mi">600</span>
 <span class="sd">&quot;&quot;&quot;Deprecated: Use a specific member of `TIMEOUTS` instead.&quot;&quot;&quot;</span>
@@ -421,13 +435,13 @@
 <span class="n">PROJECT</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="sd">&quot;&quot;&quot;:meta private: Hide this since 1.5.1 since we don&#39;t want people to use it. </span>
 
-<span class="sd">Holds the L{pysys.xml.project.Project} instance containing settings for this PySys project.</span>
+<span class="sd">Holds the L{pysys.config.project.Project} instance containing settings for this PySys project.</span>
 <span class="sd">Instead of using this constant, use `pysys.basetest.BaseTest.project` (or`pysys.process.user.ProcessUser.project`) </span>
 <span class="sd">field to access this. If this is not possible, use Project.getInstance().</span>
 
 <span class="sd">This is set by the console_XXX modules when the project is loaded. </span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pysys.xml.project</span> <span class="kn">import</span> <span class="n">Project</span> <span class="c1"># retained for compatibility when using &#39;from constants import *&#39;</span>
+<span class="kn">from</span> <span class="nn">pysys.config.project</span> <span class="kn">import</span> <span class="n">Project</span> <span class="c1"># retained for compatibility when using &#39;from constants import *&#39;</span>
 </pre></div>
 
            </div>
@@ -440,7 +454,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

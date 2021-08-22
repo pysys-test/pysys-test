@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.perfreporter &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.perfreporter &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -112,11 +114,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -135,7 +137,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -191,7 +193,7 @@
             
   <div class="section" id="module-pysys.utils.perfreporter">
 <span id="pysys-utils-perfreporter"></span><h1>pysys.utils.perfreporter<a class="headerlink" href="#module-pysys.utils.perfreporter" title="Permalink to this headline">¶</a></h1>
-<p>Performance number reporting classes, used by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.reportPerformanceResult</span></code></a>.</p>
+<p>Performance number reporting classes, used by <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.reportPerformanceResult</span></code></a>.</p>
 <p>The <a class="reference internal" href="#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSVPerformanceReporter</span></code></a> can be used as-is or subclassed for alternative output formats.</p>
 <div class="section" id="performanceunit">
 <h2>PerformanceUnit<a class="headerlink" href="#performanceunit" title="Permalink to this headline">¶</a></h2>
@@ -203,7 +205,7 @@
 <p>Every unit encodes whether big numbers are better or worse (which can be used 
 to calculate the improvement or regression when results are compared), e.g. 
 better for throughput numbers, worse for time taken or latency numbers.</p>
-<p>For consistency, we recommend using the the pre-defined units where possible. 
+<p>For consistency, we recommend using the pre-defined units where possible. 
 For throughput numbers or rates, that means using PER_SECOND. For latency 
 measurements that means using SECONDS if long time periods of several 
 seconds are expected, or NANO_SECONDS (=10**-9 seconds) if sub-second 
@@ -266,10 +268,18 @@ the <code class="docutils literal notranslate"><span class="pre">summaryfile=</s
 
 <dl class="py method">
 <dt id="pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails">
-<code class="sig-name descname">getRunDetails</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/perfreporter.html#CSVPerformanceReporter.getRunDetails"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRunDetails</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/perfreporter.html#CSVPerformanceReporter.getRunDetails"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return an dictionary of information about this test run (e.g. hostname, start time, etc).</p>
-<p>This method is deprecated; customization of the run details should be performed by changing 
+<p>Overriding this method is discouraged; customization of the run details should usually be performed by changing 
 the <code class="docutils literal notranslate"><span class="pre">runner.runDetails</span></code> dictionary from the <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>testobj</strong> – the test case instance registering the value</p>
+</dd>
+</dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0: </span>Added testobj parameter. </p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -286,7 +296,7 @@ the <code class="docutils literal notranslate"><span class="pre">runner.runDetai
 
 <dl class="py method">
 <dt id="pysys.utils.perfreporter.CSVPerformanceReporter.getRunSummaryFile">
-<code class="sig-name descname">getRunSummaryFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/perfreporter.html#CSVPerformanceReporter.getRunSummaryFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.perfreporter.CSVPerformanceReporter.getRunSummaryFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRunSummaryFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/perfreporter.html#CSVPerformanceReporter.getRunSummaryFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.perfreporter.CSVPerformanceReporter.getRunSummaryFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the fully substituted location of the file to which summary performance results will be written.</p>
 <p>This may include the following substitutions: <code class="docutils literal notranslate"><span class="pre">&#64;OUTDIR&#64;</span></code> (=${outDirName}, the basename of the output directory for this run,
 e.g. “linux”), <code class="docutils literal notranslate"><span class="pre">&#64;HOSTNAME&#64;</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;DATE&#64;</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;TIME&#64;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&#64;TESTID&#64;</span></code>. The default is given by <a class="reference internal" href="#pysys.utils.perfreporter.CSVPerformanceReporter.DEFAULT_SUMMARY_FILE" title="pysys.utils.perfreporter.CSVPerformanceReporter.DEFAULT_SUMMARY_FILE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SUMMARY_FILE</span></code></a>. 
@@ -301,7 +311,7 @@ run. The path will be resolved relative to the pysys project root directory unle
 
 <dl class="py method">
 <dt id="pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader">
-<code class="sig-name descname">getRunHeader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/perfreporter.html#CSVPerformanceReporter.getRunHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRunHeader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/perfreporter.html#CSVPerformanceReporter.getRunHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the header string to the CSV file.</p>
 </dd></dl>
 
@@ -321,7 +331,7 @@ run. The path will be resolved relative to the pysys project root directory unle
 <li><p><strong>testobj</strong> – the test case instance registering the value</p></li>
 <li><p><strong>value</strong> – the value to be reported. This may be an int, float, or a character (unicode) string.</p></li>
 <li><p><strong>resultKey</strong> – a unique string that fully identifies what was measured</p></li>
-<li><p><strong>unit</strong> – identifies the unit the the value is measured in</p></li>
+<li><p><strong>unit</strong> – identifies the unit the value is measured in</p></li>
 <li><p><strong>toleranceStdDevs</strong> – indicates how many standard deviations away from the mean for a regression</p></li>
 <li><p><strong>resultDetails</strong> – A dictionary of detailed information that should be recorded together with the result</p></li>
 </ul>
@@ -339,7 +349,7 @@ run. The path will be resolved relative to the pysys project root directory unle
 <li><p><strong>testobj</strong> – the test case instance registering the value</p></li>
 <li><p><strong>value</strong> – the value to be reported</p></li>
 <li><p><strong>resultKey</strong> – a unique string that fully identifies what was measured</p></li>
-<li><p><strong>unit</strong> – identifies the unit the the value is measured in</p></li>
+<li><p><strong>unit</strong> – identifies the unit the value is measured in</p></li>
 <li><p><strong>toleranceStdDevs</strong> – indicates how many standard deviations away from the mean for a regression</p></li>
 <li><p><strong>resultDetails</strong> – A dictionary of detailed information that should be recorded together with the result</p></li>
 </ul>
@@ -384,11 +394,8 @@ containing values for each of the keys in <code class="xref py py-obj docutils l
 <li><p><strong>COLUMNS</strong> (<em>list</em>) – Constant list of the columns in the performance output</p></li>
 </ul>
 </dd>
-</dl>
-<p>Construct an instance of the CSV performance file class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>contents</strong> – a string containing the contents of the file (can be empty)</p>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>contents</strong> (<em>str</em>) – A string containing the contents of the file to be parsed (can be empty)</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -444,7 +451,7 @@ whose keys will be added in the same order as COLUMNS.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

@@ -38,6 +38,18 @@ deletedir
 .. autofunction:: deletedir
 
 
+deletefile
+==========
+
+.. autofunction:: deletefile
+
+
+listDirContents
+===============
+
+.. autofunction:: listDirContents
+
+
 loadProperties
 ==============
 

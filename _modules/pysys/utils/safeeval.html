@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.safeeval &mdash; PySys v2.0.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.safeeval</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.safeeval</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B.Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+<span class="c1"># This set of imports was copied from BaseTest (minus a little tidying up, e.g. removing BaseTest-specific dependencies) </span>
+<span class="c1"># to preserve compatibility with 1.5.0 PySys tests using assertEval, before we started controlling the environment used </span>
+<span class="c1"># for eval more carefully. </span>
+
+<span class="c1"># It still contains lots of symbols which are likely to be useful when performing an eval such as IS_WINDOWS, etc</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">pysys.config.project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">pathexists</span>
+<span class="kn">import</span> <span class="nn">pysys</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+<div class="viewcode-block" id="safeEval"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.safeeval.html#pysys.utils.safeeval.safeEval">[docs]</a><span class="k">def</span> <span class="nf">safeEval</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">errorMessage</span><span class="o">=</span><span class="s1">&#39;Failed to evaluate &quot;</span><span class="si">{expr}</span><span class="s1">&quot; due to </span><span class="si">{error}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">emptyNamespace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extraNamespace</span><span class="o">=</span><span class="p">{}):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Executes eval(...) on the specified string expression, using a controlled globals()/locals() environment to </span>
+<span class="sd">	ensure we do not break compatibility between PySys versions, and that a sensible set of PySys constants and </span>
+<span class="sd">	modules are available. </span>
+<span class="sd">	</span>
+<span class="sd">	Unless ``emptyNamespace=True``, the global environment used for evaluation includes the </span>
+<span class="sd">	``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` </span>
+<span class="sd">	standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. </span>
+<span class="sd">	</span>
+<span class="sd">	If necessary, symbols for additional modules can be imported dynamically using ``import_module``:: </span>
+<span class="sd">	</span>
+<span class="sd">		x = safeEval(&quot;import_module(&#39;difflib&#39;).get_close_matches(&#39;app&#39;, [&#39;apple&#39;, &#39;orange&#39;, &#39;applic&#39;]&quot;)</span>
+<span class="sd">	</span>
+<span class="sd">	If an error occurs, an exception is raised that includes the expression in its message. </span>
+<span class="sd">	</span>
+<span class="sd">	:param str expr: The string to be evaluated.</span>
+<span class="sd">	</span>
+<span class="sd">	:param str errorMessage: The string used for the raised exception message if an exception is thrown by eval, </span>
+<span class="sd">		where ``{expr}`` will be replaced with the actual expression and ``{error}`` with the error message. </span>
+<span class="sd">		</span>
+<span class="sd">	:param bool emptyNamespace: By default a default namespace is provided including the symbols described above such as </span>
+<span class="sd">		``os.path``, ``pysys``, etc. Set this to True to start with a completely empty namespace with no symbols defined. </span>
+
+<span class="sd">	:param dict[str,obj] extraNamespace: A dict of string names and Python object values to be included in the globals </span>
+<span class="sd">		environment used to evaluate this string. </span>
+<span class="sd">		</span>
+<span class="sd">	.. versionadded:: 2.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">env</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">emptyNamespace</span> <span class="k">else</span> <span class="nb">globals</span><span class="p">()</span>
+	<span class="k">if</span> <span class="n">extraNamespace</span><span class="p">:</span>
+		<span class="n">env</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">extraNamespace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="n">env</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errorMessage</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span> <span class="ow">or</span> <span class="s1">&#39;&lt;no message&gt;&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span></div>
+
+	
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

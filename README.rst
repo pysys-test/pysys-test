@@ -20,23 +20,24 @@ Key features include:
   starting, orchestration, and cleanup, for both Windows and Unix-based 
   systems. Includes common operations such as:
 
-   * dynamically picking a free TCP/IP port, 
-   * waiting until a server is running on a specified port,
-   * waiting until a file contains a specified message, 
-   * powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)
-   * aborting early with a clear failure messages if an error is detected in a log file
+  * dynamically picking a free TCP/IP port, 
+  * waiting until a server is running on a specified port,
+  * waiting until a file contains a specified message, 
+  * powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)
+  * aborting early with a clear failure messages if an error is detected in a log file
 
 - Support for executing tests in parallel to significantly speed up execution 
   time, with a flexible mechanism for controlling execution order.
 - Ability to cycle a test many times (and in parallel) to reproduce rare race 
   conditions. 
 - Support for executing the same test in several modes during your test 
-  run (for example against different web browsers, databases, etc). 
+  run (for example against different web browsers, databases, etc). Python 
+  lambda expressions give the power to easily create complex and dynamic lists of 
+  modes that combine multi-dimensional parameter matrices. 
 - A process memory monitoring framework to check for memory leaks when soak 
   testing your application.
 - A performance monitoring framework for recording and aggregating latency, 
   throughput and other performance metrics.
-
 - A pluggable "writers" framework for recording test outcomes in any format, 
   including a standard JUnit-compatible XML results writer and output archiver 
   in the box, and support for running tests under CI providers such as 
@@ -48,14 +49,20 @@ Key features include:
   classification groups.
 - Support for Windows, Linux, macOS and Solaris. 
 
-PySys was created by Moray Grieve. The current maintainer is Ben Spiller. 
+PySys was created by Moray Grieve. The maintainer is now Ben Spiller. 
 This is a community project so we welcome your contributions, whether 
 enhancement issues or GitHub pull requests! 
 
 Project Links
 =============
-.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=master
-	:target: https://travis-ci.com/pysys-test/pysys-test
+.. image:: https://img.shields.io/pypi/v/PySys
+	:target: https://pypi.org/project/PySys/
+
+.. image:: https://img.shields.io/badge/license-LGPL-blue
+	:target: https://pysys-test.github.io/pysys-test/license.html
+
+.. image:: https://github.com/pysys-test/pysys-test/actions/workflows/pysys-test.yml/badge.svg
+	:target: https://github.com/pysys-test/pysys-test/actions/workflows/pysys-test.yml
 
 .. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/master/graph/badge.svg
 	:target: https://codecov.io/gh/pysys-test/pysys-test
@@ -70,8 +77,7 @@ Project Links
 Installation
 ============
 
-PySys can be installed into Python 3.8 (recommended), 3.5/3.6/3.7 or Python 2.7 
-(though note that Python 2.7 itself is out of support from the Python team so is not recommended). 
+PySys can be installed into any Python version from 3.6 to 3.9. 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
@@ -122,10 +128,10 @@ After installation, to see the available options to the pysys.py script use::
  
 The script has four main commands: 
 
-  - ``makeproject`` to create your top-level testing project configuration file, 
-  - ``make`` to create individual testcases, 
-  - ``run`` to execute them, and 
-  - ``clean`` to delete testcase output after execution.
+- ``makeproject`` to create your top-level testing project configuration file, 
+- ``make`` to create individual testcases, 
+- ``run`` to execute them, and 
+- ``clean`` to delete testcase output after execution.
 
 For detailed information, see the ``--help`` command line. 
 
@@ -141,26 +147,26 @@ Then to create your first test, run::
 
 	> pysys.py make MyApplication_001
 
-This will create a ``MyApplication_001`` subdirectory with a ``pysystest.xml`` 
-file holding metadata about the test such as its title, and a ``run.py`` 
-where you can add the logic to ``execute`` your test, and to ``validate`` that 
+This will create a ``MyApplication_001`` subdirectory with a ``pysystest.py`` file "descriptor" metadata about the test 
+such as its title, and Python class where you can add the logic to ``execute`` your test, and to ``validate`` that 
 the results are as expected. 
 
 To run your testcases, simply execute::
 
 	> pysys.py run
 
-To give a flavour for what's possible, here's a system test for checking the behaviour of a server application, which 
-shows of the most common PySys methods:
+To give a flavour for what's possible, here's a system test for checking the behaviour of a server application 
+called MyServer, which shows of the most common PySys methods:
 
 .. code-block:: python
+
+  __pysys_title__   = r""" MyServer startup - basic sanity test (+ demo of PySys basics) """
   
+  __pysys_purpose__ = r""" To demonstrate that MyServer can startup and response to basic requests. 
+    """
+
   class PySysTest(pysys.basetest.BaseTest):
-    """ This is a system test for a server process called MyServer. It checks that the server can be started and 
-      respond to basic requests. """
-    
     def execute(self):
-    
       # Ask PySys to allocate a free TCP port to start the server on (this allows running many tests in 
       # parallel without clashes)
       serverPort = self.getNextAvailableTCPPort()
@@ -197,6 +203,11 @@ shows of the most common PySys methods:
       # It's good practice to check for unexpected errors and warnings so they don't go unnoticed
       self.assertGrep('my_server.out', ' (ERROR|FATAL|WARN) .*', contains=False)
       
+      # Checking for exception stack traces is also a good idea; and joining them into a single line with a mapper will 
+      # give a more descriptive error if the test fails
+      self.assertGrep('my_server.out', r'Traceback [(]most recent call last[)]', contains=False, 
+        mappers=[pysys.mappers.JoinLines.PythonTraceback()])
+      
       self.assertThat('message == expected', 
         message=pysys.utils.fileutils.loadJSON(self.output+'/httpget_myfile.out')['message'], 
         expected="Hello world!", 
@@ -207,16 +218,17 @@ shows of the most common PySys methods:
 If you're curious about any of the functionality demonstrated above, there's lots of helpful information on these 
 methods and further examples in the documentation:
 
-	- `pysys.basetest.BaseTest.getNextAvailableTCPPort()`
-	- `pysys.basetest.BaseTest.copy()`
-	- `pysys.basetest.BaseTest.startProcess()` (+ `pysys.basetest.BaseTest.createEnvirons()` and `pysys.basetest.BaseTest.startPython()`)
-	- `pysys.basetest.BaseTest.waitForGrep()`
-	- `pysys.basetest.BaseTest.assertGrep()`
-	- `pysys.basetest.BaseTest.assertThat()`
-	- `pysys.basetest.BaseTest.logFileContents()`
+- `pysys.basetest.BaseTest.getNextAvailableTCPPort()`
+- `pysys.basetest.BaseTest.copy()`
+- `pysys.basetest.BaseTest.startProcess()` (+ `pysys.basetest.BaseTest.createEnvirons()` and `pysys.basetest.BaseTest.startPython()`)
+- `pysys.basetest.BaseTest.waitForGrep()`
+- `pysys.basetest.BaseTest.assertGrep()`
+- `pysys.basetest.BaseTest.assertThat()`
+- `pysys.basetest.BaseTest.logFileContents()`
+- `pysys.mappers`
 
 Now take a look at `pysys.basetest` to begin exploring more of the powerful functionality 
-PySys provides to help you implement your own ``run.py`` system tests. 
+PySys provides to help you implement your own ``pysystest.py`` system tests. 
 
 The sample projects under https://github.com/pysys-test are a great starting point for learning more about PySys, and 
 for creating your first project. 
@@ -228,7 +240,7 @@ License
 
 PySys System Test Framework
 
-Copyright (C) 2006-2020 M.B. Grieve
+Copyright (C) 2006-2021 M.B. Grieve
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

@@ -20,10 +20,3 @@ CollectTestOutputWriter
 
 .. autoclass:: CollectTestOutputWriter
    :members:
-
-
-PythonCoverageWriter
-====================
-
-.. autoclass:: PythonCoverageWriter
-   :members:

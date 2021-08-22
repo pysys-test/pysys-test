@@ -11,6 +11,7 @@ API Reference
   :toctree: ./
 
   pysys.baserunner
+  pysys.config
   pysys.constants
   pysys.exceptions
   pysys.launcher
@@ -19,4 +20,3 @@ API Reference
   pysys.unit
   pysys.utils
   pysys.writer
-  pysys.xml

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.misc &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.misc &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -105,17 +107,18 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.misc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#quotestring">quoteString</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#compareversions">compareVersions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#setinstancevariablesfromdict">setInstanceVariablesFromDict</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -134,7 +137,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -190,7 +193,21 @@
             
   <div class="section" id="module-pysys.utils.misc">
 <span id="pysys-utils-misc"></span><h1>pysys.utils.misc<a class="headerlink" href="#module-pysys.utils.misc" title="Permalink to this headline">¶</a></h1>
-<p>Miscellanous utilities such as <a class="reference internal" href="#pysys.utils.misc.compareVersions" title="pysys.utils.misc.compareVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.compareVersions</span></code></a> and <a class="reference internal" href="#pysys.utils.misc.setInstanceVariablesFromDict" title="pysys.utils.misc.setInstanceVariablesFromDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.setInstanceVariablesFromDict</span></code></a>.</p>
+<p>Miscellanous utilities such as <a class="reference internal" href="#pysys.utils.misc.compareVersions" title="pysys.utils.misc.compareVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.compareVersions</span></code></a>, <a class="reference internal" href="#pysys.utils.misc.setInstanceVariablesFromDict" title="pysys.utils.misc.setInstanceVariablesFromDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.setInstanceVariablesFromDict</span></code></a>, 
+and <a class="reference internal" href="#pysys.utils.misc.quoteString" title="pysys.utils.misc.quoteString"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.quoteString</span></code></a>.</p>
+<div class="section" id="quotestring">
+<h2>quoteString<a class="headerlink" href="#quotestring" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.misc.quoteString">
+<code class="sig-prename descclassname">pysys.utils.misc.</code><code class="sig-name descname">quoteString</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/misc.html#quoteString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.misc.quoteString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds double quotation marks around the specified character or byte string, 
+and additional escaping only if needed to make the meaning clear, but trying to 
+avoid double-slashes unless actually needed since it makes paths harder to read.</p>
+<p>If a byte string is provided then the 
+<code class="docutils literal notranslate"><span class="pre">repr()</span></code> representation is used instead.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="compareversions">
 <h2>compareVersions<a class="headerlink" href="#compareversions" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -247,7 +264,7 @@ contains a key for which is there no corresponding variable on obj.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

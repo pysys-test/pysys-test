@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.fileutils &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.fileutils &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v1.6.1</a>
+          <a href="../../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -153,7 +154,7 @@
   <h1>Source code for pysys.utils.fileutils</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: latin-1 -*-</span>
 <span class="c1">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -177,12 +178,15 @@
 <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">locale</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="n">IS_WINDOWS</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="n">IS_WINDOWS</span><span class="p">,</span> <span class="n">PREFERRED_ENCODING</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span><span class="p">,</span> <span class="n">openfile</span>
 
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.fileutils&#39;</span><span class="p">)</span>
+
 <div class="viewcode-block" id="toLongPathSafe"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.toLongPathSafe">[docs]</a><span class="k">def</span> <span class="nf">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onlyIfNeeded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Converts the specified path string to a form suitable for passing to API </span>
 <span class="sd">	calls if it exceeds the maximum path length on this OS. </span>
 <span class="sd">	</span>
@@ -192,12 +196,14 @@
 <span class="sd">	letters so they are always upper case regardless of OS version and current </span>
 <span class="sd">	working directory. </span>
 <span class="sd">	</span>
-<span class="sd">	:param path: A path. Must not be a relative path. Can be None/empty. Can </span>
-<span class="sd">		contain &quot;..&quot; sequences. If possible, use a unicode character string. </span>
-<span class="sd">		On Python 2, byte strings are permitted and converted using </span>
-<span class="sd">		``locale.getpreferredencoding()``.</span>
+<span class="sd">	:param str path: A path. Must not be a relative path. Can be None/empty. Can </span>
+<span class="sd">		contain &quot;..&quot; sequences. Note that no normalization of &quot;..&quot; </span>
+<span class="sd">		sequences and slashes is performed if the OS starts with ``\\?\`` already </span>
+<span class="sd">		or is non-Windows so if in doubt run the path through ``os.path.normpath`` </span>
+<span class="sd">		before calling this method on it (``\\?\`` paths with incorrect slashes or .. sequences </span>
+<span class="sd">		are not permitted by Windows). </span>
 <span class="sd">	</span>
-<span class="sd">	:param onlyIfNeeded: Set to True to only adds the long path support if this </span>
+<span class="sd">	:param bool onlyIfNeeded: Set to True to only adds the long path support if this </span>
 <span class="sd">		path exceeds the maximum length on this OS (e.g. 256 chars). You must keep </span>
 <span class="sd">		this at False if you will be adding extra characters on to the end of the </span>
 <span class="sd">		returned string. </span>
@@ -205,14 +211,10 @@
 <span class="sd">	:return: The passed-in path, possibly with a ``\\?\`` prefix added, </span>
 <span class="sd">		forward slashes converted to backslashes on Windows, and converted to </span>
 <span class="sd">		a unicode string. Trailing slashes may be removed. </span>
-<span class="sd">		Note that the conversion to unicode requires a lot of care on Python 2 </span>
-<span class="sd">		where byte strings are more common, since it is not possible to combine </span>
-<span class="sd">		unicode and byte strings (if they have non-ascii characters), for example </span>
-<span class="sd">		for a log statement. </span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">IS_WINDOWS</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">path</span><span class="p">):</span> <span class="k">return</span> <span class="n">path</span>
-	<span class="k">if</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">+</span><span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+	<span class="k">if</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">+</span><span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 	<span class="k">if</span> <span class="n">onlyIfNeeded</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">255</span><span class="p">:</span> <span class="k">return</span> <span class="n">path</span>
 	<span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">?</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">):</span> 
 		<span class="k">if</span> <span class="sa">u</span><span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span> <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -229,7 +231,7 @@
 			<span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
 
 	<span class="k">if</span> <span class="n">PY2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-		<span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">())</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">PREFERRED_ENCODING</span><span class="p">)</span>
 	
 	<span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">):</span> 
 		<span class="n">path</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">?</span><span class="se">\\</span><span class="s1">UNC</span><span class="se">\\</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># \\?\UNC\server\share</span>
@@ -238,12 +240,12 @@
 	<span class="k">return</span> <span class="n">path</span></div>
 
 <div class="viewcode-block" id="fromLongPathSafe"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.fromLongPathSafe">[docs]</a><span class="k">def</span> <span class="nf">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Strip off ``\\?\`` prefixes added by L{toLongPathSafe}. </span>
 <span class="sd">	</span>
 <span class="sd">	Note that this function does not convert unicode strings back to byte </span>
 <span class="sd">	strings, so if you want a complete reversal of toLongPathSafe you will </span>
-<span class="sd">	additionally have to call C{result.encode(locale.getpreferredencoding())}.</span>
+<span class="sd">	additionally have to call C{result.encode(PREFERRED_ENCODING)}.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span> <span class="k">return</span> <span class="n">path</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">?</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="n">path</span>
@@ -254,19 +256,18 @@
 	<span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="pathexists"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.pathexists">[docs]</a><span class="k">def</span> <span class="nf">pathexists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Returns True if the specified path is an existing file or directory, </span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot; Returns True if the specified path is an existing file or directory, </span>
 <span class="sd">	as returned by C{os.path.exists}. </span>
 <span class="sd">	</span>
 <span class="sd">	This method is safe to call on paths that may be over the Windows 256 </span>
 <span class="sd">	character limit. </span>
 <span class="sd">	</span>
-<span class="sd">	:param path: If None or empty, returns True. Only Python 2, can be a </span>
-<span class="sd">		unicode or byte string. </span>
+<span class="sd">	:param path: If None or empty, returns True.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">return</span> <span class="n">path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="mkdir"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.mkdir">[docs]</a><span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Create a directory, with recursive creation of any parent directories.</span>
 <span class="sd">	</span>
 <span class="sd">	This function is a no-op (does not throw) if the directory already exists. </span>
@@ -274,6 +275,9 @@
 <span class="sd">	:return: Returns the path passed in. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">origpath</span> <span class="o">=</span> <span class="n">path</span>
+	<span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span> <span class="c1"># this avoids makedirs creating directories that should have been &#39;..&#39;d away</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
 	<span class="n">path</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onlyIfNeeded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 	<span class="k">try</span><span class="p">:</span>
 		<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -285,7 +289,7 @@
 	<span class="k">return</span> <span class="n">origpath</span></div>
 
 <div class="viewcode-block" id="deletedir"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.deletedir">[docs]</a><span class="k">def</span> <span class="nf">deletedir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Recursively delete the specified directory, with optional retries. </span>
 <span class="sd">	</span>
 <span class="sd">	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), </span>
@@ -310,15 +314,82 @@
 		<span class="c1"># then try again, being more careful</span>
 		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_errors</span><span class="p">:</span>
 			<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="n">onerror</span><span class="p">)</span>
-	<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="k">return</span> <span class="c1"># nothing to do</span>
 		<span class="k">if</span> <span class="n">retries</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
 			<span class="k">raise</span>
-		<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="c1"># work around windows file-locking issues</span>
+		<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="c1"># work around windows file-locking issues</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrying directory deletion of &quot;</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%d</span><span class="s1"> times after </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">retries</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
 		<span class="n">deletedir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="n">onerror</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="deletefile"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.deletefile">[docs]</a><span class="k">def</span> <span class="nf">deletefile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Delete the specified file, with optional retries. </span>
+<span class="sd">	</span>
+<span class="sd">	Does nothing if it does not exist. </span>
+
+<span class="sd">	:param str path: The path to be deleted. Will be converted to be long-path safe on Windows. </span>
+<span class="sd">	</span>
+<span class="sd">	:param int retries: The number of retries to attempt. This can be useful to </span>
+<span class="sd">		work around temporary failures causes by Windows file locking. </span>
+<span class="sd">	</span>
+<span class="sd">	:param bool ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. </span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">path</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="k">return</span> <span class="c1"># nothing to do</span>
+		<span class="k">if</span> <span class="n">retries</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">ignore_errors</span><span class="p">:</span> 
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to delete file &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+				<span class="k">return</span>
+			<span class="k">raise</span>
+		<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="c1"># work around windows file-locking issues</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrying file deletion of &quot;</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%d</span><span class="s1"> times after </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">retries</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+		<span class="n">deletefile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="n">ignore_errors</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="listDirContents"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.listDirContents">[docs]</a><span class="k">def</span> <span class="nf">listDirContents</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">recurse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable </span>
+<span class="sd">	for diffing. </span>
+<span class="sd">	</span>
+<span class="sd">	The contents are returned in a normalized form suitable for diffing: relative to the scanned path, with forward </span>
+<span class="sd">	slashes on all platforms, a trailing slash for directories, and sorted to ensure deterministic results. </span>
+<span class="sd">	Symbolic links are not searched. </span>
+<span class="sd">	</span>
+<span class="sd">	For example this can be used with `pysys.basetest.BaseTest.assertDiff` like this::</span>
+<span class="sd">	</span>
+<span class="sd">	  self.assertDiff(</span>
+<span class="sd">	    self.write_text(&#39;MyDir-contents.txt&#39;, &#39;\\n&#39;.join(</span>
+<span class="sd">	      pysys.utils.fileutils.listDirContents(self.output+&#39;/MyDir&#39;)</span>
+<span class="sd">	  )))</span>
+<span class="sd">	  </span>
+<span class="sd">	</span>
+<span class="sd">	:param str path: The absolute path to search.</span>
+<span class="sd">	:param bool recurse: Set this to False to just include the specified directory but not any children. </span>
+<span class="sd">	:return: A list of strings with the relative paths found, e.g. ``[&quot;mysubdir/myfile.txt&quot;, &quot;mysubdir/mysubsubdir/&quot;]``. </span>
+<span class="sd">	</span>
+<span class="sd">	.. versionadded:: 2.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;Must specify an absolute path: </span><span class="si">%r</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">path</span>
+	<span class="n">path</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+	<span class="n">stripchars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+	
+	<span class="k">def</span> <span class="nf">listRecursively</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">as</span> <span class="n">it</span><span class="p">:</span>
+			<span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">it</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_dir</span><span class="p">(</span><span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+			<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+				<span class="k">yield</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="n">stripchars</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39;/&#39;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">is_dir</span><span class="p">(</span><span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+				<span class="k">if</span> <span class="n">recurse</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">is_dir</span><span class="p">(</span><span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+					<span class="k">yield from</span> <span class="n">listRecursively</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">listRecursively</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
+
 <div class="viewcode-block" id="loadProperties"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.loadProperties">[docs]</a><span class="k">def</span> <span class="nf">loadProperties</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Reads keys and values from the specified ``.properties`` file. </span>
 <span class="sd">	</span>
 <span class="sd">	Support ``#`` and ``!`` comments but does not perform any special handling of backslash ``\\`` characters </span>
@@ -327,7 +398,7 @@
 <span class="sd">	performed manually on the returned values. </span>
 <span class="sd">	</span>
 <span class="sd">	:param str path: The absolute path to the properties file. </span>
-<span class="sd">	:param str encoding: The encoding to use (unless running under Python 2 in which case byte strings are always returned). </span>
+<span class="sd">	:param str encoding: The encoding to use. </span>
 <span class="sd">		The default is UTF-8 (with optional Byte Order Mark). </span>
 <span class="sd">	:return dict[str:str]: An ordered dictionary containing the keys and values from the file. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -345,7 +416,7 @@
 
 
 <div class="viewcode-block" id="loadJSON"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.loadJSON">[docs]</a><span class="k">def</span> <span class="nf">loadJSON</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Reads JSON from the specified path. </span>
 <span class="sd">	</span>
 <span class="sd">	This is a small wrapper around Python&#39;s ``json.load()`` function. </span>
@@ -370,7 +441,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.process &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v1.6.1</a>
+          <a href="../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.process</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -192,38 +193,24 @@
 
 <span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">locale</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-	<span class="kn">import</span> <span class="nn">Queue</span>
-<span class="k">else</span><span class="p">:</span>
-	<span class="kn">import</span> <span class="nn">queue</span> <span class="k">as</span> <span class="nn">Queue</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">queue</span> <span class="k">as</span> <span class="nn">Queue</span>
 
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="k">def</span> <span class="nf">_stringToUnicode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Converts a unicode string or a utf-8 bit string into a unicode string. </span>
-<span class="sd">	@deprecated: for internal use only, will be removed in future. </span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">if</span> <span class="ow">not</span> <span class="n">PY2</span><span class="p">:</span> <span class="k">return</span> <span class="n">s</span>
-	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">unicode</span><span class="p">):</span>
-		<span class="k">return</span> <span class="n">s</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="n">unicode</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.process&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Process"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process">[docs]</a><span class="k">class</span> <span class="nc">Process</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Represents a process that PySys has started (or can start).</span>
 <span class="sd">	</span>
-<span class="sd">	Instances of a platform-specific implementation of this interface are returned </span>
+<span class="sd">	A platform-specific implementation subclass of this interface is returned </span>
 <span class="sd">	by `pysys.process.user.ProcessUser.startProcess`.</span>
 <span class="sd">	</span>
 <span class="sd">	:ivar str ~.command:  The full path to the executable.</span>
 <span class="sd">	:ivar list[str] ~.arguments:  A list of arguments to the command.</span>
 <span class="sd">	:ivar dict(str,str) ~.environs:  A dictionary of environment variables (key, value) for the process context execution. </span>
-<span class="sd">		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted </span>
-<span class="sd">		automatically to unicode using utf-8. </span>
 <span class="sd">	:ivar str ~.workingDir:  The working directory for the process</span>
 <span class="sd">	:ivar ~.state: The state of the process.</span>
 <span class="sd">	:vartype state: `pysys.constants.FOREGROUND` or `pysys.constants.BACKGROUND`</span>
@@ -248,11 +235,14 @@
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">displayName</span> <span class="k">if</span> <span class="n">displayName</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">isstring</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">):</span>
+			<span class="n">arguments</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">]</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">arguments</span> <span class="o">=</span> <span class="n">arguments</span>
+		
 		<span class="bp">self</span><span class="o">.</span><span class="n">environs</span> <span class="o">=</span> <span class="p">{}</span>
-		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">environs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">_stringToUnicode</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">_stringToUnicode</span><span class="p">(</span><span class="n">environs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="o">=</span> <span class="n">workingDir</span>
+		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">environs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">environs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">workingDir</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">expectedExitStatus</span> <span class="o">=</span> <span class="n">expectedExitStatus</span>
@@ -266,20 +256,41 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span>
 
 		<span class="c1"># catch these common mistakes</span>
-		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">),</span> <span class="s1">&#39;Working directory for </span><span class="si">%s</span><span class="s1"> does not exist: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">),</span> <span class="s1">&#39;Working directory for </span><span class="si">%s</span><span class="s1"> does not exist: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">)</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span> <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)),</span> <span class="s1">&#39;Parent directory for stdout does not exist: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span>
 
 		<span class="c1"># print process debug information</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Process parameters for executable </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">))</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  command      : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">)</span>
-		<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  argument     : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  working dir  : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">)</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  stdout       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stdout</span><span class="p">)</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  stderr       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span>
+		
+		<span class="n">debuginfo</span> <span class="o">=</span> <span class="p">[]</span>
+
+		<span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">shlex</span><span class="p">,</span> <span class="s1">&#39;quote&#39;</span><span class="p">):</span>
+			<span class="n">quotearg</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">c</span> <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">else</span> <span class="n">c</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">quotearg</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">quote</span>
+		<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  command line : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quotearg</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">))</span>
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">):</span> <span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;    arg #</span><span class="si">%-2d</span><span class="s2">    : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="p">)</span>
+		
+		<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  working dir  : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">256</span><span class="o">-</span><span class="mi">30</span><span class="p">:</span>
+			<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;    NB: length of working dir is </span><span class="si">%d</span><span class="s2"> (Windows MAX_PATH limit is 256 chars)&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">))</span>
+		<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  stdout       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span> <span class="n">stdout</span><span class="p">)</span>
+		<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  stderr       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span> <span class="n">stderr</span><span class="p">)</span>
 		<span class="n">keys</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 		<span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  environment  : </span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
-		<span class="k">if</span> <span class="n">info</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  info         : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span> 
+			<span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">e</span><span class="p">]</span>
+			<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  environment  : </span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="n">e</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+			<span class="k">if</span> <span class="s1">&#39;PATH&#39;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PATHEXT&#39;</span><span class="p">]:</span>
+				<span class="c1"># it&#39;s worth paths/classpaths/pythonpaths as they&#39;re often long and quite hard to spot differences otherwise</span>
+				<span class="n">pathelements</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span> <span class="k">if</span> <span class="s1">&#39;;&#39;</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">)</span>
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pathelements</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+					<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pathelement</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pathelements</span><span class="p">):</span>
+						<span class="c1">#                         : ABC=def</span>
+						<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;                   #</span><span class="si">%-2d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pathelement</span><span class="p">))</span>
+				
+		<span class="k">if</span> <span class="n">info</span><span class="p">:</span> <span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  info         : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span> <span class="n">info</span><span class="p">)</span>
+
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Process parameters for </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">debuginfo</span><span class="p">))</span>
 
 		<span class="c1"># private</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">=</span> <span class="kc">None</span>
@@ -328,7 +339,7 @@
 <span class="sd">			As only binary data can be written to a process stdin, </span>
 <span class="sd">			if a character string rather than a byte object is passed as the data,</span>
 <span class="sd">			it will be automatically converted to a bytes object using the encoding </span>
-<span class="sd">			given by ``locale.getpreferredencoding()``. </span>
+<span class="sd">			given by ``PREFERRED_ENCODING``. </span>
 <span class="sd">		:param addNewLine: True if a new line character is to be added to the end of </span>
 <span class="sd">			the data string</span>
 <span class="sd">		</span>
@@ -337,7 +348,7 @@
 		
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span> <span class="k">return</span>
 		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">binary_type</span><span class="p">:</span>
-			<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">())</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">PREFERRED_ENCODING</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">addNewLine</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">+</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 			
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
@@ -408,7 +419,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

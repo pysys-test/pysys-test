@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.fileunzip &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.utils.fileunzip &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -111,11 +113,11 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -134,7 +136,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -191,6 +193,7 @@
   <div class="section" id="module-pysys.utils.fileunzip">
 <span id="pysys-utils-fileunzip"></span><h1>pysys.utils.fileunzip<a class="headerlink" href="#module-pysys.utils.fileunzip" title="Permalink to this headline">¶</a></h1>
 <p>Unpacking one or more compressed files.</p>
+<p>Deprecated - use <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.unpackArchive" title="pysys.basetest.BaseTest.unpackArchive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.unpackArchive</span></code></a> instead.</p>
 <div class="section" id="unzipall">
 <h2>unzipall<a class="headerlink" href="#unzipall" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -220,6 +223,7 @@ converted to the operating system default.</p></li>
 <dt id="pysys.utils.fileunzip.unzip">
 <code class="sig-prename descclassname">pysys.utils.fileunzip.</code><code class="sig-name descname">unzip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zfilename</span></em>, <em class="sig-param"><span class="n">replace</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">binary</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileunzip.html#unzip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileunzip.unzip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unzip a .gz archive and write the contents to disk.</p>
+<p>Deprecated - replace <code class="docutils literal notranslate"><span class="pre">unzip(gzfilename,</span> <span class="pre">binary=True)</span></code> with <code class="docutils literal notranslate"><span class="pre">self.unpackArchive(gzfilename,</span> <span class="pre">gzfilename[:-3])</span></code></p>
 <p>The method will unpack a file of the form <code class="xref py py-obj docutils literal notranslate"><span class="pre">file.data.gz</span></code> to <code class="xref py py-obj docutils literal notranslate"><span class="pre">file.data</span></code>, removing the 
 archive file in the process if the <code class="xref py py-obj docutils literal notranslate"><span class="pre">replace</span></code> input parameter is set to true.</p>
 <p>By default the unpacked archive is treated as non-binary data, 
@@ -266,7 +270,7 @@ converted to the operating system default.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

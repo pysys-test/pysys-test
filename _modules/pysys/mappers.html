@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.mappers &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.mappers &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -82,9 +82,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ChangeLog.html">Change Log</a></li>
@@ -102,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v1.6.1</a>
+          <a href="../../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -152,7 +153,7 @@
             
   <h1>Source code for pysys.mappers</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -169,19 +170,40 @@
 <span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Mappers that filter or transform lines of input, for use with methods such as `pysys.basetest.BaseTest.copy`. </span>
+<span class="sd">Mapper filter or transform lines of input, for use with methods such as `pysys.basetest.BaseTest.copy` </span>
+<span class="sd">and `pysys.basetest.BaseTest.assertGrep`. </span>
+
+<span class="sd">This package contains several pre-defined mappers:</span>
 
 <span class="sd">.. autosummary::</span>
 <span class="sd">	RegexReplace</span>
 <span class="sd">	IncludeLinesBetween</span>
 <span class="sd">	IncludeLinesMatching</span>
 <span class="sd">	ExcludeLinesMatching</span>
+<span class="sd">	JoinLines</span>
+<span class="sd">	JoinLines.PythonTraceback</span>
+<span class="sd">	JoinLines.JavaStackTrace</span>
+<span class="sd">	JoinLines.AntBuildFailure</span>
+<span class="sd">	SortLines</span>
+<span class="sd">	applyMappers</span>
+
+<span class="sd">In addition to the above, you can create custom mappers, which are usually callables (functions, lambdas, or classes </span>
+<span class="sd">with a ``__call__()`` method) that return the transformed copy of each incoming line. </span>
+
+<span class="sd">For advanced cases you can provide a generator function that accepts a line iterator as input and yields the mapped </span>
+<span class="sd">lines; this allows for stateful transformation and avoids the limitation of having a 1:1 (or 1:0) relationship between </span>
+<span class="sd">input and output lines. </span>
+
+<span class="sd">All lines passed to/from mappers end with a ``\\n`` character (on all platforms), except for the last line of the </span>
+<span class="sd">file which will only have the ``\\n`` if the file ends with a blank line. </span>
+<span class="sd">Mappers must always preserve the final ``\\n`` of each line (if present). </span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">isstring</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.mappers&#39;</span><span class="p">)</span>
@@ -206,8 +228,8 @@
 <span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)(&#39;Test string x=5/7/2020 19:22:34.1234.&#39;)</span>
 <span class="sd">	&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
 
-<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)(&#39;Test string x=20200715T192234Z.&#39;)</span>
-<span class="sd">	&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
+<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)(&#39;Test string x=20200715T192234Z.\\n&#39;)</span>
+<span class="sd">	&#39;Test string x=&lt;timestamp&gt;.\\n&#39;</span>
 
 <span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.NUMBER_REGEX, &#39;&lt;number&gt;&#39;)(&#39;Test string x=123.&#39;)</span>
 <span class="sd">	&#39;Test string x=&lt;number&gt;.&#39;</span>
@@ -228,10 +250,9 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">NUMBER_REGEX</span> <span class="o">=</span> <span class="s1">&#39;[+-]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?&#39;</span>
-	<span class="sd">&quot;&quot;&quot;Mapper that transforms lines, replacing all integer or floating point numbers with &quot;&lt;number&gt;&quot;. </span>
-<span class="sd">	</span>
-<span class="sd">	This is useful for removing ids that would diff-ing files more difficult, if you only care about validating </span>
-<span class="sd">	the non-numeric text.</span>
+	<span class="sd">&quot;&quot;&quot;A regular expression that can be used to match integer or floating point numbers. This could be used in a </span>
+<span class="sd">	mapper to replace all numbers with with &quot;&lt;number&gt;&quot; to remove ids that would make diff-ing files more difficult, if </span>
+<span class="sd">	you only care about validating the non-numeric text.</span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
 
@@ -244,6 +265,13 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repl</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
 
 	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span></div>
+	
+<span class="k">def</span> <span class="nf">_createRegexMatchFunction</span><span class="p">(</span><span class="n">regex</span><span class="p">):</span>
+	<span class="c1"># Internal helper, not public API, do not use</span>
+	
+	<span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">matchFunction</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="o">*</span><span class="n">optional</span><span class="p">):</span> <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+	<span class="k">return</span> <span class="n">matchFunction</span>
 
 
 <div class="viewcode-block" id="IncludeLinesBetween"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.IncludeLinesBetween">[docs]</a><span class="k">class</span> <span class="nc">IncludeLinesBetween</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -253,12 +281,15 @@
 <span class="sd">	This is useful when a log file contains lots of data you don&#39;t care about, in addition to some multi-line sequences </span>
 <span class="sd">	that you want to extract (with `pysys.basetest.BaseTest.copy`) ready for `pysys.basetest.BaseTest.assertDiff`.</span>
 <span class="sd">	</span>
-<span class="sd">	As this mapper is stateful, so not use a single instance of it in multiple tests (or multiple threads). </span>
+<span class="sd">	As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads). </span>
 <span class="sd">	</span>
 <span class="sd">	The following parameters can be either a callable/lambda that accepts an input line and returns a boolean, or a </span>
 <span class="sd">	regular expression string to search for in the specified line. </span>
 <span class="sd">	</span>
 <span class="sd">	:param str|callable[str]-&gt;bool startAt: If it matches then the current line and subsequent lines are included </span>
+<span class="sd">		(not filtered out). If not specified, lines from the start of the file onwards are matched. </span>
+
+<span class="sd">	:param str|callable[str]-&gt;bool startAfter: If it matches then the subsequent lines are included </span>
 <span class="sd">		(not filtered out). If not specified, lines from the start of the file onwards are matched. </span>
 <span class="sd">		</span>
 <span class="sd">	:param str|callable[str]-&gt;bool stopAfter: If it matches then lines after the current one are filtered out </span>
@@ -267,43 +298,55 @@
 <span class="sd">	:param str|callable[str]-&gt;bool stopBefore: If it matches then this line and lines after it are filtered out </span>
 <span class="sd">		(unless/until a line matching startAt is found). Excludes the stop line. </span>
 <span class="sd">		</span>
-<span class="sd">	&gt;&gt;&gt; def test_IncludeLinesBetween(mapper, input): return &#39;,&#39;.join(x for x in (mapper(line) for line in input.split(&#39;,&#39;)) if x is not None)</span>
-<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(&#39;start.*&#39;, &#39;stopafter.*&#39;), &#39;a,start line,b,c,stopafter line,d,start line2,e&#39;)</span>
-<span class="sd">	&#39;start line,b,c,stopafter line,start line2,e&#39;</span>
+<span class="sd">	&gt;&gt;&gt; def _mapperUnitTest(mapper, input): return &#39;|&#39;.join(x for x in (applyMappers([line+&#39;\\n&#39; for line in input.replace(&#39;&lt;tab&gt;&#39;, chr(9)).split(&#39;|&#39;)], [mapper])))</span>
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( IncludeLinesBetween(&#39;start.*&#39;, &#39;stopafter.*&#39;), &#39;a|start line|b|c|stopafter line|d|start line2|e&#39;).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">	&#39;start line|b|c|stopafter line|start line2|e&#39;</span>
 
-<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(startAt=&#39;start.*&#39;), &#39;a,start line,b,c&#39;)</span>
-<span class="sd">	&#39;start line,b,c&#39;</span>
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( IncludeLinesBetween(startAt=&#39;start.*&#39;), &#39;a|start line|b|c&#39;).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">	&#39;start line|b|c&#39;</span>
 
-<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(stopAfter=&#39;stopafter.*&#39;), &#39;a,stopafter,b,c&#39;)</span>
-<span class="sd">	&#39;a,stopafter&#39;</span>
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( IncludeLinesBetween(startAfter=&#39;start.*&#39;), &#39;a|start line|b|c&#39;).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">	&#39;b|c&#39;</span>
 
-<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(stopBefore=&#39;stopbefore.*&#39;), &#39;a,b,stopbefore,c&#39;)</span>
-<span class="sd">	&#39;a,b&#39;</span>
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( IncludeLinesBetween(startAt=lambda l: l.startswith(&#39;start&#39;)), &#39;a|start line|b|c&#39;).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">	&#39;start line|b|c&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( IncludeLinesBetween(stopAfter=&#39;stopafter.*&#39;), &#39;a|stopafter|b|c&#39;).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">	&#39;a|stopafter&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( IncludeLinesBetween(stopBefore=&#39;stopbefore.*&#39;), &#39;a|b|stopbefore|c&#39;)</span>
+<span class="sd">	&#39;a\\n|b\\n&#39;</span>
+
+<span class="sd">	.. versionchanged:: 2.0 Added startAfter</span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopAfter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopBefore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopAfter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startAfter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopBefore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="s1">&#39;IncludeLinesBetween(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span>
 			<span class="s1">&#39;startAt&#39;</span><span class="p">:</span><span class="n">startAt</span><span class="p">,</span>
+			<span class="s1">&#39;startAfter&#39;</span><span class="p">:</span><span class="n">startAfter</span><span class="p">,</span>
 			<span class="s1">&#39;stopAfter&#39;</span><span class="p">:</span><span class="n">stopAfter</span><span class="p">,</span>
 			<span class="s1">&#39;stopBefore&#39;</span><span class="p">:</span><span class="n">stopBefore</span><span class="p">,</span>
 		<span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
 	
-		<span class="k">if</span> <span class="n">startAt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">startAt</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="n">startAt</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">startAt</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		<span class="k">if</span> <span class="n">startAt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">startAt</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">startAt</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="o">=</span> <span class="n">startAt</span>
+
+		<span class="k">if</span> <span class="n">startAfter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">startAfter</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAfter</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">startAfter</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAfter</span> <span class="o">=</span> <span class="n">startAfter</span>
 			
-		<span class="k">if</span> <span class="n">stopAfter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopAfter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		<span class="k">if</span> <span class="n">stopAfter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopAfter</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopAfter</span> <span class="o">=</span> <span class="n">stopAfter</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
 		
-		<span class="k">if</span> <span class="n">stopBefore</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBefore</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		<span class="k">if</span> <span class="n">stopBefore</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBefore</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBefore</span> <span class="o">=</span> <span class="n">stopBefore</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
 		
-		<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAfter</span> <span class="ow">is</span> <span class="kc">None</span>
 
 	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span>
 
 	<span class="k">def</span> <span class="nf">fileStarted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcPath</span><span class="p">,</span> <span class="n">destPath</span><span class="p">,</span> <span class="n">srcFile</span><span class="p">,</span> <span class="n">destFile</span><span class="p">):</span>
 		<span class="c1"># reset every time we start a new file</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAfter</span> <span class="ow">is</span> <span class="kc">None</span>
 
 	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__including</span><span class="p">:</span>
@@ -317,21 +360,273 @@
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="kc">True</span>
 				<span class="k">return</span> <span class="n">line</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAfter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAfter</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="kc">True</span>
+				<span class="k">return</span> <span class="kc">None</span>
 		<span class="k">return</span> <span class="kc">None</span></div>
 
+
+<div class="viewcode-block" id="JoinLines"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.JoinLines">[docs]</a><span class="k">class</span> <span class="nc">JoinLines</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Mapper that joins/concatenates consecutive related lines together into a single line. Useful for combining error or </span>
+<span class="sd">	stack trace lines together for easier grepping and for more meaingful test failure reasons.</span>
+<span class="sd">	</span>
+<span class="sd">	There are static factory methods on this class to create pre-configured instances for common languages e.g. </span>
+<span class="sd">	`JoinLines.JavaStackTrace`, `JoinLines.PythonTraceback`, or you can create your own. See </span>
+<span class="sd">	`pysys.basetest.BaseTest.assertGrep` for an example. </span>
+<span class="sd">	</span>
+<span class="sd">	As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads). </span>
+<span class="sd">	</span>
+<span class="sd">	The following parameters can be either a callable/lambda that accepts an input line and returns a boolean, or a </span>
+<span class="sd">	regular expression string to search for in the specified line. Note that a lambda with a simple string operation such </span>
+<span class="sd">	as ``startswith(...)`` is usually a lot more efficient than a regular expression. </span>
+<span class="sd">	</span>
+<span class="sd">	Typically you would use startAt and just one of continueWhile/stopAfter/stopBefore.</span>
+<span class="sd">	</span>
+<span class="sd">	:param str|callable[str]-&gt;bool startAt: If it matches then the current line then subsequent lines are joined into one. </span>
+<span class="sd">		Can be a regular expression or a function with argument ``line``. </span>
+<span class="sd">		</span>
+<span class="sd">	:param str|callable[str,list[str]]-&gt;bool continueWhile: After joining has started, then all consecutive lines </span>
+<span class="sd">		matching this will be included in the current join, and it will be stopped as soon as a non-matching line is found. </span>
+<span class="sd">		Can be a regular expression or a function with arguments ``(line, buffer)`` where ``buffer`` is the list of </span>
+<span class="sd">		previous lines accumulated from the current startAt match. </span>
+<span class="sd">				</span>
+<span class="sd">	:param str|callable[str,list[str]]-&gt;bool stopAfter: After joining has started, if this matches then this is the last line to be </span>
+<span class="sd">		included in the current join. Includes the stop line.</span>
+<span class="sd">		Can be a regular expression or a function with arguments ``(line, buffer)`` where ``buffer`` is the list of </span>
+<span class="sd">		previous lines accumulated from the current startAt match. </span>
+
+<span class="sd">	:param str|callable[str,list[str]]-&gt;bool stopBefore: After joining has started, if this matches, then the preceding line is </span>
+<span class="sd">		the last line to be included in the current join. Excludes the stop line. </span>
+<span class="sd">		Can be a regular expression or a function with arguments ``(line, buffer)`` where ``buffer`` is the list of </span>
+<span class="sd">		previous lines accumulated from the current startAt match. </span>
+
+<span class="sd">	:param callable[list[str]]-&gt;str combiner: A function that combines the joined lines from a given sequence </span>
+<span class="sd">		into a single line. The implementation is `defaultCombiner`. </span>
+<span class="sd">		</span>
+<span class="sd">	&gt;&gt;&gt; def _mapperUnitTest(mapper, input): return &#39;&#39;.join(x for x in (applyMappers([line+&#39;\\n&#39; for line in input.replace(&#39;&lt;tab&gt;&#39;, chr(9)).split(&#39;|&#39;)], [mapper]))).replace(&#39;\\n&#39;,&#39;|&#39;)</span>
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( JoinLines(startAt=&#39;startat.*&#39;, stopAfter=&#39;stopafter.*&#39;), &#39;a| startat START|  stack1|  stack2 | stopafter STOP | d|startat2| e | f &#39;)</span>
+<span class="sd">	&#39;a|startat START / stack1 / stack2 / stopafter STOP| d|startat2 / e / f|&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( JoinLines(startAt=&#39;startat.*&#39;, continueWhile=&#39;stack.*&#39;), &#39;startat START|  stack1|  stack2 | stopbefore NEXT LINE|d|startat2|stopbefore2&#39;)</span>
+<span class="sd">	&#39;startat START / stack1 / stack2| stopbefore NEXT LINE|d|startat2|stopbefore2|&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( JoinLines(startAt=&#39;startat.*&#39;, stopAfter=&#39;stopafter.*&#39;), &#39;a| startat START|  stack1|  |  stack2 | stopafter STOP |d|startat2| stopafter e | f &#39;)</span>
+<span class="sd">	&#39;a|startat START / stack1 / stack2 / stopafter STOP|d|startat2 / stopafter e| f |&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; _mapperUnitTest( JoinLines(startAt=&#39;startat.*&#39;, stopBefore=&#39;stopbefore.*&#39;), &#39;startat START|  stack1|  stack2 | stopbefore NEXT LINE|d|startat2|stopbefore2&#39;)</span>
+<span class="sd">	&#39;startat START / stack1 / stack2| stopbefore NEXT LINE|d|startat2|stopbefore2|&#39;</span>
+
+<span class="sd">	.. versionadded:: 2.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">continueWhile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopAfter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopBefore</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">combiner</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="k">assert</span> <span class="n">startAt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		
+		<span class="k">if</span> <span class="n">combiner</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">combiner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultCombiner</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="s1">&#39;JoinLines(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span>
+			<span class="s1">&#39;startAt&#39;</span><span class="p">:</span><span class="n">startAt</span><span class="p">,</span>
+			<span class="s1">&#39;continueWhile&#39;</span><span class="p">:</span><span class="n">continueWhile</span><span class="p">,</span>
+			<span class="s1">&#39;stopAfter&#39;</span><span class="p">:</span><span class="n">stopAfter</span><span class="p">,</span>
+			<span class="s1">&#39;stopBefore&#39;</span><span class="p">:</span><span class="n">stopBefore</span><span class="p">,</span>
+			<span class="s1">&#39;combiner&#39;</span><span class="p">:</span><span class="n">combiner</span><span class="p">,</span>
+		<span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">startAt</span><span class="p">):</span> <span class="n">startAt</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">startAt</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">stopAfter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">):</span> <span class="n">stopAfter</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span> <span class="n">stopAfter</span> <span class="o">=</span> <span class="n">stopAfter</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">stopBefore</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">):</span> <span class="n">stopBefore</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span> <span class="n">stopBefore</span> <span class="o">=</span> <span class="n">stopBefore</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">continueWhile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">continueWhile</span><span class="p">):</span> <span class="n">continueWhile</span> <span class="o">=</span> <span class="n">_createRegexMatchFunction</span><span class="p">(</span><span class="n">continueWhile</span><span class="p">)</span>
+		<span class="c1"># allow continueWhile to be None</span>
+		
+		<span class="k">def</span> <span class="nf">lineEndingSafeCombiner</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># don&#39;t apply combiner if we aren&#39;t joining multiple lines</span>
+			
+			<span class="n">l</span> <span class="o">=</span> <span class="n">combiner</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span> <span class="n">l</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="c1"># don&#39;t rely on user remembering to not strip newlines in their combiner</span>
+			<span class="k">return</span> <span class="n">l</span>
+		
+		<span class="k">def</span> <span class="nf">generatorFunction</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
+			<span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># buffered lines</span>
+			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="k">if</span> <span class="n">stopAfter</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">buffer</span><span class="p">):</span>
+						<span class="k">yield</span> <span class="n">lineEndingSafeCombiner</span><span class="p">(</span><span class="n">buffer</span><span class="o">+</span><span class="p">[</span><span class="n">l</span><span class="p">])</span>
+						<span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+						<span class="k">continue</span>
+					<span class="k">elif</span> <span class="n">stopBefore</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">continueWhile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">continueWhile</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)):</span>
+						<span class="k">yield</span> <span class="n">lineEndingSafeCombiner</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+						<span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+						<span class="c1"># don&#39;t &quot;continue&quot;, i.e. drop down to the logic below</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+						<span class="k">continue</span>
+						
+				<span class="k">if</span> <span class="n">startAt</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+					<span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="k">yield</span> <span class="n">l</span>
+			<span class="c1"># end for loop</span>
+				
+			<span class="k">if</span> <span class="n">buffer</span><span class="p">:</span> 
+					<span class="k">yield</span> <span class="n">lineEndingSafeCombiner</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__generatorFunction</span> <span class="o">=</span> <span class="n">generatorFunction</span>
+	
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="n">__str</span>
+	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">):</span> 
+		<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generatorFunction</span><span class="p">(</span><span class="n">iterator</span><span class="p">):</span> <span class="k">yield</span> <span class="n">x</span>
+
+<div class="viewcode-block" id="JoinLines.defaultCombiner"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.JoinLines.defaultCombiner">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">defaultCombiner</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		The default &quot;combiner&quot; function used by `JoinLines`, which joins the lines with the delimiter ``&quot; / &quot;`` after </span>
+<span class="sd">		stripping leading/trailing whitespace and blank lines.</span>
+<span class="sd">		</span>
+<span class="sd">		If you want different behaviour, create your own function with this signature and pass it in as the ``combiner=`` </span>
+<span class="sd">		argument. </span>
+<span class="sd">		</span>
+<span class="sd">		:param list[str] lines: The lines to be joined. </span>
+<span class="sd">		:returns: A single string representing all of these lines. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="s1">&#39; / &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="JoinLines.PythonTraceback"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.JoinLines.PythonTraceback">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">PythonTraceback</span><span class="p">():</span>
+			<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Mapper that joins the lines of a typical Python traceback (starting ``Traceback (most recent call last):``) </span>
+<span class="sd">			into a single line, for easier grepping and self-contained test outcome failure reasons.</span>
+<span class="sd">			</span>
+<span class="sd">			The combiner is configured to put the actual exception class and message (which is the most important information) </span>
+<span class="sd">			at the start of the joined line rather than at the end (after the traceback). </span>
+
+<span class="sd">			&gt;&gt;&gt; def _mapperUnitTest(mapper, input): return &#39;|&#39;.join(x for x in (applyMappers([line for line in input.replace(&#39;|&#39;,&#39;\\n|&#39;).replace(&#39;&lt;tab&gt;&#39;,chr(9)).split(&#39;|&#39;)], [mapper]))).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.PythonTraceback(), &#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)|KeyError: &quot;foo bar&quot;|Normal operation is resumed&#39;)</span>
+<span class="sd">			&#39;a|KeyError: &quot;foo bar&quot; / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.PythonTraceback(), &#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)|AssertionError|Normal operation is resumed&#39;)</span>
+<span class="sd">			&#39;a|AssertionError / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.PythonTraceback(), &#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)||KeyError: &quot;foo bar&quot;|Normal operation is resumed&#39;)</span>
+<span class="sd">			&#39;a|KeyError: &quot;foo bar&quot; / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.PythonTraceback(), &#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |&lt;tab&gt;raise KeyError (&quot;foo bar&quot;)||KeyError: &quot;foo bar&quot;|OtherError: baz|Normal operation is resumed&#39;)</span>
+<span class="sd">			&#39;a|KeyError: &quot;foo bar&quot; / Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|OtherError: baz|Normal operation is resumed&#39;</span>
+
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.PythonTraceback(), &#39;a|Traceback (most recent call last):|  File &quot;~/foo.py&quot;, line 1195, in __call__|    def __call__(self): myfunction()|  File &quot;~/bar.py&quot;, line 11, in myfunction |    raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;)</span>
+<span class="sd">			&#39;a|Traceback (most recent call last): / File &quot;~/foo.py&quot;, line 1195, in __call__ / def __call__(self): myfunction() / File &quot;~/bar.py&quot;, line 11, in myfunction / raise KeyError (&quot;foo bar&quot;)|Normal operation is resumed&#39;</span>
+
+
+<span class="sd">			&quot;&quot;&quot;</span>
+			<span class="k">def</span> <span class="nf">maybeReorder</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)):</span> <span class="k">return</span> <span class="p">[</span><span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">+</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># move the exception name to the beginning, if we can</span>
+				<span class="k">return</span> <span class="n">lines</span>
+			
+			<span class="k">return</span> <span class="n">JoinLines</span><span class="p">(</span>
+				<span class="n">startAt</span><span class="o">=</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Traceback (most recent call last):&#39;</span><span class="p">),</span>
+				
+				<span class="c1"># Stop when the indenting stops, but also match the first non-indented line that starts with a Python exception class (and a preceding blank)</span>
+				<span class="n">continueWhile</span><span class="o">=</span><span class="k">lambda</span> <span class="n">l</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">buffer</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;^[a-zA-Z0-9._]+(: |Exception|Error)&#39;</span><span class="p">,</span> <span class="n">l</span><span class="p">))),</span>
+				<span class="c1"># Put the actual exception first (since end of message may get truncated)</span>
+				<span class="n">combiner</span><span class="o">=</span><span class="k">lambda</span> <span class="n">lines</span><span class="p">:</span> <span class="n">JoinLines</span><span class="o">.</span><span class="n">defaultCombiner</span><span class="p">(</span><span class="n">maybeReorder</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span>
+				<span class="p">)</span></div>
+
+<div class="viewcode-block" id="JoinLines.JavaStackTrace"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.JoinLines.JavaStackTrace">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">JavaStackTrace</span><span class="p">(</span><span class="n">combiner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorLogLineRegex</span><span class="o">=</span><span class="s1">&#39;(ERROR|FATAL) &#39;</span><span class="p">):</span>
+			<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Mapper that joins the lines of a typical Java(R) stack trace (from stderr or a log file) into a single line, </span>
+<span class="sd">			for easier grepping and self-contained test outcome failure reasons.</span>
+<span class="sd">			</span>
+<span class="sd">			:param callable[list[str]]-&gt;str combiner: See `JoinLines`. </span>
+<span class="sd">			:param str errorLogLineRegex: A regular expression used to match log lines which could (optionally) be followed </span>
+<span class="sd">				by a stack trace. </span>
+
+<span class="sd">			&gt;&gt;&gt; def _mapperUnitTest(mapper, input): return &#39;|&#39;.join(x for x in (applyMappers([line for line in input.replace(&#39;&lt;tab&gt;&#39;, chr(9)).split(&#39;|&#39;)], [mapper]))).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.JavaStackTrace(), &#39;java.lang.AssertionError: Invalid state|&lt;tab&gt;at org.junit.Assert.fail(Assert.java:100)|Caused by: java.lang.RuntimeError: Oh dear |&lt;tab&gt;at org.myorg.TestMyClass2|Normal operation has resumed &#39;)</span>
+<span class="sd">			&#39;java.lang.AssertionError: Invalid state / at org.junit.Assert.fail(Assert.java:100) / Caused by: java.lang.RuntimeError: Oh dear / at org.myorg.TestMyClass2|Normal operation has resumed &#39;</span>
+<span class="sd">			</span>
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.JavaStackTrace(), &#39;2021-05-25 ERROR [Thread1] The operation failed|java.lang.AssertionError: Invalid state|&lt;tab&gt;at org.junit.Assert.fail(Assert.java:100)|Caused by: java.lang.RuntimeError: Oh dear |&lt;tab&gt;at org.myorg.TestMyClass2|2021-05-25 ERROR [Thread1] Another error|2021-05-25 INFO [Thread1] normal operation&#39;)</span>
+<span class="sd">			&#39;2021-05-25 ERROR [Thread1] The operation failed / java.lang.AssertionError: Invalid state / at org.junit.Assert.fail(Assert.java:100) / Caused by: java.lang.RuntimeError: Oh dear / at org.myorg.TestMyClass2|2021-05-25 ERROR [Thread1] Another error|2021-05-25 INFO [Thread1] normal operation&#39;</span>
+
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.JavaStackTrace(), &#39;Exception in thread &quot;main&quot; java.lang.RuntimeException: Main exception|&lt;tab&gt;at scratch.ExceptionTest.main(ExceptionTest.java:16)&#39;)</span>
+<span class="sd">			&#39;Exception in thread &quot;main&quot; java.lang.RuntimeException: Main exception / at scratch.ExceptionTest.main(ExceptionTest.java:16)&#39;</span>
+
+<span class="sd">			&quot;&quot;&quot;</span>
+			<span class="k">return</span> <span class="n">JoinLines</span><span class="p">(</span>
+				<span class="c1"># Both stderr lines that begin with an exception class, and log lines containing ERROR or FATAL</span>
+				<span class="n">startAt</span><span class="o">=</span><span class="s1">&#39;(&#39;</span><span class="o">+</span><span class="n">errorLogLineRegex</span><span class="o">+</span><span class="s1">&#39;|^[a-zA-Z.]+(Error|Exception): |Exception in thread )&#39;</span><span class="p">,</span>
+				<span class="c1"># Stop when the indenting stops</span>
+				<span class="n">continueWhile</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;(^[a-zA-Z.]+(Error|Exception): |\t*Caused by: |\t*Suppressed: |\t+at |\t+[.][.][.] )&#39;</span><span class="p">,</span>
+				<span class="n">combiner</span><span class="o">=</span><span class="n">combiner</span><span class="p">,</span>
+				<span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="JoinLines.AntBuildFailure"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.JoinLines.AntBuildFailure">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">AntBuildFailure</span><span class="p">():</span>
+			<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Mapper that joins the lines of an ant&#39;s stderr BUILD FAILED output to actually include the failure message(s), </span>
+<span class="sd">			for easier grepping and self-contained test outcome failure reasons.</span>
+
+<span class="sd">			As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads). </span>
+
+<span class="sd">			&gt;&gt;&gt; def _mapperUnitTest(mapper, input): return &#39;|&#39;.join(x for x in (applyMappers([line for line in input.split(&#39;|&#39;)], [mapper]))).replace(&#39;\\n&#39;,&#39;&#39;)</span>
+<span class="sd">			&gt;&gt;&gt; _mapperUnitTest( JoinLines.AntBuildFailure(), &#39;BUILD FAILED|~/build.xml:13: Unknown attribute [dodgyattribute]||Total time: 0 seconds&#39;)</span>
+<span class="sd">			&#39;BUILD FAILED / ~/build.xml:13: Unknown attribute [dodgyattribute]||Total time: 0 seconds&#39;</span>
+
+<span class="sd">			&quot;&quot;&quot;</span>
+			<span class="k">return</span> <span class="n">JoinLines</span><span class="p">(</span>
+				<span class="n">startAt</span><span class="o">=</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;BUILD FAILED&#39;</span><span class="p">),</span>
+				<span class="c1"># Continue until we get a blank line</span>
+				<span class="n">continueWhile</span><span class="o">=</span><span class="k">lambda</span> <span class="n">l</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span> 
+				<span class="p">)</span></div></div>
+	
+<div class="viewcode-block" id="SortLines"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.SortLines">[docs]</a><span class="k">def</span> <span class="nf">SortLines</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Mapper that sorts all lines. </span>
+<span class="sd">		</span>
+<span class="sd">		Note that unlike most mappers this will read the entire input into memory to perform the sort, so only use this </span>
+<span class="sd">		when you know the file size isn&#39;t enormous.</span>
+
+<span class="sd">		As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads). </span>
+
+<span class="sd">		.. versionadded:: 2.0</span>
+
+<span class="sd">		:param callable[str]-&gt;str key: A callable that returns the sort key to use for each line, in case you want </span>
+<span class="sd">			something other than the default lexicographic sorting. </span>
+<span class="sd">		</span>
+<span class="sd">		&gt;&gt;&gt; def _mapperUnitTest(mapper, input): return &#39;|&#39;.join(x for x in (applyMappers([line+&#39;&#39; for line in input.split(&#39;|&#39;)], [mapper])))</span>
+<span class="sd">		&gt;&gt;&gt; _mapperUnitTest( SortLines(), &#39;a|z|A|B|aa|c&#39;).replace(&#39;\\n&#39;, &#39;&#39;)</span>
+<span class="sd">		&#39;A|B|a|aa|c|z&#39;</span>
+<span class="sd">		</span>
+<span class="sd">		&gt;&gt;&gt; _mapperUnitTest( SortLines( key=lambda s: int(s) ), &#39;100|1|10|22|2&#39;).replace(&#39;\\n&#39;, &#39;&#39;)</span>
+<span class="sd">		&#39;1|2|10|22|100&#39;</span>
+
+<span class="sd">		&gt;&gt;&gt; _mapperUnitTest( SortLines(), &#39;a\\n|c\\n|b&#39;)</span>
+<span class="sd">		&#39;a\\n|b\\n|c\\n&#39;</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">def</span> <span class="nf">mapperGenerator</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">):</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span> <span class="n">l</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="c1"># need uniform newlines in output since it&#39;s possible there aren&#39;t uniform newlines in input (if file doesn&#39;t end in a newline)</span>
+				<span class="k">yield</span> <span class="n">l</span>
+		<span class="k">return</span> <span class="n">mapperGenerator</span></div>
 
 <div class="viewcode-block" id="IncludeLinesMatching"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.IncludeLinesMatching">[docs]</a><span class="k">class</span> <span class="nc">IncludeLinesMatching</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Mapper that filters lines by including only lines matching the specified regular expression. </span>
 <span class="sd">	</span>
-<span class="sd">	:param str|compiled_regex regex: The regular expression to match (use ``.*`` at the beginning to allow extra </span>
-<span class="sd">		characters at the start of the line).  Multiple expressions can be combined using </span>
-<span class="sd">		``(expr1|expr2)`` syntax. </span>
+<span class="sd">	:param str|compiled_regex regex: The regular expression to match (this is a match not a search, so </span>
+<span class="sd">		use ``.*`` at the beginning if you want to allow extra characters at the start of the line).  </span>
+<span class="sd">		Multiple expressions can be combined using ``(expr1|expr2)`` syntax. </span>
 
-<span class="sd">	&gt;&gt;&gt; IncludeLinesMatching(&#39;Foo.*&#39;)(&#39;Foo bar&#39;)</span>
-<span class="sd">	&#39;Foo bar&#39;</span>
+<span class="sd">	&gt;&gt;&gt; IncludeLinesMatching(&#39;Foo.*&#39;)(&#39;Foo bar\\n&#39;)</span>
+<span class="sd">	&#39;Foo bar\\n&#39;</span>
 
-<span class="sd">	&gt;&gt;&gt; IncludeLinesMatching(&#39;bar.*&#39;)(&#39;Foo bar&#39;) is None</span>
+<span class="sd">	&gt;&gt;&gt; IncludeLinesMatching(&#39;bar.*&#39;)(&#39;Foo bar\\n&#39;) is None</span>
 <span class="sd">	True</span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -371,6 +666,73 @@
 
 	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span></div>
 
+<div class="viewcode-block" id="applyMappers"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.applyMappers">[docs]</a><span class="k">def</span> <span class="nf">applyMappers</span><span class="p">(</span><span class="n">iterator</span><span class="p">,</span> <span class="n">mappers</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A generator function that applies zero or more mappers to each line from an iterator and yields each fully mapped line. </span>
+
+<span class="sd">	If a mapper function returns None for a line that line is dropped. </span>
+
+<span class="sd">	:param Iterable[str] iterator: An iterable such as a file object that yields lines to be mapped. </span>
+<span class="sd">		Trailing newline characters are preserved, but not passed to the mappers. </span>
+
+<span class="sd">	:type mappers: List[callable[str]-&gt;str or callable[iterator]-&gt;Generator[str,None,None] ] </span>
+<span class="sd">	:param mappers: </span>
+<span class="sd">		A list of filter functions that will be used to pre-process each </span>
+<span class="sd">		line from the file (returning None if the line is to be filtered out). </span>
+<span class="sd">		For advanced cases where stateful mappings are needed, instead of a function to filter individual lines, you can </span>
+<span class="sd">		provide a generator function which accepts an iterable of all input lines from each file and yields output lines </span>
+<span class="sd">		(including potentially some additional lines). </span>
+<span class="sd">		</span>
+<span class="sd">		Mappers must always preserve the final ``\\n`` of each line (if present). </span>
+
+<span class="sd">		Do not share mapper instances across multiple tests or threads as this can cause race conditions. </span>
+<span class="sd">		</span>
+<span class="sd">		As a convenience to make conditionalization easier, any ``None`` items in the mappers list are </span>
+<span class="sd">		simply ignored. </span>
+<span class="sd">	</span>
+<span class="sd">	:rtype: Iterable[str]</span>
+<span class="sd">	</span>
+<span class="sd">	.. versionadded:: 2.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mappers</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># optimize for common case of zero mappers</span>
+		<span class="k">yield from</span> <span class="n">iterator</span>
+
+	<span class="c1"># strip out any noop (None) mappers</span>
+	<span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span> <span class="n">mappers</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mappers</span> <span class="k">if</span> <span class="n">m</span><span class="p">]</span>
+	
+	<span class="c1"># isgeneratorfunction handles both function generators, and functor classes with a __call__ method that&#39;s a generator</span>
+	<span class="k">def</span> <span class="nf">isgeneratorfunction</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>	<span class="k">return</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isgeneratorfunction</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="ow">or</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isgeneratorfunction</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="fm">__call__</span><span class="p">)</span>
+	
+	<span class="c1"># if there are any generator functions we need to be recursive</span>
+	<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">isgeneratorfunction</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">):</span>
+		<span class="n">m</span> <span class="o">=</span> <span class="n">mappers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">isgeneratorfunction</span><span class="p">(</span><span class="n">m</span><span class="p">):</span> <span class="c1"># then make it be one, so it&#39;s all uniform</span>
+			<span class="n">originalMapperFunction</span> <span class="o">=</span> <span class="n">m</span>
+			<span class="k">def</span> <span class="nf">generatorFunctionForSimpleMapper</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
+				<span class="k">for</span> <span class="n">originalline</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+					<span class="n">l</span> <span class="o">=</span> <span class="n">originalMapperFunction</span><span class="p">(</span><span class="n">originalline</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+						<span class="c1"># Mappers must be written to preserve line endings, otherwise the lines passed to the next mapper may not be correctly interpreted</span>
+						<span class="k">assert</span> <span class="n">l</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">originalline</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">),</span> <span class="s1">&#39;Mappers must not remove newline characters: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">originalMapperFunction</span>
+						
+						<span class="k">yield</span> <span class="n">l</span>
+			<span class="n">m</span> <span class="o">=</span> <span class="n">generatorFunctionForSimpleMapper</span>
+		
+		<span class="k">yield from</span> <span class="n">applyMappers</span><span class="p">(</span><span class="n">m</span><span class="p">(</span><span class="n">iterator</span><span class="p">),</span> <span class="n">mappers</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+	<span class="k">else</span><span class="p">:</span> <span class="c1"># simple, fast implementation for the non-generators case</span>
+		<span class="k">for</span> <span class="n">originalline</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+			<span class="n">l</span> <span class="o">=</span> <span class="n">originalline</span>
+			<span class="k">for</span> <span class="n">mapper</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span>
+				<span class="n">l</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+			<span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+				<span class="c1"># Mappers must be written to preserve line endings, otherwise the lines passed to the next mapper may not be correctly interpreted</span>
+				<span class="k">assert</span> <span class="n">l</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">originalline</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">),</span> <span class="s1">&#39;Mappers must not add/remove newline characters but one of these mappers has: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">mappers</span>
+				
+				<span class="k">yield</span> <span class="n">l</span></div>
+
+	
 </pre></div>
 
            </div>
@@ -383,7 +745,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>

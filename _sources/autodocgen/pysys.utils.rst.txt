@@ -21,4 +21,5 @@ pysys.utils
   pysys.utils.misc
   pysys.utils.perfreporter
   pysys.utils.pycompat
+  pysys.utils.safeeval
   pysys.utils.threadutils

@@ -1,0 +1,14 @@
+
+pysys.config
+~~~~~~~~~~~~
+
+.. automodule:: pysys.config
+
+.. currentmodule:: pysys.config
+
+
+.. autosummary::
+  :toctree: ./
+
+  pysys.config.descriptor
+  pysys.config.project

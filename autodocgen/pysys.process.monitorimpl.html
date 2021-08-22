@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.monitorimpl &mdash; PySys v1.6.1  documentation</title>
+  <title>pysys.process.monitorimpl &mdash; PySys v2.0.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.0.dev1
           
 
           
@@ -84,11 +84,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
@@ -108,7 +110,6 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -127,7 +128,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v1.6.1</a>
+          <a href="../index.html">PySys v2.0.dev1</a>
         
       </nav>
 
@@ -204,22 +205,6 @@ monitoring OS-level process information on the current platform.</p>
 <p>Uses the <code class="xref py py-obj docutils literal notranslate"><span class="pre">GetProcessMemoryInfo</span></code>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">GetProcessTimes</span></code> APIs. 
 The UserTime and KernelTime are summed together to calculate the CPU 
 utilization for this process.</p>
-<p>Construct an instance of the process monitor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>owner</strong> – The BaseTest owning this monitor.</p></li>
-<li><p><strong>process</strong> – The process wrapper object. A numeric pid can be specified 
-instead but with reduced functionality, so use a process object if you 
-have one.</p></li>
-<li><p><strong>interval</strong> – The interval in seconds between polling for each data 
-sample.</p></li>
-<li><p><strong>pmargs</strong> – Keyword arguments to allow parameterization of the 
-returned data. An exception will be raised for any arguments not 
-expected by this class.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="pysys.process.monitorimpl.WindowsProcessMonitor._timer_ns">
 <code class="sig-name descname">_timer_ns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitorimpl.html#WindowsProcessMonitor._timer_ns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitorimpl.WindowsProcessMonitor._timer_ns" title="Permalink to this definition">¶</a></dt>
@@ -238,22 +223,6 @@ can be used to calculate performance results.</p>
 <dd><p>Bases: <a class="reference internal" href="pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a></p>
 <p>Unix implementation of a process monitor.</p>
 <p>Uses the <code class="xref py py-obj docutils literal notranslate"><span class="pre">ps</span></code> command line tool, reading columns <code class="xref py py-obj docutils literal notranslate"><span class="pre">pcpu</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">rss</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">vsz</span></code>.</p>
-<p>Construct an instance of the process monitor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>owner</strong> – The BaseTest owning this monitor.</p></li>
-<li><p><strong>process</strong> – The process wrapper object. A numeric pid can be specified 
-instead but with reduced functionality, so use a process object if you 
-have one.</p></li>
-<li><p><strong>interval</strong> – The interval in seconds between polling for each data 
-sample.</p></li>
-<li><p><strong>pmargs</strong> – Keyword arguments to allow parameterization of the 
-returned data. An exception will be raised for any arguments not 
-expected by this class.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -279,7 +248,7 @@ expected by this class.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
 
     </p>
   </div>
