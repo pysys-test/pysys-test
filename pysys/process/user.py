@@ -1064,8 +1064,8 @@ class ProcessUser(object):
 			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', encoding='utf-8',
 				process=myprocess, errorExpr=[' (ERROR|FATAL) ', 'Failed to start'])
 			
-			self.waitForGrep('myoutput.txt', expr='My message', encoding='utf-8',
-				process=myprocess, errorIf=lambda: self.getExprFromFile('myprocess.log', ' ERROR .*', returnNoneIfMissing=True))
+			self.waitForGrep('myoutput.log', expr='My message', encoding='utf-8',
+				process=myprocess, errorIf=lambda: self.grepOrNone('myprocess.err', ' ERROR .*'))
 			
 		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, 
 		which isn't recommended), so there is no need to add duplication with an 
@@ -1105,6 +1105,7 @@ class ProcessUser(object):
 			string if an error is detected which should cause us to abort looking for the grep expression. 
 			This function will be executed frequently (every ``poll`` seconds) so avoid 
 			doing anything time-consuming here unless you set a large polling interval. 
+			See above for an example. 
 			
 			Added in PySys 1.6.0. 
 

@@ -974,7 +974,7 @@ class BaseTest(ProcessUser):
 			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
 				"0.0 <= float(value) <= 60.0")
 
-		This method is implemented using `getExprFromFile` and `assertThat`, so see those methods for more detailed 
+		This method is implemented using `grep` and `assertThat`, so see those methods for more detailed 
 		information on the parameters. 
 
 		.. versionadded:: 1.6.0
@@ -1248,9 +1248,9 @@ class BaseTest(ProcessUser):
 			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
-		Rather than using this method, use `getExprFromFile` with `assertThat` for better error messages and more 
+		Rather than using this method, use `grepAll` with `assertThat` for better error messages and more 
 		maintainable tests, e.g. you can extract the last line of a file easily 
-		with ``self.getExprFromFile(file, '.', returnAll=True)[0]``.
+		with ``self.grepAll(file, '.')[0]``.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
