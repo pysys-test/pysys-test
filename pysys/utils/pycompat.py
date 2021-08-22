@@ -49,8 +49,11 @@ def quotestring(s):
 	and additional escaping only if needed to make the meaning clear, but trying to 
 	avoid double-slashes unless actually needed since it makes paths harder to read
 	
-	If a byte string is provided and this is Python 3+ then the 
+	If a byte string is provided then the 
 	``repr()`` representation is used instead. 
+	
+	Deprecated - use `pysys.utils.misc.quoteString` instead. 
+	
 	"""
 	# this function exists primarily to provide the same quoting behaviour 
 	# for str/unicode in Python 2 and str in Python 3, but avoiding 
@@ -78,7 +81,7 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	unless a binary mode was specified in which case a stream yielding 
 	bytes is returned. 
 	
-	Instead of this method, just use ``io.open(pysys.utils.fileutils.toLongPathSafe(path), ...)``. 
+	Deprecated - use ``io.open(pysys.utils.fileutils.toLongPathSafe(path), ...)`` instead. 
 	
 	:param path: The path to open; must be an absolute path. 
 		Even on Windows this path can be long (e.g. more than the usual 256 

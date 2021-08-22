@@ -487,13 +487,13 @@ Deprecations
 - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 - The old ``<mode>`` elements are deprecated in favor of the new Python lambda syntax 
   (support for these won't be removed any time soon, but are discouraged for new tests). 
-- The `pysys.utils.pycompat` module is now deprecated. 
+- The `pysys.utils.pycompat` module is now deprecated.
 - The ``ConsoleMakeTestHelper`` class is now deprecated in favor of `pysys.launcher.console_make.DefaultTestMaker`. 
 
 A quick way to check for the removed and deprecated items using a regular expression is shown in the following grep 
 command::
 
-	grep -r "\(supportMultipleModesPerRun.*alse\|DescriptorLoader\|pysys.utils.loader\|_stringToUnicode\|pysys[.]xml\|pysys.utils.fileunzip\|DEFAULT_DESCRIPTOR\|pysys.utils.pycompat\|openfile\|ConsoleMakeTestHelper\|def getRunDetails\|def getRunHeader\|locale.getpreferredencoding\|addResource\|CommonProcessWrapper\|TEST_TEMPLATE\|DESCRIPTOR_TEMPLATE\|ThreadFilter\)" .
+	grep -r "\(supportMultipleModesPerRun.*alse\|DescriptorLoader\|pysys.utils.loader\|_stringToUnicode\|pysys[.]xml\|pysys.utils.fileunzip\|[^_@]DEFAULT_DESCRIPTOR\|pysys.utils.pycompat\|PY2\|string_types\|binary_type\|isstring[(]\|quotestring[(]\|openfile[(]\|ConsoleMakeTestHelper\|def getRunDetails\|def getRunHeader\|locale.getpreferredencoding\|addResource\|CommonProcessWrapper\|TEST_TEMPLATE\|DESCRIPTOR_TEMPLATE\|ThreadFilter\)" .
 
 (This also contains some removed/deprecated items from the previous 1.6.0 release, though does not attempt to cover 
 any earlier releases). 

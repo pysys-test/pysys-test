@@ -163,8 +163,8 @@ class BaseTest(ProcessUser):
 
 
 	def addResource(self, resource):
-		"""Add a resource which is owned by the test and is therefore
-		cleaned up (deleted) when the test is cleaned up. 
+		"""Add a resource which is owned by the test and therefore gets its ``__del__`` method called 
+		when the test is cleaned up. 
 		
 		:deprecated: Please use `addCleanupFunction` instead of this function. 
 		"""
