@@ -150,7 +150,7 @@ jobs:
           
           # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
           # from working
-          export PYTHONDONTWRITEBYTECODE: true
+          export PYTHONDONTWRITEBYTECODE=true
 
           pysys.py --version
 
