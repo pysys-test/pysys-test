@@ -304,7 +304,8 @@ def logPortAllocationStats(logger=logging.getLogger('pysys.portAllocationStats')
 	
 	"""
 	logger.debug('TCP server port allocation stats: portPoolSize=%s, peakAllocatedPorts=%s, lifetimeTotalAllocatedPorts=%s',
-		__peakAllocatedPorts, __totalServerPorts, __totalAllocatedPorts)
+		__totalServerPorts, __peakAllocatedPorts, __totalAllocatedPorts)
+		
 	return { # undocumented for now, but might be useful for hacking around
 		'totalServerPorts': __totalServerPorts,
 		'peakAllocatedPorts': __peakAllocatedPorts,
