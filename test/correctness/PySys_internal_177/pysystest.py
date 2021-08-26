@@ -21,7 +21,7 @@ class PySysTest(pysys.basetest.BaseTest):
 	def execute(self):
 
 		self.pysys.pysys('pysys-debug', ['debug'], workingDir=self.project.testRootDir)
-		self.logFileContents('pysys-debug.err')
+		self.logFileContents('pysys-debug.out')
 		
 	def validate(self):
-		self.assertGrep('pysys-debug.err', 'Using PySys .* from .*')
+		self.assertGrep('pysys-debug.out', 'Using PySys .* from .*')
