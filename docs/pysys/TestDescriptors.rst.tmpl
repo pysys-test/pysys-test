@@ -18,6 +18,10 @@ Each descriptor value is populated with a ``__pysys_KEY__ = VALUE`` line.
 .. code-block:: python
 @PYSYSTESTPYTHON@
 
+This is intended as a reference, and to provide somewhere to copy snippets from as needed. Do not copy the whole thing 
+into your own tests as this example contains many fields that are only used for advanced cases. Instead use 
+``pysys make`` to create new tests. 
+
 For more information about the modes helper shown above, see `pysys.config.descriptor.TestModesConfigHelper`. 
 
 All descriptor values go at the start of the file, and are designed to look like ordinary Python string constants, but 
@@ -45,11 +49,8 @@ Sample pysystest.xml
 --------------------
 
 The following sample illustrates all the possible configuration options for a test's ``pysystest`` file when 
-using standalone XML, i.e. ``pysystest.xml``. 
-
-This is intended as a reference, and to provide somewhere to copy snippets from as needed. Do not copy the whole thing 
-into your own tests as this example contains many fields that are only used for advanced cases. Instead use 
-``pysys make`` to create new tests, including a ``pysystest.xml`` that contains everything you need for most tests. 
+using standalone XML (instead of ``pysystest.py``), i.e. ``pysystest.xml``. This is just different (XML) syntax for the 
+same capabilities described above for ``pysystest.py``. 
 
 .. code-block:: xml
 @PYSYSTESTXML@
