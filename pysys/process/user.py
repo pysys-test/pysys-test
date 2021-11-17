@@ -149,12 +149,12 @@ class ProcessUser(object):
 		which can be used for the `startProcess` ``stdouterr`` parameter. 
 		
 		The first time this is called it will return names like 
-		``('myprocess.out', 'myprocess.err')``, the second time it will return 
-		``('myprocess.1.out', 'myprocess.1.err')``, then 
-		``('myprocess.2.out', 'myprocess.2.err')`` etc. 
+		``('outdir/myprocess.out', 'outdir/myprocess.err')``, the second time it will return 
+		``('outdir/myprocess.1.out', 'outdir/myprocess.1.err')``, then 
+		``('outdir/myprocess.2.out', 'outdir/myprocess.2.err')`` etc. 
 		
 		:param str processKey: A user-defined identifier that will form the prefix onto which ``[.n].out`` is appended
-		:return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
+		:return: A STDOUTERR_TUPLE named tuple of (stdout, stderr), where each is an absolute path. 
 		:rtype: STDOUTERR_TUPLE
 
 		"""
