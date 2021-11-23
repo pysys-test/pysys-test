@@ -95,9 +95,10 @@ class DefaultTestMaker(object):
 			if t['mkdir'] is None: 
 				t['mkdir'] = [
 					defaults.output,
-					defaults.input, 
 					defaults.reference
 				]
+				if defaults.input != '!Input_dir_if_present_else_testDir!':
+					t['mkdir'].append(defaults.input)
 			
 			t['testOutputDir'] = defaults.output
 			
