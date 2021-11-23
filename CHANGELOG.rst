@@ -22,7 +22,7 @@ New features:
 
 Fixes:
 
-- YYY
+- Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
 
 -----------------
 What's new in 2.0
@@ -392,7 +392,8 @@ Additional improvements which will be of use to some users:
   (with ``condition="==0"``) to include both the first matching expression and the total number of matches. This 
   is useful when checking log files for unexpected errors and warnings. 
 - Added `pysys.utils.allocport.excludedTCPPorts` which can be set before the `pysys.baserunner.BaseRunner` is 
-  constructed to prevent the specified ports being allocated by `~pysys.basetest.BaseTest.getNextAvailableTCPPort`. 
+  constructed (e.g. in your runner module) to prevent the specified ports being allocated by 
+  `~pysys.basetest.BaseTest.getNextAvailableTCPPort`. 
   By default PySys comes with exclusions for a handful of ports that are commonly blocked by web browsers for security 
   reasons. 
 - Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
