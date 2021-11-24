@@ -250,7 +250,7 @@ class _XMLProjectParser(object):
 			if m in self.properties:
 				return self.properties[m]
 			else:
-				raise KeyError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
+				raise KeyError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file'%m)
 		try:
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
 		except KeyError as ex:
