@@ -45,6 +45,8 @@ from pysys.utils.pycompat import PY2
 
 log = logging.getLogger('pysys.writer')
 
+github_log = logging.getLogger('pysys.writer.github')
+
 class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator, ArtifactPublisher):
 	"""
 	Writer for GitHub(R) Actions. 
@@ -106,14 +108,19 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 				.replace('\r', '%0D')\
 				.replace('\n', '%0A')
 				)
-		if cmd in [u'set-output']: # since GitHub suppresses the actual commands written, it's useful to log this at debug
-			log.debug('GitHub Actions command %s', toprint)
+		# since GitHub suppresses the actual commands written, it's useful to log this at debug
+		github_log.debug('GitHub Actions command %s', toprint)
 
 		stdoutPrint(toprint)
+		
+		if cmd == 'set-output':
+			self.__outputs.add(params.get('name', '?'))
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		super(GitHubActionsCIWriter, self).setup(numTests=numTests, cycles=cycles, xargs=xargs, threads=threads, 
 			testoutdir=testoutdir, runner=runner, **kwargs)
+			
+		self.__outputs = set()
 		
 		self.remainingAnnotations = int(self.maxAnnotations)-2 # one is used up for the non-zero exit status and one is used for the summary
 		if str(self.failureTestLogAnnotations).lower()!='true': self.remainingAnnotations = 0
@@ -180,6 +187,8 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 					self.outputGitHubCommand(*a)
 
 			self.outputGitHubCommand(u'endgroup')
+			if self.__outputs:
+				github_log.info('GitHub output values: %s', ', '.join(sorted(self.__outputs)))
 
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		super(GitHubActionsCIWriter, self).processResult(testObj, cycle=cycle, testTime=testTime, 
