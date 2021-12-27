@@ -53,7 +53,7 @@ Yes this is one purposeful test, oh yeah
 """
 
 class PySysTest(BaseTest):
-	testDurationSecs = '1.0'
+	# testDurationSecs = '4.0' # set by parent
 	testsPerLoader = '200'
 
 	def execute(self):
