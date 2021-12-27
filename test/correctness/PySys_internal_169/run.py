@@ -1,10 +1,18 @@
 import pysys
-#from pysys.constants import *
+
+from pysys.constants import *
+assert Project # check it's imported after each one
+
 from pysys.basetest import BaseTest
 
 from pysys.xml.project import *
+assert Project # check it's imported after each one
+
 from pysys.xml.manual import *
+assert Project # check it's imported after each one
+
 from pysys.xml.descriptor import *
+assert Project # check it's imported after each one
 
 import pysys.xml.project
 
@@ -16,8 +24,8 @@ class PySysTest(BaseTest):
 		assert XMLManualTestStep
 		assert Project
 		
-		self.assertThat('xmlgetinstance is selfproject', xmlgetinstance=Project.getInstance(), selfproject=self.project)
-		self.assertThat('xmlproject is selfproject', xmlproject=pysys.xml.project.Project.getInstance(), selfproject=self.project)
+		self.assertThat('xmlproject is self.project', xmlproject=pysys.xml.project.Project.getInstance(), project=self.project)
+		self.assertThat('xmlgetinstance is self.project', xmlgetinstance=Project.getInstance(), project=self.project)
 
 		self.explicitImports()
 

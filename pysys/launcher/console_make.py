@@ -402,7 +402,7 @@ class DefaultTestMaker(object):
 			if os.path.exists(target):
 				raise Exception('Cannot copy to %s as it already exists'%target)
 			self.copy(c, target, replace)
-			print("  Copied %s%s"%(os.path.basename(c), os.sep+'*' if os.path.isdir(target) else ''))
+			print("  Copied %s%s"%(target, os.sep+'*' if os.path.isdir(target) else ''))
 
 		for d in tmp['mkdir']:	
 			if os.path.isabs(d):

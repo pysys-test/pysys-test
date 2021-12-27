@@ -23,6 +23,7 @@ New features:
 Fixes:
 
 - Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
+- Fix a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
 
 -----------------
 What's new in 2.0

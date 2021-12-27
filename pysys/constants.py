@@ -29,6 +29,7 @@ import sys, re, os, os.path, socket, traceback, locale
 from enum import Enum
 
 from pysys import stdoutHandler
+# do not add extra pysys import here - must keep minimal to avoid possible circular dependencies
 
 # set the platform and platform related constants
 HOSTNAME = socket.getfqdn()
@@ -278,13 +279,8 @@ class PrintLogs(Enum):
 	FAILURES = 'PrintLogs.FAILURES'
 	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
-PROJECT = None
-""":meta private: Hide this since 1.5.1 since we don't want people to use it. 
-
-Holds the L{pysys.config.project.Project} instance containing settings for this PySys project.
-Instead of using this constant, use `pysys.basetest.BaseTest.project` (or`pysys.process.user.ProcessUser.project`) 
-field to access this. If this is not possible, use Project.getInstance().
-
-This is set by the console_XXX modules when the project is loaded. 
-"""
-from pysys.config.project import Project # retained for compatibility when using 'from constants import *'
+# Prior to v2.1 the "Project" class and "PROJECT" constant were imported here; the former was removed to avoid circular 
+# dependencies during initialization but for compatibility when using 'from constants import *' in testcases both are 
+# assigned into this module during console_XXX when the project has been loaded. 
+# Instead of using these constants, it is recommended to use the `pysys.basetest.BaseTest.project` 
+# (or`pysys.process.user.ProcessUser.project`) field to access this. If this is not possible, use Project.getInstance().

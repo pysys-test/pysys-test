@@ -1,7 +1,6 @@
 from pysys import stdoutHandler
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.constants import Project 
 from pysys.exceptions import UserError
 
 class PySysTest(BaseTest):

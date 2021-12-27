@@ -750,4 +750,6 @@ class Project(object):
 			traceback.print_exc()
 			sys.exit(1)
 
+pysys.constants.Project = Project # for compatibility's sake' need to do this early
+
 import pysys.utils.safeeval # down here to break circular dependency

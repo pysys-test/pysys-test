@@ -25,9 +25,9 @@ import os, shutil, time, locale
 import collections
 import json
 import logging
+import io
 
 from pysys.constants import IS_WINDOWS, PREFERRED_ENCODING
-from pysys.utils.pycompat import PY2, openfile
 
 log = logging.getLogger('pysys.fileutils')
 
@@ -76,9 +76,6 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 		# consecutive \ separators are not permitted in \\?\ paths
 			path = path.replace('\\\\','\\')
 
-	if PY2 and isinstance(path, str):
-		path = path.decode(PREFERRED_ENCODING)
-	
 	if path.startswith(u'\\\\'): 
 		path = u'\\\\?\\UNC\\'+path.lstrip('\\') # \\?\UNC\server\share
 	else:
@@ -250,7 +247,7 @@ def loadProperties(path, encoding='utf-8-sig'):
 	"""
 	assert os.path.isabs(path), 'Cannot use relative path: "%s"'%path
 	result = collections.OrderedDict()
-	with openfile(path, mode='r', encoding=None if PY2 else encoding, errors='strict') as fp:
+	with io.open(path, mode='r', encoding=encoding, errors='strict') as fp:
 		for line in fp:
 			line = line.lstrip()
 			if len(line)==0 or line.startswith(('#','!')): continue
@@ -272,6 +269,7 @@ def loadJSON(path, **kwargs):
 	:return obj: A dict, list, or other Python object representing the contents of the JSON file. 
 	"""
 	assert os.path.isabs(path), 'Cannot use relative path: "%s"'%path
-	with openfile(path, mode='r', encoding='utf-8-sig', errors='strict') as fp:
+	with io.open(path, mode='r', encoding='utf-8-sig', errors='strict') as fp:
 		return json.load(fp, **kwargs)
-		
+
+openfile = io.open # alias after pycompat was deprecated
