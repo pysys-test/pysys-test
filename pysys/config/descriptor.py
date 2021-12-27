@@ -1185,7 +1185,7 @@ class DescriptorLoader(object):
 		project = self.project
 		
 		descriptors = []
-		ignoreSet = set(OSWALK_IGNORES+[DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE])
+		ignoreSet = set(OSWALK_IGNORES+[DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, "_pysys_templates"])
 		
 		if project.properties.get('pysysTestDescriptorFileNames') or DEFAULT_DESCRIPTOR != ['pysystest.xml']:
 			# compatibility mode
