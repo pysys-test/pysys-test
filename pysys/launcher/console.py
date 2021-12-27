@@ -50,7 +50,7 @@ def printUsage(returncode=0):
 def main(args):
 	# load project only for options where it's necessary, otherwise we get 
 	# warnings about missing project file for first time users
-	if len(args) < 1 or args[-1] in ['--help', '-h', '--version']: 
+	if len(args) < 1 or args[0] in ['--help', '-h', '--version']: 
 		printUsage()
 	else:
 		if sys.version_info[0] != 2:
