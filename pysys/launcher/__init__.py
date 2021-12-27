@@ -24,7 +24,6 @@ __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
 
-import pysys.constants
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.config.project import Project
