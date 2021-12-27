@@ -137,7 +137,7 @@ For detailed information, see the ``--help`` command line.
 
 To get started, create a new directory to hold your tests. Then run the 
 ``makeproject`` command from that directory to add a ``pysysproject.xml`` 
-file which will hold default settings your all your tests::
+file which will hold default settings for your tests::
 
 	> mkdir test
 	> cd test
