@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 
 		sampledir = self.project.testRootDir+'/../samples'
 		
-		pythonVersionForCI = "3.8"
+		pythonVersionForCI = "3.9"
 		pythonVersionForMin = "3.6"
 		
 		pysysVersion = pysys.__version__
