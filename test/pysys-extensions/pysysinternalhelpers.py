@@ -18,6 +18,9 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	else:
 		args = ['-m', 'pysys']+args
 
+	if os.getenv('PYSYS_PPROFILE','').lower()=='true':
+		args = ['-m', 'pprofile']+args
+
 	# allow controlling lang from the parent e.g. via Travis, if not explicitly set
 	if not IS_WINDOWS and 'LANG' not in (environs or {}) and 'LANG' in os.environ: 
 		environs = dict(environs or {})
