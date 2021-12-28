@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest>
+  <description> 
+    <title>My testcase {id}</title>
+    <purpose>My purpose</purpose>
+  </description>
+</pysystest>

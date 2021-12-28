@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest>
+  <description> 
+    <title>My testcase {id}</title>
+    <purpose><![CDATA[
+Yes this is one purposeful test, oh yeah
+]]></purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>group-1</group>
+      <group>group-2</group>
+    </groups>
+    <modes>
+		<mode>MyMode1</mode>
+		<mode>MyMode2</mode>
+    </modes>
+  </classification>
+
+  <skipped reason="Skip reason"/>
+  <execution-order hint="100"/> 
+ 
+  <data>
+    <class name="PySysTest" module="run"/>
+    <input path="MyInput"/>
+    <output path="MyOutput"/>
+    <reference path="MyReference"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="requirement1"/>     
+      <requirement id="requirement2"/>     
+    </requirements>
+  </traceability>
+</pysystest>
