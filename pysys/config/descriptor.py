@@ -137,13 +137,16 @@ class TestDescriptor(object):
 		self.purpose = purpose
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
-		if any(not isinstance(m, TestMode) for m in modes):
+		if len(modes)>0 and any(not isinstance(m, TestMode) for m in modes):
 			# simple strings were passed in; convert them
 			modes = [(m if isinstance(m, TestMode) else TestMode(m)) for m in modes]
+		else:
+			modes = list(modes)
 		
-		if modes and (not any(m.isPrimary for m in modes)):
+		if len(modes)>0 and (not any(m.isPrimary for m in modes)):
 			modes = [TestMode(modes[0], isPrimary=True, params=modes[0].params)]+modes[1:]
-		self.modes = list(modes)
+
+		self.modes = modes
 
 		self.authors = authors
 		self.created = created
@@ -441,7 +444,8 @@ class TestModesConfigHelper:
 			modes, each mode defined by a dict which may contain a ``mode`` key plus any number of parameters. 
 			Alternatively, each dimension can be a dict where the mode is the key and the value is a parameters dict. 
 		:return: A list[dict[str,obj]] containing the flattened list of modes consisting of all combinations of the 
-			passed in. This can be further manipulated using Python list comprehensions (e.g. to exclude certain 
+			passed in. For example: ``[{"mode":"MyMode", "param1":100}, {"mode": "myMode2", "param1":200}]``. 
+			This list can be further manipulated using Python list comprehensions (e.g. to exclude certain 
 			combinations) if desired. 
 		"""
 		if len(dimensions) == 1: return dimensions[0]
@@ -536,7 +540,7 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 			
 	
 class _XMLDescriptorParser(object):
-	'''NOT PUBLIC API - use L{DescriptorLoader.parseTestDescriptor} instead. 
+	'''NOT PUBLIC API - use L{DescriptorLoader._parseTestDescriptor} instead. 
 	
 	:meta private:
 	
@@ -551,13 +555,14 @@ class _XMLDescriptorParser(object):
 	used in the parsing.
 	
 	If not, it uses __pysys_XXX__ dunders (Python-style but also designed to work fine in other languages whether in 
-	comments e.g. /* ... */  or even as string literals, provided there are no backslash escapes to worry about)
+	comments e.g. /* ... */  or even as string literals, provided there are no backslash escapes to worry about).
 	
+	:param bytes fileContents: Used only for testing purposes - to measure load times without any disk activity. 
 	'''
 
 	KV_PATTERN = '__pysys_%s__'
 
-	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None):
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None, fileContents=None):
 		assert project
 		self.file = xmlfile
 		if len(xmlfile) < 256: self.file = fromLongPathSafe(self.file)# used for error messages etc
@@ -579,11 +584,13 @@ class _XMLDescriptorParser(object):
 			return
 		
 		if istest and not xmlfile.endswith('.xml'):
+			if fileContents is None:
+				# Open in binary mode since we don't know the encoding - we'll rely on the XML header and/or Python header to tell us if it's anything unusual
+				with open(xmlfile, 'rb') as xmlhandle:
+					fileContents = xmlhandle.read()
+								
 			# Find it within a file of another type e.g. pysystest.py
 			
-			# Open in binary mode since we don't know the encoding - we'll rely on the XML header to tell us if it's anything unusual
-			with open(xmlfile, 'rb') as xmlhandle:
-				filecontents = xmlhandle.read()
 			# must be at the start of a line, i.e. not after a comment
 			# we do allow raw strings
 			for m in re.finditer(
@@ -595,7 +602,7 @@ class _XMLDescriptorParser(object):
 						])
 						+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
 						).encode('ascii'), 
-					filecontents, flags=re.DOTALL + re.MULTILINE): 
+					fileContents, flags=re.DOTALL + re.MULTILINE): 
 				k = m.group('key').decode('ascii', errors='replace')
 				if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
 				k = k.rstrip('_')
@@ -609,10 +616,10 @@ class _XMLDescriptorParser(object):
 					value = value.decode('utf-8', errors='replace')
 				self.kvDict[k] = value
 
-			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file}')
+			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file} (found: {list(self.kvDict.keys())})')
 			xmlcontents = self.kvDict.pop('xml_descriptor', '').strip() # not likely to be used for .py files, but might be nice for some others
 		else:
-			xmlcontents = None
+			xmlcontents = fileContents # usually None, unless this is a microbenchmark performance test
 		
 		try:
 			if xmlcontents:
@@ -1338,5 +1345,5 @@ class DescriptorLoader(object):
 			displayed to the user without any Python stacktrace. 
 			The exception message must contain the path of the descriptorfile.
 		"""
-		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		assert len(kwargs)==0 or list(kwargs.keys())==['fileContents'], 'reserved for future use: %s'%kwargs.keys()
 		return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)
