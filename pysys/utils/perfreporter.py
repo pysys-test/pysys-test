@@ -545,7 +545,7 @@ cycles.
 		raise Exception('No .csv files found')
 	files = []
 	for p in paths:
-		with openfile(p, encoding='utf-8') as f:
+		with openfile(os.path.abspath(p), encoding='utf-8') as f:
 			files.append(CSVPerformanceFile(f.read()))
 	
 	if cmd == 'aggregate':
