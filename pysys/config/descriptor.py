@@ -1238,54 +1238,63 @@ class DescriptorLoader(object):
 			# this is the top-level directory that will be checked below
 			dirconfigs[os.path.dirname(dir)] = currentconfig
 
-		for root, dirs, files in os.walk(toLongPathSafe(dir)):
-			ignorematch = next( (f for f in files if (f == '.pysysignore' or f == 'pysysignore')), None)
-			if ignorematch:
-				log.debug('Skipping directory %s due to ignore file %s', root, ignorematch)
-				del dirs[:]
-				continue
+		descriptorsToParse = []
+
+		def visitDir(root):
+			with os.scandir(root) as it:
+				dirs = []
+				files = []
+				for entry in it:
+					if entry.is_dir():
+						if entry.name in ignoreSet: continue
+						dirs.append(entry.name)
+						continue
+					fname = entry.name
+					if fname in ['.pysysignore', 'pysysignore']:
+						log.debug('Skipping directory due to ignore file %s', entry.path)
+						return
+					files.append(fname)
+
+				parentconfig = None
+				if dirconfigs is not None:
+					parentconfig = dirconfigs[root[:root.rfind(os.sep)]] # rfind is much faster than dirname
+					if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
+						parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
+						log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
+
+				# allow subclasses to modify descriptors list and/or avoid processing 
+				# subdirectories
+				if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
+					return
 				
-			parentconfig = None
-			if dirconfigs is not None:
-				parentconfig = dirconfigs[os.path.dirname(root)]
-				if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
-					parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
-					log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
+				if descriptorSet is None: 
+					intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
+				else: # compatibility mode
+					intersection = descriptorSet & set(files)
+					
+				if intersection: 
+					if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
+					descriptorfile = fromLongPathSafe(root+os.sep+intersection.pop())
 
-			# allow subclasses to modify descriptors list and/or avoid processing 
-			# subdirectories
-			if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
-				del dirs[:]
-				continue
+					descriptorsToParse.append((descriptorfile, parentconfig))
+					
+					# if this is a test dir, it never makes sense to look at sub directories
+					return
+				
+				if dirconfigs is not None and len(dirs)>0:
+					# stash it for when we navigate down to subdirectories
+					# only add to dict if we're continuing to process children
+					dirconfigs[root] = parentconfig 
+				for d in dirs:
+					visitDir(root+os.sep+d)
 
-			if descriptorSet is None: 
-				intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
-			else: # compatibility mode
-				intersection = descriptorSet & set(files)
-			if intersection: 
-				if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
-				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
-
-				try:
-					parsed = self._parseTestDescriptor(descriptorfile, parentDirDefaults=parentconfig)
-					if parsed:
-						descriptors.append(parsed)
-				except UserError:
-					raise # no stack trace needed, will already include descriptorfile name
-				except Exception as e:
-					log.info('Failed to read descriptor: ', exc_info=True)
-					raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
-
-				# if this is a test dir, it never makes sense to look at sub directories
-				del dirs[:]
-				continue
-			
-			for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
-
-			if dirconfigs is not None and len(dirs)>0:
-				# stash it for when we navigate down to subdirectories
-				# only add to dict if we're continuing to process children
-				dirconfigs[root] = parentconfig 
+		# end of visitDir() definition
+		visitDir(dir)
+		
+		descriptors.extend(p for p in 
+				map(lambda element:	self._parseTestDescriptor(descriptorfile=element[0], parentDirDefaults=element[1]),
+					descriptorsToParse)
+			if p)
 
 		return descriptors
 		
@@ -1346,4 +1355,10 @@ class DescriptorLoader(object):
 			The exception message must contain the path of the descriptorfile.
 		"""
 		assert len(kwargs)==0 or list(kwargs.keys())==['fileContents'], 'reserved for future use: %s'%kwargs.keys()
-		return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)
+		try:
+			return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project, **kwargs)
+		except UserError:
+			raise # no stack trace needed, will already include descriptorfile name
+		except Exception as e:
+			log.info('Failed to read descriptor %s: ', descriptorfile, exc_info=True)
+			raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e)) from e
