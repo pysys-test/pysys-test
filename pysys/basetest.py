@@ -1484,9 +1484,8 @@ class BaseTest(ProcessUser):
 		return False
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		""" Reports a new performance number to the performance ``csv`` file, with an associated unique string key 
+		""" Reports a new performance number to the configured performance reporters, with an associated unique string key 
 		that identifies it for comparison purposes.
-		
 		
 		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
 		rather than the total time taken, since this allows the number of iterations to be increased without affecting 
@@ -1536,8 +1535,7 @@ class BaseTest(ProcessUser):
 			L{pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails}.
 
 		"""
-		for p in self.runner.performanceReporters:
-			p.reportResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
+		self.runner.reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
 			
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""

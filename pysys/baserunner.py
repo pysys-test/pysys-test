@@ -789,6 +789,16 @@ class BaseRunner(ProcessUser):
 		# call the hook for end of test execution
 		self.testComplete(container.testObj, container.outsubdir)
 
+	def reportPerformanceResult(self, testObj, value, resultKey, unit, **kwargs):
+		"""
+		Reports a new performance number to the configured performance reporters. See `pysys.basetest.reportPerformanceResult` 
+		for details of the arguments. 
+		
+		:meta private: Currently internal; may make this public in a future release if we decide it's useful.
+		"""
+		for p in self.performanceReporters:
+			p.reportResult(testObj, value, resultKey, unit, **kwargs)
+
 	def reportTestOutcome(self, testObj, testStart, testDurationSecs, cycle=0, runLogOutput=u'', **kwargs):
 		"""
 		Records the result of a completed test, including notifying any configured writers, and writing the 
