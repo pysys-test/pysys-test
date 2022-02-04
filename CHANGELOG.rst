@@ -18,7 +18,8 @@ PySys 2.1 is under development.
 
 New features:
 
-- XXX
+- Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
+  especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
 
 Fixes:
 

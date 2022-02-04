@@ -415,7 +415,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		if showRunDetails:
 			log("Run details:")
 			for k, v in self.runner.runDetails.items():
-				log(" %23s%s", k+': ', v, extra=ColorLogFormatter.tag(LOG_TEST_DETAILS, 1))
+				log(" %23s%s", k+': ', '%s'%v, extra=ColorLogFormatter.tag(LOG_TEST_DETAILS, 1))
 			log("")
 
 		if showOutcomeStats:

@@ -31,6 +31,7 @@ import shlex
 import warnings
 import difflib
 import importlib
+import multiprocessing
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -327,9 +328,10 @@ class BaseRunner(ProcessUser):
 		self.runDetails = collections.OrderedDict()
 		for p in ['outDirName', 'hostname']:
 			self.runDetails[p] = self.project.properties[p]
+		self.runDetails['cpuCount'] = multiprocessing.cpu_count()		
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
-		
+
 		# escape windows \ chars (which does limit the expressive power, but is likely to be more helpful than not)
 		commitCmd = shlex.split(self.project.properties.get('versionControlGetCommitCommand','').replace('\\', '\\\\'))
 		import subprocess
