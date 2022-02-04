@@ -590,31 +590,62 @@ class _XMLDescriptorParser(object):
 					fileContents = xmlhandle.read()
 								
 			# Find it within a file of another type e.g. pysystest.py
+			if xmlfile.endswith('.py'):
 			
-			# must be at the start of a line, i.e. not after a comment
-			# we do allow raw strings
-			for m in re.finditer(
-					(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
-						+'|'.join([
-							'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
-							'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
-							'"(?P<value3>[^"]*)"',
-						])
-						+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
-						).encode('ascii'), 
-					fileContents, flags=re.DOTALL + re.MULTILINE): 
-				k = m.group('key').decode('ascii', errors='replace')
-				if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
-				k = k.rstrip('_')
+				# TODO: give up on this I think:
+				# and re.search(b'^[ \\t]*__pysys_[^=]*= *(lambda|[{(\\[]|.*\\\\$)', fileContents, flags=re.MULTILINE):
+				# Doing a full Python parse is about 2x more expensive for a trivial/small .py file (less bad for a complex one with modes)
+				# so only do for complex files i.e. if instead of a string value we have a lambda (e.g. for modes config) 
+				# or the beginning of a potentially multi-line expression (with an opening "[{(" or a line that ends with a continuation \\ character). 
 				
-				if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
-				value = m.group('value1') or m.group('value2') or m.group('value3')
-				if value is None:
-					raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
-				if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
-				if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
-					value = value.decode('utf-8', errors='replace')
-				self.kvDict[k] = value
+				pythonHeader = fileContents
+				
+				# Optimize for speed (and to reduce unnecessary failures) by stripping out everything from the imports onwards
+				# assume platform native line endings, for performance reasons - if incorrect, just means we miss the perf optimization
+				# decent speed up from not using regex's here
+				
+				# TODO: special handling for os.linesep='\n\r'
+				# todo: either of these could come first. search from the 2nd one onwards. OR just ignore \nfrom and focus on the main import statements
+				firstImportIndex = pythonHeader.find(b'\nimport ')
+				firstImportIndex = pythonHeader.find(b'\nfrom ', 0 if firstImportIndex==-1 else firstImportIndex) # re.search(b'^(import |from .*import)', pythonHeader)#, flags=re.MULTILINE)
+				if firstImportIndex != -1 and pythonHeader.find(b'__pysys_', firstImportIndex) == -1:
+					assert firstImportIndex != 0
+					pythonHeader = pythonHeader[:firstImportIndex]
+				
+				runpycode = compile(pythonHeader, xmlfile, 'exec')
+				runpy_namespace = {}
+				exec(runpycode, runpy_namespace)
+				for k in runpy_namespace:
+					if k.startswith('__pysys_'):
+						if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
+						self.kvDict[k[len('__pysys_'):].rstrip('_')] = runpy_namespace[k]
+				del runpy_namespace
+			else: # non-Python files, fall back to a general purpsoe Python-like syntax
+			
+				# must be at the start of a line, i.e. not after a comment
+				# we do allow raw strings
+				for m in re.finditer(
+						(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
+							+'|'.join([
+								'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
+								'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
+								'"(?P<value3>[^"]*)"',
+							])
+							+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
+							).encode('ascii'), 
+						fileContents, flags=re.DOTALL + re.MULTILINE): 
+					k = m.group('key').decode('ascii', errors='replace')
+					if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
+					k = k.rstrip('_')
+				
+					if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
+					value = m.group('value1') or m.group('value2') or m.group('value3')
+					if value is None:
+						raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
+					if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
+					if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
+						value = value.decode('utf-8', errors='replace')
+					self.kvDict[k] = value
 
 			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file} (found: {list(self.kvDict.keys())})')
 			xmlcontents = self.kvDict.pop('xml_descriptor', '').strip() # not likely to be used for .py files, but might be nice for some others
@@ -1138,6 +1169,9 @@ class DescriptorLoader(object):
 	files on disk, and allowing for different database modes on different 
 	platforms. 
 
+	This class may use multi-threading to improve performance, so any extensions 
+	must be thread-safe. 
+	
 	:ivar pysys.config.project.Project ~.project: The `pysys.config.project.Project` instance. 
 	
 	"""
@@ -1291,8 +1325,9 @@ class DescriptorLoader(object):
 		# end of visitDir() definition
 		visitDir(dir)
 		
+		# Tried using multithreading with Python 3.9.5 but limited benefit, probably due to GIL
 		descriptors.extend(p for p in 
-				map(lambda element:	self._parseTestDescriptor(descriptorfile=element[0], parentDirDefaults=element[1]),
+				map(lambda element: self._parseTestDescriptor(descriptorfile=element[0], parentDirDefaults=element[1]),
 					descriptorsToParse)
 			if p)
 
