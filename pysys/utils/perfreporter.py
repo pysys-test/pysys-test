@@ -61,7 +61,7 @@ PerformanceUnit.NANO_SECONDS = PerformanceUnit('ns', False) # 10**-9 seconds
 PerformanceUnit.PER_SECOND = PerformanceUnit('/s', True)
 
 class CSVPerformanceReporter(object):
-	"""Class for receiving performance results and writing them to a file for later analysis.
+	"""Class for receiving performance results and writing them to a CSV file for later analysis.
 	
 	Each performance result consists of a value, a result key (which must 
 	be unique across all test cases and modes, and also stable across different 
@@ -83,13 +83,15 @@ class CSVPerformanceReporter(object):
 	The per-run and per-result metadata is not arranged in columns since the structure 
 	differs from row to row.
 
-	After tests have run, the summary file is published with category "CSVPerformanceReport" 
+	Project configuration of performance reporter is through the PySys project XML file using the 
+	``<performance-reporter>`` tag. Multiple reporters may be configured and their individual properties set through the 
+	nested ``<property>`` tag. Properties are set as attributes to the instance just afetr construction, with automatic conversion of 
+	type to match the default value if specified as a static attribute on the class. 
+
+	After tests have run, the summary file is published with category ``CSVPerformanceReport`` 
 	using the `pysys.writer.api.ArtifactPublisher` interface. 
 
 	:param project: The project configuration instance.
-	:param str summaryfile: The filename pattern used for the summary file(s). 
-		If not specified explicitly, the summary file for the CSVPerformanceReporter can be configured 
-		with the project property ``csvPerformanceReporterSummaryFile``. See `getRunSummaryFile()`. 
 	
 	:param str testoutdir: The output directory used for this test run 
 		(equal to `runner.outsubdir`), an identifying string which often contains 
@@ -99,6 +101,20 @@ class CSVPerformanceReporter(object):
 		
 	:param runner: Pass this through to the superclass. 
 	:param kwargs: Pass any additional keyword arguments through to the super class. 
+	
+	The following properties can be set in the project configuration for this reporter:		
+	
+	"""
+	
+	summaryFile = ''
+	"""
+	The filename pattern used for the summary file(s). 
+	
+	For compatibility purposes, if not specified explicitly, the summary file for the CSVPerformanceReporter can be 
+	configured with the project property ``csvPerformanceReporterSummaryFile``, however this is deprecated. 
+	This property can also be accessed and configured under the alternative capitalization ``summaryfile``, however this 
+	is discouraged as of PySys 2.1+, where ``summaryFile`` is the preferred name. 
+
 	"""
 
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
@@ -129,7 +145,20 @@ class CSVPerformanceReporter(object):
 			}
 		
 		self.__summaryFilesWritten = set()
+	
+	def setup(self, **kwargs):
+		"""
+		Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project 
+		configuration properties for this performance reporter have been assigned to this instance. 
 		
+		Usually there is no reason to override the constructor, and any initialization can be done in this method. 
+		
+		.. version added:: 2.1
+		"""
+		# for backwards compat
+		self.summaryfile = self.summaryfile or self.summaryFile
+		self.summaryFile = self.summaryfile
+	
 	def getRunDetails(self, testobj=None, **kwargs):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
 		
@@ -334,19 +363,19 @@ class CSVPerformanceFile(object):
 	If this file contains aggregated results the number of "samples" may be greater than 1 and the "value"
 	will specify the mean result.
 
-	:ivar dict ~.runDetails: A dictionary containing (string key, string value) information about the whole test run.
+	:ivar dict[str,obj] ~.runDetails: A dictionary containing (string key, string value) information about the whole test run.
 	
-	:ivar list ~.results: A list where each item is a dictionary containing information about a given result, 
+	:ivar list[dict] ~.results: A list where each item is a dictionary containing information about a given result, 
 		containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
 		
 	:ivar str ~.RUN_DETAILS: The constant prefix identifying information about the whole test run
 	
 	:ivar str ~.RESULT_DETAILS: The constant prefix identifying detailed information about a given result
 	
-	:ivar list ~.COLUMNS: Constant list of the columns in the performance output
+	:ivar list[str] ~.COLUMNS: Constant list of the columns in the performance output
 
 	:param str contents: A string containing the contents of the file to be parsed (can be empty)
-
+	:rtype: CSVPerformanceFile
 	"""
 	COLUMNS = ['resultKey','testId','value','unit','biggerIsBetter','toleranceStdDevs','samples','stdDev']
 	RUN_DETAILS = '#runDetails:#'
@@ -360,7 +389,7 @@ class CSVPerformanceFile(object):
 		CSVPerformanceFile with a single row for each resultKey (with the "value" set to the
 		mean if there are multiple results with that key, and the stdDev also set appropriately).
 
-		:param files: the list of performance file objects to aggregate
+		:param list[CSVPerformanceFile] files: the list of performance file objects to aggregate.
 
 		"""
 		if isinstance(files, CSVPerformanceFile): files = [files]

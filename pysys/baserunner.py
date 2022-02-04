@@ -328,7 +328,7 @@ class BaseRunner(ProcessUser):
 		self.runDetails = collections.OrderedDict()
 		for p in ['outDirName', 'hostname']:
 			self.runDetails[p] = self.project.properties[p]
-		self.runDetails['cpuCount'] = multiprocessing.cpu_count()		
+		self.runDetails['cpuCount'] = str(multiprocessing.cpu_count())
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
 
@@ -537,12 +537,19 @@ class BaseRunner(ProcessUser):
 			results.
 
 		"""
-		if self.project.perfReporterConfig:
-			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
-			# might not be fully constructed yet
-			from pysys.utils.perfreporter import CSVPerformanceReporter
-			self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir, runner=self)]
+
+		assert self.project.perfReporterConfig # should be at least one
 		
+		# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
+		# might not be fully constructed yet
+		from pysys.utils.perfreporter import CSVPerformanceReporter
+		self.performanceReporters = []
+		for perfcls, perfOptionsDict in self.project.perfReporterConfig:
+			p = perfcls(self.project, perfOptionsDict.get('summaryfile',''), self.outsubdir, runner=self)
+			p.pluginProperties = perfOptionsDict
+			pysys.utils.misc.setInstanceVariablesFromDict(p, perfOptionsDict)
+			self.performanceReporters.append(p)
+				
 		class PySysPrintRedirector(object):
 			def __init__(self):
 				self.last = None
@@ -606,7 +613,10 @@ class BaseRunner(ProcessUser):
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
 		if self.printLogs is None: self.printLogs = self.__printLogsDefault # default value, unless overridden by cmdline or writer.setup
-		
+
+		for p in self.performanceReporters:
+				p.setup()
+
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: 
 			threadPool = ThreadPool(self.threads, requests_queue=self._testScheduler)

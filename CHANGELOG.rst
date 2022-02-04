@@ -20,6 +20,11 @@ New features:
 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
   especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
+- Extended performance reporter API. Now you can have multiple performance reporters, and configure properties for each 
+  using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
+  additional ``setup`` method which is called just after `pysys.baserunner.BaseRunner.setup`, and is now the best place 
+  for any initialization (it is recommended to move any such code out of the ``__init__`` constructor which should 
+  no longer be used in most cases). 
 
 Fixes:
 

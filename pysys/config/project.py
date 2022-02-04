@@ -283,13 +283,16 @@ class _XMLProjectParser(object):
 
 	def getPerformanceReporterDetails(self):
 		nodeList = self.root.getElementsByTagName('performance-reporter')
-		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
-			
-		summaryfile = optionsDict.pop('summaryfile', '')
-		summaryfile = self.expandProperties(summaryfile, default=None, name='performance-reporter summaryfile')
-		if optionsDict: raise UserError('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
+		results = []
+		for n in nodeList:
+			cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
+			optionsDict['summaryfile'] = self.expandProperties(optionsDict.get('summaryfile', ''), default=None, name='performance-reporter summaryfile')
+			results.append( (cls, optionsDict) )
 		
-		return cls, summaryfile
+		if not results: # add a default one
+			results.append( self._parseClassAndConfigDict(None, 'pysys.utils.perfreporter.CSVPerformanceReporter') )
+			
+		return results
 
 	def getProjectHelp(self):
 		help = ''
