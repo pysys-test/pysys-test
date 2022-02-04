@@ -733,7 +733,7 @@ class BaseTest(ProcessUser):
 			seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 			
 			matches = seq.get_matching_blocks()
-			lastmatch = matches[-1] if len(matches)==2 else matches[-2] # may be of zero size
+			lastmatch = matches[-1] if len(matches) in [2,1] else matches[-2] # may be of zero size
 			
 			# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
 			# Colouring will be red, white(first match, if any), red, white(last match, if any)
