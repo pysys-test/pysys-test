@@ -81,6 +81,14 @@ class PerformanceRunData:
 		self.runDetails = runDetails
 		self.results = results
 
+	def __maybequote(self, s):
+		return '"%s"' % s if isstring(s) else s
+	def __str__(self):
+		return 'PerformanceRunData< %d results; runDetails: %s>'%(len(self.results), ', '.join([('%s=%s'%(k, self.__maybequote(self.runDetails[k]))) for k in self.runDetails]))
+	def __repr__(self):
+		return 'PerformanceRunData<runDetails: %s%s\n>'%(', '.join([('%s="%s"'%(k, self.runDetails[k])) for k in self.runDetails]),
+			''.join([('\n - %s'%(', '.join([('%s=%s'%(k, self.__maybequote(r.get(k, r.get('resultDetails',{}).get(k,None))))) for k in list(r.keys())+list(r.get('resultDetails',{}).keys()) if k!='resultDetails']))) for r in self.results]))
+
 	@staticmethod
 	def aggregate(runs):
 		"""Aggregate a list of multiple runs and/or cycles into a single performance run data object with a single 
@@ -626,18 +634,6 @@ class CSVPerformanceFile(PerformanceRunData):
 				raise Exception('Cannot parse performance line - %s (%s): "%s"'%(e, e.__class__.__name__, l))
 		
 		if self.runDetails == None: self.runDetails = collections.OrderedDict()
-
-	def __maybequote(self, s):
-		return '"%s"' % s if isstring(s) else s
-		
-	def __str__(self):
-		return 'CSVPerformanceFile< %d results; runDetails: %s>'%(len(self.results), ', '.join([('%s=%s'%(k, self.__maybequote(self.runDetails[k]))) for k in self.runDetails]))
-
-	def __repr__(self):
-		return 'CSVPerformanceFile<runDetails: %s%s\n>'%(', '.join([('%s="%s"'%(k, self.runDetails[k])) for k in self.runDetails]),
-			''.join([('\n - %s'%(', '.join([('%s=%s'%(k, self.__maybequote(r.get(k, r.get('resultDetails',{}).get(k,None))))) for k in list(r.keys())+list(r.get('resultDetails',{}).keys()) if k!='resultDetails']))) for r in self.results]))
-
-
 
 if __name__ == "__main__":
 	USAGE = """
