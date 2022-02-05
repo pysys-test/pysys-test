@@ -52,6 +52,7 @@ from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter, ArtifactPublisher
 import pysys.utils.allocport
+import pysys.utils.perfreporter
 
 global_lock = threading.Lock() # internal, do not use
 
@@ -703,6 +704,11 @@ class BaseRunner(ProcessUser):
 						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
+			# If user explicitly asked for it, or if doing a multi-cycle perf run, then display a summary at end
+			if self.getXArg('printPerfSummary', default=self.cycles>1):
+				log.debug('Will printPerfSummary')
+				self.performanceReporters[0].printPerfSummary()
+			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:
 				for writer in self.writers:
@@ -809,8 +815,37 @@ class BaseRunner(ProcessUser):
 		
 		:meta private: Currently internal; may make this public in a future release if we decide it's useful.
 		"""
-		for p in self.performanceReporters:
-			p.reportResult(testObj, value, resultKey, unit, **kwargs)
+		resultKey = resultKey.strip()
+		
+		# check for correct format for result key
+		if '  ' in resultKey:
+			raise Exception ('Invalid resultKey - contains double space "  ": %s' % resultKey)
+		if re.compile(r'.*\d{4}[-/]\d{2}[-/]\d{2}\ \d{2}[:/]\d{2}[:/]\d{2}.*').match(resultKey) != None :
+			raise Exception ('Invalid resultKey - contains what appears to be a date time - which would imply alteration of the result key in each run: %s' % resultKey)
+		if '\n' in resultKey:
+			raise Exception ('Invalid resultKey - contains a new line: %s' % resultKey)
+		if '%s' in resultKey or '%d' in resultKey or '%f' in resultKey: # people do this without noticing sometimes
+			raise Exception('Invalid resultKey - contains unsubstituted % format string: '+resultKey)
+
+		if isstring(value): value = float(value)
+		assert isinstance(value, int) or isinstance(value, float), 'invalid type for performance result: %s'%(repr(value))
+
+		if not self.performanceReporters: return
+		
+		# Use the unit aliases of the first performance reporter (to avoid the need to worry about syncing between different reporters)
+		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
+		assert isinstance(unit, pysys.utils.perfreporter.PerformanceUnit), repr(unit)
+		
+		try:
+			for p in self.performanceReporters:
+				p.reportResult(testObj, value, resultKey, unit, **kwargs)
+		finally:
+			# Better to log it after any initialization messages from the reporters
+			testObj.log.info("Performance result: %s = %s %s (%s)", 
+				# Use the first reporter to convert the values to a string, providing a mechanism to override the format if needed
+				resultKey, self.performanceReporters[0].valueToDisplayString(value), unit,
+			 'bigger is better' if unit.biggerIsBetter else 'smaller is better',
+					extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
 
 	def reportTestOutcome(self, testObj, testStart, testDurationSecs, cycle=0, runLogOutput=u'', **kwargs):
 		"""

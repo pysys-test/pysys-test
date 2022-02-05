@@ -1,4 +1,4 @@
-__pysys_title__   = r""" PerformanceReporter - default configuration, with end-of-cycle aggregation """ 
+__pysys_title__   = r""" PerformanceReporter - default configuration, multi-cycle aggregation, summary""" 
 #                        ================================================================================
 
 __pysys_purpose__ = r""" 
@@ -24,7 +24,7 @@ class PySysTest(pysys.basetest.BaseTest):
 
 	def execute(self):
 		self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--cycle=3'], workingDir=self.input)
-		self.logFileContents('pysys-run.out')
+		self.logFileContents('pysys-run.out', tail=True)
 		
 	def validate(self):
 		path = self.grep('pysys-run.out', 'Creating performance summary log file at: (.+)')
@@ -33,3 +33,8 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.assertThat('resultsLen == expected', resultsLen=len(f.results), expected=2)
 		self.assertThat('result1samples == expected', result1samples=f.results[0]['samples'], expected=3)
 		self.assertThat('result2stdDev == expected', result2stdDev=f.results[-1]['stdDev'], expected=10.0)
+
+		self.assertDiff(self.copy('pysys-run.out', 'perf-summary.out', mappers=[
+			pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX+' ', ''),
+			pysys.mappers.IncludeLinesBetween(startAfter='Summary of performance results ', stopBefore='^INFO *$'),
+		]))

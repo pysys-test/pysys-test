@@ -95,11 +95,6 @@ class CSVPerformanceReporter(object):
 	element, for example to write data to an XML or JSON file instead of CSV. 
 	Performance reporter implementations are required to be thread-safe.
 	 
-	If multiple performance reporters are configured, then the first one is designated as 
-	"primary" reporter which means it takes responsibility for printing performance results 
-	since you wouldn't want to see duplicated data on the console or run.log for every 
-	configured reporter. 
-	
 	The standard CSV performance reporter implementation writes to a UTF-8 file of 
 	comma-separated values that is both machine and human readable and 
 	easy to view and use in any spreadsheet program, and after the columns containing 
@@ -208,7 +203,7 @@ class CSVPerformanceReporter(object):
 		# for backwards compat
 		self.summaryfile = self.summaryfile or self.summaryFile
 		self.summaryFile = self.summaryfile
-	
+		
 	def getRunDetails(self, testobj=None, **kwargs):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
 		
@@ -312,33 +307,12 @@ class CSVPerformanceReporter(object):
 		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result
 
 		"""
-		resultKey = resultKey.strip()
-
-		# check for correct format for result key
-		if '  ' in resultKey:
-			raise Exception ('Invalid resultKey - contains double space "  ": %s' % resultKey)
-		if re.compile(r'.*\d{4}[-/]\d{2}[-/]\d{2}\ \d{2}[:/]\d{2}[:/]\d{2}.*').match(resultKey) != None :
-			raise Exception ('Invalid resultKey - contains what appears to be a date time - which would imply alteration of the result key in each run: %s' % resultKey)
-		if '\n' in resultKey:
-			raise Exception ('Invalid resultKey - contains a new line: %s' % resultKey)
-		if '%s' in resultKey or '%d' in resultKey or '%f' in resultKey: # people do this without noticing sometimes
-			raise Exception('Invalid resultKey - contains unsubstituted % format string: '+resultKey)
-
-		if isstring(value): value = float(value)
-		assert isinstance(value, int) or isinstance(value, float), 'invalid type for performance result: %s'%(repr(value))
-
-		if unit in self.unitAliases: unit = self.unitAliases[unit]
-		assert isinstance(unit, PerformanceUnit), repr(unit)
-
 		# toleranceStdDevs - might add support for specifying a global default in project settings
 		resultDetails = resultDetails or []
 		if isinstance(resultDetails, list):
 			resultDetails = collections.OrderedDict(resultDetails)
 
 		if self.isPrimaryReporter:
-			testobj.log.info("Performance result: %s = %s %s (%s)", resultKey, self.valueToDisplayString(value), unit,
-							 'bigger is better' if unit.biggerIsBetter else 'smaller is better',
-							 extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
 			with self._lock:
 				prevresult = self.__previousResultKeys.get(resultKey, None)
 				d = collections.OrderedDict(resultDetails)
@@ -369,6 +343,30 @@ class CSVPerformanceReporter(object):
 		formatted = self.formatResult(testobj, value, resultKey, unit, toleranceStdDevs, resultDetails)
 		self.recordResult(formatted, testobj)
 
+	def printPerfSummary(self, **kwargs):
+		""" Use the logger to print a summary of all performance results at the end of the test run. 
+		
+		Called by the runner (on the primary performance reporter) just after `cleanup`, 
+		i.e. when all results have been finalized. 
+		"""
+		with self._lock:
+			if not self.__summaryFilesWritten: return # nothing to do
+			
+			logger = logging.getLogger('pysys.perfreporter.summary')
+			for p in sorted(list(self.__summaryFilesWritten)):
+				perfFile = CSVPerformanceFile.load(p)
+				perfFile = CSVPerformanceFile.aggregate([perfFile])
+				
+				if not perfFile.results: continue
+				logger.info('Summary of performance results written to %s :', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
+				for r in sorted(perfFile.results, key=lambda r: r['resultKey']):
+					logger.info("  %s = %s %s (%s)%s", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
+						 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
+							'' if r['samples']==1 else ', stdDev = '+self.valueToDisplayString(r['stdDev']),
+								extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
+
+				logger.info('')
+				
 	def formatResult(self, testobj, value, resultKey, unit, toleranceStdDevs, resultDetails):
 		"""Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).
 
