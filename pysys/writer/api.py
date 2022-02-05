@@ -51,6 +51,9 @@ The most common type of writer is the standard 'Record' writer, but there are al
      that did not pass. 
      Summary writers are always enabled regardless of the flags given to the PySys launcher.
 
+(See also `pysys.utils.perfreporter` whcih is used for writing performance results, using a similar but slightly 
+different API).
+
 Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
 writers may be configured and their individual properties set through the nested ``<property>`` tag. Writer
 properties are set as attributes to the writer instance just before setup is called, with automatic conversion of 
