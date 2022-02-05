@@ -25,8 +25,9 @@ New features:
   mean and standard deviation (and ``samples``=``cycles``) instead of individual results for each cycle. This is very 
   useful when cycling tests locally to generate stable numbers for comparisons while optimizing your application. 
   The new behaviour can be disabled by setting the ``aggregateCycles`` property on the reporter if needed. 
-- Extended performance reporter API. Now you can have multiple performance reporters, and configure properties for each 
-  using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
+- Extended performance reporter API. Added a new class `pysys.utils.perfreporter.BasePerformanceReporter` for creating 
+  custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for 
+  each using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
   additional ``setup`` method which is called just after `pysys.baserunner.BaseRunner.setup`, and is now the best place 
   for any initialization (it is recommended to move any such code out of the ``__init__`` constructor which should 
   no longer be used in most cases). 

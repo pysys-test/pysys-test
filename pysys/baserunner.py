@@ -218,6 +218,7 @@ class BaseRunner(ProcessUser):
 		assert not mode, 'Passing mode= to the runner is no longer supported'
 
 		self.__resultWritingLock = threading.Lock() 
+		self.__previousPerfResultKeys = {}
 		self.runnerErrors = [] # list of strings
 
 		self.startTime = self.project.startTimestamp
@@ -551,6 +552,11 @@ class BaseRunner(ProcessUser):
 			p = perfcls(self.project, perfOptionsDict.get('summaryfile',''), self.outsubdir, runner=self)
 			p.pluginProperties = perfOptionsDict
 			pysys.utils.misc.setInstanceVariablesFromDict(p, perfOptionsDict)
+			
+			# for backwards compat permit "summaryfile" as well as summaryFile
+			p.summaryfile = p.summaryfile or p.summaryFile
+			p.summaryFile = p.summaryfile
+			
 			self.performanceReporters.append(p)
 		if self.performanceReporters: self.performanceReporters[0].isPrimaryReporter = True
 				
@@ -830,11 +836,42 @@ class BaseRunner(ProcessUser):
 		if isstring(value): value = float(value)
 		assert isinstance(value, int) or isinstance(value, float), 'invalid type for performance result: %s'%(repr(value))
 
+		kwargs['resultDetails'] = kwargs.get('resultDetails') or []
+		if isinstance(kwargs['resultDetails'], list):
+			kwargs['resultDetails'] = collections.OrderedDict(kwargs['resultDetails'])
+
+		# Make sure user notices if they've reused resultKeys illegally
+		with self.__resultWritingLock: # reuse this lock for simplicity; perf writing doesn't happen very often anyway
+			prevresult = self.__previousPerfResultKeys.get(resultKey, None)
+			d = dict(kwargs['resultDetails'])
+			d['testId'] = testObj.descriptor.id
+			if prevresult:
+				previd, prevcycle, prevdetails = prevresult
+				# if only difference is cycle (i.e. different testobj but same test id) then allow, but
+				# make sure we report error if this test tries to report same key more than once, or if it
+				# overlaps with another test's result keys
+				if previd == testObj.descriptor.id and prevcycle==testObj.testCycle:
+					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
+					return
+				elif previd != testObj.descriptor.id: 
+					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
+					return
+				elif prevdetails != d: 
+					# prevent different cycles of same test with different resultdetails 
+					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
+					return
+			else:
+				self.__previousPerfResultKeys[resultKey] = (testObj.descriptor.id, testObj.testCycle, d)
+
 		if not self.performanceReporters: return
-		
+
 		# Use the unit aliases of the first performance reporter (to avoid the need to worry about syncing between different reporters)
 		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
 		assert isinstance(unit, pysys.utils.perfreporter.PerformanceUnit), repr(unit)
+
+		if testObj.getOutcome().isFailure():
+			testObj.log.warning('Performance result "%s" will not be recorded as test has failed so results could be invalid', resultKey)
+			return
 		
 		try:
 			for p in self.performanceReporters:

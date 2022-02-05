@@ -18,7 +18,7 @@
 """
 Performance number reporting classes, used by `pysys.basetest.BaseTest.reportPerformanceResult`. 
 
-The `CSVPerformanceReporter` can be used as-is or subclassed for alternative output formats. 
+Some reporter classes are provided in the box, and the `BasePerformanceReporter` class can be used to create more. 
 """
 
 import collections, threading, time, math, sys, os
@@ -81,21 +81,150 @@ class PerformanceRunData:
 		self.runDetails = runDetails
 		self.results = results
 
-class CSVPerformanceReporter(object):
-	"""Class for receiving performance results and writing them to a CSV file for later analysis.
+class BasePerformanceReporter:
+	"""API base class for creating a reporter that handles or stores performance results for later analysis.
 	
 	Each performance result consists of a value, a result key (which must 
 	be unique across all test cases and modes, and also stable across different 
 	runs), and a unit (which also encodes whether bigger values are better or worse). 
 	Each test can report any number of performance results. 
 	
-	There is usually a single shared instance of this class per invocation of PySys. 
-	It is possible to customize the way performance results are recorded by 
-	providing a subclass and specifying it in the project ``<performancereporter>`` 
-	element, for example to write data to an XML or JSON file instead of CSV. 
 	Performance reporter implementations are required to be thread-safe.
 	 
-	The standard CSV performance reporter implementation writes to a UTF-8 file of 
+	Project configuration of performance reporters is through the PySys project XML file using the 
+	``<performance-reporter>`` tag. Multiple reporters may be configured and their individual properties set through the 
+	nested ``<property>`` tag or XML attributes. Properties are set as Python attributes on the instance just after 
+	construction, with automatic conversion of type to match the default value if specified as a static attribute on the 
+	class. 
+	
+	If no reporters are explicitly configured, default reporters will be added. 
+
+	:ivar pysys.config.project.Project project: The project configuration instance.
+	
+	:ivar str testoutdir: The output directory used for this test run 
+		(equal to `runner.outsubdir`), an identifying string which often contains 
+		the platform, or when there are multiple test runs on the same machine 
+		may be used to distinguish between them. This is usually a relative path 
+		but may be an absolute path. 
+		
+	:ivar runner: A reference to the runner. 
+	
+	.. version added:: 2.1
+	"""
+	
+	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
+		self.runner = runner
+		assert self.runner is not None
+		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future if needed; give error if any unexpected args are passed
+		
+		self.testoutdir = os.path.basename(testoutdir)
+		self.summaryfile = summaryfile
+		self.project = project
+		self.hostname = HOSTNAME.lower().split('.')[0]
+		self.runStartTime = self.runner.startTime
+		
+		self._lock = threading.RLock()
+		
+		# anything listed here can be passed using just a string literal
+		self.unitAliases = {
+			's':PerformanceUnit.SECONDS, 
+			'ns':PerformanceUnit.NANO_SECONDS, 
+			'/s': PerformanceUnit.PER_SECOND
+			}
+			
+	def setup(self, **kwargs):
+		"""
+		Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project 
+		configuration properties for this performance reporter have been assigned to this instance. 
+		
+		Usually there is no reason to override the constructor, and any initialization can be done in this method. 
+		
+		.. version added:: 2.1
+		"""
+		pass
+		
+	def getRunDetails(self, testobj=None, **kwargs):
+		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
+		
+		Overriding this method is discouraged; customization of the run details should usually be performed by changing 
+		the ``runner.runDetails`` dictionary from the `pysys.baserunner.BaseRunner.setup()` method. 
+
+		:param testobj: the test case instance registering the value
+
+		.. versionchanged:: 2.0 Added testobj parameter, for advanced cases where you want to 
+		to provide different ``runDetails`` based on some feature of the test object or mode. 
+		
+		"""
+		return collections.OrderedDict(self.runner.runDetails)
+	
+	def valueToDisplayString(self, value):
+		"""Pretty-print an integer or float value to a moderate number of significant figures.
+
+		The method additionally adds a "," grouping for large numbers.
+
+		:param value: the value to be displayed, which must be a numeric type. 
+
+		"""
+		if value > 1000:
+			return '{0:,}'.format(int(value))
+		else:
+			valtostr = '%0.4g' % value
+			if 'e' in valtostr: valtostr = '%f'%value
+			return valtostr
+
+	def getRunSummaryFile(self, testobj, **kwargs):
+		"""Return the fully substituted location of the file to which summary performance results will be written.
+
+		This may include the following substitutions: ``@OUTDIR@`` (=${outDirName}, the basename of the output directory for this run,
+		e.g. "linux"), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. 
+		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
+		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.
+
+		:param testobj: the test case instance registering the value
+
+		"""
+		summaryfile = self.summaryfile or self.summaryFile or self.DEFAULT_SUMMARY_FILE
+		
+		# properties are already expanded if set in project config, but needs doing explicitly in case default value was used
+		summaryfile = self.runner.project.expandProperties(summaryfile)
+		
+		summaryfile = summaryfile\
+			.replace('@OUTDIR@', os.path.basename(self.testoutdir)) \
+			.replace('@HOSTNAME@', self.hostname) \
+			.replace('@DATE@', time.strftime('%Y-%m-%d', time.localtime(self.runStartTime))) \
+			.replace('@TIME@', time.strftime('%H.%M.%S', time.localtime(self.runStartTime))) \
+			.replace('@TESTID@', testobj.descriptor.id)
+		
+		assert summaryfile, repr(getRunSummaryFile) # must not be empty
+		summaryfile = os.path.normpath(os.path.join(self.runner.output+'/..', summaryfile))
+		return summaryfile
+
+	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
+		"""Report a performance result, with an associated unique key that identifies it.
+
+		:param testobj: the test case instance registering the value. Use ``testobj.descriptor.id`` to get the ``testId``. 
+		:param int|float value: the value to be reported. This may be an int or a float. 
+		:param str resultKey: a unique string that fully identifies what was measured.
+		:param PerformanceUnit unit: identifies the unit the value is measured in.
+		:param float toleranceStdDevs: indicates how many standard deviations away from the mean for a regression.
+		:param dict[str,obj] resultDetails:  A dictionary of detailed information that should be recorded together with the result.
+
+		"""
+		pass
+		
+
+	def cleanup(self):
+		"""Called when PySys has finished executing tests.
+		
+		This is where any file footer and other I/O finalization can be written to the end of performance log files, and 
+		is also a good time to do any required aggregation, printing of summaries or artifact publishing. 
+		"""
+		pass
+
+class CSVPerformanceReporter(BasePerformanceReporter):
+	"""Performance reporter which writes to a CSV file.
+	
+	This reporter writes to a UTF-8 file of 
 	comma-separated values that is both machine and human readable and 
 	easy to view and use in any spreadsheet program, and after the columns containing 
 	the information for each result, contains comma-separated metadata containing 
@@ -104,29 +233,9 @@ class CSVPerformanceReporter(object):
 	The per-run and per-result metadata is not arranged in columns since the structure 
 	differs from row to row.
 
-	Project configuration of performance reporter is through the PySys project XML file using the 
-	``<performance-reporter>`` tag. Multiple reporters may be configured and their individual properties set through the 
-	nested ``<property>`` tag. Properties are set as attributes to the instance just after construction, with automatic conversion of 
-	type to match the default value if specified as a static attribute on the class. 
-
 	After tests have run, the summary file is published with category ``CSVPerformanceReport`` 
 	using the `pysys.writer.api.ArtifactPublisher` interface. 
 
-	:param project: The project configuration instance.
-	
-	:param str testoutdir: The output directory used for this test run 
-		(equal to `runner.outsubdir`), an identifying string which often contains 
-		the platform, or when there are multiple test runs on the same machine 
-		may be used to distinguish between them. This is usually a relative path 
-		but may be an absolute path. 
-		
-	:param runner: Pass this through to the superclass. 
-	:param kwargs: Pass any additional keyword arguments through to the super class. 
-	
-	:ivar bool isPrimaryReporter: If True, this is the first (or only) performance reporter, which will print results to 
-		the console and run.log in a human-friendly way. If False, this is a secondary reporter which should leave the 
-		job to the primary. 
-	
 	The following properties can be set in the project configuration for this reporter:		
 	
 	"""
@@ -166,31 +275,6 @@ class CSVPerformanceReporter(object):
 	(typically testRootDir, unless ``--outdir`` is overridden).
 	"""
 
-	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
-		self.runner = runner
-		assert self.runner is not None
-		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future if needed; give error if any unexpected args are passed
-		
-		self.testoutdir = os.path.basename(testoutdir)
-		self.summaryfile = summaryfile
-		self.project = project
-		self.hostname = HOSTNAME.lower().split('.')[0]
-		self.runStartTime = self.runner.startTime
-		
-		self._lock = threading.RLock()
-		self.__previousResultKeys = {} # value = (testid, testobjhash, resultDetails)
-		
-		# anything listed here can be passed using just a string literal
-		self.unitAliases = {
-			's':PerformanceUnit.SECONDS, 
-			'ns':PerformanceUnit.NANO_SECONDS, 
-			'/s': PerformanceUnit.PER_SECOND
-			}
-		
-		self.isPrimaryReporter = False # will be set to True by the runner later
-		
-		self.__summaryFilesWritten = set()
-	
 	def setup(self, **kwargs):
 		"""
 		Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project 
@@ -200,64 +284,12 @@ class CSVPerformanceReporter(object):
 		
 		.. version added:: 2.1
 		"""
-		# for backwards compat
-		self.summaryfile = self.summaryfile or self.summaryFile
-		self.summaryFile = self.summaryfile
+		self.__summaryFilesWritten = set()
 		
-	def getRunDetails(self, testobj=None, **kwargs):
-		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
+		# for backwards compat - must do this before super.setup sets the summaryfile
+		self.summaryfile = self.summaryfile or self.summaryFile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
 		
-		Overriding this method is discouraged; customization of the run details should usually be performed by changing 
-		the ``runner.runDetails`` dictionary from the `pysys.baserunner.BaseRunner.setup()` method. 
-
-		:param testobj: the test case instance registering the value
-
-		.. versionchanged:: 2.0 Added testobj parameter. 
-		
-		"""
-		return collections.OrderedDict(self.runner.runDetails)
-	
-	def valueToDisplayString(self, value):
-		"""Pretty-print an integer or float value to a moderate number of significant figures.
-
-		The method additionally adds a "," grouping for large numbers.
-
-		:param value: the value to be displayed
-
-		"""
-		if value > 1000:
-			return '{0:,}'.format(int(value))
-		else:
-			valtostr = '%0.4g' % value
-			if 'e' in valtostr: valtostr = '%f'%value
-			return valtostr
-
-	def getRunSummaryFile(self, testobj, **kwargs):
-		"""Return the fully substituted location of the file to which summary performance results will be written.
-
-		This may include the following substitutions: ``@OUTDIR@`` (=${outDirName}, the basename of the output directory for this run,
-		e.g. "linux"), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. 
-		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
-		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.
-
-		:param testobj: the test case instance registering the value
-
-		"""
-		summaryfile = self.summaryfile or self.summaryFile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
-		
-		# properties are already expanded if set in project config, but needs doing explicitly in case default value was used
-		summaryfile = self.runner.project.expandProperties(summaryfile)
-		
-		summaryfile = summaryfile\
-			.replace('@OUTDIR@', os.path.basename(self.testoutdir)) \
-			.replace('@HOSTNAME@', self.hostname) \
-			.replace('@DATE@', time.strftime('%Y-%m-%d', time.localtime(self.runStartTime))) \
-			.replace('@TIME@', time.strftime('%H.%M.%S', time.localtime(self.runStartTime))) \
-			.replace('@TESTID@', testobj.descriptor.id)
-		
-		assert summaryfile, repr(getRunSummaryFile) # must not be empty
-		summaryfile = os.path.normpath(os.path.join(self.runner.output+'/..', summaryfile))
-		return summaryfile
+		super().setup()
 
 	def getRunHeader(self, testobj=None, **kwargs):
 		"""Return the header string to the CSV file.
@@ -273,11 +305,6 @@ class CSVPerformanceReporter(object):
 		return CSVPerformanceFile.makeCSVHeaderLine(runDetails)
 
 	def cleanup(self):
-		"""Called when PySys has finished executing tests.
-		
-		This is where any footer and other I/O finalization can be written to the end of files, and also a good time to 
-		do aggregation, printing of summaries and artifact publishing. 
-		"""
 		with self._lock:
 			if self.runner is not None and self.__summaryFilesWritten:
 				for p in sorted(list(self.__summaryFilesWritten)):
@@ -297,49 +324,6 @@ class CSVPerformanceReporter(object):
 						self.runner.publishArtifact(p, self.publishArtifactCategory)
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		"""Report a performance result, with an associated unique key that identifies it.
-
-		:param testobj: the test case instance registering the value
-		:param value: the value to be reported. This may be an int, float, or a character (unicode) string. 
-		:param resultKey: a unique string that fully identifies what was measured
-		:param unit: identifies the unit the value is measured in
-		:param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
-		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result
-
-		"""
-		# toleranceStdDevs - might add support for specifying a global default in project settings
-		resultDetails = resultDetails or []
-		if isinstance(resultDetails, list):
-			resultDetails = collections.OrderedDict(resultDetails)
-
-		if self.isPrimaryReporter:
-			with self._lock:
-				prevresult = self.__previousResultKeys.get(resultKey, None)
-				d = collections.OrderedDict(resultDetails)
-				d['testId'] = testobj.descriptor.id
-				if prevresult:
-					previd, prevcycle, prevdetails = prevresult
-					# if only difference is cycle (i.e. different testobj but same test id) then allow, but
-					# make sure we report error if this test tries to report same key more than once, or if it
-					# overlaps with another test's result keys
-					if previd == testobj.descriptor.id and prevcycle==testobj.testCycle:
-						testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
-						return
-					elif previd != testobj.descriptor.id: 
-						testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
-						return
-					elif prevdetails != d: 
-						# prevent different cycles of same test with different resultdetails 
-						testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
-						return
-				else:
-					self.__previousResultKeys[resultKey] = (testobj.descriptor.id, testobj.testCycle, d)
-
-			if testobj.getOutcome().isFailure():
-				testobj.log.warning('   Performance result "%s" will not be recorded as test has failed', resultKey)
-				return
-
-
 		formatted = self.formatResult(testobj, value, resultKey, unit, toleranceStdDevs, resultDetails)
 		self.recordResult(formatted, testobj)
 
