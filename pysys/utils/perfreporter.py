@@ -324,9 +324,7 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 					 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
 						'' if r['samples']==1 else ', stdDev = '+self.valueToDisplayString(r['stdDev']),
 						r['testId'],
-							extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
-
-			logger.info('')
+							extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1], suppress_prefix=True))
 
 class CSVPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a CSV file.

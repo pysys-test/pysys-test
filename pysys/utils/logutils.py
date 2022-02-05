@@ -60,19 +60,27 @@ class BaseLogFormatter(logging.Formatter):
 	# the key to add to the extra={} dict of a logger call to specify the arg index for the category
 	ARG_INDEX = 'log_arg_index'
 
+	# the key to add to the extra={} dict of a logger call to skip the timestamp and log level prefix and just format the message
+	SUPPRESS_PREFIX = 'pysys_log_suppressPrefix'
+
 	@classmethod
-	def tag(cls, category, arg_index=None):
+	def tag(cls, category, arg_index=None, suppress_prefix=False):
 		"""Return  dictionary to tag a string to format with color encodings.
 
 		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
 		:param arg_index: The index of argument in the string expansion to color. This can be either a single
 			integer value representing the index, or a list of integers representing a set of indexes to be colored. 
 			Note that format arguments for coloring must be of string type. 
+		:param bool suppress_prefix: Set to True to suppress the timestamp and log level prefix, to save horizontal space 
+			on the console. Only do this for log lines where you're sure these details aren't needed, for example where a 
+			preceding log line with those details) has already been printed and there is no chance of other threads writing 
+			interleaving lines to the same device. 
+			This flag only affects the colored formatter (as used on the console). Added in v2.1. 
 		:return: A dictionary that can then be used in calls to the logger
 		"""
-		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index]}
-		if type(arg_index) is list and all(isinstance(i, int) for i in arg_index): return {cls.CATEGORY:category, cls.ARG_INDEX:arg_index}
-		return {cls.CATEGORY:category}
+		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index], cls.SUPPRESS_PREFIX:suppress_prefix}
+		if type(arg_index) is list and all(isinstance(i, int) for i in arg_index): return {cls.CATEGORY:category, cls.ARG_INDEX:arg_index, cls.SUPPRESS_PREFIX:suppress_prefix}
+		return {cls.CATEGORY:category, cls.SUPPRESS_PREFIX:suppress_prefix}
 
 
 	def __init__(self, propertiesDict):
@@ -269,6 +277,8 @@ class ColorLogFormatter(BaseLogFormatter):
 			except Exception as e:
 				logging.getLogger('pysys.utils.logutils').debug('Failed to format log message "%s": %s'%(record.msg, repr(e)))
 
+		if getattr(record, self.SUPPRESS_PREFIX, False):
+			return record.msg % record.args
 		return super(ColorLogFormatter, self).format(record)
 
 

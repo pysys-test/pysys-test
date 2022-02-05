@@ -28,6 +28,5 @@ class PySysTest(pysys.basetest.BaseTest):
 		path = self.grep('pysys-run.out', 'Creating performance summary log file at: (.+)')
 
 		self.assertDiff(self.copy('pysys-run.out', 'perf-summary.out', mappers=[
-			pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX+' ', ''),
-			pysys.mappers.IncludeLinesBetween(startAfter='Summary of performance results:', stopBefore='^(INFO|CRIT) *$'),
+			pysys.mappers.IncludeLinesBetween(startAfter='Summary of performance results:', stopBefore=' (INFO|CRIT) *$'),
 		]))
