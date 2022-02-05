@@ -20,6 +20,9 @@ New features:
 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
   especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
+- Added a new performance reporter class `pysys.utils.perfreporter.JSONPerformanceReporter` which write performance 
+  results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
+  as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
 - The default performance reporter class `pysys.utils.perfreporter.CSVPerformanceReporter` now automatically rewrites 
   the summary file at the end of a run where you have executed multiple cycles, to give aggregate statistics such as 
   mean and standard deviation (and ``samples``=``cycles``) instead of individual results for each cycle. This is very 

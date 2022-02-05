@@ -24,6 +24,7 @@ Some reporter classes are provided in the box, and the `BasePerformanceReporter`
 import collections, threading, time, math, sys, os
 import io
 import logging
+import json
 
 if __name__ == "__main__":
 	sys.path.append(os.path.dirname( __file__)+'/../..')
@@ -115,7 +116,7 @@ class PerformanceRunData:
 					combinedmean = (e['value']*e['samples'] + r['value']*r['samples']) / (e['samples']+r['samples'])
 
 					# nb: do this carefully to avoid subtracting large numbers from each other
-					# also we calculate the sample standard deviation (i.e. using the bessel-corrected unbiased estimate)
+					# also we calculate the SAMPLE standard deviation (i.e. using the bessel-corrected unbiased estimate)
 					e['stdDev'] = math.sqrt(
 						((e['samples']-1)*(e['stdDev']**2)
 						 +(r['samples']-1)*(r['stdDev']**2)
@@ -278,6 +279,74 @@ class BasePerformanceReporter:
 		"""
 		pass
 
+class JSONPerformanceReporter(BasePerformanceReporter):
+	"""Performance reporter which writes to a JSON file.
+	
+	After tests have run, the summary file is published with category ``JSONPerformanceReport`` 
+	using the `pysys.writer.api.ArtifactPublisher` interface. 
+
+	.. versionadded:: 2.1
+
+	The following properties can be set in the project configuration for this reporter:		
+	
+	"""
+	
+	summaryFile = ''
+	"""
+	The ``.json`` filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. 
+	"""
+
+	publishArtifactCategory = 'JSONPerformanceReport' 
+	"""
+	If specified, the output file will be published as an artifact using the specified category name. 
+	"""
+
+	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.json'
+	"""The default summary file if not overridden by the ``summaryFile=`` attribute. See `getRunSummaryFile()`. 
+	This is relative to the runner output+'/..' directory (typically testRootDir, unless ``--outdir`` is overridden).
+	"""
+
+	def setup(self, **kwargs):
+		super().setup()
+		self.__summaryFilesWritten = set()
+		
+	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
+		path = self.getRunSummaryFile(testobj)
+		mkdir(os.path.dirname(path))
+		with self._lock:
+			alreadyexists = os.path.exists(toLongPathSafe(path))
+			with io.open(toLongPathSafe(path), 'a', encoding='utf-8') as f:
+				if not alreadyexists: 
+					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
+					f.write('{"runDetails": ')
+					json.dump(self.getRunDetails(testobj), f)
+					f.write(', "results":[\n')
+				else:
+					f.write(',\n')
+					
+				json.dump({
+					'resultKey':resultKey,
+					'value':value,
+					'unit':str(unit),
+					'biggerIsBetter':unit.biggerIsBetter,
+					'samples':1,
+					'stdDev':0,
+					'toleranceStdDevs':toleranceStdDevs,
+					'testId':testobj.descriptor.id,
+					'resultDetails':resultDetails or {}
+				}, f)
+			self.__summaryFilesWritten.add(path)
+
+	def cleanup(self):
+		with self._lock:
+			if self.__summaryFilesWritten:
+				for p in sorted(list(self.__summaryFilesWritten)):
+					with io.open(toLongPathSafe(p), 'a', encoding='utf-8') as f:
+						f.write('\n]}\n')
+					
+					if self.publishArtifactCategory:
+						self.runner.publishArtifact(p, self.publishArtifactCategory)
+
 class CSVPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a CSV file.
 	
@@ -299,7 +368,7 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 	
 	summaryFile = ''
 	"""
-	The filename pattern used for the summary file(s). 
+	The filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. 
 	
 	For compatibility purposes, if not specified explicitly, the summary file for the CSVPerformanceReporter can be 
 	configured with the project property ``csvPerformanceReporterSummaryFile``, however this is deprecated. 
@@ -328,25 +397,17 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
 	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
-	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+'/..' directory 
+	the ``summaryFile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+'/..' directory 
 	(typically testRootDir, unless ``--outdir`` is overridden).
 	"""
 
 	def setup(self, **kwargs):
-		"""
-		Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project 
-		configuration properties for this performance reporter have been assigned to this instance. 
-		
-		Usually there is no reason to override the constructor, and any initialization can be done in this method. 
-		
-		.. version added:: 2.1
-		"""
-		self.__summaryFilesWritten = set()
-		
-		# for backwards compat - must do this before super.setup sets the summaryfile
-		self.summaryfile = self.summaryfile or self.summaryFile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
-		
 		super().setup()
+
+		# for backwards compat
+		self.summaryfile = self.summaryfile or self.summaryFile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
+
+		self.__summaryFilesWritten = set()
 
 	def getRunHeader(self, testobj=None, **kwargs):
 		"""Return the header string to the CSV file.
@@ -583,6 +644,7 @@ class CSVPerformanceFile(PerformanceRunData):
 	def __init__(self, contents):
 		super().__init__(None, [])
 		header = None
+		self.results = []
 		self.runDetails = None
 		for l in contents.split('\n'):
 			l = l.strip()

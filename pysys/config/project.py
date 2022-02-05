@@ -285,7 +285,7 @@ class _XMLProjectParser(object):
 		nodeList = self.root.getElementsByTagName('performance-reporter')
 		results = []
 		for n in nodeList:
-			cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
+			cls, optionsDict = self._parseClassAndConfigDict(n, 'pysys.utils.perfreporter.CSVPerformanceReporter')
 			optionsDict['summaryfile'] = self.expandProperties(optionsDict.get('summaryfile', ''), default=None, name='performance-reporter summaryfile')
 			results.append( (cls, optionsDict) )
 		
@@ -474,6 +474,7 @@ class _XMLProjectParser(object):
 					tag.getAttribute("value") or '\n'.join(n.data for n in tag.childNodes 
 							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data),
 					default=tag, name=name)
+			
 		classname = optionsDict.pop('classname', defaultClass)
 		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
