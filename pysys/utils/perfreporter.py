@@ -132,6 +132,13 @@ class CSVPerformanceReporter(object):
 	.. versionadded:: 2.1
 	"""
 
+	publishArtifactCategory = 'CSVPerformanceReport' 
+	"""
+	If specified, the output file will be published as an artifact using the specified category name. 
+
+	.. versionadded:: 2.1
+	"""
+
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
 	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
 	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+'/..' directory 
@@ -263,7 +270,8 @@ class CSVPerformanceReporter(object):
 							log.info('Rewriting CSV to aggregate results across all %d cycles'%self.runner.cycles)
 							perfFile.dump(p)
 				
-					self.runner.publishArtifact(p, 'CSVPerformanceReport')
+					if self.publishArtifactCategory:
+						self.runner.publishArtifact(p, self.publishArtifactCategory)
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		"""Report a performance result, with an associated unique key that identifies it.
