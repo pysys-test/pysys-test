@@ -64,6 +64,23 @@ PerformanceUnit.SECONDS = PerformanceUnit('s', False)
 PerformanceUnit.NANO_SECONDS = PerformanceUnit('ns', False) # 10**-9 seconds
 PerformanceUnit.PER_SECOND = PerformanceUnit('/s', True)
 
+class PerformanceRunData:
+	"""
+	Holds performance data for a single test run, consistenting of runDetails and a list of performance results covering 
+	one or more cycles. 
+	
+	:ivar dict[str,str] ~.runDetails: A dictionary containing (string key, string value) information about the whole test 
+		run, for example operating system and hostname.
+	
+	:ivar list[dict] ~.results: A list where each item is a dictionary containing information about a given result. 
+		The current keys are: resultKey, testId, value, unit, biggerIsBetter, toleranceStdDevs, samples, stdDev, 
+		resultDetails. 
+
+	"""
+	def __init__(self, runDetails, results):
+		self.runDetails = runDetails
+		self.results = results
+
 class CSVPerformanceReporter(object):
 	"""Class for receiving performance results and writing them to a CSV file for later analysis.
 	
@@ -74,9 +91,14 @@ class CSVPerformanceReporter(object):
 	
 	There is usually a single shared instance of this class per invocation of PySys. 
 	It is possible to customize the way performance results are recorded by 
-	providing a subclass and specifying it in the project performancereporter 
+	providing a subclass and specifying it in the project ``<performancereporter>`` 
 	element, for example to write data to an XML or JSON file instead of CSV. 
-	Performance reporter implementations are required to be thread-safe. 
+	Performance reporter implementations are required to be thread-safe.
+	 
+	If multiple performance reporters are configured, then the first one is designated as 
+	"primary" reporter which means it takes responsibility for printing performance results 
+	since you wouldn't want to see duplicated data on the console or run.log for every 
+	configured reporter. 
 	
 	The standard CSV performance reporter implementation writes to a UTF-8 file of 
 	comma-separated values that is both machine and human readable and 
@@ -89,7 +111,7 @@ class CSVPerformanceReporter(object):
 
 	Project configuration of performance reporter is through the PySys project XML file using the 
 	``<performance-reporter>`` tag. Multiple reporters may be configured and their individual properties set through the 
-	nested ``<property>`` tag. Properties are set as attributes to the instance just afetr construction, with automatic conversion of 
+	nested ``<property>`` tag. Properties are set as attributes to the instance just after construction, with automatic conversion of 
 	type to match the default value if specified as a static attribute on the class. 
 
 	After tests have run, the summary file is published with category ``CSVPerformanceReport`` 
@@ -105,6 +127,10 @@ class CSVPerformanceReporter(object):
 		
 	:param runner: Pass this through to the superclass. 
 	:param kwargs: Pass any additional keyword arguments through to the super class. 
+	
+	:ivar bool isPrimaryReporter: If True, this is the first (or only) performance reporter, which will print results to 
+		the console and run.log in a human-friendly way. If False, this is a secondary reporter which should leave the 
+		job to the primary. 
 	
 	The following properties can be set in the project configuration for this reporter:		
 	
@@ -166,6 +192,8 @@ class CSVPerformanceReporter(object):
 			'/s': PerformanceUnit.PER_SECOND
 			}
 		
+		self.isPrimaryReporter = False # will be set to True by the runner later
+		
 		self.__summaryFilesWritten = set()
 	
 	def setup(self, **kwargs):
@@ -220,7 +248,7 @@ class CSVPerformanceReporter(object):
 		:param testobj: the test case instance registering the value
 
 		"""
-		summaryfile = self.summaryfile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
+		summaryfile = self.summaryfile or self.summaryFile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
 		
 		# properties are already expanded if set in project config, but needs doing explicitly in case default value was used
 		summaryfile = self.runner.project.expandProperties(summaryfile)
@@ -307,34 +335,35 @@ class CSVPerformanceReporter(object):
 		if isinstance(resultDetails, list):
 			resultDetails = collections.OrderedDict(resultDetails)
 
-		testobj.log.info("Performance result: %s = %s %s (%s)", resultKey, self.valueToDisplayString(value), unit,
-						 'bigger is better' if unit.biggerIsBetter else 'smaller is better',
-						 extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
-		with self._lock:
-			prevresult = self.__previousResultKeys.get(resultKey, None)
-			d = collections.OrderedDict(resultDetails)
-			d['testId'] = testobj.descriptor.id
-			if prevresult:
-				previd, prevcycle, prevdetails = prevresult
-				# if only difference is cycle (i.e. different testobj but same test id) then allow, but
-				# make sure we report error if this test tries to report same key more than once, or if it
-				# overlaps with another test's result keys
-				if previd == testobj.descriptor.id and prevcycle==testobj.testCycle:
-					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
-					return
-				elif previd != testobj.descriptor.id: 
-					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
-					return
-				elif prevdetails != d: 
-					# prevent different cycles of same test with different resultdetails 
-					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
-					return
-			else:
-				self.__previousResultKeys[resultKey] = (testobj.descriptor.id, testobj.testCycle, d)
+		if self.isPrimaryReporter:
+			testobj.log.info("Performance result: %s = %s %s (%s)", resultKey, self.valueToDisplayString(value), unit,
+							 'bigger is better' if unit.biggerIsBetter else 'smaller is better',
+							 extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
+			with self._lock:
+				prevresult = self.__previousResultKeys.get(resultKey, None)
+				d = collections.OrderedDict(resultDetails)
+				d['testId'] = testobj.descriptor.id
+				if prevresult:
+					previd, prevcycle, prevdetails = prevresult
+					# if only difference is cycle (i.e. different testobj but same test id) then allow, but
+					# make sure we report error if this test tries to report same key more than once, or if it
+					# overlaps with another test's result keys
+					if previd == testobj.descriptor.id and prevcycle==testobj.testCycle:
+						testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
+						return
+					elif previd != testobj.descriptor.id: 
+						testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
+						return
+					elif prevdetails != d: 
+						# prevent different cycles of same test with different resultdetails 
+						testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
+						return
+				else:
+					self.__previousResultKeys[resultKey] = (testobj.descriptor.id, testobj.testCycle, d)
 
-		if testobj.getOutcome().isFailure():
-			testobj.log.warning('   Performance result "%s" will not be recorded as test has failed', resultKey)
-			return
+			if testobj.getOutcome().isFailure():
+				testobj.log.warning('   Performance result "%s" will not be recorded as test has failed', resultKey)
+				return
 
 
 		formatted = self.formatResult(testobj, value, resultKey, unit, toleranceStdDevs, resultDetails)

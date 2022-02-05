@@ -551,6 +551,7 @@ class BaseRunner(ProcessUser):
 			p.pluginProperties = perfOptionsDict
 			pysys.utils.misc.setInstanceVariablesFromDict(p, perfOptionsDict)
 			self.performanceReporters.append(p)
+		if self.performanceReporters: self.performanceReporters[0].isPrimaryReporter = True
 				
 		class PySysPrintRedirector(object):
 			def __init__(self):
