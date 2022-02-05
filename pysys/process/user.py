@@ -1874,6 +1874,8 @@ class ProcessUser(object):
 				if stripWhitespace:
 					l = l.rstrip()
 					if len(l) == 0: continue
+				else:
+					l = l.strip('\n\r')
 				
 				if includes:
 					l = matchesany(l, includes)
@@ -1893,14 +1895,15 @@ class ProcessUser(object):
 		if not tolog:
 			return False
 		
-		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS, suppress_prefix=True)
 		if logFunction is None: 
 			def logFunction(line):
 				self.log.info(u'  %s', l, extra=logextra)
 
 		path = os.path.normpath(path)
 		if path.startswith(self.output): path = path[len(self.output)+1:]
-		self.log.info(u'Contents of %s%s: ', fromLongPathSafe(path), ' (filtered)' if includes or excludes else '', extra=logextra)
+		self.log.info(u'Contents of %s%s: ', fromLongPathSafe(path), ' (filtered)' if includes or excludes else '', 
+			extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS, suppress_prefix=False))
 		for l in tolog:
 			logFunction(l)
 		self.log.info('  -----', extra=logextra)

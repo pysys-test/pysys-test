@@ -45,6 +45,9 @@ Fixes:
 
 - Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
 - Fix a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
+- Fix display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
+- Removed the normal logging prefix from PySys in each `BaseTest.logFileContents` line to avoid distracting from the 
+  contents of the file being displayed. 
 
 -----------------
 What's new in 2.0
