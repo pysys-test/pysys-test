@@ -554,7 +554,7 @@ class BaseRunner(ProcessUser):
 			pysys.utils.misc.setInstanceVariablesFromDict(p, perfOptionsDict)
 			
 			# for backwards compat permit "summaryfile" as well as summaryFile
-			p.summaryfile = p.summaryfile or p.summaryFile
+			p.summaryfile = p.summaryfile or getattr(p, 'summaryFile', '')
 			p.summaryFile = p.summaryfile
 			
 			self.performanceReporters.append(p)
@@ -709,11 +709,6 @@ class BaseRunner(ProcessUser):
 					except Exception as ex: 
 						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
-			
-			# If user explicitly asked for it, or if doing a multi-cycle perf run, then display a summary at end
-			if self.getXArg('printPerfSummary', default=self.cycles>1):
-				log.debug('Will printPerfSummary')
-				self.performanceReporters[0].printPerfSummary()
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:

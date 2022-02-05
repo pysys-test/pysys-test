@@ -18,16 +18,22 @@ PySys 2.1 is under development.
 
 New features:
 
+New features related to reporting of performance result numbers:
+
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
   especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
 - Added a new performance reporter class `pysys.utils.perfreporter.JSONPerformanceReporter` which write performance 
   results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
   as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
-- The default performance reporter class `pysys.utils.perfreporter.CSVPerformanceReporter` now automatically rewrites 
-  the summary file at the end of a run where you have executed multiple cycles, to give aggregate statistics such as 
-  mean and standard deviation (and ``samples``=``cycles``) instead of individual results for each cycle. This is very 
-  useful when cycling tests locally to generate stable numbers for comparisons while optimizing your application. 
-  The new behaviour can be disabled by setting the ``aggregateCycles`` property on the reporter if needed. 
+- Added a new performance reporter class `pysys.utils.perfreporter.PrintSummaryPerformanceReporter` which prints a 
+  summary of performance results (including mean and stdDev calculation if aggregating across multiple cycles) at the 
+  end of the test run. This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
+  not explicit list of ``<performance-reporters>`` has been configured. 
+- The default performance reporter class `pysys.utils.perfreporter.CSVPerformanceReporter` has a property 
+  called ``aggregateCycles`` which instructs it to automatically rewrite the summary file at the end of a run where you 
+  have executed multiple cycles, to give aggregate statistics such as mean and standard deviation (and 
+  ``samples``=``cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
+  generate stable numbers for comparisons while optimizing your application. 
 - Extended performance reporter API. Added a new class `pysys.utils.perfreporter.BasePerformanceReporter` for creating 
   custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for 
   each using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 

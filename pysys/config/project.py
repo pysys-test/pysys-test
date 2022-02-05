@@ -289,8 +289,9 @@ class _XMLProjectParser(object):
 			optionsDict['summaryfile'] = self.expandProperties(optionsDict.get('summaryfile', ''), default=None, name='performance-reporter summaryfile')
 			results.append( (cls, optionsDict) )
 		
-		if not results: # add a default one
+		if not results: # add the defaults
 			results.append( self._parseClassAndConfigDict(None, 'pysys.utils.perfreporter.CSVPerformanceReporter') )
+			results.append( self._parseClassAndConfigDict(None, 'pysys.utils.perfreporter.PrintSummaryPerformanceReporter') )
 			
 		return results
 

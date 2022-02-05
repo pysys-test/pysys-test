@@ -269,8 +269,64 @@ class JSONPerformanceReporter(BasePerformanceReporter):
 					with io.open(toLongPathSafe(p), 'a', encoding='utf-8') as f:
 						f.write('\n]}\n')
 					
+					log.info('Performance results were written to: %s', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
+
 					if self.publishArtifactCategory:
 						self.runner.publishArtifact(p, self.publishArtifactCategory)
+
+class PrintSummaryPerformanceReporter(BasePerformanceReporter):
+	"""Performance reporter which logs a human-friendly summary of all performance results to the console at the end of 
+	the test run. 
+	
+	The logger category is ``perfreporter.summary``, so if you wish to suppress it you can do so by specifying that 
+	category to the ``--verbosity`` argument of ``pysys run``. 
+	
+	.. versionadded:: 2.1
+
+	"""
+
+	def setup(self, **kwargs):
+		super().setup()
+		self.results = []
+	
+	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
+		with self._lock:
+			self.results.append({
+						'resultKey':resultKey,
+						'value':value,
+						'unit':str(unit),
+						'biggerIsBetter':unit.biggerIsBetter,
+						'samples':1,
+						'stdDev':0,
+						'toleranceStdDevs':toleranceStdDevs,
+						'testId':testobj.descriptor.id,
+						'resultDetails':resultDetails or {}
+					})
+
+	def isEnabled(self, **kwargs):
+		# If user explicitly asked for it, or if doing a multi-cycle perf run, then display a summary at end
+		return True # self.getXArg('printPerfSummary', default=self.runner.cycles>1):
+	
+	def cleanup(self):
+		if not self.isEnabled(): return
+		if not self.results: return
+		
+		with self._lock:
+			logger = logging.getLogger('pysys.perfreporter.summary')
+
+			logger.info('Summary of performance results:')
+
+			# perform aggregation in case there are multiple cycles
+			p = PerformanceRunData.aggregate(PerformanceRunData(self.runner.runDetails, self.results))
+			
+			for r in p.results:
+				logger.info("  %s = %s %s (%s)%s (%s)", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
+					 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
+						'' if r['samples']==1 else ', stdDev = '+self.valueToDisplayString(r['stdDev']),
+						r['testId'],
+							extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
+
+			logger.info('')
 
 class CSVPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a CSV file.
@@ -302,13 +358,11 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 
 	"""
 
-	aggregateCycles = True
+	aggregateCycles = False
 	"""
-	By default PySys will automatically rewrite the summary file at the end of a multi-cycle test with an aggregated 
-	file containing the mean and standard deviation for all the samples, rather than a separate line for each one. 
-	This is usually much easier to consume when triaging performance results and looking for regressions. 
-	
-	This behaviour can be disabled by setting ``aggregateCycles`` to ``False``. 
+	Enable this if you want PySys to rewrite the summary file at the end of a multi-cycle test with an aggregated 
+	file containing the mean and standard deviation for all the cycles, rather than a separate line for each cycle. 
+	This may be easier to consume when triaging performance results and looking for regressions. 
 	
 	.. versionadded:: 2.1
 	"""
@@ -363,6 +417,8 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 							log.info('Rewriting CSV to aggregate results across all %d cycles'%self.runner.cycles)
 							perfFile.dump(p)
 				
+					log.info('Performance results were written to: %s', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
+
 					if self.publishArtifactCategory:
 						self.runner.publishArtifact(p, self.publishArtifactCategory)
 
@@ -370,30 +426,6 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 		formatted = self.formatResult(testobj, value, resultKey, unit, toleranceStdDevs, resultDetails)
 		self.recordResult(formatted, testobj)
 
-	def printPerfSummary(self, **kwargs):
-		""" Use the logger to print a summary of all performance results at the end of the test run. 
-		
-		Called by the runner (on the primary performance reporter) just after `cleanup`, 
-		i.e. when all results have been finalized. 
-		"""
-		with self._lock:
-			if not self.__summaryFilesWritten: return # nothing to do
-			
-			logger = logging.getLogger('pysys.perfreporter.summary')
-			for p in sorted(list(self.__summaryFilesWritten)):
-				perfFile = CSVPerformanceFile.load(p)
-				perfFile = CSVPerformanceFile.aggregate([perfFile])
-				
-				if not perfFile.results: continue
-				logger.info('Summary of performance results written to %s :', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
-				for r in sorted(perfFile.results, key=lambda r: r['resultKey']):
-					logger.info("  %s = %s %s (%s)%s", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
-						 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
-							'' if r['samples']==1 else ', stdDev = '+self.valueToDisplayString(r['stdDev']),
-								extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
-
-				logger.info('')
-				
 	def formatResult(self, testobj, value, resultKey, unit, toleranceStdDevs, resultDetails):
 		"""Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).
 
