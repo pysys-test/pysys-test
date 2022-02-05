@@ -300,7 +300,7 @@
 	</writers>
 
 	<!--
-	Performance Reporters
+	Performance reporters
 	~~~~~~~~~~~~~~~~~~~~~
 	
 	By default PySys will record performance results using a default instance of 
