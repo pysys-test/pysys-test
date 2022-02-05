@@ -581,8 +581,8 @@ class CSVPerformanceFile(PerformanceRunData):
 			raise Exception('Unsupported input type: %s'%values.__class__.__name__)
 		
 	def __init__(self, contents):
+		super().__init__(None, [])
 		header = None
-		self.results = []
 		self.runDetails = None
 		for l in contents.split('\n'):
 			l = l.strip()
