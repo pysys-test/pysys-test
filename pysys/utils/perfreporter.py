@@ -81,6 +81,55 @@ class PerformanceRunData:
 		self.runDetails = runDetails
 		self.results = results
 
+	@staticmethod
+	def aggregate(runs):
+		"""Aggregate a list of multiple runs and/or cycles into a single performance run data object with a single 
+		entry for each unique resultKey with the value given as a mean of all the observed samples.
+
+		:param list[PerformanceRunData] files: the list of run objects to aggregate.
+
+		"""
+		if isinstance(runs, PerformanceRunData): runs = [runs]
+		
+		details = {} # values are lists of unique run detail values from input files
+		results = {}
+		for f in runs:
+			if not f.results: continue # don't even include the rundetails if there are no results
+			for r in f.results:
+				if r['resultKey'] not in results:
+					results[r['resultKey']] = collections.OrderedDict(r)
+					# make it a deep copy
+					results[r['resultKey']]['resultDetails'] = collections.OrderedDict( results[r['resultKey']].get('resultDetails', {}))
+				else:
+					e = results[r['resultKey']] # existing result which we will merge the new data into
+
+					# calculate new mean and stddev
+					combinedmean = (e['value']*e['samples'] + r['value']*r['samples']) / (e['samples']+r['samples'])
+
+					# nb: do this carefully to avoid subtracting large numbers from each other
+					# also we calculate the sample standard deviation (i.e. using the bessel-corrected unbiased estimate)
+					e['stdDev'] = math.sqrt(
+						((e['samples']-1)*(e['stdDev']**2)
+						 +(r['samples']-1)*(r['stdDev']**2)
+						 +e['samples']*( (e['value']-combinedmean) ** 2 )
+						 +r['samples']*( (r['value']-combinedmean) ** 2 )
+						 ) / (e['samples'] + r['samples'] - 1)
+					)
+					e['value'] = combinedmean
+					e['samples'] += r['samples']
+					e['resultDetails'] = r.get('resultDetails', {}) # just use latest; shouldn't vary
+
+			for k in f.runDetails:
+				if k not in details:
+					details[k] = []
+				if f.runDetails[k] not in details[k]:
+					details[k].append(f.runDetails[k])
+
+		return PerformanceRunData(
+			{k: '; '.join(sorted(details[k])) for k in details},
+			sorted(list(results.values()), key=lambda r: r['resultKey'])
+			)
+
 class BasePerformanceReporter:
 	"""API base class for creating a reporter that handles or stores performance results for later analysis.
 	
@@ -410,7 +459,7 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 			self.__summaryFilesWritten.add(path)
 	
 
-class CSVPerformanceFile(object):
+class CSVPerformanceFile(PerformanceRunData):
 	"""Object to hold the model for a CSV performance file.
 
 	If this file contains aggregated results the number of "samples" may be greater than 1 and the "value"
@@ -436,57 +485,25 @@ class CSVPerformanceFile(object):
 
 	@staticmethod
 	def aggregate(files):
-		"""Aggregate a list of performance file objects into a single performance file object.
+		"""Aggregate a list of performance file objects into a single CSVPerformanceFile object.
 
 		Takes a list of one or more CSVPerformanceFile objects and returns a single aggregated
 		CSVPerformanceFile with a single row for each resultKey (with the "value" set to the
 		mean if there are multiple results with that key, and the stdDev also set appropriately).
 
+		This method is now deprecated in favour of `PerformanceRunData.aggregate`. 
+
 		:param list[CSVPerformanceFile] files: the list of performance file objects to aggregate.
 
 		"""
 		if isinstance(files, CSVPerformanceFile): files = [files]
-		details = collections.OrderedDict() # values are lists of unique run detail values from input files
-		results = {}
-		for f in files:
-			if not f.results: continue # don't even include the rundetails if there are no results
-			for r in f.results:
-				if r['resultKey'] not in results:
-					results[r['resultKey']] = collections.OrderedDict(r)
-					# make it a deep copy
-					results[r['resultKey']]['resultDetails'] = collections.OrderedDict( results[r['resultKey']].get('resultDetails', {}))
-				else:
-					e = results[r['resultKey']] # existing result which we will merge the new data into
-
-					# calculate new mean and stddev
-					combinedmean = (e['value']*e['samples'] + r['value']*r['samples']) / (e['samples']+r['samples'])
-
-					# nb: do this carefully to avoid subtracting large numbers from each other
-					# also we calculate the sample standard deviation (i.e. using the bessel-corrected unbiased estimate)
-					e['stdDev'] = math.sqrt(
-						((e['samples']-1)*(e['stdDev']**2)
-						 +(r['samples']-1)*(r['stdDev']**2)
-						 +e['samples']*( (e['value']-combinedmean) ** 2 )
-						 +r['samples']*( (r['value']-combinedmean) ** 2 )
-						 ) / (e['samples'] + r['samples'] - 1)
-					)
-					e['value'] = combinedmean
-					e['samples'] += r['samples']
-					e['resultDetails'] = r.get('resultDetails', {}) # just use latest; shouldn't vary
-
-			for k in f.runDetails:
-				if k not in details:
-					details[k] = []
-				if f.runDetails[k] not in details[k]:
-					details[k].append(f.runDetails[k])
-
-		a = CSVPerformanceFile('')
-		for rk in sorted(results):
-			a.results.append(results[rk])
-		a.results.sort(key=lambda r: r['resultKey'])
-		for k in details:
-			a.runDetails[k] = '; '.join(sorted(details[k]))
-		return a
+		
+		agg = PerformanceRunData.aggregate([f for f in files])
+		
+		result = CSVPerformanceFile('')
+		result.results = agg.results
+		result.runDetails = agg.runDetails
+		return result
 
 	@staticmethod
 	def load(src):
