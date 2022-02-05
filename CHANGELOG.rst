@@ -20,6 +20,11 @@ New features:
 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
   especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
+- The default performance reporter class `pysys.utils.perfreporter.CSVPerformanceReporter` now automatically rewrites 
+  the summary file at the end of a run where you have executed multiple cycles, to give aggregate statistics such as 
+  mean and standard deviation (and ``samples``=``cycles``) instead of individual results for each cycle. This is very 
+  useful when cycling tests locally to generate stable numbers for comparisons while optimizing your application. 
+  The new behaviour can be disabled by setting the ``aggregateCycles`` property on the reporter if needed. 
 - Extended performance reporter API. Now you can have multiple performance reporters, and configure properties for each 
   using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
   additional ``setup`` method which is called just after `pysys.baserunner.BaseRunner.setup`, and is now the best place 

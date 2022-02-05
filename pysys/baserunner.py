@@ -151,7 +151,9 @@ class BaseRunner(ProcessUser):
 	:ivar bool ~.purge: Indicates that all files other than ``run.log`` should be deleted from the output directory 
 		unless the test fails; this corresponds to the ``--purge`` command line argument. 
 
-	:ivar int ~.cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
+	:ivar int ~.cycles: The total number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
+		(added in PySys v2.1). 
+	:ivar int ~.cycle: Old name, identical to ``cycles``. 
 
 	:ivar str ~.mode: No longer used. 
 
@@ -202,7 +204,7 @@ class BaseRunner(ProcessUser):
 
 		self.record = record
 		self.purge = purge
-		self.cycle = cycle
+		self.cycle = self.cycles = cycle
 		self.threads = threads
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors

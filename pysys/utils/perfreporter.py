@@ -22,6 +22,8 @@ The `CSVPerformanceReporter` can be used as-is or subclassed for alternative out
 """
 
 import collections, threading, time, math, sys, os
+import io
+import logging
 
 if __name__ == "__main__":
 	sys.path.append(os.path.dirname( __file__)+'/../..')
@@ -30,6 +32,8 @@ from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.fileutils import mkdir, toLongPathSafe
 from pysys.utils.pycompat import *
+
+log = logging.getLogger('pysys.perfreporter')
 
 class PerformanceUnit(object):
 	"""Class which identifies the unit in which a performance result is measured.
@@ -115,6 +119,17 @@ class CSVPerformanceReporter(object):
 	This property can also be accessed and configured under the alternative capitalization ``summaryfile``, however this 
 	is discouraged as of PySys 2.1+, where ``summaryFile`` is the preferred name. 
 
+	"""
+
+	aggregateCycles = True
+	"""
+	By default PySys will automatically rewrite the summary file at the end of a multi-cycle test with an aggregated 
+	file containing the mean and standard deviation for all the samples, rather than a separate line for each one. 
+	This is usually much easier to consume when triaging performance results and looking for regressions. 
+	
+	This behaviour can be disabled by setting ``aggregateCycles`` to ``False``. 
+	
+	.. versionadded:: 2.1
 	"""
 
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
@@ -215,20 +230,39 @@ class CSVPerformanceReporter(object):
 		return summaryfile
 
 	def getRunHeader(self, testobj=None, **kwargs):
-		"""Return the header string to the CSV file."""
+		"""Return the header string to the CSV file.
+		
+		There should usually be no reason to override this method. 
+		"""
 		
 		try:
 			runDetails = self.getRunDetails(testobj)
 		except Exception: # for pre-2.0 signature
 			runDetails = self.getRunDetails()
 		
-		return '# '+CSVPerformanceFile.toCSVLine(CSVPerformanceFile.COLUMNS+[CSVPerformanceFile.RUN_DETAILS, runDetails])+'\n'
+		return CSVPerformanceFile.makeCSVHeaderLine(runDetails)
 
 	def cleanup(self):
-		"""Called when PySys has finished executing tests."""
+		"""Called when PySys has finished executing tests.
+		
+		This is where any footer and other I/O finalization can be written to the end of files, and also a good time to 
+		do aggregation, printing of summaries and artifact publishing. 
+		"""
 		with self._lock:
 			if self.runner is not None and self.__summaryFilesWritten:
 				for p in sorted(list(self.__summaryFilesWritten)):
+					
+					if self.runner.cycle > 1 and self.aggregateCycles:
+						try:
+							perfFile = CSVPerformanceFile.load(p)
+							perfFile = CSVPerformanceFile.aggregate([perfFile])
+						except Exception as ex:
+							log.exception('Failed to read and aggregate performance information for %s: '%p)
+							# Don't make it fatal, more useful to go ahead and publish it as best we can
+						else:
+							log.info('Rewriting CSV to aggregate results across all %d cycles'%self.runner.cycles)
+							perfFile.dump(p)
+				
 					self.runner.publishArtifact(p, 'CSVPerformanceReport')
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
@@ -330,7 +364,7 @@ class CSVPerformanceReporter(object):
 		"""
 		# generate a file in the test output directory for convenience/triaging, plus add to the global summary
 		path = testobj.output+'/performance_results.csv'
-		encoding = None if PY2 else 'utf-8'
+		encoding = 'utf-8'
 		
 		def callGetRunHeader():
 			try:
@@ -339,9 +373,9 @@ class CSVPerformanceReporter(object):
 				return self.getRunHeader()
 		
 		if not os.path.exists(path):
-			with openfile(path, 'w', encoding=encoding) as f:
+			with io.open(toLongPathSafe(path), 'w', encoding=encoding) as f:
 				f.write(callGetRunHeader())
-		with openfile(path, 'a', encoding=encoding) as f:
+		with io.open(toLongPathSafe(path), 'a', encoding=encoding) as f:
 			f.write(formatted)
 		
 		# now the global one
@@ -349,7 +383,7 @@ class CSVPerformanceReporter(object):
 		mkdir(os.path.dirname(path))
 		with self._lock:
 			alreadyexists = os.path.exists(toLongPathSafe(path))
-			with openfile(path, 'a', encoding=encoding) as f:
+			with io.open(toLongPathSafe(path), 'a', encoding=encoding) as f:
 				if not alreadyexists: 
 					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
 					f.write(callGetRunHeader())
@@ -434,6 +468,38 @@ class CSVPerformanceFile(object):
 		for k in details:
 			a.runDetails[k] = '; '.join(sorted(details[k]))
 		return a
+
+	@staticmethod
+	def load(src):
+		"""
+		Read the runDetails and results from the specified .csv file on disk.
+		
+		:str src: The path to read. 
+		:returns: A new `CSVPerformanceFile` instance. 
+		
+		.. versionadded:: 2.1
+		"""
+		with io.open(toLongPathSafe(src), 'r', encoding='utf-8') as f:
+			return CSVPerformanceFile(f.read())
+				
+	def dump(self, dest):
+		"""
+		Dump the runDetails and results from this object to a CSV at the specified location. 
+		
+		Any existing file is overwritten. 
+		
+		:str dest: The destination path to write to. 
+		
+		.. versionadded:: 2.1
+		"""
+		with io.open(toLongPathSafe(dest), 'w', encoding='utf-8') as f:
+			f.write(self.makeCSVHeaderLine(self.runDetails))
+			for v in self.results:
+				f.write(self.toCSVLine(v)+'\n')
+
+	@staticmethod 
+	def makeCSVHeaderLine(runDetails):
+		return '# '+CSVPerformanceFile.toCSVLine(CSVPerformanceFile.COLUMNS+[CSVPerformanceFile.RUN_DETAILS, runDetails])+'\n'
 
 	@staticmethod
 	def toCSVLine(values):
@@ -574,7 +640,7 @@ cycles.
 		raise Exception('No .csv files found')
 	files = []
 	for p in paths:
-		with openfile(os.path.abspath(p), encoding='utf-8') as f:
+		with io.open(toLongPathSafe(os.path.abspath(p)), encoding='utf-8') as f:
 			files.append(CSVPerformanceFile(f.read()))
 	
 	if cmd == 'aggregate':
