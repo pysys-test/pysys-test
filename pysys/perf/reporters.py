@@ -30,7 +30,6 @@ from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.fileutils import mkdir, toLongPathSafe
 from pysys.utils.pycompat import *
-import pysys.perf.perfreportstool
 
 log = logging.getLogger('pysys.perfreporter')
 
@@ -142,6 +141,7 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 		super().setup()
 		self.results = []
 		
+		import pysys.perf.perfreportstool
 		self.comparisonGenerator = pysys.perf.perfreportstool.PerformanceComparisonGenerator(reporters=self.runner.performanceReporters)
 		self.baselines = self.comparisonGenerator.loadFiles(
 			baselineBaseDir=self.project.testRootDir,

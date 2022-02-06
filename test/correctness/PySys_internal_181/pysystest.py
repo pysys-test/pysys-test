@@ -21,7 +21,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--cycle=3'], workingDir=self.input, 
 			environs={'PYSYS_PERFORMANCE_BASELINES':'__pysys_performance/**/*.csv , __pysys_perform*/*/*.json '})
 
-		self.startPython([os.path.dirname(pysys.__file__)+'/utils/perfreporter.py', 
+		self.startPython([os.path.dirname(pysys.__file__)+'/perf/perfreportstool.py', 
 			'compare', 
 			# all of 3 of these have some outdir so will generate a label based on something else
 			'__pysys_performance/**/*.csv', 
