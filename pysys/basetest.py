@@ -1501,7 +1501,7 @@ class BaseTest(ProcessUser):
 				resultDetails=[('mode',self.mode)])
 
 		While use of standard units such as '/s', 's' or 'ns' (nano-seconds) is recommended, custom units can be 
-		provided when needed using `pysys.utils.perfreporter.PerformanceUnit`::
+		provided when needed using `pysys.perf.api.PerformanceUnit`::
 		
 			self.reportPerformanceResult(int(iterations)/float(calctime)/1000, 
 				'Fibonacci sequence calculation rate using %s with different units' % self.mode, 
@@ -1520,9 +1520,9 @@ class BaseTest(ProcessUser):
 			towards the end of the string. It should be as concise as possible (given the above).
 
 		:param unit: Identifies the unit the value is measured in, including whether bigger numbers are better or
-			worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
-			In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
-			L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
+			worse (used to determine improvement or regression). Must be an instance of L{pysys.perf.api.PerformanceUnit}.
+			In most cases, use L{pysys.perf.api.PerformanceUnit.SECONDS} (e.g. for latency) or
+			L{pysys.perf.api.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
 			used as a shorthand for those PerformanceUnit instances.
 		
 		:param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
@@ -1530,9 +1530,8 @@ class BaseTest(ProcessUser):
 		
 		:param resultDetails: (optional) A dictionary of detailed information about this specific result 
 			and/or test that should be recorded together with the result, for example detailed information about what mode 
-			or versions the test is measuring. Note this is separate from the global run details shared across 
-			all tests in this PySys execution, which can be customized by overriding 
-			L{pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails}.
+			or versions the test is measuring. Note this is separate from the global "run details" shared across 
+			all tests in this PySys execution, which can be customized with a runner plugin.
 
 		"""
 		self.runner.reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)

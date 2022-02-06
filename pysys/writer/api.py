@@ -51,7 +51,7 @@ The most common type of writer is the standard 'Record' writer, but there are al
      that did not pass. 
      Summary writers are always enabled regardless of the flags given to the PySys launcher.
 
-(See also `pysys.utils.perfreporter` whcih is used for writing performance results, using a similar but slightly 
+(See also `pysys.perf.api` whcih is used for writing performance results, using a similar but slightly 
 different API).
 
 Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
@@ -272,7 +272,7 @@ class ArtifactPublisher(object):
 		:param str path: Absolute path of the file or directory, using forward slashes as the path separator. 
 		:param str category: A string identifying what kind of artifact this is, e.g. 
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.testoutput.TestOutputArchiveWriter`) or 
-			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			"CSVPerformanceReport" (from `pysys.perf.reporters.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 		"""
 		pass

@@ -285,13 +285,13 @@ class _XMLProjectParser(object):
 		nodeList = self.root.getElementsByTagName('performance-reporter')
 		results = []
 		for n in nodeList:
-			cls, optionsDict = self._parseClassAndConfigDict(n, 'pysys.utils.perfreporter.CSVPerformanceReporter')
+			cls, optionsDict = self._parseClassAndConfigDict(n, 'pysys.perf.reporters.CSVPerformanceReporter')
 			optionsDict['summaryfile'] = self.expandProperties(optionsDict.get('summaryfile', ''), default=None, name='performance-reporter summaryfile')
 			results.append( (cls, optionsDict) )
 		
 		if not results: # add the defaults
-			results.append( self._parseClassAndConfigDict(None, 'pysys.utils.perfreporter.CSVPerformanceReporter') )
-			results.append( self._parseClassAndConfigDict(None, 'pysys.utils.perfreporter.PrintSummaryPerformanceReporter') )
+			results.append( self._parseClassAndConfigDict(None, 'pysys.perf.reporters.CSVPerformanceReporter') )
+			results.append( self._parseClassAndConfigDict(None, 'pysys.perf.reporters.PrintSummaryPerformanceReporter') )
 			
 		return results
 

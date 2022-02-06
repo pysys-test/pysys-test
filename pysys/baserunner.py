@@ -52,7 +52,6 @@ from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter, ArtifactPublisher
 import pysys.utils.allocport
-import pysys.utils.perfreporter
 
 global_lock = threading.Lock() # internal, do not use
 
@@ -546,7 +545,6 @@ class BaseRunner(ProcessUser):
 		
 		# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 		# might not be fully constructed yet
-		from pysys.utils.perfreporter import CSVPerformanceReporter
 		self.performanceReporters = []
 		for perfcls, perfOptionsDict in self.project.perfReporterConfig:
 			p = perfcls(self.project, perfOptionsDict.get('summaryfile',''), self.outsubdir, runner=self)
@@ -862,7 +860,7 @@ class BaseRunner(ProcessUser):
 
 		# Use the unit aliases of the first performance reporter (to avoid the need to worry about syncing between different reporters)
 		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
-		assert isinstance(unit, pysys.utils.perfreporter.PerformanceUnit), repr(unit)
+		assert isinstance(unit, pysys.perf.api.PerformanceUnit), repr(unit)
 
 		if testObj.getOutcome().isFailure():
 			testObj.log.warning('Performance result "%s" will not be recorded as test has failed so results could be invalid', resultKey)
@@ -958,7 +956,7 @@ class BaseRunner(ProcessUser):
 			the ``outDirName`` in the filename, so that artifacts from multiple test runs/platforms do not clash. 
 		:param str category: A string identifying what kind of artifact this is, e.g. 
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
-			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			"CSVPerformanceReport" (from `pysys.perf.reporters.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 			Use alphanumeric characters and underscores only. 
 		"""

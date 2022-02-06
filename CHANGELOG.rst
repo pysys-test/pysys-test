@@ -22,24 +22,26 @@ New features related to reporting of performance result numbers:
 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
   especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
-- Added a new performance reporter class `pysys.utils.perfreporter.JSONPerformanceReporter` which write performance 
+- Added a new performance reporter class `pysys.perf.reporters.JSONPerformanceReporter` which write performance 
   results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
   as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
-- Added a new performance reporter class `pysys.utils.perfreporter.PrintSummaryPerformanceReporter` which prints a 
+- Added a new performance reporter class `pysys.perf.reporters.PrintSummaryPerformanceReporter` which prints a 
   summary of performance results (including mean and stdDev calculation if aggregating across multiple cycles) at the 
   end of the test run. This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
   not explicit list of ``<performance-reporters>`` has been configured. 
-- The default performance reporter class `pysys.utils.perfreporter.CSVPerformanceReporter` has a property 
+- The default performance reporter class `pysys.perf.reporters.CSVPerformanceReporter` has a property 
   called ``aggregateCycles`` which instructs it to automatically rewrite the summary file at the end of a run where you 
   have executed multiple cycles, to give aggregate statistics such as mean and standard deviation (and 
   ``samples``=``cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
   generate stable numbers for comparisons while optimizing your application. 
-- Extended performance reporter API. Added a new class `pysys.utils.perfreporter.BasePerformanceReporter` for creating 
+- Extended performance reporter API. Added a new class `pysys.perf.api.BasePerformanceReporter` for creating 
   custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for 
   each using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
   additional ``setup`` method which is called just after `pysys.baserunner.BaseRunner.setup`, and is now the best place 
   for any initialization (it is recommended to move any such code out of the ``__init__`` constructor which should 
   no longer be used in most cases). 
+- Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
+  will continue to work so this is not a breaking change. 
 
 Fixes:
 
@@ -48,6 +50,11 @@ Fixes:
 - Fix display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
 - Removed the normal logging prefix from PySys in each `BaseTest.logFileContents` line to avoid distracting from the 
   contents of the file being displayed. 
+
+Deprecations:
+
+- Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
+  will continue to work so this is not a breaking change. 
 
 -----------------
 What's new in 2.0
