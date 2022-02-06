@@ -500,15 +500,16 @@ class PerformanceComparisonGenerator:
 
 		out('')
 		out('Comparison results:')
-		out('  where format is (fromRun->toRun): (%improvement) = (change above 2 sigmas/stdDevs is 95% probability it\'s significant)')
+		out('  where fromRun->toRun format is: (%improvement) = (speedup ratio) = (sigmas/stdDevs where change above +/- 2.0 gives 95% probability it\'s significant)')
 		out('')
 		ComparisonData = collections.namedtuple('ComparisonData', [
 			'comparisonPercent', #%improvement
 			'comparisonSigmas', # improvements as a multiple of stddec
 			'ratio', # speedup ratio of from->to, how much faster we are now
-			'rfrom', # the "from" value
-			'rto',   # the "to"   value
+			'rfrom', # the "from" result value
+			'rto',   # the "to"   result value
 			'relativeStdDevTo', # relative stdDev as a % of the "to" value, or None if only one sample (or value is 0)
+			'toleranceStdDevs', # The configured tolerance specified in this test, if any
 			])
 		
 		# now compute comparison info, comparing each path to the final one
@@ -535,21 +536,26 @@ class PerformanceComparisonGenerator:
 						c.append('Compare to value is zero')
 						continue
 
-					# how many times faster are we now
-					ratio = rto['value']/rfrom['value']
-					# use a + or - sign to indicate improvement vs regression
-					sign = 1.0 if k.biggerIsBetter else -1.0
 					
 					# frequently at least one of these will have only one sample so 
 					# not much point doing a statistically accurate stddev estimate; so just 
 					# take whichever is bigger (which neatly ignores any that are zero due
 					# to only one sample)
-					stddevRatio = max(abs(rfrom['stdDev']/rfrom['value']), abs(rto['stdDev']/rto['value']))
+					relStdDev = max(abs(rfrom['stdDev']/rfrom['value']), abs(rto['stdDev']/rto['value']))
+
+					# how many times faster are we now
+					ratio = rto['value']/rfrom['value'] # initially, we ignore biggerIsBetter in the ratio calculation...
 					
+					# use a + or - sign to indicate improvement vs regression in the % (rather than a reciprocal which is harder to understand)
+					sign = 1.0 if k.biggerIsBetter else -1.0
 					comparisonPercent = 100.0*(ratio - 1)*sign
+					
 					# assuming a normal distribution, 1.0 or more gives 68% confidence of 
-					# a real difference, and 2.0 or more gives 95%
-					comparisonSigmas = sign*((ratio-1)/stddevRatio) if stddevRatio else None
+					# a real difference, and 2.0 or more gives 95%. 
+					comparisonSigmas = sign*((ratio-1)/relStdDev) if relStdDev else None
+
+					# but +/- isn't relevant when displaying the ratio; we want ratios >1 to always be a good thing, so use reciprocal here
+					if not k.biggerIsBetter: ratio = 1.0/ratio
 					
 					c.append(ComparisonData(
 						comparisonPercent=comparisonPercent, 
@@ -558,6 +564,7 @@ class PerformanceComparisonGenerator:
 						rfrom=rfrom['value'], 
 						rto=rto['value'],
 						relativeStdDevTo=100.0*rto['stdDev']/rto['value'] if rto['samples'] > 0 and rto['value']!=0 else None,
+						toleranceStdDevs=files[-1].keyedResults[k].get('toleranceStdDevs', 0.0),
 					))
 
 		if comparisonheaders:
@@ -572,10 +579,6 @@ class PerformanceComparisonGenerator:
 					(-1*c.comparisonPercent) if hasattr(c, 'comparisonPercent') else -10000000.0
 					for c in comparisons[k]]+[k]
 			raise Exception(f'Invalid sortby key "{sortby}"; valid values are: resultKey, testId, comparison%')
-
-		def addPlus(s):
-			if not s.startswith('-'): return '+'+s
-			return s
 
 		sortedkeys = sorted(comparisons.keys(), key=getComparisonKey)
 		
@@ -596,33 +599,40 @@ class PerformanceComparisonGenerator:
 					out('  '+prefix+c)
 					continue
 				
-				if c.comparisonSigmas != None:
-					significantresult = abs(c.comparisonSigmas) >= (files[-1].keyedResults[k].get('toleranceStdDevs', 0.0) or 2.0)
-				else:
-					significantresult = abs(c.comparisonPercent) >= 10
-				category = None
-				if significantresult:
-					category = LOG_PERF_BETTER if c.comparisonPercent > 0 else LOG_PERF_WORSE
-				
-				if c.comparisonSigmas is None:
-					sigmas = ''
-				else:
-					sigmas = ' = %s sigmas'%addColor(category, addPlus('%0.1f'%c.comparisonSigmas))
-				
-				line = '  '+prefix+'%s%s'%(
-					addColor(category, '%6s'%(addPlus('%0.1f'%c.comparisonPercent)+'%')), 
-					sigmas, 
-					)
-				"""if i==len(comparisons):
-					line +=  ' ( -> %s %s%s )'%(
-						self.valueToDisplayString(c.rto), 
-						files[-1].keyedResults[k]['unit'],
-						'' if c.relativeStdDevTo in (None, 0.0) else
-							f'; stdDev {c.relativeStdDevTo:0.1f}% of mean'
-					)
-				"""
-				out(line)
+				out('  '+prefix+self.formatResultComparison(c, addColor=addColor))
 			out('')
+
+	@staticmethod
+	def addPlus(s):
+		if not s.startswith('-'): return '+'+s
+		return s
+
+	def formatResultComparison(self, comparisonData, addColor, **kwargs):
+		# addColor function is passed like this just for simplicity, would be more elegant if this was public API
+		c = comparisonData
+		
+		# don't color for tiny deviations
+		if c.comparisonSigmas != None:
+			significantresult = abs(c.comparisonSigmas) >= (c.toleranceStdDevs or 2.0)
+		else:
+			significantresult = abs(c.comparisonPercent) >= 10
+		category = None
+		if significantresult:
+			category = LOG_PERF_BETTER if c.comparisonPercent > 0 else LOG_PERF_WORSE
+		
+		if c.comparisonSigmas is None:
+			sigmas = ''
+		else:
+			sigmas = ' = %s sigmas'%addColor(category, self.addPlus('%0.1f'%c.comparisonSigmas))
+		
+		result = addColor(category, '%6s'%(self.addPlus('%0.1f'%c.comparisonPercent)+'%'))
+
+		result += ' = '+addColor(category, self.valueToDisplayString(c.ratio)+'x')+' speedup'
+
+		result += sigmas
+		
+		return result
+
 		
 
 class CSVPerformanceReporter(BasePerformanceReporter):

@@ -7,15 +7,15 @@ Performance comparison summary between the following runs (the differing "run de
      hostname=myjsonhost, startTime=2022-02-05 18:38:03
 
 Comparison results:
-  where format is (fromRun->toRun): (%improvement) = (change above 2 sigmas/stdDevs is 95% probability it's significant)
+  where fromRun->toRun format is: (%improvement) = (speedup ratio) = (sigmas/stdDevs where change above +/- 2.0 gives 95% probability it's significant)
 
 Rate of doing a badda-badda-bing from MyNestedTestcase
  Mean from this run = 66,666,667,340 /s with stdDev=115,470,053,254 (173.2% of mean)
-  2022-02-05_14.08.51.win->run3: +4444444389.3% = +25660012.0 sigmas
-                 myoutdir->run3: +3294892849.3% = +19023073.0 sigmas
+  2022-02-05_14.08.51.win->run3: +4444444389.3% = 44,444,444x speedup = +25660012.0 sigmas
+                 myoutdir->run3: +3294892849.3% = 32,948,929x speedup = +19023073.0 sigmas
 
 Rate of doing a foo bar from MyNestedTestcase
  Mean from this run = 20,000,000,011 /s with stdDev=14.14 (0.0% of mean)
-  2022-02-05_14.08.51.win->run3: +1599999900.9% = +56568539.0 sigmas
+  2022-02-05_14.08.51.win->run3: +1599999900.9% = 16,000,000x speedup = +56568539.0 sigmas
                  myoutdir->run3: Compare from value is missing
 
