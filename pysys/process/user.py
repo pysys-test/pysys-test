@@ -1898,7 +1898,9 @@ class ProcessUser(object):
 		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS, suppress_prefix=True)
 		if logFunction is None: 
 			def logFunction(line):
-				self.log.info(u'  %s', l, extra=logextra)
+				self.log.info(u'  %s', l, 
+					# special-case printing of lines that already have coloring - don't add any extra colors to such lines
+					extra=BaseLogFormatter.tag(None, suppress_prefix=True) if '\033[' in line else logextra)
 
 		path = os.path.normpath(path)
 		if path.startswith(self.output): path = path[len(self.output)+1:]
