@@ -25,6 +25,7 @@ import collections, threading, time, math, sys, os
 import io
 import logging
 import json
+import glob
 
 if __name__ == "__main__":
 	sys.path.append(os.path.dirname( __file__)+'/../..')
@@ -33,6 +34,8 @@ from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.fileutils import mkdir, toLongPathSafe
 from pysys.utils.pycompat import *
+from pysys.utils.logutils import ColorLogFormatter
+from pysys.utils.logutils import stdoutPrint
 
 log = logging.getLogger('pysys.perfreporter')
 
@@ -203,6 +206,20 @@ class BasePerformanceReporter:
 		is also a good time to do any required aggregation, printing of summaries or artifact publishing. 
 		"""
 		pass
+	
+	def tryDeserializePerformanceFile(self, path):
+		"""
+		Advanced method which allows performance reporters to deserialize the files they write to allow them to be used 
+		as comparison baselines. 
+		
+		Most reporters do not need to worry about this method. 
+		
+		If you do implement it, return an instance of PerformanceRunData, or None if you do not support this file type, for 
+		example because the extension does not match. 
+		
+		:rtype: PerformanceRunData
+		"""
+		return None
 
 class JSONPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a JSON file.
@@ -274,21 +291,47 @@ class JSONPerformanceReporter(BasePerformanceReporter):
 					if self.publishArtifactCategory:
 						self.runner.publishArtifact(p, self.publishArtifactCategory)
 
+	def tryDeserializePerformanceFile(self, path):
+		if not path.endswith('.json'): return None
+		with io.open(toLongPathSafe(path), encoding='utf-8') as f:
+			data = json.load(f)
+			return PerformanceRunData(path, data['runDetails'], data['results'])
+
 class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which logs a human-friendly summary of all performance results to the console at the end of 
 	the test run. 
-	
-	The logger category is ``perfreporter.summary``, so if you wish to suppress it you can do so by specifying that 
-	category to the ``--verbosity`` argument of ``pysys run``. 
+
+	By setting the `BASELINES_ENV_VAR` environment variable, this reporter will also print out an 
+	automatic comparison from the named baseline file(s) to the results from the current test run. 
+	This feature is very useful when comparingdifferent strategies for optimizing your application. 
 	
 	.. versionadded:: 2.1
 
 	"""
 
+	BASELINES_ENV_VAR = 'PYSYS_PERFORMANCE_BASELINES'
+	"""
+	Set this environment variable to a comma-separated list of performance (e.g. ``.csv``) files to print out an 
+	automatic comparison from the baseline file(s) to the results from the current test run. 
+	
+	This feature is very useful when comparing different strategies for optimizing your application. 
+	
+	For best results, use multiple cycles for all test runs so that standard deviation can be calculated. 
+	
+	The filenames can be absolute paths, glob paths using ``*`` and ``**``, or relative to the testRootDir. For example::
+	
+		export PYSYS_PERFORMANCE_BASELINES=__pysys_performance/mybaseline*/**/*.csv,__pysys_performance/optimization1*/**/*.csv
+		
+	"""
+
+
 	def setup(self, **kwargs):
 		super().setup()
 		self.results = []
-	
+		
+		self.baselines = self.getComparisonBaselines()
+		self.baselineBaseDir = self.project.testRootDir
+
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		with self._lock:
 			self.results.append({
@@ -304,27 +347,258 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 					})
 
 	def isEnabled(self, **kwargs):
-		# If user explicitly asked for it, or if doing a multi-cycle perf run, then display a summary at end
-		return True # self.getXArg('printPerfSummary', default=self.runner.cycles>1):
+		return True
 	
 	def cleanup(self):
 		if not self.isEnabled(): return
 		if not self.results: return
 		
 		with self._lock:
-			logger = logging.getLogger('pysys.perfreporter.summary')
-
-			logger.info('Summary of performance results:')
+			logmethod = logging.getLogger('pysys.perfreporter.summary').info
 
 			# perform aggregation in case there are multiple cycles
-			p = PerformanceRunData.aggregate(PerformanceRunData(self.runner.runDetails, self.results))
+			p = PerformanceRunData.aggregate(PerformanceRunData('this', self.getRunDetails(), self.results))
+
+			if not self.baselines:
+				logmethod('Performance results summary:')
+				# simple formatting when there's no comparisons to be done
+				for r in p.results:
+					logmethod("  %s = %s %s (%s)%s %s", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
+						 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
+							'' if r['samples']==1 or ['value'] == 0 else f", stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)",
+							r['testId'],
+								extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1], suppress_prefix=True))
+				
+			else:
+				self.logComparisons(self.baselines+[p])
+
+	def getComparisonBaselines(self):
+		# return an (ordered) dict of path:PerformanceRunData for each path in the env var
+	
+		configuredBaselines = os.getenv(self.BASELINES_ENV_VAR)
+		if not configuredBaselines:
+			baselineData = []
+		else:
+			baselines = []
+			for b in configuredBaselines.split(','):
+				b = b.strip()
+				if not b: continue
+				
+				# if not abs, take paths as relative to testRootDir. Easier to work with the cwd which is constantly changing
+				b = os.path.join(self.project.testRootDir, b)
+				if os.path.isfile(b): 
+					baselines.append(b)
+				else:
+					globresults = sorted(glob.glob(b, recursive=True))
+					if not globresults: raise Exception('Cannot find any paths matching '+self.BASELINES_ENV_VAR+' expression: %s'%b)
+					baselines.extend(globresults)
+			baselineData = {}
+			for b in baselines:
+				if os.path.isdir(b): raise Exception(self.BASELINES_ENV_VAR+' may contain "*" or "**" glob expressions but not directories: %s'%b)
+				x = None
+				for r in self.runner.performanceReporters:
+					x = r.tryDeserializePerformanceFile(b)
+					if x: break
+				if x:
+					baselineData[b] = x
+				else:
+					raise Exception('Failed to find a reporter that can deserialize performance files of this type: %s'%b)
+
+			log.info('Successfully loaded performance comparison data from %d files: %s', len(baselines), ', '.join(baselineData.keys()))
+			baselineData = list(baselineData.values())
+		return baselineData
+		
+	def logComparisons(self, comparisonFiles, sortby=None, printmethod=stdoutPrint):
+		# NB: this method implementation mutates the passed in comparisonFiles
+		
+		# TODO: provide an option to override the sort order
+		
+		sortby = os.getenv('PYSYS_PERFORMANCE_SORT_BY', 'resultKey')
+		
+		files = comparisonFiles
+
+		out  = printmethod
+
+		# we may not have the project available here if running this standalone, but can still reuse the same 
+		# logic for deciding if coloring is enabled
+		colorFormatter = ColorLogFormatter({})
+		def addColor(category, s):
+			if not category: return s
+			return colorFormatter.formatArg(category, s) 
+				
+		# usually resultKey is itself the unique key, but for comparisons we also 
+		# want to include units/biggerIsBetter since if these change the 
+		# comparison would be invalidated
+		ComparisonKey = collections.namedtuple('ComparisonKey', ['resultKey', 'unit', 'biggerIsBetter'])
+
+		# iterate over each comparison item, stashing various aggregated information we need later, and printing summary info
+		for p in files:
+			p.keyedResults = {
+				ComparisonKey(resultKey=r['resultKey'], unit=r['unit'], biggerIsBetter=r['biggerIsBetter'])
+				: r for r in p.results
+			}
+
+		commonRunDetails = {}
+		for k in list(files[-1].runDetails.keys()):
+			if all([k in p.runDetails and  p.runDetails[k] == files[-1].runDetails[k] for p in files]):
+				commonRunDetails[k] = files[-1].runDetails[k]
+
+		def formatRunDetails(k, val):
+			valsplit = val.split(';')
+			if k == 'startTime' and len(valsplit)>=3:
+				val = ' .. '.join([valsplit[0].strip(), valsplit[-1].strip()])
+			else:
+				val = val.replace('; ',';')
+			return '%s=%s'%(k, addColor(LOG_TEST_DETAILS, val))
+
+		#out('Comparing performance files with these common run details: %s'% ', '.join([formatRunDetails(k, commonRunDetails[k]) for k in commonRunDetails]))
+
+		# Assign a comparison label to each; use outDirName if unique, else make something based on the filename
+		if len(set(p.runDetails.get('outDirName') for p in files)) == len(files):
+			for p in files: p.comparisonLabel = p.runDetails.get('outDirName', p.name)
+		else:
+			for p in files: p.comparisonLabel = os.path.splitext(os.path.basename(p.name))[0].replace('perf_','')
 			
-			for r in p.results:
-				logger.info("  %s = %s %s (%s)%s (%s)", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
-					 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
-						'' if r['samples']==1 else ', stdDev = '+self.valueToDisplayString(r['stdDev']),
-						r['testId'],
-							extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1], suppress_prefix=True))
+		out('')
+		out('Performance comparison summary between the following runs (the differing "run details" are shown):')
+			
+		for p in files:
+			out('- %s (%d results, %d samples/result)%s:'%(
+				addColor(LOG_TEST_DETAILS, p.comparisonLabel), 
+				len(p.results), 
+				float( sum([r['samples'] for r in p.results])) / len(p.results),
+				'' if p.comparisonLabel != p.runDetails.get('outDirName')
+					else f' from {p.name}'
+				))
+			out('     %s'%', '.join([formatRunDetails(k, p.runDetails[k]) for k in p.runDetails if k not in commonRunDetails]))
+
+		out('')
+		out('Comparison results:')
+		out('  where format is (fromRun->toRun): (%improvement) = (change above 2 sigmas/stdDevs is 95% probability it\'s significant)')
+		out('')
+		ComparisonData = collections.namedtuple('ComparisonData', [
+			'comparisonPercent', #%improvement
+			'comparisonSigmas', # improvements as a multiple of stddec
+			'ratio', # speedup ratio of from->to, how much faster we are now
+			'rfrom', # the "from" value
+			'rto',   # the "to"   value
+			'relativeStdDevTo', # relative stdDev as a % of the "to" value, or None if only one sample (or value is 0)
+			])
+		
+		# now compute comparison info, comparing each path to the final one
+		comparisons = {} # ComparisonKey:[ComparisonInfo or string if not available, ...]
+		comparetoresults = files[-1].keyedResults
+		comparisonheaders = []
+		for p in files[:-1]:
+			if len(files)>2:
+				comparisonheaders.append('%s->%s'%(p.comparisonLabel, files[-1].comparisonLabel))
+			
+			keyedResults = p.keyedResults
+			for k in comparetoresults:
+				c = comparisons.setdefault(k, [])
+				if k not in keyedResults:
+					c.append('Compare from value is missing')
+				else:
+					rfrom = keyedResults[k]
+					rto = comparetoresults[k]
+					# avoid div by zero errors; results are nonsensical anyway if either is zero
+					if rfrom['value'] == 0: 
+						c.append('Compare from value is zero')
+						continue
+					if rto['value'] == 0: 
+						c.append('Compare to value is zero')
+						continue
+
+					# how many times faster are we now
+					ratio = rto['value']/rfrom['value']
+					# use a + or - sign to indicate improvement vs regression
+					sign = 1.0 if k.biggerIsBetter else -1.0
+					
+					# frequently at least one of these will have only one sample so 
+					# not much point doing a statistically accurate stddev estimate; so just 
+					# take whichever is bigger (which neatly ignores any that are zero due
+					# to only one sample)
+					stddevRatio = max(abs(rfrom['stdDev']/rfrom['value']), abs(rto['stdDev']/rto['value']))
+					
+					comparisonPercent = 100.0*(ratio - 1)*sign
+					# assuming a normal distribution, 1.0 or more gives 68% confidence of 
+					# a real difference, and 2.0 or more gives 95%
+					comparisonSigmas = sign*((ratio-1)/stddevRatio) if stddevRatio else None
+					
+					c.append(ComparisonData(
+						comparisonPercent=comparisonPercent, 
+						comparisonSigmas=comparisonSigmas,
+						ratio=ratio,
+						rfrom=rfrom['value'], 
+						rto=rto['value'],
+						relativeStdDevTo=100.0*rto['stdDev']/rto['value'] if rto['samples'] > 0 and rto['value']!=0 else None,
+					))
+
+		if comparisonheaders:
+			headerpad = max([len(h) for h in comparisonheaders])
+			comparisonheaders = [('%'+str(headerpad+1)+'s')%(h+':') for h in ([files[-1].comparisonLabel]+comparisonheaders)]
+
+		def getComparisonKey(k):
+			if sortby == 'resultKey': return k
+			if sortby == 'testId': return (allresultinfo[k]['testId'], k)
+			# sort with regressions at the bottom, so they're more prominent
+			if sortby == 'comparison%': return [
+					(-1*c.comparisonPercent) if hasattr(c, 'comparisonPercent') else -10000000.0
+					for c in comparisons[k]]+[k]
+			raise Exception(f'Invalid sortby key "{sortby}"; valid values are: resultKey, testId, comparison%')
+
+		def addPlus(s):
+			if not s.startswith('-'): return '+'+s
+			return s
+
+		sortedkeys = sorted(comparisons.keys(), key=getComparisonKey)
+		
+		for k in sortedkeys:
+			out('%s from %s'%(colorFormatter.formatArg(LOG_TEST_PERFORMANCE, k.resultKey), files[-1].keyedResults[k]['testId']))
+			
+			r = files[-1].keyedResults[k]
+			out(' '+f"Mean from this run = {self.valueToDisplayString(r['value'])} {r['unit']}"+
+							('' if r['samples']==1 or ['value'] == 0 else f", stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)"),
+					)
+
+			i = 0
+			for c in comparisons[k]:
+				i+=1
+				prefix = ('%s '%comparisonheaders[i]) if comparisonheaders else ''
+				if not hasattr(c, 'comparisonPercent'):
+					# strings for error messages
+					out('  '+prefix+c)
+					continue
+				
+				if c.comparisonSigmas != None:
+					significantresult = abs(c.comparisonSigmas) >= (files[-1].keyedResults[k].get('toleranceStdDevs', 0.0) or 2.0)
+				else:
+					significantresult = abs(c.comparisonPercent) >= 10
+				category = None
+				if significantresult:
+					category = LOG_PERF_BETTER if c.comparisonPercent > 0 else LOG_PERF_WORSE
+				
+				if c.comparisonSigmas is None:
+					sigmas = ''
+				else:
+					sigmas = ' = %s sigmas'%addColor(category, addPlus('%0.1f'%c.comparisonSigmas))
+				
+				line = '  '+prefix+'%s%s'%(
+					addColor(category, '%6s'%(addPlus('%0.1f'%c.comparisonPercent)+'%')), 
+					sigmas, 
+					)
+				"""if i==len(comparisons):
+					line +=  ' ( -> %s %s%s )'%(
+						self.valueToDisplayString(c.rto), 
+						files[-1].keyedResults[k]['unit'],
+						'' if c.relativeStdDevTo in (None, 0.0) else
+							f'; stdDev {c.relativeStdDevTo:0.1f}% of mean'
+					)
+				"""
+				out(line)
+			out('')
+		#return output[0]
+
 
 class CSVPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a CSV file.
@@ -416,7 +690,8 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 							perfFile.dump(p)
 				
 					log.info('Performance results were written to: %s', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
-
+					log.info('  (add the above path to env %s to show a comparison against that baseline on future test runs)', PrintSummaryPerformanceReporter.BASELINES_ENV_VAR)
+					
 					if self.publishArtifactCategory:
 						self.runner.publishArtifact(p, self.publishArtifactCategory)
 
@@ -481,12 +756,17 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 					f.write(callGetRunHeader())
 				f.write(formatted)
 			self.__summaryFilesWritten.add(path)
-	
+
+	def tryDeserializePerformanceFile(self, path):
+		if not path.endswith('.csv'): return None
+		return CSVPerformanceFile.load(path)
 
 class PerformanceRunData:
 	"""
 	Holds performance data for a single test run, consistenting of runDetails and a list of performance results covering 
 	one or more cycles. 
+	
+	:ivar str name: The name, typically a filename. 
 	
 	:ivar dict[str,str] ~.runDetails: A dictionary containing (string key, string value) information about the whole test 
 		run, for example operating system and hostname.
@@ -496,7 +776,8 @@ class PerformanceRunData:
 		resultDetails. 
 
 	"""
-	def __init__(self, runDetails, results):
+	def __init__(self, name, runDetails, results):
+		self.name = name
 		self.runDetails = runDetails
 		self.results = results
 
@@ -553,6 +834,7 @@ class PerformanceRunData:
 					details[k].append(f.runDetails[k])
 
 		return PerformanceRunData(
+			', '.join(run.name or '?' for run in runs),
 			{k: '; '.join(sorted(details[k])) for k in details},
 			sorted(list(results.values()), key=lambda r: r['resultKey'])
 			)
@@ -598,8 +880,7 @@ class CSVPerformanceFile(PerformanceRunData):
 		if isinstance(files, CSVPerformanceFile): files = [files]
 		
 		agg = PerformanceRunData.aggregate([f for f in files])
-		
-		result = CSVPerformanceFile('')
+		result = CSVPerformanceFile('', name=agg.name)
 		result.results = agg.results
 		result.runDetails = agg.runDetails
 		return result
@@ -615,7 +896,7 @@ class CSVPerformanceFile(PerformanceRunData):
 		.. versionadded:: 2.1
 		"""
 		with io.open(toLongPathSafe(src), 'r', encoding='utf-8') as f:
-			return CSVPerformanceFile(f.read())
+			return CSVPerformanceFile(f.read(), name=src)
 				
 	def dump(self, dest):
 		"""
@@ -671,8 +952,8 @@ class CSVPerformanceFile(PerformanceRunData):
 		else:
 			raise Exception('Unsupported input type: %s'%values.__class__.__name__)
 		
-	def __init__(self, contents):
-		super().__init__(None, [])
+	def __init__(self, contents, name=None):
+		super().__init__(name, None, [])
 		header = None
 		self.results = []
 		self.runDetails = None

@@ -1,0 +1,21 @@
+Performance comparison summary between the following runs (the differing "run details" are shown):
+- 2022-02-05_14.08.51.win (4 results, 1 samples/result):
+     outDirName=historicOutDir, hostname=orighost, startTime=2022-02-05 14:08:51 .. 2022-02-07 16:00:00
+- myoutdir (3 results, 1 samples/result):
+     outDirName=historicOutDir, hostname=myjsonhost, startTime=2022-02-05 18:38:03
+- this (2 results, 3 samples/result):
+     outDirName=myoutdir, <stripped>
+
+Comparison results:
+  where format is (fromRun->toRun): (%improvement) = (change above 2 sigmas/stdDevs is 95% probability it's significant)
+
+Rate of doing a badda-badda-bing from MyNestedTestcase
+ Mean from this run = 2,003 /s, stdDev=1 (0.0% of mean)
+  2022-02-05_14.08.51.win->this: +33.5% = +4.1 sigmas
+                 myoutdir->this:  -1.8% = -36.3 sigmas
+
+Rate of doing a foo bar from MyNestedTestcase
+ Mean from this run = 1,030 /s, stdDev=10 (1.0% of mean)
+  2022-02-05_14.08.51.win->this: -31.3% = -32.3 sigmas
+                 myoutdir->this: Compare from value is missing
+

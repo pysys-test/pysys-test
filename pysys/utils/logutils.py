@@ -131,6 +131,8 @@ class ColorLogFormatter(BaseLogFormatter):
 		LOG_PASSES: 'GREEN',
 		LOG_SKIPS: 'YELLOW',
 		LOG_DIFF_ADDED: 'CYAN', LOG_DIFF_REMOVED: 'MAGENTA', # can't use red/green here without confusion with fail/pass
+		LOG_PERF_BETTER:'GREEN', LOG_PERF_WORSE:'RED',
+		
 		LOG_END:'END',
 	}
 	
