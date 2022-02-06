@@ -1,8 +1,8 @@
 Performance comparison summary between the following runs (the differing "run details" are shown):
 - 2022-02-05_14.08.51.win (3 result keys, 2 samples/result):
-     outDirName=historicOutDir, hostname=orighost, startTime=2022-02-05 14:08:51 .. 2022-02-07 16:00:00
+     outDirName=historicOutDir, <stripped>
 - myoutdir (1 result keys, 3 samples/result):
-     outDirName=historicOutDir, hostname=myjsonhost, startTime=2022-02-05 18:38:03
+     outDirName=historicOutDir, <stripped>
 - this (2 result keys, 3 samples/result):
      outDirName=myoutdir, <stripped>
 

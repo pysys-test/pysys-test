@@ -37,8 +37,8 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.assertDiff(self.copy('pysys-run.out', 'perf-summary.out', mappers=[
 			lambda line: pysys.utils.logutils.stripANSIEscapeCodes(line),
 			pysys.mappers.IncludeLinesBetween('Performance comparison', stopBefore=' (CRIT|INFO) '),
-			# strip out the bit that contains timestamps and hostnames from the current run
-			pysys.mappers.RegexReplace('(  outDirName=myoutdir, ).*', r'\1<stripped>'),
+			# strip out the bit that contains timestamps and hostnames from the current run; all kinds of details like OS and cpu count could also differ
+			pysys.mappers.RegexReplace('(  outDirName=[^,]*, ).*', r'\1<stripped>'),
 			#pysys.mappers.RegexReplace(r'( from ).*(perf_.*)', r'\1<stripped>\2'),
 		]))
 
