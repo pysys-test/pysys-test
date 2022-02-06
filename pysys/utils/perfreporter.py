@@ -37,7 +37,8 @@ from pysys.utils.pycompat import *
 from pysys.perf.perfreportstool import perfReportsToolMain
 
 # For backwards compatibility where modules are importing this
-from pysys.perf.reporters import *#CSVPerformanceReporter
+from pysys.perf.reporters import *
+from pysys.perf.api import PerformanceUnit
 
 if __name__ == "__main__":
 	perfReportsToolMain(sys.argv[1:])
