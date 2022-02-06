@@ -19,6 +19,8 @@
 
 """
 Performance reporters are configurable plugins responsible for storing or displaying performance result numbers. 
+
+They are invoked by `pysys.basetest.BaseTest.reportPerformanceResult`. 
 """
 
 __all__ = ['api', 'reporters']

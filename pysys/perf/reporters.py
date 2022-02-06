@@ -16,9 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Performance number reporting classes, used by `pysys.basetest.BaseTest.reportPerformanceResult`. 
-
-Some reporter classes are provided in the box, and the `BasePerformanceReporter` class can be used to create more. 
+Contains the built-in reporter classes. 
 """
 
 import collections, threading, time, math, sys, os
@@ -256,6 +254,8 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 		"""Return the header string to the CSV file.
 		
 		There should usually be no reason to override this method. 
+		
+		:meta private:
 		"""
 		
 		try:
@@ -294,6 +294,8 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 	def formatResult(self, testobj, value, resultKey, unit, toleranceStdDevs, resultDetails):
 		"""Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).
 
+		:meta private:
+
 		:param testobj: the test case instance registering the value
 		:param value: the value to be reported
 		:param resultKey: a unique string that fully identifies what was measured
@@ -316,6 +318,8 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 
 	def recordResult(self, formatted, testobj):
 		"""Record results to the performance summary file.
+
+		:meta private:
 
 		:param formatted: the formatted string to write
 		:param testobj: object reference to the calling test

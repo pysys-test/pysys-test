@@ -16,9 +16,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Performance number reporting classes, used by `pysys.basetest.BaseTest.reportPerformanceResult`. 
+API for creating new performance reporters (for manipulating performance run files outside the framework).
 
-Some reporter classes are provided in the box, and the `BasePerformanceReporter` class can be used to create more. 
 """
 
 import collections, threading, time, math, sys, os
@@ -48,6 +47,8 @@ class PerformanceUnit(object):
 	1,234,000 ns easier to skim-read and compare than fractional numbers like 
 	0.001234).
 
+	:param str name: The name of the unit . Should be short, for example "/s".
+	:param bool biggerIsBetter: Indicates whether larger values are good (e.g. rate/TPS/throughput) or bad (latency/memory). 
 	"""
 	def __init__(self, name, biggerIsBetter):
 		assert biggerIsBetter in [False, True], biggerIsBetter
@@ -80,7 +81,7 @@ class BasePerformanceReporter:
 	
 	If no reporters are explicitly configured, default reporters will be added. 
 
-	:ivar pysys.config.project.Project project: The project configuration instance.
+	:ivar pysys.config.project.Project ~.project: The project configuration instance.
 	
 	:ivar str testoutdir: The output directory used for this test run 
 		(equal to `runner.outsubdir`), an identifying string which often contains 
@@ -159,7 +160,7 @@ class BasePerformanceReporter:
 	def getRunSummaryFile(self, testobj, **kwargs):
 		"""Return the fully substituted location of the file to which summary performance results will be written.
 
-		This may include the following substitutions: ``@OUTDIR@`` (=${outDirName}, the basename of the output directory for this run,
+		This may include the following substitutions: ``@OUTDIR@`` (=``${outDirName}``, the basename of the output directory for this run,
 		e.g. "linux"), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. 
 		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
 		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.
@@ -185,6 +186,10 @@ class BasePerformanceReporter:
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		"""Report a performance result, with an associated unique key that identifies it.
+		
+		This method must be implemented by performance reporters. However do not ever call it directly - always use 
+		`pysys.basetest.BaseTest.reportPerformanceResult` which performs some critical input validations before calling 
+		all the registered reporters. 
 
 		:param testobj: the test case instance registering the value. Use ``testobj.descriptor.id`` to get the ``testId``. 
 		:param int|float value: the value to be reported. This may be an int or a float. 
@@ -222,7 +227,7 @@ class BasePerformanceReporter:
 
 class PerformanceRunData:
 	"""
-	Holds performance data for a single test run, consistenting of runDetails and a list of performance results covering 
+	Holds performance data for a single test run, consisting of runDetails and a list of performance results covering 
 	one or more cycles. 
 	
 	:ivar str name: The name, typically a filename. 
@@ -254,7 +259,7 @@ class PerformanceRunData:
 		entry for each unique resultKey with the value given as a mean of all the observed samples.
 
 		:param list[PerformanceRunData] files: the list of run objects to aggregate.
-
+		:rtype PerformanceRunData:
 		"""
 		if isinstance(runs, PerformanceRunData): runs = [runs]
 		
@@ -349,7 +354,7 @@ class CSVPerformanceFile(PerformanceRunData):
 		"""
 		Read the runDetails and results from the specified .csv file on disk.
 		
-		:str src: The path to read. 
+		:param str src: The path to read. 
 		:returns: A new `CSVPerformanceFile` instance. 
 		
 		.. versionadded:: 2.1
@@ -363,7 +368,7 @@ class CSVPerformanceFile(PerformanceRunData):
 		
 		Any existing file is overwritten. 
 		
-		:str dest: The destination path or file handle to write to. 
+		:param str dest: The destination path or file handle to write to. 
 		
 		.. versionadded:: 2.1
 		"""

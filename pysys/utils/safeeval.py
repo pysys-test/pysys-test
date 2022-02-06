@@ -22,6 +22,10 @@
 
 # It still contains lots of symbols which are likely to be useful when performing an eval such as IS_WINDOWS, etc
 
+"""
+Contains the `safeEval` function.
+"""
+
 import os.path, time, threading, logging, sys
 import re
 import math
