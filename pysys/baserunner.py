@@ -708,6 +708,7 @@ class BaseRunner(ProcessUser):
 					try: perfreporter.cleanup()
 					except Exception as ex: 
 						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+						sys.stderr.write('Caught exception performing performance reporter cleanup: %s\n'%traceback.format_exc()) # useful to have it on stderr too, esp during development
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
