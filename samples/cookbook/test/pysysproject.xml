@@ -315,6 +315,8 @@
 		</performance-reporter>
 		
 		<performance-reporter classname="pysys.utils.perfreporter.JSONPerformanceReporter"/>
+
+		<performance-reporter classname="pysys.utils.perfreporter.PrintSummaryPerformanceReporter"/>
 		
 	</performance-reporters>
 	
