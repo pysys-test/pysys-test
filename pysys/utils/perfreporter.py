@@ -34,8 +34,7 @@ from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.fileutils import mkdir, toLongPathSafe
 from pysys.utils.pycompat import *
-from pysys.utils.logutils import ColorLogFormatter
-from pysys.utils.logutils import stdoutPrint
+from pysys.utils.logutils import ColorLogFormatter, stdoutPrint
 
 log = logging.getLogger('pysys.perfreporter')
 
@@ -100,14 +99,14 @@ class BasePerformanceReporter:
 	
 	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
 		self.runner = runner
-		assert self.runner is not None
 		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future if needed; give error if any unexpected args are passed
 		
 		self.testoutdir = os.path.basename(testoutdir)
 		self.summaryfile = summaryfile
 		self.project = project
 		self.hostname = HOSTNAME.lower().split('.')[0]
-		self.runStartTime = self.runner.startTime
+		if self.runner is not None: # just in case we're constructing it for standalone execution in the compare script
+			self.runStartTime = self.runner.startTime
 		
 		self._lock = threading.RLock()
 		
@@ -143,10 +142,13 @@ class BasePerformanceReporter:
 		"""
 		return collections.OrderedDict(self.runner.runDetails)
 	
-	def valueToDisplayString(self, value):
+	@staticmethod
+	def valueToDisplayString(value):
 		"""Pretty-print an integer or float value to a moderate number of significant figures.
 
 		The method additionally adds a "," grouping for large numbers.
+		
+		Subclasses may customize this if desired, including by reimplementing as a non-static method. 
 
 		:param value: the value to be displayed, which must be a numeric type. 
 
@@ -207,6 +209,7 @@ class BasePerformanceReporter:
 		"""
 		pass
 	
+	@staticmethod
 	def tryDeserializePerformanceFile(self, path):
 		"""
 		Advanced method which allows performance reporters to deserialize the files they write to allow them to be used 
@@ -215,7 +218,7 @@ class BasePerformanceReporter:
 		Most reporters do not need to worry about this method. 
 		
 		If you do implement it, return an instance of PerformanceRunData, or None if you do not support this file type, for 
-		example because the extension does not match. 
+		example because the extension does not match. It is best to declare this as a static method if possible. 
 		
 		:rtype: PerformanceRunData
 		"""
@@ -291,7 +294,8 @@ class JSONPerformanceReporter(BasePerformanceReporter):
 					if self.publishArtifactCategory:
 						self.runner.publishArtifact(p, self.publishArtifactCategory)
 
-	def tryDeserializePerformanceFile(self, path):
+	@staticmethod
+	def tryDeserializePerformanceFile(path):
 		if not path.endswith('.json'): return None
 		with io.open(toLongPathSafe(path), encoding='utf-8') as f:
 			data = json.load(f)
@@ -324,13 +328,15 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 		
 	"""
 
-
 	def setup(self, **kwargs):
 		super().setup()
 		self.results = []
 		
-		self.baselines = self.getComparisonBaselines()
-		self.baselineBaseDir = self.project.testRootDir
+		self.comparisonGenerator = PerformanceComparisonGenerator(reporters=self.runner.performanceReporters)
+		self.baselines = self.comparisonGenerator.loadFiles(
+			baselineBaseDir=self.project.testRootDir,
+			paths=os.getenv(self.BASELINES_ENV_VAR,'').split(','), 
+			)
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		with self._lock:
@@ -370,50 +376,70 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 								extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1], suppress_prefix=True))
 				
 			else:
-				self.logComparisons(self.baselines+[p])
+				logmethod('\n')
+				self.comparisonGenerator.logComparisons(self.baselines+[p])
 
-	def getComparisonBaselines(self):
-		# return an (ordered) dict of path:PerformanceRunData for each path in the env var
-	
+
+class PerformanceComparisonGenerator:
+	"""Internal helper class for comparing multiple .csv or json performance files and printing the differences. 
+
+	:meta private: Not public API may change at any time. 
+	.. versionadded:: 2.1
+
+	"""
+
+	BASELINES_ENV_VAR = PrintSummaryPerformanceReporter.BASELINES_ENV_VAR
+
+	def __init__(self, reporters): 
+		self.reporters = reporters # list of perf reporter instances (or for standalone invocation, classes); must be at least one
+		
+			# - with the static tryDeserializePerformanceFile method on them
+			
+		# We'd like to delegate to the first runner. Assuming it's a static method is probably reasonable. Could break if user subclass redefines as non-static
+		self.valueToDisplayString = reporters[0].valueToDisplayString
+
+	def loadFiles(self, baselineBaseDir, paths):
+		# return a list PerformanceRunData for each path in the specified list
+		
 		configuredBaselines = os.getenv(self.BASELINES_ENV_VAR)
-		if not configuredBaselines:
-			baselineData = []
-		else:
-			baselines = []
-			for b in configuredBaselines.split(','):
-				b = b.strip()
-				if not b: continue
-				
-				# if not abs, take paths as relative to testRootDir. Easier to work with the cwd which is constantly changing
-				b = os.path.join(self.project.testRootDir, b)
-				if os.path.isfile(b): 
-					baselines.append(b)
-				else:
-					globresults = sorted(glob.glob(b, recursive=True))
-					if not globresults: raise Exception('Cannot find any paths matching '+self.BASELINES_ENV_VAR+' expression: %s'%b)
-					baselines.extend(globresults)
-			baselineData = {}
-			for b in baselines:
-				if os.path.isdir(b): raise Exception(self.BASELINES_ENV_VAR+' may contain "*" or "**" glob expressions but not directories: %s'%b)
-				x = None
-				for r in self.runner.performanceReporters:
-					x = r.tryDeserializePerformanceFile(b)
-					if x: break
-				if x:
-					baselineData[b] = x
-				else:
-					raise Exception('Failed to find a reporter that can deserialize performance files of this type: %s'%b)
+		if not paths:
+			return None
 
-			log.info('Successfully loaded performance comparison data from %d files: %s', len(baselines), ', '.join(baselineData.keys()))
-			baselineData = list(baselineData.values())
+		baselines = []
+		for b in paths:
+			b = b.strip()
+			if not b: continue
+			
+			# if not abs, take paths as relative to testRootDir. Easier to work with the cwd which is constantly changing
+			b = os.path.join(baselineBaseDir, b)
+			
+			if os.path.isfile(b): 
+				baselines.append(b)
+			else:
+				globresults = sorted(glob.glob(b, recursive=True))
+				if not globresults: raise Exception('Cannot find any paths matching '+self.BASELINES_ENV_VAR+' expression: %s'%b)
+				baselines.extend(globresults)
+		baselineData = {}
+		for b in baselines:
+			if os.path.isdir(b): raise Exception(self.BASELINES_ENV_VAR+' may contain "*" or "**" glob expressions but not directories: %s'%b)
+			x = None
+			for r in self.reporters:
+				x = r.tryDeserializePerformanceFile(b)
+				if x: break
+			if x:
+				baselineData[b] = x
+			else:
+				raise Exception('Failed to find a reporter that can deserialize performance files of this type: %s'%b)
+
+		baselineData = [PerformanceRunData.aggregate(b) for b in baselineData.values()]
 		return baselineData
 		
 	def logComparisons(self, comparisonFiles, sortby=None, printmethod=stdoutPrint):
+		# comparisonFiles are a list of PerformanceRunData instances
+		
 		# NB: this method implementation mutates the passed in comparisonFiles
 		
-		# TODO: provide an option to override the sort order
-		
-		sortby = os.getenv('PYSYS_PERFORMANCE_SORT_BY', 'resultKey')
+		sortby = sortby or os.getenv('PYSYS_PERFORMANCE_SORT_BY', 'resultKey')
 		
 		files = comparisonFiles
 
@@ -459,11 +485,10 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 		else:
 			for p in files: p.comparisonLabel = os.path.splitext(os.path.basename(p.name))[0].replace('perf_','')
 			
-		out('')
 		out('Performance comparison summary between the following runs (the differing "run details" are shown):')
 			
 		for p in files:
-			out('- %s (%d results, %d samples/result)%s:'%(
+			out('- %s (%d result keys, %d samples/result)%s:'%(
 				addColor(LOG_TEST_DETAILS, p.comparisonLabel), 
 				len(p.results), 
 				float( sum([r['samples'] for r in p.results])) / len(p.results),
@@ -558,7 +583,7 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 			
 			r = files[-1].keyedResults[k]
 			out(' '+f"Mean from this run = {self.valueToDisplayString(r['value'])} {r['unit']}"+
-							('' if r['samples']==1 or ['value'] == 0 else f", stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)"),
+							('' if r['samples']==1 or ['value'] == 0 else f" with stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)"),
 					)
 
 			i = 0
@@ -597,8 +622,7 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 				"""
 				out(line)
 			out('')
-		#return output[0]
-
+		
 
 class CSVPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a CSV file.
@@ -756,8 +780,9 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 					f.write(callGetRunHeader())
 				f.write(formatted)
 			self.__summaryFilesWritten.add(path)
-
-	def tryDeserializePerformanceFile(self, path):
+	
+	@staticmethod
+	def tryDeserializePerformanceFile(path):
 		if not path.endswith('.csv'): return None
 		return CSVPerformanceFile.load(path)
 
@@ -904,14 +929,17 @@ class CSVPerformanceFile(PerformanceRunData):
 		
 		Any existing file is overwritten. 
 		
-		:str dest: The destination path to write to. 
+		:str dest: The destination path or file handle to write to. 
 		
 		.. versionadded:: 2.1
 		"""
-		with io.open(toLongPathSafe(dest), 'w', encoding='utf-8') as f:
-			f.write(self.makeCSVHeaderLine(self.runDetails))
-			for v in self.results:
-				f.write(self.toCSVLine(v)+'\n')
+		if isinstance(dest, str):
+			with io.open(toLongPathSafe(dest), 'w', encoding='utf-8') as f:
+				return self.dump(f)
+				
+		dest.write(self.makeCSVHeaderLine(self.runDetails))
+		for v in self.results:
+			dest.write(self.toCSVLine(v)+'\n')
 
 	@staticmethod 
 	def makeCSVHeaderLine(runDetails):
@@ -1010,46 +1038,65 @@ class CSVPerformanceFile(PerformanceRunData):
 
 if __name__ == "__main__":
 	USAGE = """
-python -m pysys.utils.perfreporter aggregate PATH1 PATH2... > aggregated.csv
+perfreporter.py aggregate PATH1 PATH2... > aggregated.csv
+perfreporter.py compare PATH_GLOB1 PATH_GLOB2...
 
-where PATH is a .csv file or directory of .csv files. 
+where PATH is a .csv file or directory of .csv files 
+      GLOB_PATH is a path to a file or files, optionally containing by * and ** globs
 
-The aggregate command combines the specifies file(s) to form a single file 
+The aggregate command combines the specifies CSVfile(s) to form a single file 
 with one row for each resultKey, with the 'value' equal to the mean of all 
 values for that resultKey and the 'stdDev' updated with the standard deviation. 
 This can also be used with one or more .csv file to aggregate results from multiple 
 cycles. 
 
+The compare command prints a comparison from each listed performance file to the final one in the list.
+Note that the format of the output may change at any time, and it is not intended for machine parsing. 
+
 """
 	# could later add support for automatically comparing files
 	args = sys.argv[1:]
-	if '-h' in sys.argv or '--help' in args or len(args) <2 or args[0] not in ['aggregate']:
+	if '-h' in sys.argv or '--help' in args or len(args) <2 or args[0] not in ['aggregate', 'compare']:
 		sys.stderr.write(USAGE)
 		sys.exit(1)
 	
 	cmd = args[0]
 	
-	paths = []
-	for p in args[1:]:
-		if os.path.isfile(p):
-			paths.append(p)
-		elif os.path.isdir(p):
-			for (dirpath, dirnames, filenames) in os.walk(p):
-				for f in sorted(filenames):
-					if f.endswith('.csv'):
-						paths.append(dirpath+'/'+f)
-		else:
-			raise Exception('Cannot find file: %s'%p)
-	
-	if not paths:
-		raise Exception('No .csv files found')
-	files = []
-	for p in paths:
-		with io.open(toLongPathSafe(os.path.abspath(p)), encoding='utf-8') as f:
-			files.append(CSVPerformanceFile(f.read()))
+	# send log output to stderr to avoid interfering with output we might be redirecting to a file	
+	logging.basicConfig(format='%(levelname)s: %(message)s', stream=sys.stderr, level=getattr(logging, os.getenv('PYSYS_LOG_LEVEL', 'INFO').upper()))
 	
 	if cmd == 'aggregate':
+		paths = []
+		for p in args[1:]:
+			if os.path.isfile(p):
+				paths.append(p)
+			elif os.path.isdir(p):
+				for (dirpath, dirnames, filenames) in os.walk(p):
+					for f in sorted(filenames):
+						if f.endswith('.csv'):
+							paths.append(dirpath+'/'+f)
+			else:
+				raise Exception('Cannot find file: %s'%p)
+		
+		if not paths:
+			raise Exception('No .csv files found')
+		files = []
+		for p in paths:
+			with io.open(toLongPathSafe(os.path.abspath(p)), encoding='utf-8') as f:
+				files.append(CSVPerformanceFile(f.read()))
+
 		f = CSVPerformanceFile.aggregate(files)
-		sys.stdout.write('# '+CSVPerformanceFile.toCSVLine(CSVPerformanceFile.COLUMNS+[CSVPerformanceFile.RUN_DETAILS, f.runDetails])+'\n')
-		for r in f.results:
-			sys.stdout.write(CSVPerformanceFile.toCSVLine(r)+'\n')
+		f.dump(sys.stdout)
+	elif cmd == 'compare':
+		paths = args[1:]
+		from pysys.config.project import Project
+
+		project = Project.findAndLoadProject()
+		# Can't easily get these classes from project without replicating the logic to instantiate them, which would 
+		# be error prone
+		performanceReporterClasses = [CSVPerformanceReporter, JSONPerformanceReporter]
+		
+		gen = PerformanceComparisonGenerator(performanceReporterClasses)
+		files = gen.loadFiles(baselineBaseDir=project.testRootDir, paths=paths)
+		gen.logComparisons(files)
+
