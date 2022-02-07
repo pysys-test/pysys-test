@@ -10,7 +10,7 @@ It's very common to have one set of logic for Windows and another for
 all non-Windows (Unix-based) platforms, and PySys has a dedicated constant `pysys.constants.IS_WINDOWS` for 
 that::
 
-	self.startProcess('cmd.exe' if IS_WINDOWS else 'bash', ...)
+	self.startProcess('myprogram.exe' if IS_WINDOWS else 'myprogram', ...)
 
 For finer grained platform detection we recommend using the facilities built into Python, for example 
 ``sys.platform``, ``platform.platform()`` or ``platform.uname()``.
@@ -531,6 +531,102 @@ have a few miscellaneous test failures and just want to re-run the failing
 tests::
 
   pysys run MyTest_001~MockDatabase MyTest_020~MyDatabase_2.0
+
+Performance tests - recording results
+-------------------------------------
+PySys is a great tool for running performance tests, whether unit-level microbenchmarks or complex multi-process 
+full system benchmarking. 
+
+Often performance tests will produced detailed output files (XML/JSON/PDF/logs etc) that are worth capturing for 
+analysis by a human, or for storing as a long term audit of how this build performed. To do this, you can add a 
+`pysys.writer.testoutput.CollectTestOutputWriter` to your project configuration. This writer collects files matching a 
+specified pattern from the output directory after each test, and puts them in a single directory or archive at the 
+end of the test run. 
+
+Whether or not you have some detailed files to stash, it is worth also using `BaseTest.reportPerformanceResult`, the 
+powerful built-in capability for storing some summary numbers for each test. In complex tests you probably 
+won't want to record every possible statistic - since that can quickly overwhelm once the total number of number of 
+tests grows; a better strategy is to select a few representative data points from each test/mode combination. 
+By default the numeric results are written to a CSV file (along with the runner's ``runDetails`` dictionary including 
+things like OS, CPU count, hostname and git commit of your source changes). There is also a reporter available for 
+writing in a simple JSON format, and another that produces a textual summary of the results at the end of the run. 
+You can also create your own reporters (e.g. to publish to an in-house database) using the `pysys.perf` API.
+
+The `BaseTest.reportPerformanceResult` documentation gives the details, but one point that's worth stressing is that 
+every result should be identified by a short, unique, human-friendly ``resultKey`` which should give an at-a-glance 
+definition of what is being recorded such as 
+``Message send rate with 3 topics and small 100kB messages using MyMessagingVendor``. 
+For maximum benefit, design your keys so that when sorted (imagine a big list of 100+ numbers from all your testcases!) 
+you'll see closely related results next to each other. These keys must be unique - so if a test runs in multiple modes 
+(e.g. messaging/database vendors) then you must add some kind of string to the result key to indicate which it is 
+running in, otherwise PySys will raise an exception and not persist the result. See the samples for some examples of 
+using this API. 
+
+Performance tests - design considerations
+-----------------------------------------
+Often a performance test will run for a bit longer than a simple correctness test, for example it might have a set 
+number of iterations or time duration. See the above section "Configuring and overriding test options" for an example 
+of how to make it easy to customize the iteration count/duration at runtime e.g. ``pysys run -XmyIterationCount=10``. 
+You may find you want to run your test super-quick in the early stages until it executes the steps correctly. When 
+tracking down performance problems you might want to try running it for longer than usual to get more reliable results. 
+
+It is common to have a single performance test that should run with different parameters, for example against different 
+databases, or perhaps with a variety of incoming message sizes. Avoid copy+pasting tests for this use case (which would 
+be a maintenance nightmare). It is also a bad idea to add a giant "for" loop into your test and make it do everything in 
+one invocation, since then it's very difficult to surgically re-run problematic parts of your parameter matrix when 
+tracking down test bugs or optimizing your application. Instead use the built-in "modes" concept of PySys which is 
+perfect for the job. It can even generate a combinatoric product of various different parameter dimensions for you 
+with `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` as described above. 
+
+Performance tests - running them
+--------------------------------
+When running performance tests from an automated job, it is important to ensure that you do not have multiple 
+tests executing at once since this will usually invalidate the results. It is therefore best to run your performance 
+tests in a separate ``pysys run`` invocation to your correctness testing, which does benefit from multi-threaded 
+execution. You should also disable code coverage in a performance run to avoid artificially slowing your components 
+down. So a typical automated performance run would need to modify the usual ``--ci`` default into something like::
+
+	cd performance/
+	pysys run --ci --threads=1 -XcodeCoverage=false
+
+When running performance tests locally to investigate a performance bug, it can be incredibly valuable to run 
+multiple cycles of each test to generate a more stable baseline, and also to give you a measurable indication of how 
+variable your results are. There is no point trying to track down a 10% performance regression from a test whose 
+normal variation is +/-50%! It is also worth customizing the ``--outdir`` to assign a human-friendly label each time 
+you do a run against a different build of your application. The ``outdir`` is recorded with the performance numbers 
+and also allows you to avoid overwriting previous detailed logging output when doing a new run. So a typical local 
+execution of a performance test would be::
+
+	pysys run -c5 --outdir=with-foobar-optimization MyTest~MyMode
+
+You may wish to focus on just one mode, or all modes (``--modes=ALL``) or a specific subset of the modes (perhaps 
+using a regular expression on the command line to indicate which modes are needed). At the end of the test run PySys 
+will print a summary of the results, including a calculation of the sample standard deviation (if ``cycles`` > 1) 
+which you can use to check your test is reliable and to decide whether measured increases/decreases are statistically 
+significant or just random noise. 
+
+Performance tests - comparing results
+-------------------------------------
+When using PySys tests to measure your application while you experiment with possible optimizations, consider 
+listing the ``.csv`` (or ``.json``) summary files containing your baselines (e.g. baseline before any changes, with 
+optimization A, B, C etc...) in the ``PYSYS_PERFORMANCE_BASELINES`` environment variable. The 
+`pysys.perf.reporters.PrintSummaryPerformanceReporter` will print a textual comparison from each of the listed 
+baselines to the current result. You can also run comparisons from the command line at any time by running 
+the ``pysys/perf/perfreportstool.py`` script. 
+
+When reviewing comparisons, note that some numbers are "better" when large (e.g. rate of sending messages/transactions) 
+while others are "worse" when large (e.g. latency or response time). The comparison tries to avoid confusion when 
+looking at such results side by side, by showing "+" results for all improvements and "-" when things got worse. 
+For each comparison, it prints the %improvement (with a + for bigger-is-better increases and - for reductions, and 
+vice-versa), and the speedup ratio (newValue/oldValue for bigger-is-better, or oldValue/newValue for smaller is better). 
+Typically the % is useful for small changes (< 100%) whereas the speedup ratio is more friendly for large changes 
+(e.g. 3.5x faster). Provided multiple samples are available (from a multi-cycle run), it calculates the standard 
+deviation (using whichever is the larger of the old and new stdDevs) and expresses the improvement delta as a ratio of 
+the standard deviation (aka "sigma") to give a "sigmas" value which indicates statistically how significant the result 
+is - above ``+/- 1 sigma`` means there is a 68% chance the change is a real (significant) one, and above 
+``+/- 2 sigmas`` shows a 95% probability of significance. 
+Results with less than 2 sigmas are not colour-coded since they typically don't indicate a real change; anything with a 
+red or green colour is a regression or improvement that is statistically significant and worth paying attention to. 
 
 Test ids and structuring large projects
 ---------------------------------------
