@@ -275,7 +275,7 @@ class ArtifactPublisher(object):
 			"CSVPerformanceReport" (from `pysys.perf.reporters.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 		"""
-		pass
+		pass # pragma: no cover
 
 
 class TestOutputVisitor(object):

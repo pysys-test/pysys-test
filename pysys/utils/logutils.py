@@ -276,7 +276,7 @@ class ColorLogFormatter(BaseLogFormatter):
 						for index in indexes: args[index] = self.formatArg(cat, args[index])
 						record.args = tuple(args)
 					
-			except Exception as e:
+			except Exception as e: # pragma: no cover
 				logging.getLogger('pysys.utils.logutils').debug('Failed to format log message "%s": %s'%(record.msg, repr(e)))
 
 		if getattr(record, self.SUPPRESS_PREFIX, False):

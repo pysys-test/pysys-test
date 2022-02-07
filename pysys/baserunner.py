@@ -32,13 +32,8 @@ import warnings
 import difflib
 import importlib
 import multiprocessing
-
-if sys.version_info[0] == 2:
-	from StringIO import StringIO
-	import Queue as queue
-else:
-	from io import StringIO
-	import queue
+from io import StringIO
+import queue
 
 import pysys
 from pysys.constants import *
@@ -703,7 +698,7 @@ class BaseRunner(ProcessUser):
 			# with the perf output
 			for perfreporter in self.performanceReporters:
 					try: perfreporter.cleanup()
-					except Exception as ex: 
+					except Exception as ex: # pragma: no cover
 						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						sys.stderr.write('Caught exception performing performance reporter cleanup: %s\n'%traceback.format_exc()) # useful to have it on stderr too, esp during development
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
@@ -843,13 +838,13 @@ class BaseRunner(ProcessUser):
 				# if only difference is cycle (i.e. different testobj but same test id) then allow, but
 				# make sure we report error if this test tries to report same key more than once, or if it
 				# overlaps with another test's result keys
-				if previd == testObj.descriptor.id and prevcycle==testObj.testCycle:
+				if previd == testObj.descriptor.id and prevcycle==testObj.testCycle: # pragma: no cover
 					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
 					return
-				elif previd != testObj.descriptor.id: 
+				elif previd != testObj.descriptor.id: # pragma: no cover
 					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
 					return
-				elif prevdetails != d: 
+				elif prevdetails != d: # pragma: no cover
 					# prevent different cycles of same test with different resultdetails 
 					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
 					return
@@ -862,7 +857,7 @@ class BaseRunner(ProcessUser):
 		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
 		assert isinstance(unit, pysys.perf.api.PerformanceUnit), repr(unit)
 
-		if testObj.getOutcome().isFailure():
+		if testObj.getOutcome().isFailure(): # pragma: no cover
 			testObj.log.warning('Performance result "%s" will not be recorded as test has failed so results could be invalid', resultKey)
 			return
 		

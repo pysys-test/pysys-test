@@ -123,7 +123,7 @@ class BasePerformanceReporter:
 		
 		.. version added:: 2.1
 		"""
-		pass
+		pass # pragma: no cover
 		
 	def getRunDetails(self, testobj=None, **kwargs):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
@@ -199,7 +199,7 @@ class BasePerformanceReporter:
 		:param dict[str,obj] resultDetails:  A dictionary of detailed information that should be recorded together with the result.
 
 		"""
-		pass
+		pass # pragma: no cover
 		
 
 	def cleanup(self):
@@ -208,7 +208,7 @@ class BasePerformanceReporter:
 		This is where any file footer and other I/O finalization can be written to the end of performance log files, and 
 		is also a good time to do any required aggregation, printing of summaries or artifact publishing. 
 		"""
-		pass
+		pass # pragma: no cover
 	
 	@staticmethod
 	def tryDeserializePerformanceFile(self, path):
@@ -223,7 +223,7 @@ class BasePerformanceReporter:
 		
 		:rtype: PerformanceRunData
 		"""
-		return None
+		return None # pragma: no cover
 
 class PerformanceRunData:
 	"""
@@ -417,7 +417,7 @@ class CSVPerformanceFile(PerformanceRunData):
 			return CSVPerformanceFile.toCSVLine(l)
 
 		else:
-			raise Exception('Unsupported input type: %s'%values.__class__.__name__)
+			raise Exception('Unsupported input type: %s'%values.__class__.__name__) # pragma: no cover
 		
 	def __init__(self, contents, name=None):
 		super().__init__(name, None, [])
@@ -447,7 +447,7 @@ class CSVPerformanceFile(PerformanceRunData):
 					r = collections.OrderedDict()
 					for i in range(len(header)):
 						if i >= len(row):
-							raise Exception('Missing value for column "%s"'%header[i])
+							raise Exception('Missing value for column "%s"'%header[i]) # pragma: no cover
 						else:
 							val = row[i].strip()
 							if header[i] in ['value', 'toleranceStdDevs', 'stdDev']:
@@ -470,7 +470,7 @@ class CSVPerformanceFile(PerformanceRunData):
 					if resultDetails == None: resultDetails = collections.OrderedDict()
 					r['resultDetails'] = resultDetails
 					self.results.append(r)
-			except Exception as e:
+			except Exception as e: # pragma: no cover
 				raise Exception('Cannot parse performance line - %s (%s): "%s"'%(e, e.__class__.__name__, l))
 		
 		if self.runDetails == None: self.runDetails = collections.OrderedDict()

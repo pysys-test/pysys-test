@@ -274,7 +274,7 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 						try:
 							perfFile = CSVPerformanceFile.load(p)
 							perfFile = CSVPerformanceFile.aggregate([perfFile])
-						except Exception as ex:
+						except Exception as ex: # pragma: no cover
 							log.exception('Failed to read and aggregate performance information for %s: '%p)
 							# Don't make it fatal, more useful to go ahead and publish it as best we can
 						else:
@@ -332,7 +332,7 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 		def callGetRunHeader():
 			try:
 				return self.getRunHeader(testobj)
-			except Exception: # for pre-2.0 signature
+			except Exception: # pragma: no cover - for pre-2.0 signature 
 				return self.getRunHeader()
 		
 		if not os.path.exists(path):

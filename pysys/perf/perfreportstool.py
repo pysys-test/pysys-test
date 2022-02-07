@@ -29,7 +29,7 @@ import json
 import glob
 
 if __name__ == "__main__":
-	sys.path.append(os.path.dirname( __file__)+'/../..')
+	sys.path.append(os.path.dirname( __file__)+'/../..') # pragma: no cover
 
 from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
@@ -65,7 +65,7 @@ class PerformanceComparisonGenerator:
 		
 		configuredBaselines = os.getenv(self.BASELINES_ENV_VAR)
 		if not paths:
-			return None
+			return None  # pragma: no cover
 
 		baselines = []
 		for b in paths:
@@ -90,7 +90,7 @@ class PerformanceComparisonGenerator:
 				if x: break
 			if x:
 				baselineData[b] = x
-			else:
+			else:  # pragma: no cover
 				raise Exception('Failed to find a reporter that can deserialize performance files of this type: %s'%b)
 
 		baselineData = [PerformanceRunData.aggregate(b) for b in baselineData.values()]
