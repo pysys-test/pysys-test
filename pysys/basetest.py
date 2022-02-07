@@ -1537,7 +1537,7 @@ class BaseTest(ProcessUser):
 		
 		:param resultDetails: (optional) A dictionary of detailed information about this specific result 
 			and/or test that should be recorded together with the result, for example detailed information about what mode 
-			or versions the test is measuring. Note this result-specific, unlike the global "run details" shared across 
+			or versions the test is measuring. Note this is result-specific, unlike the global "run details" shared across 
 			all tests in this PySys execution, which can be customized with a runner plugin.
 			If no resultDetails are specified explicitly then parameters from the test's mode will be used if present. 
 
