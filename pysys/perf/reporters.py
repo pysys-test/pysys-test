@@ -33,162 +33,6 @@ from pysys.utils.pycompat import *
 
 log = logging.getLogger('pysys.perfreporter')
 
-class JSONPerformanceReporter(BasePerformanceReporter):
-	"""Performance reporter which writes to a JSON file.
-	
-	After tests have run, the summary file is published with category ``JSONPerformanceReport`` 
-	using the `pysys.writer.api.ArtifactPublisher` interface. 
-
-	.. versionadded:: 2.1
-
-	The following properties can be set in the project configuration for this reporter:		
-	
-	"""
-	
-	summaryFile = ''
-	"""
-	The ``.json`` filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. 
-	"""
-
-	publishArtifactCategory = 'JSONPerformanceReport' 
-	"""
-	If specified, the output file will be published as an artifact using the specified category name. 
-	"""
-
-	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.json'
-	"""The default summary file if not overridden by the ``summaryFile=`` attribute. See `getRunSummaryFile()`. 
-	This is relative to the runner output+'/..' directory (typically testRootDir, unless ``--outdir`` is overridden).
-	"""
-
-	def setup(self, **kwargs):
-		super().setup()
-		self.__summaryFilesWritten = set()
-		
-	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		path = self.getRunSummaryFile(testobj)
-		mkdir(os.path.dirname(path))
-		with self._lock:
-			alreadyexists = os.path.exists(toLongPathSafe(path))
-			with io.open(toLongPathSafe(path), 'a', encoding='utf-8') as f:
-				if not alreadyexists: 
-					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
-					f.write('{"runDetails": ')
-					json.dump(self.getRunDetails(testobj), f)
-					f.write(', "results":[\n')
-				else:
-					f.write(',\n')
-					
-				json.dump({
-					'resultKey':resultKey,
-					'value':value,
-					'unit':str(unit),
-					'biggerIsBetter':unit.biggerIsBetter,
-					'samples':1,
-					'stdDev':0,
-					'toleranceStdDevs':toleranceStdDevs,
-					'testId':testobj.descriptor.id,
-					'resultDetails':resultDetails or {}
-				}, f)
-			self.__summaryFilesWritten.add(path)
-
-	def cleanup(self):
-		with self._lock:
-			if self.__summaryFilesWritten:
-				for p in sorted(list(self.__summaryFilesWritten)):
-					with io.open(toLongPathSafe(p), 'a', encoding='utf-8') as f:
-						f.write('\n]}\n')
-					
-					log.info('Performance results were written to: %s', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
-
-					if self.publishArtifactCategory:
-						self.runner.publishArtifact(p, self.publishArtifactCategory)
-
-	@staticmethod
-	def tryDeserializePerformanceFile(path):
-		if not path.endswith('.json'): return None
-		with io.open(toLongPathSafe(path), encoding='utf-8') as f:
-			data = json.load(f)
-			return PerformanceRunData(path, data['runDetails'], data['results'])
-
-class PrintSummaryPerformanceReporter(BasePerformanceReporter):
-	"""Performance reporter which logs a human-friendly summary of all performance results to the console at the end of 
-	the test run. 
-
-	By setting the `BASELINES_ENV_VAR` environment variable, this reporter will also print out an 
-	automatic comparison from the named baseline file(s) to the results from the current test run. 
-	This feature is very useful when comparingdifferent strategies for optimizing your application. 
-	
-	.. versionadded:: 2.1
-
-	"""
-
-	BASELINES_ENV_VAR = 'PYSYS_PERFORMANCE_BASELINES'
-	"""
-	Set this environment variable to a comma-separated list of performance (e.g. ``.csv``) files to print out an 
-	automatic comparison from the baseline file(s) to the results from the current test run. 
-	
-	This feature is very useful when comparing different strategies for optimizing your application. 
-	
-	For best results, use multiple cycles for all test runs so that standard deviation can be calculated. 
-	
-	The filenames can be absolute paths, glob paths using ``*`` and ``**``, or relative to the testRootDir. For example::
-	
-		export PYSYS_PERFORMANCE_BASELINES=__pysys_performance/mybaseline*/**/*.csv,__pysys_performance/optimization1*/**/*.csv
-		
-	"""
-
-	def setup(self, **kwargs):
-		super().setup()
-		self.results = []
-		
-		import pysys.perf.perfreportstool
-		self.comparisonGenerator = pysys.perf.perfreportstool.PerformanceComparisonGenerator(reporters=self.runner.performanceReporters)
-		self.baselines = self.comparisonGenerator.loadFiles(
-			baselineBaseDir=self.project.testRootDir,
-			paths=os.getenv(self.BASELINES_ENV_VAR,'').split(','), 
-			)
-		log.info('Successfully loaded performance comparison data from %d files: %s', len(self.baselines), ', '.join(b.name for b in self.baselines))
-
-	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		with self._lock:
-			self.results.append({
-						'resultKey':resultKey,
-						'value':value,
-						'unit':str(unit),
-						'biggerIsBetter':unit.biggerIsBetter,
-						'samples':1,
-						'stdDev':0,
-						'toleranceStdDevs':toleranceStdDevs,
-						'testId':testobj.descriptor.id,
-						'resultDetails':resultDetails or {}
-					})
-
-	def isEnabled(self, **kwargs):
-		return True
-	
-	def cleanup(self):
-		if not self.isEnabled(): return
-		if not self.results: return
-		
-		with self._lock:
-			logmethod = logging.getLogger('pysys.perfreporter.summary').info
-
-			# perform aggregation in case there are multiple cycles
-			p = PerformanceRunData.aggregate(PerformanceRunData('this', self.getRunDetails(), self.results))
-
-			if not self.baselines:
-				logmethod('Performance results summary:')
-				# simple formatting when there's no comparisons to be done
-				for r in p.results:
-					logmethod("  %s = %s %s (%s)%s %s", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
-						 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
-							'' if r['samples']==1 or ['value'] == 0 else f", stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)",
-							r['testId'],
-								extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1], suppress_prefix=True))
-				
-			else:
-				logmethod('\n')
-				self.comparisonGenerator.logComparisons(self.baselines+[p])
 
 class CSVPerformanceReporter(BasePerformanceReporter):
 	"""Performance reporter which writes to a CSV file.
@@ -358,3 +202,159 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 		if not path.endswith('.csv'): return None
 		return CSVPerformanceFile.load(path)
 
+class JSONPerformanceReporter(BasePerformanceReporter):
+	"""Performance reporter which writes to a JSON file.
+	
+	After tests have run, the summary file is published with category ``JSONPerformanceReport`` 
+	using the `pysys.writer.api.ArtifactPublisher` interface. 
+
+	.. versionadded:: 2.1
+
+	The following properties can be set in the project configuration for this reporter:		
+	
+	"""
+	
+	summaryFile = ''
+	"""
+	The ``.json`` filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. 
+	"""
+
+	publishArtifactCategory = 'JSONPerformanceReport' 
+	"""
+	If specified, the output file will be published as an artifact using the specified category name. 
+	"""
+
+	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.json'
+	"""The default summary file if not overridden by the ``summaryFile=`` attribute. See `getRunSummaryFile()`. 
+	This is relative to the runner output+'/..' directory (typically testRootDir, unless ``--outdir`` is overridden).
+	"""
+
+	def setup(self, **kwargs):
+		super().setup()
+		self.__summaryFilesWritten = set()
+		
+	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
+		path = self.getRunSummaryFile(testobj)
+		mkdir(os.path.dirname(path))
+		with self._lock:
+			alreadyexists = os.path.exists(toLongPathSafe(path))
+			with io.open(toLongPathSafe(path), 'a', encoding='utf-8') as f:
+				if not alreadyexists: 
+					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
+					f.write('{"runDetails": ')
+					json.dump(self.getRunDetails(testobj), f)
+					f.write(', "results":[\n')
+				else:
+					f.write(',\n')
+					
+				json.dump({
+					'resultKey':resultKey,
+					'value':value,
+					'unit':str(unit),
+					'biggerIsBetter':unit.biggerIsBetter,
+					'samples':1,
+					'stdDev':0,
+					'toleranceStdDevs':toleranceStdDevs,
+					'testId':testobj.descriptor.id,
+					'resultDetails':resultDetails or {}
+				}, f)
+			self.__summaryFilesWritten.add(path)
+
+	def cleanup(self):
+		with self._lock:
+			if self.__summaryFilesWritten:
+				for p in sorted(list(self.__summaryFilesWritten)):
+					with io.open(toLongPathSafe(p), 'a', encoding='utf-8') as f:
+						f.write('\n]}\n')
+					
+					log.info('Performance results were written to: %s', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
+
+					if self.publishArtifactCategory:
+						self.runner.publishArtifact(p, self.publishArtifactCategory)
+
+	@staticmethod
+	def tryDeserializePerformanceFile(path):
+		if not path.endswith('.json'): return None
+		with io.open(toLongPathSafe(path), encoding='utf-8') as f:
+			data = json.load(f)
+			return PerformanceRunData(path, data['runDetails'], data['results'])
+
+class PrintSummaryPerformanceReporter(BasePerformanceReporter):
+	"""Performance reporter which logs a human-friendly summary of all performance results to the console at the end of 
+	the test run. 
+
+	By setting the `BASELINES_ENV_VAR` environment variable, this reporter will also print out an 
+	automatic comparison from the named baseline file(s) to the results from the current test run. 
+	This feature is very useful when comparingdifferent strategies for optimizing your application. 
+	
+	.. versionadded:: 2.1
+
+	"""
+
+	BASELINES_ENV_VAR = 'PYSYS_PERFORMANCE_BASELINES'
+	"""
+	Set this environment variable to a comma-separated list of performance (e.g. ``.csv``) files to print out an 
+	automatic comparison from the baseline file(s) to the results from the current test run. 
+	
+	This feature is very useful when comparing different strategies for optimizing your application. 
+	
+	For best results, use multiple cycles for all test runs so that standard deviation can be calculated. 
+	
+	The filenames can be absolute paths, glob paths using ``*`` and ``**``, or relative to the testRootDir. For example::
+	
+		export PYSYS_PERFORMANCE_BASELINES=__pysys_performance/mybaseline*/**/*.csv,__pysys_performance/optimization1*/**/*.csv
+		
+	"""
+
+	def setup(self, **kwargs):
+		super().setup()
+		self.results = []
+		
+		import pysys.perf.perfreportstool
+		self.comparisonGenerator = pysys.perf.perfreportstool.PerformanceComparisonGenerator(reporters=self.runner.performanceReporters)
+		self.baselines = self.comparisonGenerator.loadFiles(
+			baselineBaseDir=self.project.testRootDir,
+			paths=os.getenv(self.BASELINES_ENV_VAR,'').split(','), 
+			)
+		log.info('Successfully loaded performance comparison data from %d files: %s', len(self.baselines), ', '.join(b.name for b in self.baselines))
+
+	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
+		with self._lock:
+			self.results.append({
+						'resultKey':resultKey,
+						'value':value,
+						'unit':str(unit),
+						'biggerIsBetter':unit.biggerIsBetter,
+						'samples':1,
+						'stdDev':0,
+						'toleranceStdDevs':toleranceStdDevs,
+						'testId':testobj.descriptor.id,
+						'resultDetails':resultDetails or {}
+					})
+
+	def isEnabled(self, **kwargs):
+		return True
+	
+	def cleanup(self):
+		if not self.isEnabled(): return
+		if not self.results: return
+		
+		with self._lock:
+			logmethod = logging.getLogger('pysys.perfreporter.summary').info
+
+			# perform aggregation in case there are multiple cycles
+			p = PerformanceRunData.aggregate(PerformanceRunData('this', self.getRunDetails(), self.results))
+
+			if not self.baselines:
+				logmethod('Performance results summary:')
+				# simple formatting when there's no comparisons to be done
+				for r in p.results:
+					logmethod("  %s = %s %s (%s)%s %s", r['resultKey'], self.valueToDisplayString(r['value']), r['unit'],
+						 'bigger is better' if r['biggerIsBetter'] else 'smaller is better',
+							'' if r['samples']==1 or ['value'] == 0 else f", stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)",
+							r['testId'],
+								extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1], suppress_prefix=True))
+				
+			else:
+				logmethod('\n')
+				self.comparisonGenerator.logComparisons(self.baselines+[p])
