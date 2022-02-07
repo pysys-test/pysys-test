@@ -630,6 +630,12 @@ red or green colour is a regression or improvement that is statistically signifi
 
 Test ids and structuring large projects
 ---------------------------------------
+Firstly, try to have everything in a single PySys project if possible. Use subdirectories to structure your tests, 
+but don't separate into different PySys projects unless it's for testing a totally different component with different 
+testing needs. Keeping everything in the same project gives you the ability to run all your tests 
+(unit/correctness/perf) from a single command line which could be useful in the future even if you don't need it right 
+now. 
+
 Each test has a unique ``id`` which is used in various places such as when 
 reporting passed/failed outcomes. By default the id is just the name of the 
 directory containing the ``pysystest.*`` file. 
