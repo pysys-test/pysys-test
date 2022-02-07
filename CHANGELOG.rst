@@ -42,6 +42,8 @@ New features related to reporting of performance result numbers:
   no longer be used in most cases). 
 - Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
   will continue to work so this is not a breaking change. 
+- Added ``reportPerformanceResult`` variable to ``BaseTest``, which can be set to ``True`` by any commands that would 
+  make recording of performance results pointless (e.g. enablement of profiling). 
 
 Fixes:
 

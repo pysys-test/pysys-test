@@ -1,4 +1,4 @@
-__pysys_title__   = r""" PerformanceReporter - default configuration, summary""" 
+__pysys_title__   = r""" PerformanceReporter - default configuration, summary, disablePerformanceReporting""" 
 #                        ================================================================================
 
 __pysys_purpose__ = r""" 
@@ -23,6 +23,8 @@ class PySysTest(pysys.basetest.BaseTest):
 	def execute(self):
 		self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--cycle=3'], workingDir=self.input)
 		self.logFileContents('pysys-run.out', tail=True)
+
+		self.pysys.pysys('pysys-disabledperf', ['run', '-o', self.output+'/myoutdir-disabled', '-XdisablePerformanceReporting'], workingDir=self.input)
 		
 	def validate(self):
 		path = self.grep('pysys-run.out', 'Creating performance summary log file at: (.+)')
@@ -30,3 +32,6 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.assertDiff(self.copy('pysys-run.out', 'perf-summary.out', mappers=[
 			pysys.mappers.IncludeLinesBetween(startAfter='Performance results summary:', stopBefore=' (INFO|CRIT) *$'),
 		]))
+
+		self.assertGrep('pysys-disabledperf.out', 'Creating performance summary log file at: ', contains=False)
+		self.assertGrep('pysys-disabledperf.out', 'Not recording performance result due to disablePerformanceReporting.*')

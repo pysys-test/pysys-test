@@ -61,6 +61,9 @@ class BaseTest(ProcessUser):
 		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir).rstrip('/\\.')
 		self.reference = os.path.join(descriptor.testDir, descriptor.reference).rstrip('/\\.')
 		self.runner = runner
+
+		self.disablePerformanceReporting = False
+
 		self.mode = descriptor.mode
 		# NB: we don't set self.mode.params as keyword arguments since it'd be easy to overwrite a class/instance 
 		# variable unintentionally with unpredictable results; accessing explicitly with self.mode is fine 
@@ -1507,6 +1510,10 @@ class BaseTest(ProcessUser):
 				'Fibonacci sequence calculation rate using %s with different units' % self.mode, 
 				unit=PerformanceUnit('kilo_fibonacci/s', biggerIsBetter=True))
 
+		If the current test is executed with unusual options (e.g. enabling a profiler or code coverage) that would 
+		invalidate performance numbers, you can set ``self.disablePerformanceReporting = True`` to prevent 
+		``reportPerformanceResult`` calls from doing anything. 
+
 		:param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
 
 		:param resultKey: A unique string that fully identifies what was measured, which will be
@@ -1534,7 +1541,10 @@ class BaseTest(ProcessUser):
 			all tests in this PySys execution, which can be customized with a runner plugin.
 
 		"""
-		self.runner.reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
+		if self.disablePerformanceReporting:
+			self.log.info('Not recording performance result due to disablePerformanceReporting flag: %s = %s %s', resultKey, value, unit)
+		else:
+			self.runner.reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
 			
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""
