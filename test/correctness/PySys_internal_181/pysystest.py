@@ -44,4 +44,6 @@ class PySysTest(pysys.basetest.BaseTest):
 
 		self.assertDiff(self.copy('perf-compare.out', 'perf-compare-no-colors.out', mappers=[
 			lambda line: pysys.utils.logutils.stripANSIEscapeCodes(line),
+			lambda line: line.replace('\\', '/') if ' from ' in line else line, # windows path separator used in "from ..." filename
+			
 		]))

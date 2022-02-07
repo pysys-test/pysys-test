@@ -1,6 +1,6 @@
 Performance comparison summary between the following runs (the differing "run details" are shown):
 - 2022-02-05_14.08.51.win (3 result keys, 2 samples/result):
-     outDirName=historicOutDir, <stripped>
+     outDirName=myoutdir, <stripped>
 - myoutdir (15 result keys, 1 samples/result):
      outDirName=historicOutDir, <stripped>
 - this (2 result keys, 3 samples/result):

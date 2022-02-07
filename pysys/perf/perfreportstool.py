@@ -155,7 +155,7 @@ class PerformanceComparisonGenerator:
 				len(p.results), 
 				float( sum([r['samples'] for r in p.results])) / len(p.results),
 				'' if p.comparisonLabel != p.runDetails.get('outDirName')
-					else f' from {p.name}'
+					else f' from {p.name if not os.path.abspath(p.name) else os.path.relpath(p.name)}'
 				))
 			out('     %s'%', '.join([formatRunDetails(k, p.runDetails[k]) for k in p.runDetails if k not in commonRunDetails]))
 
