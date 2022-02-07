@@ -1537,10 +1537,17 @@ class BaseTest(ProcessUser):
 		
 		:param resultDetails: (optional) A dictionary of detailed information about this specific result 
 			and/or test that should be recorded together with the result, for example detailed information about what mode 
-			or versions the test is measuring. Note this is separate from the global "run details" shared across 
+			or versions the test is measuring. Note this result-specific, unlike the global "run details" shared across 
 			all tests in this PySys execution, which can be customized with a runner plugin.
+			If no resultDetails are specified explicitly then parameters from the test's mode will be used if present. 
 
 		"""
+		if resultDetails is None and self.mode:
+			# useful information to have available
+			resultDetails = {'mode': self.mode.name}
+			resultDetails.update(self.mode.params)
+		
+		
 		if self.disablePerformanceReporting:
 			self.log.info('Not recording performance result due to disablePerformanceReporting flag: %s = %s %s', resultKey, value, unit)
 		else:

@@ -34,3 +34,6 @@ class PySysTest(pysys.basetest.BaseTest):
 			data = json.load(f)
 			self.assertThat('keys == expected', keys=sorted(list(data.keys())), expected=sorted(['runDetails', 'results']))
 			self.assertThat('runDetails and results', runDetails=data['runDetails'], results=data['results'])
+			self.assertThat('resultDetails == expected', resultDetails=data['results'][0]['resultDetails'], expected={
+				'mode': 'MyMode', 'ModeParamA': 123, 'ModeParamB': 'Foo'
+			})

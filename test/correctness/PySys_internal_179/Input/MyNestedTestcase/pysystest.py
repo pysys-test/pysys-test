@@ -1,5 +1,6 @@
 __pysys_title__   = r""" Nested """ 
 #                        ================================================================================
+__pysys_modes__ = "lambda helper: {'MyMode': {'ModeParamA':123, 'ModeParamB':'Foo'}}"
 
 import pysys
 from pysys.constants import *

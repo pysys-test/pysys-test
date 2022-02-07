@@ -44,6 +44,8 @@ New features related to reporting of performance result numbers:
   will continue to work so this is not a breaking change. 
 - Added ``reportPerformanceResult`` variable to ``BaseTest``, which can be set to ``True`` by any commands that would 
   make recording of performance results pointless (e.g. enablement of profiling). 
+- If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
+  parameters from the test's mode will be recorded as the ``resultDetails``. 
 
 Fixes:
 
