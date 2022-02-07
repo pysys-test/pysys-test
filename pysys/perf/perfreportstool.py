@@ -161,11 +161,11 @@ class PerformanceComparisonGenerator:
 
 		out('')
 		out('Comparison results:')
-		out('  where fromRun->toRun format is: (%improvement) = (speedup ratio) = (sigmas/stdDevs where change above +/- 2.0 gives 95% probability it\'s significant)')
+		out('  where fromRun->toRun format is: (%improvement) = (speedup ratio) = (sigmas/stdDevs where change above +/- 2.0 gives 95% probability it\'s significant; only significant results are colored)')
 		out('')
 		ComparisonData = collections.namedtuple('ComparisonData', [
 			'comparisonPercent', #%improvement
-			'comparisonSigmas', # improvements as a multiple of stddec
+			'comparisonSigmas',  #improvements as a multiple of stddev
 			'ratio', # speedup ratio of from->to, how much faster we are now
 			'rfrom', # the "from" result value
 			'rto',   # the "to"   result value
@@ -214,6 +214,7 @@ class PerformanceComparisonGenerator:
 					# assuming a normal distribution, 1.0 or more gives 68% confidence of 
 					# a real difference, and 2.0 or more gives 95%. 
 					comparisonSigmas = sign*((ratio-1)/relStdDev) if relStdDev else None
+					# = (new-old)/stddev
 
 					# but +/- isn't relevant when displaying the ratio; we want ratios >1 to always be a good thing, so use reciprocal here
 					if not k.biggerIsBetter: ratio = 1.0/ratio
@@ -248,7 +249,8 @@ class PerformanceComparisonGenerator:
 			
 			r = files[-1].keyedResults[k]
 			out(' '+f"Mean from this run = {self.valueToDisplayString(r['value'])} {r['unit']}"+
-							('' if r['samples']==1 or ['value'] == 0 else f" with stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)"),
+							('' if r['samples']==1 or ['value'] == 0 else f" with stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)")+
+							('' if not r.get('toleranceStdDevs') else f"; configured toleranceStdDevs={self.valueToDisplayString(r['toleranceStdDevs'])}"),
 					)
 
 			i = 0

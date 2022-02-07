@@ -30,9 +30,9 @@ class PySysTest(pysys.basetest.BaseTest):
 			], workingDir=self.input, stdouterr='perf-compare')
 		
 	def validate(self):
-		self.logFileContents('pysys-run.out', maxLines=0, stripWhitespace=False, tail=True)
+		self.logFileContents('pysys-run.out', maxLines=0, stripWhitespace=False, tail=True, color=False)
 
-		self.logFileContents('perf-compare.out', maxLines=0, stripWhitespace=False, tail=True)
+		self.logFileContents('perf-compare.out', maxLines=0, stripWhitespace=False, tail=True, color=False)
 		
 		self.assertDiff(self.copy('pysys-run.out', 'perf-summary.out', mappers=[
 			lambda line: pysys.utils.logutils.stripANSIEscapeCodes(line),
