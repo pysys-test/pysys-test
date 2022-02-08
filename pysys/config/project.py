@@ -283,13 +283,17 @@ class _XMLProjectParser(object):
 
 	def getPerformanceReporterDetails(self):
 		nodeList = self.root.getElementsByTagName('performance-reporter')
-		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
-			
-		summaryfile = optionsDict.pop('summaryfile', '')
-		summaryfile = self.expandProperties(summaryfile, default=None, name='performance-reporter summaryfile')
-		if optionsDict: raise UserError('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
+		results = []
+		for n in nodeList:
+			cls, optionsDict = self._parseClassAndConfigDict(n, 'pysys.perf.reporters.CSVPerformanceReporter')
+			optionsDict['summaryfile'] = self.expandProperties(optionsDict.get('summaryfile', ''), default=None, name='performance-reporter summaryfile')
+			results.append( (cls, optionsDict) )
 		
-		return cls, summaryfile
+		if not results: # add the defaults
+			results.append( self._parseClassAndConfigDict(None, 'pysys.perf.reporters.CSVPerformanceReporter') )
+			results.append( self._parseClassAndConfigDict(None, 'pysys.perf.reporters.PrintSummaryPerformanceReporter') )
+			
+		return results
 
 	def getProjectHelp(self):
 		help = ''
@@ -471,6 +475,7 @@ class _XMLProjectParser(object):
 					tag.getAttribute("value") or '\n'.join(n.data for n in tag.childNodes 
 							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data),
 					default=tag, name=name)
+			
 		classname = optionsDict.pop('classname', defaultClass)
 		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))

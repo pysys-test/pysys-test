@@ -1,0 +1,35 @@
+{"runDetails": {"outDirName": "newOutDir", "hostname": "myjsonhost", "cpuCount": "12", "os": "Windows 10 10.0.19043 SP0", "startTime": "2022-02-05 18:38:03"}, "results":[
+
+{"resultKey": "Time expected to get higher/worse by 10%", "value": 11550000143.45, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": 1.1, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Time expected to get higher/worse by 10%", "value": 10450000129.12, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": 1.1, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Time expected to get higher/worse by 4x", "value": 42000000519.45, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Time expected to get higher/worse by 4x", "value": 38000000469.12, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Time expected to get lower/better by 10%", "value": 9450000117.45, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Time expected to get lower/better by 10%", "value": 8550000106.12, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Time expected to get lower/better by 75%", "value": 2625000032.45, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Time expected to get lower/better by 75%", "value": 2375000029.12, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Time expected to get higher/worse by 1000x", "value": 10000000123000, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Time expected to get lower/better by 1/1000x", "value": 10000123, "unit": "ns", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Small time expected to get higher/worse by 1000x", "value": 0.0234, "unit": "s", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Small time expected to get lower/better by 1/1000x", "value": 0.0000000234, "unit": "s", "biggerIsBetter": false, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Rate expected to get higher/better by 10%", "value": 1100135.3, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Rate expected to get higher/better by 1000x", "value": 1000123000, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Rate expected to get lower/worse by 10%", "value": 900110.7, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Rate expected to get lower/worse by 1/1000x", "value": 900.1107, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+{"resultKey": "Small rate expected to get higher/better by 1000x", "value": 0.0234, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+{"resultKey": "Small rate expected to get lower/worse by 1/1000x", "value": 0.0000000234, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "Synthetic", "resultDetails": {}},
+
+
+{"resultKey": "Rate of doing a badda-badda-bing", "value": 2000, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "MyNestedTestcase", "resultDetails": {}},
+{"resultKey": "Rate of doing a badda-badda-bing", "value": 2020, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "MyNestedTestcase", "resultDetails": {}},
+{"resultKey": "Rate of doing a badda-badda-bing", "value": 0.000001, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "MyNestedTestcase", "resultDetails": {}},
+{"resultKey": "Rate of doing a foo bar", "value": 20000000001, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "MyNestedTestcase", "resultDetails": {}},
+{"resultKey": "Rate of doing a foo bar", "value": 20000000021, "unit": "/s", "biggerIsBetter": true, "samples": 1, "stdDev": 0, "toleranceStdDevs": null, "testId": "MyNestedTestcase", "resultDetails": {}}
+]}

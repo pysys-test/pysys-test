@@ -1,3 +1,5 @@
+import glob
+import json
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
@@ -63,3 +65,9 @@ class PySysTest(BaseTest):
 		# Custom runner
 		self.assertGrep('pysys-run-tests.out', 'MyRunner.setup was called; myRunnerArg=12345')
 		self.assertGrep('pysys-run-tests.out', 'MyRunner.cleanup was called')
+
+		if self.assertThat('len(performanceFiles)==2 and ".json" in "".join(performanceFiles)', performanceFiles=glob.glob(outdir+'/__pysys_performance/*/*')):
+			# check it's valid json
+			with open(glob.glob(outdir+'/__pysys_performance/*/*.json')[0]) as f:
+				json.load(f)
+		

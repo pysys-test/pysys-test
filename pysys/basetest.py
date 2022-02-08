@@ -61,6 +61,9 @@ class BaseTest(ProcessUser):
 		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir).rstrip('/\\.')
 		self.reference = os.path.join(descriptor.testDir, descriptor.reference).rstrip('/\\.')
 		self.runner = runner
+
+		self.disablePerformanceReporting = False
+
 		self.mode = descriptor.mode
 		# NB: we don't set self.mode.params as keyword arguments since it'd be easy to overwrite a class/instance 
 		# variable unintentionally with unpredictable results; accessing explicitly with self.mode is fine 
@@ -733,7 +736,7 @@ class BaseTest(ProcessUser):
 			seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 			
 			matches = seq.get_matching_blocks()
-			lastmatch = matches[-1] if len(matches)==2 else matches[-2] # may be of zero size
+			lastmatch = matches[-1] if len(matches) in [2,1] else matches[-2] # may be of zero size
 			
 			# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
 			# Colouring will be red, white(first match, if any), red, white(last match, if any)
@@ -1484,9 +1487,8 @@ class BaseTest(ProcessUser):
 		return False
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		""" Reports a new performance number to the performance ``csv`` file, with an associated unique string key 
+		""" Reports a new performance number to the configured performance reporters, with an associated unique string key 
 		that identifies it for comparison purposes.
-		
 		
 		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
 		rather than the total time taken, since this allows the number of iterations to be increased without affecting 
@@ -1502,11 +1504,15 @@ class BaseTest(ProcessUser):
 				resultDetails=[('mode',self.mode)])
 
 		While use of standard units such as '/s', 's' or 'ns' (nano-seconds) is recommended, custom units can be 
-		provided when needed using `pysys.utils.perfreporter.PerformanceUnit`::
+		provided when needed using `pysys.perf.api.PerformanceUnit`::
 		
 			self.reportPerformanceResult(int(iterations)/float(calctime)/1000, 
 				'Fibonacci sequence calculation rate using %s with different units' % self.mode, 
 				unit=PerformanceUnit('kilo_fibonacci/s', biggerIsBetter=True))
+
+		If the current test is executed with unusual options (e.g. enabling a profiler or code coverage) that would 
+		invalidate performance numbers, you can set ``self.disablePerformanceReporting = True`` to prevent 
+		``reportPerformanceResult`` calls from doing anything. 
 
 		:param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
 
@@ -1521,9 +1527,9 @@ class BaseTest(ProcessUser):
 			towards the end of the string. It should be as concise as possible (given the above).
 
 		:param unit: Identifies the unit the value is measured in, including whether bigger numbers are better or
-			worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
-			In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
-			L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
+			worse (used to determine improvement or regression). Must be an instance of L{pysys.perf.api.PerformanceUnit}.
+			In most cases, use L{pysys.perf.api.PerformanceUnit.SECONDS} (e.g. for latency) or
+			L{pysys.perf.api.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
 			used as a shorthand for those PerformanceUnit instances.
 		
 		:param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
@@ -1531,13 +1537,21 @@ class BaseTest(ProcessUser):
 		
 		:param resultDetails: (optional) A dictionary of detailed information about this specific result 
 			and/or test that should be recorded together with the result, for example detailed information about what mode 
-			or versions the test is measuring. Note this is separate from the global run details shared across 
-			all tests in this PySys execution, which can be customized by overriding 
-			L{pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails}.
+			or versions the test is measuring. Note this is result-specific, unlike the global "run details" shared across 
+			all tests in this PySys execution, which can be customized with a runner plugin.
+			If no resultDetails are specified explicitly then parameters from the test's mode will be used if present. 
 
 		"""
-		for p in self.runner.performanceReporters:
-			p.reportResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
+		if resultDetails is None and self.mode:
+			# useful information to have available
+			resultDetails = {'mode': self.mode.name}
+			resultDetails.update(self.mode.params)
+		
+		
+		if self.disablePerformanceReporting:
+			self.log.info('Not recording performance result due to disablePerformanceReporting flag: %s = %s %s', resultKey, value, unit)
+		else:
+			self.runner.reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
 			
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""

@@ -2,12 +2,16 @@ from pysys.utils.perfreporter import CSVPerformanceReporter
 import logging
 
 class CustomPerfReporter(CSVPerformanceReporter):
+	myDefaultedProperty = 5
+
 	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
 		super(CustomPerfReporter, self).__init__(project, summaryfile, testoutdir, runner, **kwargs)
 		assert self.runner is not None
 	
 	def getRunHeader(self, testobj, **kwargs): # new signature with testobj
 		assert testobj
+		assert self.myproperty == 'my_project_value'
+		assert self.myDefaultedProperty == 10
 		return '<custom reporter>\n'+super(CustomPerfReporter, self).getRunHeader()
 
 	def getRunDetails(self): # deprecated legacy signature without testobj

@@ -31,13 +31,9 @@ import shlex
 import warnings
 import difflib
 import importlib
-
-if sys.version_info[0] == 2:
-	from StringIO import StringIO
-	import Queue as queue
-else:
-	from io import StringIO
-	import queue
+import multiprocessing
+from io import StringIO
+import queue
 
 import pysys
 from pysys.constants import *
@@ -150,7 +146,9 @@ class BaseRunner(ProcessUser):
 	:ivar bool ~.purge: Indicates that all files other than ``run.log`` should be deleted from the output directory 
 		unless the test fails; this corresponds to the ``--purge`` command line argument. 
 
-	:ivar int ~.cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
+	:ivar int ~.cycles: The total number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
+		(added in PySys v2.1). 
+	:ivar int ~.cycle: Old name, identical to ``cycles``. 
 
 	:ivar str ~.mode: No longer used. 
 
@@ -201,7 +199,7 @@ class BaseRunner(ProcessUser):
 
 		self.record = record
 		self.purge = purge
-		self.cycle = cycle
+		self.cycle = self.cycles = cycle
 		self.threads = threads
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
@@ -214,6 +212,7 @@ class BaseRunner(ProcessUser):
 		assert not mode, 'Passing mode= to the runner is no longer supported'
 
 		self.__resultWritingLock = threading.Lock() 
+		self.__previousPerfResultKeys = {}
 		self.runnerErrors = [] # list of strings
 
 		self.startTime = self.project.startTimestamp
@@ -327,9 +326,10 @@ class BaseRunner(ProcessUser):
 		self.runDetails = collections.OrderedDict()
 		for p in ['outDirName', 'hostname']:
 			self.runDetails[p] = self.project.properties[p]
+		self.runDetails['cpuCount'] = str(multiprocessing.cpu_count())
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
-		
+
 		# escape windows \ chars (which does limit the expressive power, but is likely to be more helpful than not)
 		commitCmd = shlex.split(self.project.properties.get('versionControlGetCommitCommand','').replace('\\', '\\\\'))
 		import subprocess
@@ -535,12 +535,23 @@ class BaseRunner(ProcessUser):
 			results.
 
 		"""
-		if self.project.perfReporterConfig:
-			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
-			# might not be fully constructed yet
-			from pysys.utils.perfreporter import CSVPerformanceReporter
-			self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir, runner=self)]
+
+		assert self.project.perfReporterConfig # should be at least one
 		
+		# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
+		# might not be fully constructed yet
+		self.performanceReporters = []
+		for perfcls, perfOptionsDict in self.project.perfReporterConfig:
+			p = perfcls(self.project, perfOptionsDict.get('summaryfile',''), self.outsubdir, runner=self)
+			p.pluginProperties = perfOptionsDict
+			pysys.utils.misc.setInstanceVariablesFromDict(p, perfOptionsDict)
+			
+			# for backwards compat permit "summaryfile" as well as summaryFile
+			p.summaryfile = p.summaryfile or getattr(p, 'summaryFile', '')
+			p.summaryFile = p.summaryfile
+			
+			self.performanceReporters.append(p)
+				
 		class PySysPrintRedirector(object):
 			def __init__(self):
 				self.last = None
@@ -604,7 +615,10 @@ class BaseRunner(ProcessUser):
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
 		if self.printLogs is None: self.printLogs = self.__printLogsDefault # default value, unless overridden by cmdline or writer.setup
-		
+
+		for p in self.performanceReporters:
+				p.setup()
+
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: 
 			threadPool = ThreadPool(self.threads, requests_queue=self._testScheduler)
@@ -684,8 +698,9 @@ class BaseRunner(ProcessUser):
 			# with the perf output
 			for perfreporter in self.performanceReporters:
 					try: perfreporter.cleanup()
-					except Exception as ex: 
+					except Exception as ex: # pragma: no cover
 						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+						sys.stderr.write('Caught exception performing performance reporter cleanup: %s\n'%traceback.format_exc()) # useful to have it on stderr too, esp during development
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
@@ -787,6 +802,76 @@ class BaseRunner(ProcessUser):
 		# call the hook for end of test execution
 		self.testComplete(container.testObj, container.outsubdir)
 
+	def reportPerformanceResult(self, testObj, value, resultKey, unit, **kwargs):
+		"""
+		Reports a new performance number to the configured performance reporters. See `pysys.basetest.reportPerformanceResult` 
+		for details of the arguments. 
+		
+		:meta private: Currently internal; may make this public in a future release if we decide it's useful.
+		"""
+		resultKey = resultKey.strip()
+		
+		# check for correct format for result key
+		if '  ' in resultKey:
+			raise Exception ('Invalid resultKey - contains double space "  ": %s' % resultKey)
+		if re.compile(r'.*\d{4}[-/]\d{2}[-/]\d{2}\ \d{2}[:/]\d{2}[:/]\d{2}.*').match(resultKey) != None :
+			raise Exception ('Invalid resultKey - contains what appears to be a date time - which would imply alteration of the result key in each run: %s' % resultKey)
+		if '\n' in resultKey:
+			raise Exception ('Invalid resultKey - contains a new line: %s' % resultKey)
+		if '%s' in resultKey or '%d' in resultKey or '%f' in resultKey: # people do this without noticing sometimes
+			raise Exception('Invalid resultKey - contains unsubstituted % format string: '+resultKey)
+
+		if isstring(value): value = float(value)
+		assert isinstance(value, int) or isinstance(value, float), 'invalid type for performance result: %s'%(repr(value))
+
+		kwargs['resultDetails'] = kwargs.get('resultDetails') or []
+		if isinstance(kwargs['resultDetails'], list):
+			kwargs['resultDetails'] = collections.OrderedDict(kwargs['resultDetails'])
+
+		# Make sure user notices if they've reused resultKeys illegally
+		with self.__resultWritingLock: # reuse this lock for simplicity; perf writing doesn't happen very often anyway
+			prevresult = self.__previousPerfResultKeys.get(resultKey, None)
+			d = dict(kwargs['resultDetails'])
+			d['testId'] = testObj.descriptor.id
+			if prevresult:
+				previd, prevcycle, prevdetails = prevresult
+				# if only difference is cycle (i.e. different testobj but same test id) then allow, but
+				# make sure we report error if this test tries to report same key more than once, or if it
+				# overlaps with another test's result keys
+				if previd == testObj.descriptor.id and prevcycle==testObj.testCycle: # pragma: no cover
+					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
+					return
+				elif previd != testObj.descriptor.id: # pragma: no cover
+					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
+					return
+				elif prevdetails != d: # pragma: no cover
+					# prevent different cycles of same test with different resultdetails 
+					testObj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
+					return
+			else:
+				self.__previousPerfResultKeys[resultKey] = (testObj.descriptor.id, testObj.testCycle, d)
+
+		if not self.performanceReporters: return
+
+		# Use the unit aliases of the first performance reporter (to avoid the need to worry about syncing between different reporters)
+		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
+		assert isinstance(unit, pysys.perf.api.PerformanceUnit), repr(unit)
+
+		if testObj.getOutcome().isFailure(): # pragma: no cover
+			testObj.log.warning('Performance result "%s" will not be recorded as test has failed so results could be invalid', resultKey)
+			return
+		
+		try:
+			for p in self.performanceReporters:
+				p.reportResult(testObj, value, resultKey, unit, **kwargs)
+		finally:
+			# Better to log it after any initialization messages from the reporters
+			testObj.log.info("Performance result: %s = %s %s (%s)", 
+				# Use the first reporter to convert the values to a string, providing a mechanism to override the format if needed
+				resultKey, self.performanceReporters[0].valueToDisplayString(value), unit,
+			 'bigger is better' if unit.biggerIsBetter else 'smaller is better',
+					extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
+
 	def reportTestOutcome(self, testObj, testStart, testDurationSecs, cycle=0, runLogOutput=u'', **kwargs):
 		"""
 		Records the result of a completed test, including notifying any configured writers, and writing the 
@@ -866,7 +951,7 @@ class BaseRunner(ProcessUser):
 			the ``outDirName`` in the filename, so that artifacts from multiple test runs/platforms do not clash. 
 		:param str category: A string identifying what kind of artifact this is, e.g. 
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
-			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			"CSVPerformanceReport" (from `pysys.perf.reporters.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 			Use alphanumeric characters and underscores only. 
 		"""

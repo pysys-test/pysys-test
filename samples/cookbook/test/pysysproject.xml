@@ -299,6 +299,27 @@
 		</writer>
 	</writers>
 
+	<!--
+	Performance reporters
+	~~~~~~~~~~~~~~~~~~~~~
+	
+	By default PySys will record performance results using a default instance of 
+	`pysys.perf.reporters.CSVPerformanceReporter`. However if desired you can configure an alternative list of 
+	reporters such as `pysys.perf.reporters.JSONPerformanceReporter` or custom reporters of your own. 
+	-->
+	<performance-reporters>
+	
+		<performance-reporter classname="pysys.perf.reporters.CSVPerformanceReporter">
+			<property name="aggregateCycles" value="true"/>
+			<property name="summaryFile" value="__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv"/>
+		</performance-reporter>
+		
+		<performance-reporter classname="pysys.perf.reporters.JSONPerformanceReporter"/>
+
+		<performance-reporter classname="pysys.perf.reporters.PrintSummaryPerformanceReporter"/>
+		
+	</performance-reporters>
+	
 	<!-- 
 	Configuration for how tests execute
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

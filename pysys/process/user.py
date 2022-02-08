@@ -1796,7 +1796,7 @@ class ProcessUser(object):
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, 
-			logFunction=None, reFlags=0, stripWhitespace=True, mappers=[]):
+			logFunction=None, reFlags=0, stripWhitespace=True, mappers=[], color=True):
 		""" Logs some or all of the lines from the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
@@ -1845,6 +1845,9 @@ class ProcessUser(object):
 
 		:param bool stripWhitespace: By default blank lines are removed; set this to False to disable that behaviour. 
 			Added in PySys 2.0. 
+		
+		:param bool color: By default logged lines are colored blue to distinguish from the rest of the log contents. 
+			Set this to False to disable coloring. Added in PySys 2.1. 
 
 		:return: True if anything was logged, False if not.
 		
@@ -1874,6 +1877,8 @@ class ProcessUser(object):
 				if stripWhitespace:
 					l = l.rstrip()
 					if len(l) == 0: continue
+				else:
+					l = l.strip('\n\r')
 				
 				if includes:
 					l = matchesany(l, includes)
@@ -1893,14 +1898,17 @@ class ProcessUser(object):
 		if not tolog:
 			return False
 		
-		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS if color else None, suppress_prefix=True)
 		if logFunction is None: 
 			def logFunction(line):
-				self.log.info(u'  %s', l, extra=logextra)
+				self.log.info(u'  %s', l, 
+					# special-case printing of lines that already have coloring - don't add any extra colors to such lines
+					extra=BaseLogFormatter.tag(None, suppress_prefix=True) if color and '\033[' in line else logextra)
 
 		path = os.path.normpath(path)
 		if path.startswith(self.output): path = path[len(self.output)+1:]
-		self.log.info(u'Contents of %s%s: ', fromLongPathSafe(path), ' (filtered)' if includes or excludes else '', extra=logextra)
+		self.log.info(u'Contents of %s%s: ', fromLongPathSafe(path), ' (filtered)' if includes or excludes else '', 
+			extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS, suppress_prefix=False))
 		for l in tolog:
 			logFunction(l)
 		self.log.info('  -----', extra=logextra)

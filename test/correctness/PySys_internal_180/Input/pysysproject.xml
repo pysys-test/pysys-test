@@ -1,0 +1,26 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<!--
+	<pysysdirconfig>
+	</pysysdirconfig>
+	-->
+
+	<performance-reporters>
+	
+		<performance-reporter classname="pysys.utils.perfreporter.CSVPerformanceReporter">
+			<property name="aggregateCycles" value="true"/>
+			<property name="summaryFile" value="__pysys_performance/${outDirName}/perf_${outDirName}.csv"/>
+		</performance-reporter>
+				
+	</performance-reporters>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+</pysysproject>

@@ -1,0 +1,5 @@
+# resultKey,testId,value,unit,biggerIsBetter,toleranceStdDevs,samples,stdDev,#runDetails:#,outDirName=myoutdir,hostname=orighost,cpuCount=12,os=Windows 10 10.0.19043 SP0,startTime=2022-02-05 14:08:51; 2022-02-06 15:08:51; 2022-02-07 16:00:00
+Rate of doing a badda-badda-bing,MyNestedTestcase,1500,/s,True,0.0,2,123.4
+Rate of doing a foo bar,MyNestedTestcase,1000.0,/s,True,0.0,1,0
+Rate of doing a foo bar,MyNestedTestcase,1500.0,/s,True,0.0,1,0
+Rate of doing an extra thing this test doesn't do,MyNestedTestcase,1025.0,/s,True,0.0,2,7.0710678118654755
