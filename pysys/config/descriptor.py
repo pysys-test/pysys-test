@@ -561,6 +561,8 @@ class _XMLDescriptorParser(object):
 	'''
 
 	KV_PATTERN = '__pysys_%s__'
+	
+	__IMPORT_EXPR = b'\nimport ' if os.linesep.endswith('\n') else b'\rimport ' # the former works for windows+linux (regardless of ending), the latter for mac
 
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None, fileContents=None):
 		assert project
@@ -591,25 +593,21 @@ class _XMLDescriptorParser(object):
 								
 			# Find it within a file of another type e.g. pysystest.py
 			if xmlfile.endswith('.py'):
-			
-				# TODO: give up on this I think:
-				# and re.search(b'^[ \\t]*__pysys_[^=]*= *(lambda|[{(\\[]|.*\\\\$)', fileContents, flags=re.MULTILINE):
-				# Doing a full Python parse is about 2x more expensive for a trivial/small .py file (less bad for a complex one with modes)
-				# so only do for complex files i.e. if instead of a string value we have a lambda (e.g. for modes config) 
-				# or the beginning of a potentially multi-line expression (with an opening "[{(" or a line that ends with a continuation \\ character). 
+
+				# NB Doing a full python parse, ignoring the import statements onwards, is up to 14% faster(!) 
+				# (for large size/complexity) than the regex approach - and of course more idiomatic for Python developers
 				
 				pythonHeader = fileContents
 				
 				# Optimize for speed (and to reduce unnecessary failures) by stripping out everything from the imports onwards
 				# assume platform native line endings, for performance reasons - if incorrect, just means we miss the perf optimization
 				# decent speed up from not using regex's here
+
+				# we could also search for "from XXX import ..." but that's harder to match without regex's so don't bother as it would slow down the common case
 				
-				# TODO: special handling for os.linesep='\n\r'
-				# todo: either of these could come first. search from the 2nd one onwards. OR just ignore \nfrom and focus on the main import statements
-				firstImportIndex = pythonHeader.find(b'\nimport ')
-				firstImportIndex = pythonHeader.find(b'\nfrom ', 0 if firstImportIndex==-1 else firstImportIndex) # re.search(b'^(import |from .*import)', pythonHeader)#, flags=re.MULTILINE)
-				if firstImportIndex != -1 and pythonHeader.find(b'__pysys_', firstImportIndex) == -1:
-					assert firstImportIndex != 0
+				firstImportIndex = pythonHeader.find(self.__IMPORT_EXPR) # the first "\nimport " is a pretty clear sign of the imports beginning
+				# nb: give up on optimization if there are "__pysys_" lines below the imports
+				if firstImportIndex > 0 and b'__pysys_' not in fileContents[firstImportIndex:]:
 					pythonHeader = pythonHeader[:firstImportIndex]
 				
 				runpycode = compile(pythonHeader, xmlfile, 'exec')
@@ -617,7 +615,7 @@ class _XMLDescriptorParser(object):
 				exec(runpycode, runpy_namespace)
 				for k in runpy_namespace:
 					if k.startswith('__pysys_'):
-						if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
+						if not k.endswith('__'): raise UserError(f'Incorrect key format for "{k}" in "{self.file}"')
 						self.kvDict[k[len('__pysys_'):].rstrip('_')] = runpy_namespace[k]
 				del runpy_namespace
 			else: # non-Python files, fall back to a general purpsoe Python-like syntax
