@@ -51,6 +51,9 @@ The most common type of writer is the standard 'Record' writer, but there are al
      that did not pass. 
      Summary writers are always enabled regardless of the flags given to the PySys launcher.
 
+(See also `pysys.perf.api` whcih is used for writing performance results, using a similar but slightly 
+different API).
+
 Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
 writers may be configured and their individual properties set through the nested ``<property>`` tag. Writer
 properties are set as attributes to the writer instance just before setup is called, with automatic conversion of 
@@ -269,10 +272,10 @@ class ArtifactPublisher(object):
 		:param str path: Absolute path of the file or directory, using forward slashes as the path separator. 
 		:param str category: A string identifying what kind of artifact this is, e.g. 
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.testoutput.TestOutputArchiveWriter`) or 
-			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			"CSVPerformanceReport" (from `pysys.perf.reporters.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 		"""
-		pass
+		pass # pragma: no cover
 
 
 class TestOutputVisitor(object):
@@ -415,7 +418,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		if showRunDetails:
 			log("Run details:")
 			for k, v in self.runner.runDetails.items():
-				log(" %23s%s", k+': ', v, extra=ColorLogFormatter.tag(LOG_TEST_DETAILS, 1))
+				log(" %23s%s", k+': ', '%s'%v, extra=ColorLogFormatter.tag(LOG_TEST_DETAILS, 1))
 			log("")
 
 		if showOutcomeStats:

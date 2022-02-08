@@ -1,4 +1,4 @@
-CSVPerformanceFile<runDetails: outDirName="myoutdir", hostname="mcbsp02", startTime="2018-08-30 14:49:53", myBuildNumber="1.23.45X"
+PerformanceRunData<runDetails: outDirName="myoutdir", hostname="mcbsp02", startTime="2018-08-30 14:49:53", myBuildNumber="1.23.45X"
  - resultKey="Sample small integer performance result", testId="PySys_NestedTestcase", value=123.0, unit="s", biggerIsBetter=False, toleranceStdDevs=0.0, samples=1, stdDev=0.0, someResultDetail="value;yesitis"
  - resultKey="Sample large integer performance result", testId="PySys_NestedTestcase", value=1234.0, unit="s", biggerIsBetter=False, toleranceStdDevs=0.0, samples=1, stdDev=0.0, someResultDetail="value;yesitis"
  - resultKey="Sample float performance result", testId="PySys_NestedTestcase", value=0.012341, unit="/s", biggerIsBetter=True, toleranceStdDevs=0.0, samples=1, stdDev=0.0

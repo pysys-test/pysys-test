@@ -264,6 +264,8 @@ LOG_PASSES = 'passed'
 LOG_SKIPS = 'skipped'
 LOG_DIFF_ADDED = 'diff+'
 LOG_DIFF_REMOVED = 'diff-'
+LOG_PERF_BETTER = 'performancebetter'
+LOG_PERF_WORSE = 'performanceworse'
 LOG_END = 'end'
 
 class PrintLogs(Enum):

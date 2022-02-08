@@ -1,0 +1,21 @@
+Performance comparison summary between the following runs (the differing "run details" are shown):
+- 2022-02-05_14.08.51.win (3 result keys, 2 samples/result):
+     outDirName=myoutdir, <stripped>
+- myoutdir (15 result keys, 1 samples/result):
+     outDirName=historicOutDir, <stripped>
+- this (2 result keys, 3 samples/result):
+     outDirName=myoutdir, <stripped>
+
+Comparison results:
+  where fromRun->toRun format is: (%improvement) = (speedup ratio) = (sigmas/stdDevs where change above +/- 2.0 gives 95% probability it's significant; only significant results are colored)
+
+Rate of doing a badda-badda-bing from MyNestedTestcase
+ Mean from this run = 2,003 /s with stdDev=1 (0.0% of mean)
+  2022-02-05_14.08.51.win->this: +33.5% = 1.335x speedup = +4.1 sigmas
+                 myoutdir->this:  -1.0% = 0.99x speedup = -1.3 sigmas
+
+Rate of doing a foo bar from MyNestedTestcase
+ Mean from this run = 1,030 /s with stdDev=10 (1.0% of mean)
+  2022-02-05_14.08.51.win->this: -17.6% = 0.824x speedup = -0.6 sigmas
+                 myoutdir->this: Compare from value is missing
+

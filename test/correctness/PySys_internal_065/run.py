@@ -32,6 +32,8 @@ class PySysTest(BaseTest):
 		self.startPython([perfreporterexe, 'aggregate', self.input+'/sample.csv'], stdouterr='perfreporter-aggregate', abortOnError=False)
 		
 	def validate(self):
+		self.assertGrep('pysys.out', 'Sample small integer performance result.*123') # ensure we print the result to the console
+	
 		defaultPerfFilename=glob.glob(self.output+'/test/__pysys_performance/*/*.csv')[0]
 		defaultPerfFilename = '/'.join(defaultPerfFilename.replace('\\','/').split('/')[-3:])
 		self.assertThat('"$" not in defaultPerfFilename', defaultPerfFilename=defaultPerfFilename)

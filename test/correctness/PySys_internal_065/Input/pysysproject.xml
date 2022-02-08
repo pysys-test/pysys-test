@@ -12,6 +12,8 @@
 	<pythonpath value="${root}/extrapath"/>
 	<property name="csvPerformanceReporterSummaryFile" value="${perfparent}/@OUTDIR@_@TESTID@_perf_@HOSTNAME@_@DATE@_${startTime}.csv"/>
 
-	<performance-reporter classname="CustomPerfReporter" module="mypkg.customperf" />
+	<property name="myProjectProp" value="my_project_value"/>
+
+	<performance-reporter classname="CustomPerfReporter" module="mypkg.customperf" myproperty="${myProjectProp}" myDefaultedProperty="10"/>
 	
 </pysysproject>

@@ -507,7 +507,7 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 		runs in this mode. 
 		
 	:ivar bool ~.isPrimary: Indicates whether this is a primary mode, 
-		one that executes by default even when not explicity requested with a commnad line option such as ``--modes=ALL``)
+		one that executes by default even when not explicity requested with a command line option such as ``--modes=ALL``. 
 
 	.. versionadded:: 2.0
 
