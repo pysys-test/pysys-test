@@ -1184,6 +1184,9 @@ class DescriptorLoader(object):
 			pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
 			plugin.setup(project)
 			self.__descriptorLoaderPlugins.append(plugin)
+		
+		import concurrent.futures
+		self.threadPool = concurrent.futures.ThreadPoolExecutor()
 
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
@@ -1323,7 +1326,7 @@ class DescriptorLoader(object):
 		# end of visitDir() definition
 		visitDir(dir)
 		
-		# Tried using multithreading with Python 3.9.5 but limited benefit, probably due to GIL
+		# Tried using multithreading with Python 3.9.5 but limited benefit approx 10%, probably due to GIL
 		descriptors.extend(p for p in 
 				map(lambda element: self._parseTestDescriptor(descriptorfile=element[0], parentDirDefaults=element[1]),
 					descriptorsToParse)
