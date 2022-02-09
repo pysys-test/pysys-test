@@ -1181,6 +1181,10 @@ class DescriptorLoader(object):
 	def __init__(self, project, **kwargs): 
 		assert project, 'project must be specified'
 		self.project = project
+
+		# Import these since they _could_ be needed when parsing pysystest.py descriptors
+		import pysys.baserunner
+		import pysys.basetest
 		
 		self.__descriptorLoaderPlugins = []
 		for (pluginCls, pluginProperties) in project._descriptorLoaderPlugins:
@@ -1189,10 +1193,6 @@ class DescriptorLoader(object):
 			pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
 			plugin.setup(project)
 			self.__descriptorLoaderPlugins.append(plugin)
-		
-		# Import these since they _could_ be needed when parsing pysystest.py descriptors
-		import pysys.baserunner
-		import pysys.basetest
 
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
