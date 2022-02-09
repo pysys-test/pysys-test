@@ -1190,9 +1190,6 @@ class DescriptorLoader(object):
 			plugin.setup(project)
 			self.__descriptorLoaderPlugins.append(plugin)
 		
-		import concurrent.futures
-		self.threadPool = concurrent.futures.ThreadPoolExecutor()
-
 		# Import these since they _could_ be needed when parsing pysystest.py descriptors
 		import pysys.baserunner
 		import pysys.basetest
