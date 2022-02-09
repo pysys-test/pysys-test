@@ -14,6 +14,7 @@ __pysys_modes__            = """
 	lambda helper: helper.combineModeDimensions(helper.inheritedModes, 
 			[{'descriptorFile':v} for v in [
 				'PythonLarge', 
+				'PythonLargeNonString', 
 				'PythonSmall', 
 				'XmlLarge', 
 				'XmlSmall', 
