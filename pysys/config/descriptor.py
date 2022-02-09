@@ -497,6 +497,9 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	See the ``mode`` parameter/field in `TestDescriptor` where this class is used. 
 	
 	This class is immutable, so create a new instance if you want to change something. 
+	
+	The mode values can be of any type as long as it is pickleable (see Python's `pickle` module for more information). 
+	Standard Python types like strings, dicts etc are fine. 
 
 	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
 	
