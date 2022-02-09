@@ -38,7 +38,7 @@ __pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 # inherit=true/false which specifies whether groups from parent pysysdirconfigs are inherited by this test. 
 #
 # The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for 
-# tests that are performance-critical. 
+# tests that are performance-critical. By default groups inherit, but you can override that with "; inherit=false". 
 __pysys_groups__           = "performance, disableCoverage; inherit=true"
 
 # Specify the list of modes this test can be run in. 
@@ -81,8 +81,7 @@ __pysys_groups__           = "performance, disableCoverage; inherit=true"
 #
 # A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
 #
-__pysys_modes__            = r""" 
-	lambda helper: [
+__pysys_modes__            = lambda helper: [
 			mode for mode in 
 				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
@@ -112,7 +111,6 @@ __pysys_modes__            = r"""
 			# This is Python list comprehension syntax for filtering the items in the list
 			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
 		]
-	"""
 
 # Specify as a floating point number an indicator of when to run the tests under this directory, relative to other 
 # tests/directories with a higher or lower hint. 
@@ -138,8 +136,7 @@ __pysys_output_dir__       = "MyOutput"
 # The ability to add user-defined data to the test descriptor is mostly useful when using a shared Python class for 
 # lots of tests, or for passing data from a pysystest.* file in a language other than Python into the descriptor 
 # for reading by Python code. 
-__pysys_user_data__        = r"""
-	{
+__pysys_user_data__        = {
 	
 		'myTestDescriptorData': 'foobar', 
 
@@ -154,7 +151,6 @@ __pysys_user_data__        = r"""
 			foo/bosh
 		'''
 	}
-	"""
 
 # It is also possible to provide the descriptor values using XML embedded in this file as follows. Note that parsing 
 # XML is relatively slow, so add this value only if you have a good reason. 
