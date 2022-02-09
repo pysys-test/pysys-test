@@ -563,6 +563,7 @@ class _XMLDescriptorParser(object):
 	KV_PATTERN = '__pysys_%s__'
 	
 	__IMPORT_EXPR = b'\nimport ' if os.linesep.endswith('\n') else b'\rimport ' # the former works for windows+linux (regardless of ending), the latter for mac
+	__PYTHON_PYSYS_DUNDER_EXPR = b'\n__pysys_' if os.linesep.endswith('\n') else b'\r__pysys_'
 
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None, fileContents=None):
 		assert project
@@ -605,9 +606,9 @@ class _XMLDescriptorParser(object):
 
 				# we could also search for "from XXX import ..." but that's harder to match without regex's so don't bother as it would slow down the common case
 				
-				firstImportIndex = pythonHeader.find(self.__IMPORT_EXPR) # the first "\nimport " is a pretty clear sign of the imports beginning
+				firstImportIndex = pythonHeader.find(_XMLDescriptorParser.__IMPORT_EXPR) # the first "\nimport " is a pretty clear sign of the imports beginning
 				# nb: give up on optimization if there are "__pysys_" lines below the imports
-				if firstImportIndex > 0 and b'__pysys_' not in fileContents[firstImportIndex:]:
+				if firstImportIndex > 0 and _XMLDescriptorParser.__PYTHON_PYSYS_DUNDER_EXPR not in fileContents[firstImportIndex:]:
 					pythonHeader = pythonHeader[:firstImportIndex]
 				
 				runpycode = compile(pythonHeader, xmlfile, 'exec')
@@ -1398,3 +1399,4 @@ class DescriptorLoader(object):
 		except Exception as e:
 			log.info('Failed to read descriptor %s: ', descriptorfile, exc_info=True)
 			raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e)) from e
+
