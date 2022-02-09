@@ -1193,6 +1193,10 @@ class DescriptorLoader(object):
 		import concurrent.futures
 		self.threadPool = concurrent.futures.ThreadPoolExecutor()
 
+		# Import these since they _could_ be needed when parsing pysystest.py descriptors
+		import pysys.baserunner
+		import pysys.basetest
+
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
 		return them as a list.
@@ -1404,6 +1408,3 @@ class DescriptorLoader(object):
 			log.info('Failed to read descriptor %s: ', descriptorfile, exc_info=True)
 			raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e)) from e
 
-# Import these since they _could_ be needed when parsing pysystest.py descriptors
-import pysys.baserunner
-import pysys.basetest
