@@ -18,6 +18,15 @@ PySys 2.1 is under development.
 
 New features:
 
+New features related to ``pysystest.py`` descriptors:
+
+- Descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
+  approach used for non-Python ``pysys.*`` files. This allows normal Python syntax to be used for things like 
+  the ``lambda`` expressions (in ``__pysys_modes__``) which is more intuitive compared to the Python 2.0 approach 
+  of nesting them inside multi-line strings. The new test template and samples have been updated accordingly. 
+- Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
+  most cases users would prefer not to worry about it. 
+
 New features related to reporting of performance testing:
 
 - Added details documentation about how to use PySys for performance testing to the :doc:`/pysys/UserGuide`. 
@@ -272,6 +281,8 @@ The mode name can be automatically generated from the parameters, or provided ex
 				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
 	"""
+
+(Note that as of PySys 2.1 the enclosing``"""`` string is not required). 
 
 For those still using ``pysystest.xml`` files, the same Python lambda can also be added in your ``<modes>...</modes>`` 
 element. 

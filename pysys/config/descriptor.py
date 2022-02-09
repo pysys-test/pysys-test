@@ -853,10 +853,10 @@ class _XMLDescriptorParser(object):
 		groups = self.kvDict.pop('groups', None)
 		if isinstance(groups, str):
 			groups = groups.replace(' ','').split(';')
-			if len(groups) != 2 or groups[1].lower() not in ['inherit=true', 'inherit=false']:
-				raise UserError(f'Groups must be in the form "my-group1, mygroup2, ...; inherit=true/false" (the inherit= specifier is mandatory) in descriptor "{self.file}"')
 			groupList = [g for g in groups[0].split(',') if g]
-			if groups[1].lower() == 'inherit=false': return groupList
+			if len(groups) > 1 and groups[1].lower() not in ['inherit=true', 'inherit=false']:
+				raise UserError(f'Invalid inherit= specifier - groups should be in the form "my-group1, mygroup2, ...; inherit=true/false" in descriptor "{self.file}"')
+			if len(groups)>1 and groups[1].lower() == 'inherit=false': return groupList
 		else:
 			groups = self.getSingleElement('groups', optionalParents=['classification'])
 			if groups:

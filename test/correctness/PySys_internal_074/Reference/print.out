@@ -2,7 +2,6 @@
 Test id:           MyNewTest
 Test directory:    MyNewTest
 Test title:        Category <todo> - Test title (short, specific and sortable!) goes here <todo>
-Test purpose:      The purpose of this test is ... <todo>.
 Test created:      <date waz here>; authors: pysystestuser
 Test groups:       <none>
 Test modes:        <none>
@@ -14,12 +13,12 @@ Test id:           MyNewTestUncommented
 Test directory:    MyNewTestUncommented
 Test skip reason:  Skipped until Bug-1234 is fixed
 Test title:        Category TODO - Test title (short, specific and sortable!) goes here TODO
-Test purpose:      The purpose of this test is ... TODO.
 Test created:      <date waz here>; authors: pysystestuser
 Test groups:       myGroup, disableCoverage, performance
 Test modes:        
- --> MyMode {MyParam=123}
-Test order hint:   0.0
+ --> MyParameterizedSubtestModeA {MyParam=123} [PRIMARY]
+ --> MyParameterizedSubtestModeB {MyParam=456} [PRIMARY]
+Test order hint:   0.0, 0.0
 Test classname:    PySysTest; module: pysystest.py
 Test traceability: Bug-1234, UserStory-456
 
