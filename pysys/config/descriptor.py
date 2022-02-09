@@ -564,6 +564,7 @@ class _XMLDescriptorParser(object):
 	
 	__IMPORT_EXPR = b'\nimport ' if os.linesep.endswith('\n') else b'\rimport ' # the former works for windows+linux (regardless of ending), the latter for mac
 	__PYTHON_PYSYS_DUNDER_EXPR = b'\n__pysys_' if os.linesep.endswith('\n') else b'\r__pysys_'
+	__DISABLE_PYTHON_DESCRIPTOR_PARSING = os.getenv('PYSYS_DISABLE_PYTHON_DESCRIPTOR_PARSING','').lower()=='true' # undocumented, just for testing 
 
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None, fileContents=None):
 		assert project
@@ -593,7 +594,7 @@ class _XMLDescriptorParser(object):
 					fileContents = xmlhandle.read()
 								
 			# Find it within a file of another type e.g. pysystest.py
-			if xmlfile.endswith('.py'):
+			if xmlfile.endswith('.py') and not _XMLDescriptorParser.__DISABLE_PYTHON_DESCRIPTOR_PARSING:
 
 				# NB Doing a full python parse, ignoring the import statements onwards, is up to 14% faster(!) 
 				# (for large size/complexity) than the regex approach - and of course more idiomatic for Python developers
@@ -616,7 +617,7 @@ class _XMLDescriptorParser(object):
 				exec(runpycode, runpy_namespace)
 				for k in runpy_namespace:
 					if k.startswith('__pysys_'):
-						if not k.endswith('__'): raise UserError(f'Incorrect key format for "{k}" in "{self.file}"')
+						if not k.endswith('__'): raise UserError(f'Incorrect key format for "{k}" (should end with "__") in "{self.file}"')
 						self.kvDict[k[len('__pysys_'):].rstrip('_')] = runpy_namespace[k]
 				del runpy_namespace
 			else: # non-Python files, fall back to a general purpsoe Python-like syntax
@@ -1400,3 +1401,6 @@ class DescriptorLoader(object):
 			log.info('Failed to read descriptor %s: ', descriptorfile, exc_info=True)
 			raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e)) from e
 
+# Import these since they _could_ be needed when parsing pysystest.py descriptors
+import pysys.baserunner
+import pysys.basetest
