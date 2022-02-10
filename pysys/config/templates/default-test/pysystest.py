@@ -8,6 +8,7 @@ __pysys_created__ = "@@DATE@@"
 
 #__pysys_traceability_ids__ = "Bug-1234, UserStory-456" 
 #__pysys_groups__           = "myGroup, disableCoverage, performance"
+#__pysys_modes__            = lambda helper: helper.inheritedModes+[ {'mode':'MyMode', 'MyModeParam':123}, ]
 #__pysys_modes__            = lambda helper: helper.combineModeDimensions(helper.inheritedModes, helper.makeAllPrimary(
 #		{'MyParameterizedSubtestModeA':{'MyParam':123}, 'MyParameterizedSubtestModeB':{'MyParam':456}, }))
 
