@@ -156,7 +156,7 @@ def xmlToPy(xmlpath):
 	py += f'{"#" if not d.get("groups") else ""}__pysys_groups__  = "{d.pop("groups","myGroup; inherit=true")}"\n'
 	value = d.pop('modes', None)
 	if value:
-		py += f'__pysys_modes__            = r""" {cleanIndentation(value)} """'+'\n\n'
+		py += f'__pysys_modes__            = {cleanIndentation(value).lstrip()}'+'\n\n'
 	
 	value = d.pop('execution_order_hint', None)
 	if value: py += f'__pysys_execution_order_hint__ = {value}\n'
@@ -174,7 +174,7 @@ def xmlToPy(xmlpath):
 			py += f'{x} = "{value}"\n'
 
 	value = d.pop('user_data', None)
-	if value: py += f'__pysys_user_data__ = r""" {value} """\n\n'
+	if value: py += f'__pysys_user_data__ = {value.lstrip()}\n\n'
 
 	py += f'{"#" if not d.get("skipped_reason") else ""}__pysys_skipped_reason__   = "{d.pop("skipped_reason","Skipped until Bug-1234 is fixed")}"\n\n'
 
