@@ -9,7 +9,7 @@ __pysys_purpose__ = r""" To demonstrate that MyServer can startup and response t
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_groups__  = "myServerBasicSanity; inherit=true"
+__pysys_groups__  = "myServerBasicSanity"
 #__pysys_skipped_reason__ = "Skipped until Bug-1234 is fixed"
 
 import pysys

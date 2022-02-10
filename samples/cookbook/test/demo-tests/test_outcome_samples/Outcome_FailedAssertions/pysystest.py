@@ -1,6 +1,5 @@
 __pysys_title__   = r""" Demo of outcomes - FAILED assertions """
 #                        ===============================================================================
-
 __pysys_purpose__ = r""" 
 	"""
 

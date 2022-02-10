@@ -1,6 +1,5 @@
 __pysys_title__   = r""" Demo of getting project properties """
 #                        ===============================================================================
-
 __pysys_purpose__ = r""" 
 	"""
 

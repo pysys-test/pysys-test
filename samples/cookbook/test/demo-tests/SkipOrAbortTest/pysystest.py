@@ -1,6 +1,5 @@
 __pysys_title__   = r""" Demo of skipping tests based on platform, and of aborting a test when a fatal problem occurs """
 #                        ===============================================================================
-
 __pysys_purpose__ = r""" 
 	"""
 

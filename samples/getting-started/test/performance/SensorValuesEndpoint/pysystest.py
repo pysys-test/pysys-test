@@ -9,7 +9,7 @@ __pysys_purpose__ = r""" To measure the throughout and a sample of the latencies
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_modes__   = r""" lambda helper: helper.inheritedModes+[ {'mode':'CompressionGZip', 'compressionType':'gzip'} ] """
+__pysys_modes__   = lambda helper: helper.inheritedModes+[ {'mode':'CompressionGZip', 'compressionType':'gzip'} ]
 
 import pysys
 from pysys.constants import *

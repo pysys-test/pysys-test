@@ -10,7 +10,7 @@ __pysys_purpose__ = r""" To demonstrate successful and unsuccessful startup of M
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_groups__  = "myServerStartup; inherit=true"
+__pysys_groups__  = "myServerStartup"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 
 import pysys
