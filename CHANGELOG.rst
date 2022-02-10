@@ -23,7 +23,11 @@ New features related to ``pysystest.py`` descriptors:
 - Descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
   approach used for non-Python ``pysys.*`` files. This allows normal Python syntax to be used for things like 
   the ``lambda`` expressions (in ``__pysys_modes__``) which is more intuitive compared to the Python 2.0 approach 
-  of nesting them inside multi-line strings. The new test template and samples have been updated accordingly. 
+  of nesting them inside multi-line strings. The samples and the default ``pysys make`` test template have been updated 
+  accordingly. 
+  All descriptor values should go at the start of the file, before any ``import`` statements - this is important for 
+  efficient parsing. For optimum parsing performance, make sure your first import is an ``import XXX`` rather than 
+  a ``from XXX import YYY`` statement. 
 - Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
   most cases users would prefer not to worry about it. 
 
