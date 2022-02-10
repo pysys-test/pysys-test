@@ -1,11 +1,5 @@
 __pysys_title__   = """ My UTF-8 encoded descriptor '£'     <> """ 
 
-__pysys_purpose__ = """ The purpose of this test is ... 
-	very interesting
-	
-		oh yeah!""" 
-
-
 __pysys_xml_descriptor__ = r"""
 	<?xml version="1.0" encoding="utf-8"?>
 	<pysystest>
@@ -22,9 +16,8 @@ __pysys_xml_descriptor__ = r"""
 
 import pysys
 from pysys.constants import *
-from pysys.basetest import BaseTest
 
-class PySysTest(BaseTest):
+class PySysTest(pysys.basetest.BaseTest):
 	
 	def execute(self):
 		self.log.info('Got: £')
@@ -35,3 +28,10 @@ class PySysTest(BaseTest):
 	def validate(self):
 		pass
 	
+
+# unusually, put this after some import statements to check it still works
+# the above "pysys.basetest.BaseTest" reference would break without the "pysys.baserunner" at the bottom of descriptor.py
+__pysys_purpose__ = """ The purpose of this test is ... 
+	very interesting
+	
+		oh yeah!""" 

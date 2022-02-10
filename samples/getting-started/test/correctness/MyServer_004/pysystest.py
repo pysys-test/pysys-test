@@ -9,11 +9,10 @@ __pysys_purpose__ = r""" To demonstrate error messages for unsuccessful startup 
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_groups__  = "myServerStartup; inherit=true"
+__pysys_groups__  = "myServerStartup"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 
-__pysys_modes__   = r""" 
-		lambda helper: helper.combineModeDimensions(
+__pysys_modes__   = lambda helper: helper.combineModeDimensions(
 			# If any inherited modes were defined at the project/parent dir level to cover different 
 			# execution environments (e.g. real db, mock db, different web browsers etc) 
 			# we would want to combine each of them with each of the different behavioural scenarios
@@ -34,7 +33,7 @@ __pysys_modes__   = r"""
 						'expectedExitStatus':'!=0', 'expectedMessage':'Server failed: Cannot specify port twice'}, 
 				}), 
 		)
-"""
+
 
 import pysys
 from pysys.constants import *

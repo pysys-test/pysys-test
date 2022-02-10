@@ -38,7 +38,7 @@ __pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 # inherit=true/false which specifies whether groups from parent pysysdirconfigs are inherited by this test. 
 #
 # The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for 
-# tests that are performance-critical. 
+# tests that are performance-critical. By default groups inherit, but you can override that with "; inherit=false". 
 __pysys_groups__           = "performance, disableCoverage; inherit=true"
 
 # Specify the list of modes this test can be run in. 
@@ -81,38 +81,36 @@ __pysys_groups__           = "performance, disableCoverage; inherit=true"
 #
 # A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
 #
-__pysys_modes__            = r""" 
-	lambda helper: [
-			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
-					helper.inheritedModes,
-					{
-							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
-							'CompressionGZip': {'compressionType':'gzip'},
-					}, 
-					[
-						{'auth':None}, # Mode name is optional
-						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-					], 
-					
-					# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
-					# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
-					# using modes to validate the same behaviour/conditions in different execution environments e.g. 
-					# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
-					# out different command line options) using a single PySysTest class, then you should have all your modes as 
-					# "primary" as you want all of them to execute by default in a quick local test run. 
-					helper.makeAllPrimary(
-						{
-							'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
-							'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
-							'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
-						}), 
-					)
+__pysys_modes__ = lambda helper: [
+		mode for mode in 
+			helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.inheritedModes,
+				{
+						'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
+						'CompressionGZip': {'compressionType':'gzip'},
+				}, 
+				[
+					{'auth':None}, # Mode name is optional
+					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+				], 
 				
-			# This is Python list comprehension syntax for filtering the items in the list
-			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
-		]
-	"""
+				# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
+				# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+				# using modes to validate the same behaviour/conditions in different execution environments e.g. 
+				# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
+				# out different command line options) using a single PySysTest class, then you should have all your modes as 
+				# "primary" as you want all of them to execute by default in a quick local test run. 
+				helper.makeAllPrimary(
+					{
+						'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+						'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+						'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+					}), 
+				)
+			
+		# This is Python list comprehension syntax for filtering the items in the list
+		if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
+	]
 
 # Specify as a floating point number an indicator of when to run the tests under this directory, relative to other 
 # tests/directories with a higher or lower hint. 
@@ -138,8 +136,7 @@ __pysys_output_dir__       = "MyOutput"
 # The ability to add user-defined data to the test descriptor is mostly useful when using a shared Python class for 
 # lots of tests, or for passing data from a pysystest.* file in a language other than Python into the descriptor 
 # for reading by Python code. 
-__pysys_user_data__        = r"""
-	{
+__pysys_user_data__        = {
 	
 		'myTestDescriptorData': 'foobar', 
 
@@ -154,7 +151,6 @@ __pysys_user_data__        = r"""
 			foo/bosh
 		'''
 	}
-	"""
 
 # It is also possible to provide the descriptor values using XML embedded in this file as follows. Note that parsing 
 # XML is relatively slow, so add this value only if you have a good reason. 

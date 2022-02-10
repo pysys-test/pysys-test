@@ -22,27 +22,19 @@ This is intended as a reference, and to provide somewhere to copy snippets from 
 into your own tests as this example contains many fields that are only used for advanced cases. Instead use 
 ``pysys make`` to create new tests. 
 
-For more information about the modes helper shown above, see `pysys.config.descriptor.TestModesConfigHelper`. 
+For more information about the modes ``helper`` shown above, see `pysys.config.descriptor.TestModesConfigHelper`. 
 
-All descriptor values go at the start of the file, and are designed to look like ordinary Python string constants, but 
-for reasons of efficiency they are actually parsed out using a simpler mechanism well before the files are parsed and 
-imported by Python itself. So you are limited to a subset of the possible Python syntax::
-
-   __pysys_KEY__ = r""" Use this raw string format for multi-line values, and for anything where you might need 
-      to include a \ character or nested ' or " quotes. """
-      
-   __pysys_KEY__ = "Use this for single-line values where you don't need any backslash sequences."
-   
-   __pysys_KEY__ = True/False/-10.5 # simple primitive literals of these types are supported
-
-Any complex data structures must be wrapped in strings, and note that single-quote ``'`` strings aren't supported. 
-All descriptor values are read using UTF-8 (sticking to ASCII characters is recommended). 
+All descriptor values should go at the start of the file, before any ``import`` statements - this is important for 
+efficient parsing. For optimum parsing performance, make sure your first import is an ``import XXX`` rather than a 
+``from XXX import YYY`` statement. 
 
 It is mandatory to provide a ``__pysys_title__`` value, but everything else is optional. For ease of readability and 
 performance it is best to use ``#`` to comment out any items where you aren't setting a (non-default) value. 
 
-A nice feature of the way these values are parsed is that it is completely possible to use the same syntax for 
-descriptors in non-Python files, for example ``pysystest.cs`` for C#/ECMAScript (either embedded within a C# comment 
+Non-Python files can include descriptor values using the same syntax, but since they are parsed with regular 
+expressions rather than Python, all values (except numbers/booleans) must be wrapped in a string, ideally a 
+``r""" ... """`` string. In non-Python files these can appear at any position in the file, for example inside a class 
+or a comment. For example ``pysystest.cs`` for C#/ECMAScript (either embedded within a C# comment 
 or as fields of your C# class). 
 
 Sample pysystest.xml

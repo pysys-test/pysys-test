@@ -8,7 +8,8 @@ __pysys_purpose__ = r""" To verify that responses from MyServer are correct on t
 
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
-__pysys_groups__  = "myServerSensorValues; inherit=true"
+__pysys_groups__  = "myServerSensorValues"
+#__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 
 # This test will be executed for each of the following modes, in this case controlling the compression
 # of results from the server and whether authentication is used. The test can use self.mode to find out which
@@ -16,7 +17,7 @@ __pysys_groups__  = "myServerSensorValues; inherit=true"
 # as fields on the test object. Keep mode strings short but self-describing.
 # 
 # The first mode in the list is the "primary" one.
-__pysys_modes__            = r""" lambda helper: [
+__pysys_modes__            = lambda helper: [
 	mode for mode in 
 		helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 			helper.inheritedModes,
@@ -32,9 +33,7 @@ __pysys_modes__            = r""" lambda helper: [
 	# This is a Python list comprehension syntax for filtering the items in the list
 	if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
 	]
-	"""
 
-#__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 
 import pysys
 from pysys.constants import *

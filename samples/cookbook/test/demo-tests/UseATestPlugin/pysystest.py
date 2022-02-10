@@ -1,6 +1,5 @@
 __pysys_title__   = r""" Demo of using a test plugin called MyTestPlugin to check log for errors """
 #                        ===============================================================================
-
 __pysys_purpose__ = r""" 
 	"""
 

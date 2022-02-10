@@ -37,7 +37,6 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
-import pysys.config.descriptor
 
 log = logging.getLogger('pysys.config.project')
 
@@ -758,3 +757,4 @@ class Project(object):
 pysys.constants.Project = Project # for compatibility's sake' need to do this early
 
 import pysys.utils.safeeval # down here to break circular dependency
+import pysys.config.descriptor

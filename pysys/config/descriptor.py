@@ -497,6 +497,9 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	See the ``mode`` parameter/field in `TestDescriptor` where this class is used. 
 	
 	This class is immutable, so create a new instance if you want to change something. 
+	
+	The mode values can be of any type as long as it is pickleable (see Python's `pickle` module for more information). 
+	Standard Python types like strings, dicts etc are fine. 
 
 	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
 	
@@ -561,6 +564,10 @@ class _XMLDescriptorParser(object):
 	'''
 
 	KV_PATTERN = '__pysys_%s__'
+	
+	__IMPORT_EXPR = b'\nimport ' if os.linesep.endswith('\n') else b'\rimport ' # the former works for windows+linux (regardless of ending), the latter for mac
+	__PYTHON_PYSYS_DUNDER_EXPR = b'\n__pysys_' if os.linesep.endswith('\n') else b'\r__pysys_'
+	__DISABLE_PYTHON_DESCRIPTOR_PARSING = os.getenv('PYSYS_DISABLE_PYTHON_DESCRIPTOR_PARSING','').lower()=='true' # undocumented, just for testing 
 
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None, fileContents=None):
 		assert project
@@ -590,31 +597,58 @@ class _XMLDescriptorParser(object):
 					fileContents = xmlhandle.read()
 								
 			# Find it within a file of another type e.g. pysystest.py
-			
-			# must be at the start of a line, i.e. not after a comment
-			# we do allow raw strings
-			for m in re.finditer(
-					(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
-						+'|'.join([
-							'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
-							'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
-							'"(?P<value3>[^"]*)"',
-						])
-						+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
-						).encode('ascii'), 
-					fileContents, flags=re.DOTALL + re.MULTILINE): 
-				k = m.group('key').decode('ascii', errors='replace')
-				if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
-				k = k.rstrip('_')
+			if xmlfile.endswith('.py') and not _XMLDescriptorParser.__DISABLE_PYTHON_DESCRIPTOR_PARSING:
+
+				# NB Doing a full python parse, ignoring the import statements onwards, is up to 14% faster(!) 
+				# (for large size/complexity) than the regex approach - and of course more idiomatic for Python developers
 				
-				if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
-				value = m.group('value1') or m.group('value2') or m.group('value3')
-				if value is None:
-					raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
-				if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
-				if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
-					value = value.decode('utf-8', errors='replace')
-				self.kvDict[k] = value
+				pythonHeader = fileContents
+				
+				# Optimize for speed (and to reduce unnecessary failures) by stripping out everything from the imports onwards
+				# assume platform native line endings, for performance reasons - if incorrect, just means we miss the perf optimization
+				# decent speed up from not using regex's here
+
+				# we could also search for "from XXX import ..." but that's harder to match without regex's so don't bother as it would slow down the common case
+				
+				firstImportIndex = pythonHeader.find(_XMLDescriptorParser.__IMPORT_EXPR) # the first "\nimport " is a pretty clear sign of the imports beginning
+				# nb: give up on optimization if there are "__pysys_" lines below the imports
+				if firstImportIndex > 0 and _XMLDescriptorParser.__PYTHON_PYSYS_DUNDER_EXPR not in fileContents[firstImportIndex:]:
+					pythonHeader = pythonHeader[:firstImportIndex]
+				
+				runpycode = compile(pythonHeader, xmlfile, 'exec')
+				runpy_namespace = {}
+				exec(runpycode, runpy_namespace)
+				for k in runpy_namespace:
+					if k.startswith('__pysys_'):
+						if not k.endswith('__'): raise UserError(f'Incorrect key format for "{k}" (should end with "__") in "{self.file}"')
+						self.kvDict[k[len('__pysys_'):].rstrip('_')] = runpy_namespace[k]
+				del runpy_namespace
+			else: # non-Python files, fall back to a general purpsoe Python-like syntax
+			
+				# must be at the start of a line, i.e. not after a comment
+				# we do allow raw strings
+				for m in re.finditer(
+						(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
+							+'|'.join([
+								'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
+								'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
+								'"(?P<value3>[^"]*)"',
+							])
+							+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
+							).encode('ascii'), 
+						fileContents, flags=re.DOTALL + re.MULTILINE): 
+					k = m.group('key').decode('ascii', errors='replace')
+					if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
+					k = k.rstrip('_')
+				
+					if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
+					value = m.group('value1') or m.group('value2') or m.group('value3')
+					if value is None:
+						raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
+					if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
+					if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
+						value = value.decode('utf-8', errors='replace')
+					self.kvDict[k] = value
 
 			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file} (found: {list(self.kvDict.keys())})')
 			xmlcontents = self.kvDict.pop('xml_descriptor', '').strip() # not likely to be used for .py files, but might be nice for some others
@@ -819,10 +853,10 @@ class _XMLDescriptorParser(object):
 		groups = self.kvDict.pop('groups', None)
 		if isinstance(groups, str):
 			groups = groups.replace(' ','').split(';')
-			if len(groups) != 2 or groups[1].lower() not in ['inherit=true', 'inherit=false']:
-				raise UserError(f'Groups must be in the form "my-group1, mygroup2, ...; inherit=true/false" (the inherit= specifier is mandatory) in descriptor "{self.file}"')
 			groupList = [g for g in groups[0].split(',') if g]
-			if groups[1].lower() == 'inherit=false': return groupList
+			if len(groups) > 1 and groups[1].lower() not in ['inherit=true', 'inherit=false']:
+				raise UserError(f'Invalid inherit= specifier - groups should be in the form "my-group1, mygroup2, ...; inherit=true/false" in descriptor "{self.file}"')
+			if len(groups)>1 and groups[1].lower() == 'inherit=false': return groupList
 		else:
 			groups = self.getSingleElement('groups', optionalParents=['classification'])
 			if groups:
@@ -1138,12 +1172,19 @@ class DescriptorLoader(object):
 	files on disk, and allowing for different database modes on different 
 	platforms. 
 
+	This class may use multi-threading to improve performance, so any extensions 
+	must be thread-safe. 
+	
 	:ivar pysys.config.project.Project ~.project: The `pysys.config.project.Project` instance. 
 	
 	"""
 	def __init__(self, project, **kwargs): 
 		assert project, 'project must be specified'
 		self.project = project
+
+		# Import these since they _could_ be needed when parsing pysystest.py descriptors
+		import pysys.baserunner
+		import pysys.basetest
 		
 		self.__descriptorLoaderPlugins = []
 		for (pluginCls, pluginProperties) in project._descriptorLoaderPlugins:
@@ -1238,54 +1279,64 @@ class DescriptorLoader(object):
 			# this is the top-level directory that will be checked below
 			dirconfigs[os.path.dirname(dir)] = currentconfig
 
-		for root, dirs, files in os.walk(toLongPathSafe(dir)):
-			ignorematch = next( (f for f in files if (f == '.pysysignore' or f == 'pysysignore')), None)
-			if ignorematch:
-				log.debug('Skipping directory %s due to ignore file %s', root, ignorematch)
-				del dirs[:]
-				continue
+		descriptorsToParse = []
+
+		def visitDir(root):
+			with os.scandir(root) as it:
+				dirs = []
+				files = []
+				for entry in it:
+					if entry.is_dir():
+						if entry.name in ignoreSet: continue
+						dirs.append(entry.name)
+						continue
+					fname = entry.name
+					if fname in ['.pysysignore', 'pysysignore']:
+						log.debug('Skipping directory due to ignore file %s', entry.path)
+						return
+					files.append(fname)
+
+				parentconfig = None
+				if dirconfigs is not None:
+					parentconfig = dirconfigs[root[:root.rfind(os.sep)]] # rfind is much faster than dirname
+					if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
+						parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
+						log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
+
+				# allow subclasses to modify descriptors list and/or avoid processing 
+				# subdirectories
+				if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
+					return
 				
-			parentconfig = None
-			if dirconfigs is not None:
-				parentconfig = dirconfigs[os.path.dirname(root)]
-				if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
-					parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
-					log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
+				if descriptorSet is None: 
+					intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
+				else: # compatibility mode
+					intersection = descriptorSet & set(files)
+					
+				if intersection: 
+					if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
+					descriptorfile = fromLongPathSafe(root+os.sep+intersection.pop())
 
-			# allow subclasses to modify descriptors list and/or avoid processing 
-			# subdirectories
-			if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
-				del dirs[:]
-				continue
+					descriptorsToParse.append((descriptorfile, parentconfig))
+					
+					# if this is a test dir, it never makes sense to look at sub directories
+					return
+				
+				if dirconfigs is not None and len(dirs)>0:
+					# stash it for when we navigate down to subdirectories
+					# only add to dict if we're continuing to process children
+					dirconfigs[root] = parentconfig 
+				for d in dirs:
+					visitDir(root+os.sep+d)
 
-			if descriptorSet is None: 
-				intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
-			else: # compatibility mode
-				intersection = descriptorSet & set(files)
-			if intersection: 
-				if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
-				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
-
-				try:
-					parsed = self._parseTestDescriptor(descriptorfile, parentDirDefaults=parentconfig)
-					if parsed:
-						descriptors.append(parsed)
-				except UserError:
-					raise # no stack trace needed, will already include descriptorfile name
-				except Exception as e:
-					log.info('Failed to read descriptor: ', exc_info=True)
-					raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
-
-				# if this is a test dir, it never makes sense to look at sub directories
-				del dirs[:]
-				continue
-			
-			for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
-
-			if dirconfigs is not None and len(dirs)>0:
-				# stash it for when we navigate down to subdirectories
-				# only add to dict if we're continuing to process children
-				dirconfigs[root] = parentconfig 
+		# end of visitDir() definition
+		visitDir(dir)
+		
+		# Tried using multithreading with Python 3.9.5 but limited benefit approx 10%, probably due to GIL
+		descriptors.extend(p for p in 
+				map(lambda element: self._parseTestDescriptor(descriptorfile=element[0], parentDirDefaults=element[1]),
+					descriptorsToParse)
+			if p)
 
 		return descriptors
 		
@@ -1346,4 +1397,11 @@ class DescriptorLoader(object):
 			The exception message must contain the path of the descriptorfile.
 		"""
 		assert len(kwargs)==0 or list(kwargs.keys())==['fileContents'], 'reserved for future use: %s'%kwargs.keys()
-		return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)
+		try:
+			return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project, **kwargs)
+		except UserError:
+			raise # no stack trace needed, will already include descriptorfile name
+		except Exception as e:
+			log.info('Failed to read descriptor %s: ', descriptorfile, exc_info=True)
+			raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e)) from e
+

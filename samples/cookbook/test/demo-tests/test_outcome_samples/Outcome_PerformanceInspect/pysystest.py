@@ -9,11 +9,11 @@ __pysys_purpose__ = r""" Demonstrates how the INSPECT outcome prevents output fi
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_groups__           = "performance, disableCoverage; inherit=true"
-__pysys_modes__            = r""" lambda helper: helper.inheritedModes+[
-	# For now we run this test in just one mode, but could add additional modes if desired.
-	{'mode':'CompressionGZip'}
-	] """
+__pysys_groups__           = "performance, disableCoverage"
+__pysys_modes__            = lambda helper: helper.inheritedModes+[
+		# For now we run this test in just one mode, but could add additional modes if desired.
+		{'mode':'CompressionGZip'}
+	]
 
 import pysys
 from pysys.constants import *

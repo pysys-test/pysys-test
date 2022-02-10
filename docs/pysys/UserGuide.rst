@@ -367,17 +367,15 @@ can also be run against a mocked database for quick local development.
 Another common use case is executing the same PySysTest class in different 
 modes to test different scenarios. 
 
-To define some modes, first edit the ``pysystest.*`` file for your test, and provide a string 
-containing a Python lambda that will be evaluated when the test descriptors are loaded to 
+To define some modes, first edit the ``pysystest.*`` file for your test, and provide a 
+Python lambda that will be evaluated when the test descriptors are loaded to 
 return a list of named modes that the test can run in:
 
 .. code-block:: python
 	
-	__pysys_modes__ = r""" 
-		lambda helper: helper.inheritedModes+[
+	__pysys_modes__ = lambda helper: helper.inheritedModes+[
 			{'mode':'CompressionGZip', 'compressionType':'gzip'},
 		]
-	"""
 
 The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper` which provides 
 access to the list of inherited modes (and more). 
@@ -385,7 +383,7 @@ access to the list of inherited modes (and more).
 When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
 may be used. Typically dot is useful for version numbers and underscore ``_`` is 
 useful for separating out different dimensions (e.g. compression vs authentication type 
-in the example described later in this section); separating dimensions cleanly will make it 
+in the example described later in this section). Separating dimensions cleanly in this way will make it 
 much easier to include/exclude the test modes you want. PySys will give an error if you use different 
 capitalization for the same mode in different places, as this can result in test bugs. 
 
@@ -416,9 +414,7 @@ Here is an example of multi-dimensional modes (taken from the getting-started sa
 
 .. code-block:: python
 	
-	__pysys_modes__ = r""" 
-
-	lambda helper: [
+	__pysys_modes__ = lambda helper: [
 			mode for mode in 
 				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
@@ -448,7 +444,6 @@ Here is an example of multi-dimensional modes (taken from the getting-started sa
 			# This is Python list comprehension syntax for filtering the items in the list
 			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
 		]
-	"""
 
 This will create the following modes::
 

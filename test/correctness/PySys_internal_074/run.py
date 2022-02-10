@@ -24,7 +24,8 @@ class PySysTest(BaseTest):
 		self.pysys.pysys('run-MyNewTest', ['run','MyNewTest', '-o', 'output-MyNewTest'])
 
 		self.copy('MyNewTestUncommented/pysystest.py', 'MyNewTestUncommented/pysystest.py', mappers=[
-			pysys.mappers.RegexReplace('^#', '') # uncomment the commented bits to make sure they work
+			pysys.mappers.RegexReplace('^#', ''), # uncomment the commented bits to make sure they work
+			pysys.mappers.RegexReplace(r'\s*======*', '# (underline waz here)'),   # need to nuke the separator too
 		])
 
 		self.pysys.pysys('print', ['print', '--full'])
