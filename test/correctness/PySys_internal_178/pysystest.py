@@ -11,7 +11,6 @@ __pysys_created__ = "2022-02-04"
 #__pysys_traceability_ids__ = "Bug-1234, UserStory-456" 
 #__pysys_groups__           = "myGroup, disableCoverage, performance; inherit=true"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
-#__pysys_modes__            = """ lambda helper: helper.combineModeDimensions(helper.inheritedModes, helper.makeAllPrimary({'MyMode':{'MyParam':123}})) """
 
 import pysys
 from pysys.constants import *

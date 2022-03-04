@@ -407,7 +407,7 @@ The `pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary` helper functi
 Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
 type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
 Rather than writing out every combination manually, you can use the function 
-`pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` to automatically generate the combinations, 
+`pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` to automatically generate the combinations, 
 passing it each dimension (e.g. each compression type) as a separate list. 
 
 Here is an example of multi-dimensional modes (taken from the getting-started sample):
@@ -416,7 +416,7 @@ Here is an example of multi-dimensional modes (taken from the getting-started sa
 	
 	__pysys_modes__ = lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
@@ -571,7 +571,7 @@ be a maintenance nightmare). It is also a bad idea to add a giant "for" loop int
 one invocation, since then it's very difficult to surgically re-run problematic parts of your parameter matrix when 
 tracking down test bugs or optimizing your application. Instead use the built-in "modes" concept of PySys which is 
 perfect for the job. It can even generate a combinatoric product of various different parameter dimensions for you 
-with `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` as described above. 
+with `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` as described above. 
 
 Performance tests - running them
 --------------------------------

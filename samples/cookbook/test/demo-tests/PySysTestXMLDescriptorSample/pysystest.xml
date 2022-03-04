@@ -59,12 +59,12 @@
 	
 	It's often useful to combine multiple mode 'dimensions', for example all the combinations of a list of web browsers 
 	with a list of databases, or compression methods and authentication types. Rather than writing out every combination 
-	manually, you can use the function ``helper.combineModeDimensions`` to automatically generate all combinations. 
+	manually, you can use the function ``helper.createModeCombinations`` to automatically generate all combinations. 
 
 	Modes can be used to define similar subtests that share the same test class logic, for example testing your 
 	application's output when given various different input test vectors. For this common use case, if you already (or 
 	plan to) define multiple execution modes inherited in a parent directory, you usually want to 
-	use ``helper.combineModeDimensions(helper.inheritedModes, [...])`` in your test so that each of the subtests you 
+	use ``helper.createModeCombinations(helper.inheritedModes, [...])`` in your test so that each of the subtests you 
 	define in that second argument are executed in each of the inherited modes (if any). 
 
 	A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
@@ -73,7 +73,7 @@
 	<modes>
 		lambda helper: [
 				mode for mode in 
-					helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+					helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 						helper.inheritedModes,
 						{
 								'CompressionNone': {'compressionType':None, 'isPrimary':True}, 

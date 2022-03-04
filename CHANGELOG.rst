@@ -60,6 +60,8 @@ New features related to reporting of performance testing:
   make recording of performance results pointless (e.g. enablement of profiling). 
 - If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
   parameters from the test's mode will be recorded as the ``resultDetails``. 
+- Renamed ``combineModeDimensions`` to `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` for 
+  improved usability. 
 
 Fixes:
 
@@ -291,8 +293,9 @@ The mode name can be automatically generated from the parameters, or provided ex
 For those still using ``pysystest.xml`` files, the same Python lambda can also be added in your ``<modes>...</modes>`` 
 element. 
 
-There is also a helper function provided (in `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions`) 
-to combine multiple mode "dimensions" together, for example every combination of your supported databases and your 
+There is also a helper function provided in `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` 
+(previously known as ``combineModeDimensions``) to combine multiple mode "dimensions" together, for example every 
+combination of your supported databases and your 
 supported web browsers. This allows for some quite sophisticated logic to generate the mode list such as:
 
 .. code-block:: python
@@ -300,7 +303,7 @@ supported web browsers. This allows for some quite sophisticated logic to genera
 	__pysys_modes__ = r""" 
 		lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 

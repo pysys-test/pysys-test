@@ -16,8 +16,8 @@ Test title:        Category TODO - Test title (short, specific and sortable!) go
 Test created:      <date waz here>; authors: pysystestuser
 Test groups:       myGroup, disableCoverage, performance
 Test modes:        
- --> MyParameterizedSubtestModeA {MyParam=123} [PRIMARY]
- --> MyParameterizedSubtestModeB {MyParam=456} [PRIMARY]
+ --> MyParameterizedSubtestModeA {MyModeParam=123} [PRIMARY]
+ --> MyParameterizedSubtestModeB {MyModeParam=456} [PRIMARY]
 Test order hint:   0.0, 0.0
 Test classname:    PySysTest; module: pysystest.py
 Test traceability: Bug-1234, UserStory-456

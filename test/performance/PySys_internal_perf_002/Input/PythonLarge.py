@@ -17,7 +17,7 @@ __pysys_traceability_ids__ = "Bug-1234, UserStory-456, UserRequirement_1a, UserR
 
 __pysys_modes__            = """lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 

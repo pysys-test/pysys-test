@@ -11,7 +11,7 @@ __pysys_created__ = "2021-12-27"
 __pysys_groups__           = "testLoading, performance, disableCoverage; inherit=true"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 __pysys_modes__            = """ 
-	lambda helper: helper.combineModeDimensions(helper.inheritedModes, 
+	lambda helper: helper.createModeCombinations(helper.inheritedModes, 
 			[{'descriptorFile':v} for v in ['PythonLarge', 'PythonSmall', 'XmlLarge', 'XmlSmall']],
 			#[{'chunksize':v} for v in [1, 2, 6, 8, 12, 16, 32, 64]],
 			#[{'processWorkers':v} for v in [2, 4, 8, 16, 32, 48, 60]],

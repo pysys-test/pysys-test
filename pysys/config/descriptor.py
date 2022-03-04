@@ -358,7 +358,7 @@ class TestModesConfigHelper:
 		You would typically combine test-specific behaviour modes with any inherited execution environment modes like 
 		this::
 		
-			lambda modes: modes.combineModeDimensions(
+			lambda modes: modes.createModeCombinations(
 				helper.inheritedModes,
 				helper.makeAllPrimary(
 					{
@@ -379,24 +379,35 @@ class TestModesConfigHelper:
 
 	def combineModeDimensions(self, *dimensions):
 		"""
-		Generates a single flat mode list containing all combinations that can be generated the specified mode lists. 
+		Old name for the `createModeCombinations` method. 
+		"""
+		return self.createModeCombinations(*dimensions)
+
+	def createModeCombinations(self, *dimensions):
+		"""
+		Generates a mode list containing all the combinations from each mode list passed into the function. 
 		
-		For example::
+		For example, you could combine a list of inherited modes (defined in parent directories' ``pysysdirconfig.xml`` 
+		files), with a second dimension containing modes for each database you want to test with and a third dimension with 
+		modes for each web browser. The result would be a single (flat) list containing modes, with names and parameter 
+		dictionaries automatically merged together from each input dimension::
+				
+			lambda helper: helper.createModeCombinations(
+				helper.inheritedModes,
+				{
+					'MySQL':  {'db': 'MySQL',  'dbTimeoutSecs':60}, 
+					'SQLite': {'db': 'SQLite', 'dbTimeoutSecs':120},
+					'Mock':   {'db': 'Mock',   'dbTimeoutSecs':30},
+				},
+				
+				# can use dict or list format for each mode list, whichever is more convenient: 
+				[ 
+					{'browser':'Chrome'}, # if mode is not explicitly specified it is auto-generated from the parameter(s)
+					{'browser':'Firefox'},
+				]
+				)
 		
-			lambda helper: helper.combineModeDimensions(
-			helper.inheritedModes,
-			{
-				'MySQL':  {'db': 'MySQL',  'dbTimeoutSecs':60}, 
-				'SQLite': {'db': 'SQLite', 'dbTimeoutSecs':120},
-				'Mock':   {'db': 'Mock',   'dbTimeoutSecs':30},
-			},
-			# can use dict or list format for each mode list, whichever is more convenient: 
-			[ 
-				{'browser':'Chrome'}, # if mode is not explicitly specified it is auto-generated from the parameter(s)
-				{'browser':'Firefox'},
-			])
-		
-		would generate modes named::
+		would generate a list of modes named::
 		
 			MySQL_Chrome
 			MySQL_Firefox
@@ -408,7 +419,7 @@ class TestModesConfigHelper:
 		NB: By default the first mode in each dimension is designated a *primary* mode (one that executes by default 
 		when no ``--modes`` or ``--ci`` argument is specified), but this can be overridden by setting ``'isPrimary': True/False`` 
 		in the dict for any mode. When mode dimensions are combined, the primary modes are AND-ed together, 
-		i.e. any where *all* mode dimensions were designated primary. 
+		i.e. any where *all* mode dimensions will be designated primary. 
 		So in the above case, since MySQL and Chrome are automatically set as 
 		primary modes, the MySQL_Chrome mode would be the (only) primary mode returned from this function.
 		When using modes for different execution environments/browsers etc you probably want only 
@@ -420,7 +431,7 @@ class TestModesConfigHelper:
 		A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
 		this test::
 		
-			lambda helper: helper.combineModeDimensions(
+			lambda helper: helper.createModeCombinations(
 				helper.inheritedModes,
 				
 				helper.makeAllPrimary(
@@ -437,16 +448,20 @@ class TestModesConfigHelper:
 		This is a good way to use modes for the concept of parameterized subtests, since even if you don't initially have 
 		any inherited modes, if in future you add some then everything will automatically work correctly. 
 
-		NB: For efficiency reasons, don't use the ``combineModeDimensions`` method in your configuration if you are 
+		NB: For efficiency reasons, don't use the ``createModeCombinations`` method in your configuration if you are 
 		*just* using the inherited modes unchanged. 
 		
 		:param list[dict[str,obj]]|dict[str,dict[str,obj]] dimensions: Each argument passed to this function is a list of 
 			modes, each mode defined by a dict which may contain a ``mode`` key plus any number of parameters. 
 			Alternatively, each dimension can be a dict where the mode is the key and the value is a parameters dict. 
+			
 		:return: A list[dict[str,obj]] containing the flattened list of modes consisting of all combinations of the 
-			passed in. For example: ``[{"mode":"MyMode", "param1":100}, {"mode": "myMode2", "param1":200}]``. 
-			This list can be further manipulated using Python list comprehensions (e.g. to exclude certain 
+			passed in. Mode names and parameter dictionaries will be merged. 
+			For example: ``[{"mode":"MyMode", "param1":100}, {"mode": "myMode2", "param1":200}]``. 
+			The returned list can be further manipulated using Python list comprehensions (e.g. to exclude certain 
 			combinations) if desired. 
+			
+		.. versionadded:: 2.1
 		"""
 		if len(dimensions) == 1: return dimensions[0]
 		

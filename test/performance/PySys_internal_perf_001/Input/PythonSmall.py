@@ -10,7 +10,7 @@ __pysys_created__ = "2021-12-27"
 
 #__pysys_groups__           = "group1, group2"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
-#__pysys_modes__            = """ lambda helper: helper.combineModeDimensions(helper.inheritedModes, helper.makeAllPrimary({'MyMode':{'MyParam':123}})) """
+#__pysys_modes__            = """ lambda helper: helper.createModeCombinations(helper.inheritedModes, helper.makeAllPrimary({'MyMode':{'MyParam':123}})) """
 
 import os, sys, math, shutil, glob
 

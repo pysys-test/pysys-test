@@ -12,11 +12,11 @@ __pysys_created__ = "1999-12-31"
 __pysys_groups__  = "myServerStartup"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 
-__pysys_modes__   = lambda helper: helper.combineModeDimensions(
+__pysys_modes__   = lambda helper: helper.createModeCombinations(
 			# If any inherited modes were defined at the project/parent dir level to cover different 
 			# execution environments (e.g. real db, mock db, different web browsers etc) 
 			# we would want to combine each of them with each of the different behavioural scenarios
-			# covered by this test, which we can do using combineModeDimensions:
+			# covered by this test, which we can do using createModeCombinations:
 			
 			helper.inheritedModes,
 			
