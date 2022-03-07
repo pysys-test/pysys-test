@@ -322,6 +322,8 @@ class TestModesConfigHelper:
 	the list of inherited modes, to project properties and also helper functions for combining multiple mode lists into 
 	one and for configuring a collection of modes as primary modes. 
 	
+	See :doc:`/pysys/UserGuide` for detailed information about what you can do with PySys modes. 
+	
 	:ivar list[dict[str,obj]] ~.inheritedModes: A list of the inherited modes, each defined by a dictionary containing a ``mode`` 
 		key and any number of additional parameters. 
 	:ivar ~.constants: A reference to `pysys.constants` which can be used to access constants such as ``IS_WINDOWS`` for 
@@ -931,7 +933,8 @@ class _XMLDescriptorParser(object):
 		return modeString, mode
 
 
-	def _addParameterizedTestModes(self, base: list[TestMode]):
+	def _addParameterizedTestModes(self, base):
+		# base: list(TestMode)
 		parameterized = self.kvDict.pop('parameterized_test_modes', None)
 		if not parameterized: return base
 		

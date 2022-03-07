@@ -30,6 +30,9 @@ New features related to ``pysystest.py`` descriptors:
   a ``from XXX import YYY`` statement. 
 - Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
   most cases users would prefer not to worry about it. 
+- Added ``__pysys_parameterized_test_modes__`` field to the ``pysystest.py`` descriptor which makes it easier to 
+  configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing 
+  scenarios. See :doc:`/pysys/UserGuide` for detailed information about modes. 
 
 New features related to reporting of performance testing:
 
