@@ -8,9 +8,10 @@ __pysys_created__ = "@@DATE@@"
 
 #__pysys_traceability_ids__ = "Bug-1234, UserStory-456" 
 #__pysys_groups__           = "myGroup, disableCoverage, performance"
-#__pysys_modes__            = lambda helper: helper.inheritedModes + [ {'mode':'MyMode', 'MyModeParam':123}, ]
+#__pysys_modes__            = lambda helper: helper.inheritedModes + [ {'mode':'MyMode', 'myModeParam':123}, ]
 #__pysys_modes__            = lambda helper: helper.createModeCombinations(helper.inheritedModes, helper.makeAllPrimary(
-#		{'MyParameterizedSubtestModeA':{'MyModeParam':123}, 'MyParameterizedSubtestModeB':{'MyModeParam':456}, }))
+#		{'MyParameterizedSubtestModeA':{'myModeParam':123}, 'MyParameterizedSubtestModeB':{'myModeParam':456}, }))
+#__pysys_parameterized_test_modes__ = {'MyParameterizedSubtestModeA':{'myModeParam':123}, 'MyParameterizedSubtestModeB':{'myModeParam':456}, }
 
 import pysys
 from pysys.constants import *
