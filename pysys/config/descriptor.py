@@ -377,12 +377,6 @@ class TestModesConfigHelper:
 		for m in modes: m['isPrimary'] = True
 		return modes
 
-	def combineModeDimensions(self, *dimensions):
-		"""
-		Old name for the `createModeCombinations` method. 
-		"""
-		return self.createModeCombinations(*dimensions)
-
 	def createModeCombinations(self, *dimensions):
 		"""
 		Generates a mode list containing all the combinations from each mode list passed into the function. 
@@ -444,9 +438,14 @@ class TestModesConfigHelper:
 							'expectedExitStatus':'!=0', 'expectedMessage':'Server failed: Cannot specify port twice'}, 
 					}), 
 			)
-
-		This is a good way to use modes for the concept of parameterized subtests, since even if you don't initially have 
-		any inherited modes, if in future you add some then everything will automatically work correctly. 
+		
+		For simplicity this common case can be expressed with the more concise syntax::
+		
+			__pysys_parameterized_test_modes__ = {
+					'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+					'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+					'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+				}
 
 		NB: For efficiency reasons, don't use the ``createModeCombinations`` method in your configuration if you are 
 		*just* using the inherited modes unchanged. 
@@ -474,7 +473,6 @@ class TestModesConfigHelper:
 				dimension = [{**{'mode':k}, **v} for k, v in dimension.items()]
 
 			for mode in dimension:
-				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
 				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode, project=self.project)
 				current[modeString] = mode
 			# end for mode
@@ -499,7 +497,12 @@ class TestModesConfigHelper:
 							current[modeA.strip('_')+'_'+modeB.strip('_')] = params
 		return [{**{'mode':modeString}, **params} for modeString, params in current.items()]
 
-	
+	def combineModeDimensions(self, *dimensions):
+		"""
+		Old name for the `createModeCombinations` method. 
+		"""
+		return self.createModeCombinations(*dimensions)
+
 
 class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
 	"""Represents a mode that a test can run in in a `TestDescriptor`, and optionally a dict of parameters that define 
@@ -555,7 +558,6 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	
 	def __repr__(self):
 		return self.name+str(self.__params)+('[PRIMARY]' if self.__isPrimary else '')
-			
 	
 class _XMLDescriptorParser(object):
 	'''NOT PUBLIC API - use L{DescriptorLoader._parseTestDescriptor} instead. 
@@ -898,20 +900,28 @@ class _XMLDescriptorParser(object):
 		"""
 		Returns (modename, params). Auto-generates a mode name if one is not already provided. 
 		
-		The mode dict is mutated by this method. 
+		WARNING: The mode dict is mutated by this method. 
 		"""
-		assert isinstance(mode, dict), 'Expecting mode dict but got %r'%mode
-		modeString = mode.pop('mode', None)
-		if modeString: return modeString, mode
+		
+		if isinstance(mode, TestMode): # just for the parameterized test modes use case
+			modeString = mode.name
+			params = dict(mode.params)
+			params['isPrimary'] = mode.isPrimary
+			mode = params
+		else:
+			assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
 
-		# Auto-generate mode string
-		
-		assert len(mode) != 0, 'Must provide a name and/or params for every mode dictionary'
-		modeString = '_'.join(
-			'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
-			for (k,v) in mode.items() if k != 'isPrimary')
-		
-		modeString = modeString.strip('_') # avoid leading/trailing _'s
+			modeString = mode.pop('mode', None)
+			if modeString: return modeString, mode
+
+			# Auto-generate mode string
+			
+			assert len(mode) != 0, 'Must provide a name and/or params for every mode dictionary'
+			modeString = '_'.join(
+				'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
+				for (k,v) in mode.items() if k != 'isPrimary')
+			
+			modeString = modeString.strip('_') # avoid leading/trailing _'s
 
 		# Enforce consistent naming convention of initial caps
 		if project.getProperty('enforceModeCapitalization', True):
@@ -919,7 +929,23 @@ class _XMLDescriptorParser(object):
 
 		assert modeString, 'Mode name cannot be empty'
 		return modeString, mode
+
+
+	def _addParameterizedTestModes(self, base: list[TestMode]):
+		parameterized = self.kvDict.pop('parameterized_test_modes', None)
+		if not parameterized: return base
 		
+		assert isinstance(parameterized, list) or isinstance(parameterized, dict), 'Parameterized test modes must be a list or dict of modes, but got: %r'%parameterized
+		helper = TestModesConfigHelper(
+				inheritedModes=[], 
+				project=self.project, 
+				testDir=os.path.dirname(self.file) if self.istest else None
+				)
+		return [TestMode(m.pop('mode'), isPrimary=m.pop('isPrimary', False), params=m) for m in 
+			helper.createModeCombinations(
+				base, 
+				helper.makeAllPrimary(parameterized))]
+					
 	def getModes(self):
 		text = self.kvDict.pop('modes', None)
 		modesNode = None
@@ -928,7 +954,7 @@ class _XMLDescriptorParser(object):
 			if modesNode:
 				text = self.getText(modesNode)
 			else: # if we have neither kvText text nor mode
-				return self.defaults.modes # by default we inherit
+				return self._addParameterizedTestModes(self.defaults.modes) # by default we inherit
 
 		if not text: 
 			# pre-2.0 XML approach
@@ -948,17 +974,17 @@ class _XMLDescriptorParser(object):
 			if result and not any(m.isPrimary for m in result): 
 				result[0] = TestMode(result[0], params=result[0].params, isPrimary=True)
 
-			return result
+			return self._addParameterizedTestModes(result)
 			
 		# The modern PySys 2.0+ approach with a Python eval string
 		try:
 			modesLambda = text
-			if isinstance(modesLambda, str): # eventually kvDict may be able to contain non-string values direct from Python
+			if isinstance(modesLambda, str): # kvDict may contain non-string values direct from Python
 				# use an empty namespace since if we were parsing this as real python, all import statements would be appearing later
 				modesLambda = pysys.utils.safeeval.safeEval(text.strip(), extraNamespace={}, emptyNamespace=True)
 			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
 			helper = TestModesConfigHelper(
-				# note that inheritedModes param dicts may be mutated (so good think we'd creating a new dict here for the default modes)
+				# note that inheritedModes param dicts may be mutated (so good thing we'd creating a new dict here for the default modes)
 				inheritedModes=[{**mode.params, **{'mode':mode, 'isPrimary':mode.isPrimary}} for mode in self.defaults.modes], 
 				project=self.project, 
 				testDir=os.path.dirname(self.file) if self.istest else None
@@ -968,8 +994,12 @@ class _XMLDescriptorParser(object):
 			if isinstance(modes, dict):
 				modes = [{**{'mode':k}, **v} for k, v in modes.items()]
 			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
-			assert not modesNode or not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
+			assert not modesNode or not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python lambda to define modes'
 			
+
+			# Add parameterized modes before validation
+			modes = self._addParameterizedTestModes(modes)
+
 			result = []
 			already = set()
 			expectedparams = None
@@ -978,7 +1008,6 @@ class _XMLDescriptorParser(object):
 				isPrimary = params.pop('isPrimary', False)
 				assert isPrimary in [True, False], 'isPrimary must be set to True or False, not %r'%isPrimary
 
-			
 				# Eliminate dodgy characters
 				badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
 				if badchars: 
@@ -1000,12 +1029,13 @@ class _XMLDescriptorParser(object):
 				for p in params:
 					assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
 
-
 				# check that params are the same in each one to avoid mistakes
 				if expectedparams is None: expectedparams = sorted(params.keys())
 				assert sorted(params.keys()) == expectedparams, f'The same mode parameter keys must be given for every mode in the list, but found {sorted(params.keys())} parameters for "{modeString}" different to {expectedparams}'
 
 				result.append(TestMode(modeString, isPrimary=isPrimary, params=params))
+
+			result = self._addParameterizedTestModes(result)
 
 			# ensure there's at least one primary mode
 			if result and not any(m.isPrimary for m in result): 
@@ -1014,8 +1044,7 @@ class _XMLDescriptorParser(object):
 			return result
 
 		except Exception as ex:
-			if not isinstance(ex, AssertionError):
-				traceback.print_exc()
+			log.debug('Invalid modes config: ', exc_info=True)
 			raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
 
 				
