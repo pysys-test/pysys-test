@@ -63,7 +63,10 @@ New features related to reporting of performance testing:
 
 Misc new features:
 
-- Added support for Python 3.10. 
+- Added support for Python 3.10. Note that on Windows the following deprecation warning may be seen until PyWin32 
+  releases version 304::
+  
+    DeprecationWarning: getargs: The 'u' format is deprecated. Use 'U' instead.
 
 Fixes:
 
