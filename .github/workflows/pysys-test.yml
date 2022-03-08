@@ -92,7 +92,7 @@ jobs:
         shell: bash
         run: |
           python --version
-          python -m pip install --upgrade setuptools==59.6.0 wheel
+          python -m pip install --upgrade setuptools wheel
           
           # Set this env var ready for later steps
           echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
