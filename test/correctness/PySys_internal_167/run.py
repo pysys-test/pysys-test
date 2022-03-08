@@ -34,5 +34,5 @@ class PySysTest(BaseTest):
 		self.assertThatGrep('nonlist.err', '.+', 'expected in value', 
 			expected=": Expecting a list of modes, got a str: 'abcdef'")
 
-		self.assertThatGrep('syntaxerror.err', 'ERROR.+', 'expected in value', 
-			expected='SyntaxError - invalid syntax (<string>, line 3)')
+		self.assertThatGrep('syntaxerror.err', 'ERROR.+', 'expected in value and "line 3" in value', 
+			expected='SyntaxError - ')

@@ -36,7 +36,9 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	environs.setdefault("PYSYS_USERNAME", "pysystestuser")
 
 	# Error on warnings, to keep everything clean
-	environs.setdefault("PYTHONWARNINGS", "error")
+	environs.setdefault("PYTHONWARNINGS", 
+		# temporarily ignore 3.10 deprecation warnings until PyWin32 releases v304
+		"ignore" if IS_WINDOWS and sys.version_info[0:2]==(3,10) else "error")
 	environs.setdefault("PYTHONDONTWRITEBYTECODE", "true")
 
 	if defaultproject:

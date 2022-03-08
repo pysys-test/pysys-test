@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 
 		sampledir = self.project.testRootDir+'/../samples'
 		
-		pythonVersionForCI = "3.9"
+		pythonVersionForCI = "3.10"
 		pythonVersionForMin = "3.6"
 		
 		pysysVersion = pysys.__version__
@@ -44,7 +44,7 @@ class PySysTest(BaseTest):
 				
 				if f == 'pysys-test.yml': # GitHub Actions workflow
 					self.assertThatGrep(p, ' pip install pysys==(.*)', 'value == pysysVersion', pysysVersion=pysysVersion)
-					self.assertThatGrep(p, ' python-version: (.*)', 'value == pythonVersionForCI', pythonVersionForCI=pythonVersionForCI)
+					self.assertThatGrep(p, ' python-version: "?([^"]+)"?', 'value == pythonVersionForCI', pythonVersionForCI=pythonVersionForCI)
 
 				if f == 'run.py':
 					self.assertGrep(p, 'import pysys') # new-style test not an old one we copied from somewhere

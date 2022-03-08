@@ -316,7 +316,8 @@ class PrintSummaryPerformanceReporter(BasePerformanceReporter):
 			baselineBaseDir=self.project.testRootDir,
 			paths=os.getenv(self.BASELINES_ENV_VAR,'').split(','), 
 			)
-		log.info('Successfully loaded performance comparison data from %d files: %s', len(self.baselines), ', '.join(b.name for b in self.baselines))
+		if self.baselines:
+			log.info('Successfully loaded performance comparison data from %d files: %s', len(self.baselines), ', '.join(b.name for b in self.baselines))
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		with self._lock:

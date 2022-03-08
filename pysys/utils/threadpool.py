@@ -76,7 +76,7 @@ class WorkerThread(threading.Thread):
 		
 		"""
 		threading.Thread.__init__(self, **kwds)
-		log.debug("[%s] Creating thread for test execution" % self.getName())
+		log.debug("[%s] Creating thread for test execution" % self.name)
 		self.daemon = True
 		self._requests_queue = requests_queue
 		self._results_queue = results_queue
@@ -87,22 +87,22 @@ class WorkerThread(threading.Thread):
 	def run(self):
 		"""Start running the worker thread."""
 		while True:
-			if self._dismissed.isSet():
+			if self._dismissed.is_set():
 				break
 			try:
 				request = self._requests_queue.get(True, self._poll_timeout)
 			except Queue.Empty:
 				continue
 			else:
-				if self._dismissed.isSet():
+				if self._dismissed.is_set():
 					self._requests_queue.put(request)
 					break
 				try:
 					result = request.callable(*request.args, **request.kwds)
-					self._results_queue.put((request, self.getName(), result))
+					self._results_queue.put((request, self.name, result))
 				except:
 					request.exception = True
-					self._results_queue.put((request, self.getName(), sys.exc_info()))
+					self._results_queue.put((request, self.name, sys.exc_info()))
 			time.sleep(0.1)
 					
 	def dismiss(self):

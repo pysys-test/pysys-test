@@ -4,7 +4,7 @@ usage: my_server.py [-h] [--port PORT] [--loglevel LOGLEVEL]
 MyServer - a trivial HTTP server used to illustrate how to test a server with
 PySys.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --port PORT           The port to listen on
   --loglevel LOGLEVEL   The log level e.g. INFO/DEBUG

@@ -61,6 +61,13 @@ New features related to reporting of performance testing:
 - If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
   parameters from the test's mode will be recorded as the ``resultDetails``. 
 
+Misc new features:
+
+- Added support for Python 3.10. Note that on Windows the following deprecation warning may be seen until PyWin32 
+  releases version 304::
+  
+    DeprecationWarning: getargs: The 'u' format is deprecated. Use 'U' instead.
+
 Fixes:
 
 - Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 

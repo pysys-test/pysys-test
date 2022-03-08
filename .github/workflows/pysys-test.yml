@@ -31,40 +31,40 @@ jobs:
       matrix:
         # A selection range of OS, Python and Java versions
         include:
-          - test-run-id: lnx-py3.8-doc-deploy
+          - test-run-id: lnx-py3.10-doc-deploy
             os: ubuntu-latest
-            python-version: 3.8
+            python-version: "3.10"
             doc-and-deploy: true
           
           - test-run-id: mac-py3.7
             os: macos-latest
-            python-version: 3.7
+            python-version: "3.7"
 
           - test-run-id: win-py3.6
             os: windows-latest
-            python-version: 3.6
+            python-version: "3.6"
+
+          - test-run-id: win-py3.10
+            os: windows-latest
+            python-version: "3.10"
 
           # --- Additional testing combinations
 
           #- test-run-id: mac-py3.7
           #  os: macos-latest
-          #  python-version: 3.7
+          #  python-version: "3.7"
 
           #- test-run-id: lnx-py3.6
           #  os: ubuntu-latest
           #  python-version: 3.6
 
-          #- test-run-id: lnx-py3.7
+          #- test-run-id: lnx-py3.9
           #  os: ubuntu-latest
-          #  python-version: 3.7
+          #  python-version: "3.9"
           
-          - test-run-id: lnx-py3.9
-            os: ubuntu-latest
-            python-version: 3.9
-
-          - test-run-id: win-py3.9
-            os: windows-latest
-            python-version: 3.9
+          #- test-run-id: lnx-py3.9
+          #  os: ubuntu-latest
+          #  python-version: "3.9"
 
     runs-on: ${{matrix.os}}
     
@@ -147,6 +147,11 @@ jobs:
         id: pysys
         run: |
           export PYTHONWARNINGS=error
+          if [[ ${{ matrix.test-run-id }} = win-py3.10 ]]; then
+            # see also same logic in pysys-extensions/pysysinternalhelpers.py
+            echo TEMPORARILY disabling PYTHONWARNINGS on Windows until PyWin32 v304 is released
+            export PYTHONWARNINGS=ignore
+          fi
           
           # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
           # from working
@@ -227,8 +232,7 @@ jobs:
 
       - name: Upload HTML to gh-pages
         if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
-        # v4.1.1
-        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
+        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9 # v4.1.1
         with:
           branch: gh-pages
           folder: docs/build_output/html/
@@ -236,8 +240,7 @@ jobs:
       - name: Upload to GitHub Release
         if: success() && matrix.doc-and-deploy && github.event_name == 'release'
         id: upload-release-asset 
-        # v2.2.1
-        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2 # v2.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}

@@ -22,9 +22,16 @@ os.chdir(os.path.dirname(__file__))
 try:
 
 	parser = argparse.ArgumentParser(description='MyServer - a trivial HTTP server used to illustrate how to test a server with PySys.')
-	parser.add_argument('--port', dest='port', type=int, help='The port to listen on')
-	parser.add_argument('--loglevel', dest='loglevel', help='The log level e.g. INFO/DEBUG', default='INFO')
-	parser.add_argument('--configfile', dest='configfile', help='The JSON configuration file for this server')
+	
+	orig_format_help = parser.format_help
+	parser.format_help = lambda: orig_format_help().replace('optional arguments:', 'options:') # Produce same usage on pre-Python 3.10 versions
+	
+	group = parser#parser.add_argument_group('optional arguments:')
+	#group.add_argument('--help', '-h', dest='port', type=int, help='The port to listen on')
+	group.add_argument('--port', dest='port', type=int, help='The port to listen on')
+	group.add_argument('--loglevel', dest='loglevel', help='The log level e.g. INFO/DEBUG', default='INFO')
+	group.add_argument('--configfile', dest='configfile', help='The JSON configuration file for this server')
+	
 	args = parser.parse_args()
 
 	if args.configfile:
