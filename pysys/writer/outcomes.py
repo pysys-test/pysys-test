@@ -328,6 +328,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def processResult(self, testObj, **kwargs):
 		# Creates a test summary file in the Apache Ant JUnit XML format. 
 		
+		outcome = testObj.getOutcome()
+		
 		if "cycle" in kwargs: 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
@@ -340,9 +342,9 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		attr2 = document.createAttribute('tests')
 		attr2.value='1'
 		attr3 = document.createAttribute('failures')
-		attr3.value = '%d'%(int)(testObj.getOutcome().isFailure())	
+		attr3.value = '%d'%int(outcome.isFailure())	
 		attr4 = document.createAttribute('skipped')	
-		attr4.value = '%d'%(int)(testObj.getOutcome() == SKIPPED)		
+		attr4.value = '%d'%int(outcome == SKIPPED)		
 		attr5 = document.createAttribute('time')	
 		attr5.value = '%s'%kwargs['testTime']
 		rootElement.setAttributeNode(attr1)
@@ -364,15 +366,16 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		testcase.setAttributeNode(attr2)
 		
 		# add in failure information if the test has failed
-		if (testObj.getOutcome().isFailure()):
-			failure = document.createElement('failure')
+		if (outcome.isFailure() or outcome == SKIPPED):
+			failure = document.createElement('skipped' if outcome==SKIPPED else 'failure')
 			attr = document.createAttribute('message')
-			attr.value = '%s%s'%(testObj.getOutcome(), (': %s'%testObj.getOutcomeReason()) if testObj.getOutcomeReason() else '')
+			attr.value = '%s%s'%(outcome, (': %s'%testObj.getOutcomeReason()) if testObj.getOutcomeReason() else '')
 			failure.setAttributeNode(attr)
 
-			attr = document.createAttribute('type') # would be an exception class in a JUnit test
-			attr.value = str(testObj.getOutcome())
-			failure.setAttributeNode(attr)
+			if outcome != SKIPPED:
+				attr = document.createAttribute('type') # would be an exception class in a JUnit test
+				attr.value = str(testObj.getOutcome())
+				failure.setAttributeNode(attr)
 
 			stdout = document.createElement('system-out')
 			runLogOutput = stripANSIEscapeCodes(kwargs.get('runLogOutput','')) # always unicode characters

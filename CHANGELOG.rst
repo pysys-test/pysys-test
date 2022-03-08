@@ -30,9 +30,6 @@ New features related to ``pysystest.py`` descriptors:
   a ``from XXX import YYY`` statement. 
 - Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
   most cases users would prefer not to worry about it. 
-- Added ``__pysys_parameterized_test_modes__`` field to the ``pysystest.py`` descriptor which makes it easier to 
-  configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing 
-  scenarios. See :doc:`/pysys/UserGuide` for detailed information about modes. 
 
 New features related to reporting of performance testing:
 
@@ -63,8 +60,6 @@ New features related to reporting of performance testing:
   make recording of performance results pointless (e.g. enablement of profiling). 
 - If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
   parameters from the test's mode will be recorded as the ``resultDetails``. 
-- Renamed ``combineModeDimensions`` to `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` for 
-  improved usability. 
 
 Misc new features:
 
@@ -75,6 +70,7 @@ Misc new features:
 
 Fixes:
 
+- Add missing ``<skipped message="..."/>`` element in JUnit XML reports when a test is skipped. 
 - Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
 - Fix a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
 - Fix display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
@@ -303,9 +299,8 @@ The mode name can be automatically generated from the parameters, or provided ex
 For those still using ``pysystest.xml`` files, the same Python lambda can also be added in your ``<modes>...</modes>`` 
 element. 
 
-There is also a helper function provided in `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` 
-(previously known as ``combineModeDimensions``) to combine multiple mode "dimensions" together, for example every 
-combination of your supported databases and your 
+There is also a helper function provided (in `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions`) 
+to combine multiple mode "dimensions" together, for example every combination of your supported databases and your 
 supported web browsers. This allows for some quite sophisticated logic to generate the mode list such as:
 
 .. code-block:: python
@@ -313,7 +308,7 @@ supported web browsers. This allows for some quite sophisticated logic to genera
 	__pysys_modes__ = r""" 
 		lambda helper: [
 			mode for mode in 
-				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 

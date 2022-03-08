@@ -87,6 +87,10 @@ class PySysTest(BaseTest):
 			expected='name=NestedTimedout, tests=1, failures=1, skipped=0')
 		self.assertThatGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', '<failure .*/>', 
 			expected='<failure message="TIMED OUT: Reason for timed out outcome is general tardiness - %s" type="TIMED OUT"/>'%TEST_STR, encoding='utf-8')
+
+		self.assertThatGrep('target/pysys-reports/TEST-NestedSkipped.1.xml', '<skipped .*/>', 
+			expected='<skipped message="SKIPPED: This is the reason this test is skipped"/>', encoding='utf-8')
+
 		# check stdout is included, and does not have any ANSI control characters in it
 		self.assertThat('junitStdoutOutcome == expected', expected='TIMED OUT', 
 			junitStdoutOutcome=self.getExprFromFile('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='Test final outcome: *(.*)', encoding='utf-8'))
