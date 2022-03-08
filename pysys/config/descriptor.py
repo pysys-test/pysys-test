@@ -1195,6 +1195,15 @@ class _XMLDescriptorParser(object):
 		if node is None: return default
 		return self.getText(node)
 
+IGNORED_PYSYSTEST_SUFFIXES = tuple( (os.getenv('PYSYS_IGNORED_PYSYSTEST_SUFFIXES', '')+',~,.tmp,.bak,.swp,.orig').strip(',').replace(' ','').split(',') )
+"""
+A tuple listing ``pysystest.*`` suffixes that will be ignored due to being temporary/backup/swap files for common 
+editors and IDEs. 
+
+The list can be extended by setting the ``PYSYS_IGNORED_PYSYSTEST_SUFFIXES`` environment variable to a comma-separated 
+list of additional extensions. 
+"""
+
 class DescriptorLoader(object):
 	"""
 	This class is responsible for locating and loading all available testcase 
@@ -1356,7 +1365,7 @@ class DescriptorLoader(object):
 					return
 				
 				if descriptorSet is None: 
-					intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
+					intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(IGNORED_PYSYSTEST_SUFFIXES)]
 				else: # compatibility mode
 					intersection = descriptorSet & set(files)
 					

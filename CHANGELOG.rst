@@ -71,6 +71,9 @@ Misc new features:
 Fixes:
 
 - Add missing ``<skipped message="..."/>`` element in JUnit XML reports when a test is skipped. 
+- Ignore common editor swap/temporary file extensions such as ``~`` and ``.swp`` when identifying ``pysystest.*`` 
+  files. The environment variable ``PYSYS_IGNORED_PYSYSTEST_SUFFIXES`` allows additional exclusions to be added if 
+  needed. 
 - Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
 - Fix a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
 - Fix display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
