@@ -54,17 +54,17 @@ jobs:
           #  os: ubuntu-latest
           #  python-version: 3.6
 
-          #- test-run-id: lnx-py3.7
-          #  os: ubuntu-latest
-          #  python-version: 3.7
-          
           - test-run-id: lnx-py3.9
             os: ubuntu-latest
             python-version: 3.9
+          
+          - test-run-id: lnx-py3.10
+            os: ubuntu-latest
+            python-version: 3.10
 
-          - test-run-id: win-py3.9
+          - test-run-id: win-py3.10
             os: windows-latest
-            python-version: 3.9
+            python-version: 3.10
 
     runs-on: ${{matrix.os}}
     
@@ -227,8 +227,7 @@ jobs:
 
       - name: Upload HTML to gh-pages
         if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
-        # v4.1.1
-        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
+        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9 # v4.1.1
         with:
           branch: gh-pages
           folder: docs/build_output/html/
@@ -236,8 +235,7 @@ jobs:
       - name: Upload to GitHub Release
         if: success() && matrix.doc-and-deploy && github.event_name == 'release'
         id: upload-release-asset 
-        # v2.2.1
-        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2 # v2.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
