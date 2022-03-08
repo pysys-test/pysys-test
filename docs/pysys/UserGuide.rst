@@ -498,6 +498,14 @@ You can find the mode that this test is running in using `self.mode <BaseTest>`,
 `pysys.config.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
 via a ``params`` field. 
 
+You can also use Python list comprehensions to generate sets of modes from a ``range`` like this::
+
+	__pysys_modes__   = lambda helper: helper.createModeCombinations(
+			helper.inheritedModes, 
+			[ {'mode':'CompressionGZip', 'compressionType':'gzip'}, ],
+			[ {'serverThreads': t} for t in range(1, 3) ],
+		)
+
 Here's an example showing how a test plugin might use modes configuration to configure the test object 
 during test setup::
 

@@ -6,7 +6,7 @@
 
 import urllib.request, sys, time, json, gzip
 
-url, plannedIterations, acceptencoding = sys.argv[1:]
+url, plannedIterations, acceptencoding, serverThreads = sys.argv[1:]
 plannedIterations = int(plannedIterations)
 
 startTime = time.time()
