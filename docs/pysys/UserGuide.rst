@@ -360,25 +360,16 @@ If you wish to produce coverage reports using any other language, this is easy t
 
 Running tests in multiple modes
 -------------------------------
-One of the powerful features of PySys is the ability to run the same test 
-in multiple modes from a single execution. This could be useful for cases such 
-as a set of tests that should be run against various different databases but 
-can also be run against a mocked database for quick local development. 
-Another common use case is executing the same PySysTest class in different 
-modes to test different scenarios. 
+One of the powerful features of PySys is the ability to run the same test in multiple modes from a single execution. 
+This can be useful for both parameterized tests, where the same Python logic is invoked with multiple different 
+parameters to test a range of scenarios, and for running tests against different databases, web browsers etc. 
 
-To define some modes, first edit the ``pysystest.*`` file for your test, and provide a 
-Python lambda that will be evaluated when the test descriptors are loaded to 
-return a list of named modes that the test can run in:
+In PySys, a mode consists of a mode name, and a dictionary of parameters with detailed information about how to 
+execute in that mode. The Python test can use ``self.mode.params`` to access the parameter dictionary, and ``self.mode`` 
+to get the mode name. 
 
-.. code-block:: python
-	
-	__pysys_modes__ = lambda helper: helper.inheritedModes+[
-			{'mode':'CompressionGZip', 'compressionType':'gzip'},
-		]
-
-The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper` which provides 
-access to the list of inherited modes (and more). 
+During test execution, output files are kept separate by having mode executed from a different output directory, 
+suffixed by ``~ModeName``. 
 
 When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
 may be used. Typically dot is useful for version numbers and underscore ``_`` is 
@@ -386,6 +377,57 @@ useful for separating out different dimensions (e.g. compression vs authenticati
 in the example described later in this section). Separating dimensions cleanly in this way will make it 
 much easier to include/exclude the test modes you want. PySys will give an error if you use different 
 capitalization for the same mode in different places, as this can result in test bugs. 
+
+Using modes for parameterized tests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Parameterized tests provide a convenient way to re-use the same Python logic to check multiple different testing 
+scenarios. This avoids the maintenance headache of copy+pasted testcases, and provides faster and more granular test 
+outcomes than combining all the different parameters into a single test with a big ``for`` loop. 
+
+To specify modes for a parameterized test, just edit the ``pysystest.*`` file for your test, and 
+provide a dictionary of ``ModeName: {ParameterDict}`` like this::
+
+	__pysys_parameterized_test_modes__ = {
+			'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+			'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+			'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+		}
+
+This produces a test with 3 modes - named ``Usage``, ``BadPort`` and ``MissingPort`` - for the various scenarios 
+being checked. As you can see, it is possible to provide both input data, and data for use during validation. 
+The test can easily access the parameters using expressions such as ``self.mode.params["cmd"]``. 
+
+It is also possible to provide the exact same configuration using the more advanced ``__pysys_modes__`` field described 
+below, however ``__pysys_parameterized_test_modes__`` is easier for this use case, and automatically takes care of 
+marking the parameterized modes as "primary" (so they will all run by default even specifying a ``--modes`` argument), 
+and combining them with any inherited modes (e.g. for different databases, browsers, etc). 
+
+Using modes for other purposes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Modes can also be used for making your test run with different databases, web browsers, and other execution 
+environments. 
+
+Often for these use cases you will want more control than parameterized tests give, for example 
+it is likely you'll want to execute with one database/browser in local test runs (probably the fastest one!) so 
+you would not want all of them marked as primary modes. Additionally for these use cases the modes are often defined 
+at a directory level for a collection of testcases rather in each individual test. You may also need precise control 
+over which of the modes from a parent directory are inherited, since some modes may not be applicable to all tests. 
+
+All of these cases and more can be handled by the ``__pysys_modes__`` configuration, which allows you to return a 
+Python expression that returns the list (or dict) of modes for each test and/or ``pysysdirconfig``. Since you will 
+often need access to the inherited modes and (other useful methods and data) when defining your mode list, 
+a ``helper`` object (`pysys.config.descriptor.TestModesConfigHelper`) is made available to your modes expression by the 
+use of a Python lambda expression. 
+
+If you want to add some new modes in addition to the inherited ones, you would add this to your ``pysystest.py`` file:
+
+.. code-block:: python
+	
+	__pysys_modes__ = lambda helper: helper.inheritedModes+[
+			{'mode':'CompressionGZip', 'compressionType':'gzip'},
+		]
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
 file in a parent directory rather than in ``pysystest.*``, which will by 
@@ -396,18 +438,13 @@ list if you need to change them later.
 By default the first mode in each list is "primary", so the test will only run in that one primary mode by 
 default during local test runs (i.e. unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
 using modes to validate the same behaviour/conditions in different execution environments e.g. 
-browsers/databases etc. It's best to choose either the fastest mode or else the one that 
-is most likely to show up interesting issues as the primary mode. 
-
-However when using modes to validate different *behaviours/conditions* (e.g. testing 
-out different command line options) using a single PySysTest class, then you should designate all your modes as 
-"primary" as you want *all of them* to execute by default in a quick local test run. 
-The `pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary` helper function can do this. 
+browsers/databases etc (but not for parameterized tests where you usually want to run all of them). It's best to choose 
+either the fastest mode or else the one that is most likely to show up interesting issues as the primary mode. 
 
 Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
 type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
-Rather than writing out every combination manually, you can use the function 
-`pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` to automatically generate the combinations, 
+Rather than writing out every combination manually, you can use the helper function 
+`pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` to automatically generate the combinations, 
 passing it each dimension (e.g. each compression type) as a separate list. 
 
 Here is an example of multi-dimensional modes (taken from the getting-started sample):
@@ -416,30 +453,19 @@ Here is an example of multi-dimensional modes (taken from the getting-started sa
 	
 	__pysys_modes__ = lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
+				
 					helper.inheritedModes,
+					
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
 							'CompressionGZip': {'compressionType':'gzip'},
 					}, 
+					
 					[
 						{'auth':None}, # Mode name is optional
 						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
 					], 
-					
-					# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
-					# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
-					# using modes to validate the same behaviour/conditions in different execution environments e.g. 
-					# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
-					# out different command line options) using a single PySysTest class, then you should have all your modes as 
-					# "primary" as you want all of them to execute by default in a quick local test run. 
-					helper.makeAllPrimary(
-						{
-							'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
-							'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
-							'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
-						}), 
-					)
 				
 			# This is Python list comprehension syntax for filtering the items in the list
 			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
@@ -488,7 +514,10 @@ during test setup::
 			# Call the supplied method to start/configure the database
 			testObj.db = dbHelperFactory() 
 
-Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
+Executing modes with pysys run
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
 primary modes (for tests with no mode, the primary mode is ``self.mode==None``) - 
 which is great for quick checks during development of your application and 
@@ -571,7 +600,7 @@ be a maintenance nightmare). It is also a bad idea to add a giant "for" loop int
 one invocation, since then it's very difficult to surgically re-run problematic parts of your parameter matrix when 
 tracking down test bugs or optimizing your application. Instead use the built-in "modes" concept of PySys which is 
 perfect for the job. It can even generate a combinatoric product of various different parameter dimensions for you 
-with `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` as described above. 
+with `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` as described above. 
 
 Performance tests - running them
 --------------------------------

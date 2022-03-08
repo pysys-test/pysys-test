@@ -26,10 +26,10 @@ class PySysTest(BaseTest):
 			expected=': Illegal mode parameter name - cannot start with underscore: __paramName')
 			
 		self.assertThatGrep('inherit.err', '.+', 'expected in value', 
-			expected=': Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes')
+			expected=': Cannot use the legacy inherit= attribute when using the modern Python lambda to define modes')
 			
 		self.assertThatGrep('nondict.err', '.+', 'expected in value', 
-			expected=': Expecting mode dict but got 12345')
+			expected=': Each mode must be a {...} dict but found unexpected object 12345 (int)')
 
 		self.assertThatGrep('nonlist.err', '.+', 'expected in value', 
 			expected=": Expecting a list of modes, got a str: 'abcdef'")

@@ -19,7 +19,7 @@ __pysys_groups__  = "myServerSensorValues"
 # The first mode in the list is the "primary" one.
 __pysys_modes__            = lambda helper: [
 	mode for mode in 
-		helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+		helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 			helper.inheritedModes,
 			{
 					# NB: by default only the first - "primary" - mode in each list will execute unless using the --modes flag

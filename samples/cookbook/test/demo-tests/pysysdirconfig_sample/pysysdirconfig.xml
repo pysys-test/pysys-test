@@ -102,7 +102,7 @@
 	
 	It's often useful to combine multiple mode 'dimensions', for example all the combinations of a list of web browsers 
 	with a list of databases, or compression methods and authentication types. Rather than writing out every combination 
-	manually, you can use the function ``helper.combineModeDimensions`` to automatically generate all combinations. 
+	manually, you can use the function ``helper.createModeCombinations`` to automatically generate all combinations. 
 	
 	A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
 
@@ -110,7 +110,7 @@
 	<modes>
 		lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
