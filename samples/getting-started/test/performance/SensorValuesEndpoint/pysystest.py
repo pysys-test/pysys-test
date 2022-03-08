@@ -81,4 +81,4 @@ class PySysTest(pysys.basetest.BaseTest):
 		
 		# Optionally, you could also produce some detailed files (e.g. graphical plots of the performance 
 		# characteristics for which many Python plugins are available) and then collect together the file types of 
-		# interest 
+		# interest using pysys.writer.testoutput.CollectTestOutputWriter
