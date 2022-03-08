@@ -87,14 +87,14 @@ class WorkerThread(threading.Thread):
 	def run(self):
 		"""Start running the worker thread."""
 		while True:
-			if self._dismissed.isSet():
+			if self._dismissed.is_set():
 				break
 			try:
 				request = self._requests_queue.get(True, self._poll_timeout)
 			except Queue.Empty:
 				continue
 			else:
-				if self._dismissed.isSet():
+				if self._dismissed.is_set():
 					self._requests_queue.put(request)
 					break
 				try:
