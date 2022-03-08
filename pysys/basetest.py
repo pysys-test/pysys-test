@@ -736,17 +736,23 @@ class BaseTest(ProcessUser):
 			seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 			
 			matches = seq.get_matching_blocks()
-			lastmatch = matches[-1] if len(matches) in [2,1] else matches[-2] # may be of zero size
 			
-			# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
-			# Colouring will be red, white(first match, if any), red, white(last match, if any)
-			ijk = []
-			for v in [0,1]:
-				ijk.append([
-					matches[0][v], # i - start of first matching block
-					matches[0][v]+matches[0].size, # j - end of first matching block
-					lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
-				])
+			if len(matches)==0 and matches[0].size == 0: 
+				# special case where there as no matching substrings at all
+				ijk.append( (0,0,0) )
+				ijk.append( (0,0,0) )
+			else:
+				lastmatch = matches[-1] if 1 <= len(matches) <= 2 else matches[-2] # may be of zero size
+				# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
+				# Colouring will be red, white(first match, if any), red, white(last match, if any)
+				ijk = []
+				for v in [0,1]:
+					ijk.append([
+						matches[0][v], # i - start of first matching block
+						matches[0][v]+matches[0].size, # j - end of first matching block
+						lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
+					])
+					
 			i1, j1, k1 = ijk[0]
 			i2, j2, k2 = ijk[1]
 			
