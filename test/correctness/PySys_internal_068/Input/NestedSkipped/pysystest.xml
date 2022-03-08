@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title></title>  <!-- deliberately empty --> 
+    <purpose><![CDATA[
+
+]]>
+    </purpose>
+  </description>
+  
+  <skipped reason="This is the reason this test is skipped"/>
+
+  <classification>
+    <groups>
+      <group>outcomes</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
