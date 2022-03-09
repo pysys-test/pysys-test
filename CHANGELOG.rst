@@ -68,7 +68,8 @@ New features related to reporting of performance testing:
 
 Misc new features:
 
-- Upgraded the GitHub workflows to use the new CodeCov uploader as the old v1 uploader was deprecated. 
+- Upgraded the sample GitHub workflows to use the new CodeCov uploader as the old v1 uploader was deprecated. 
+  If you use this functionality in your own GitHub Actions workflow you should make the same change. 
 - Added support for Python 3.10. Note that on Windows the following deprecation warning may be seen until PyWin32 
   releases version 304::
   
