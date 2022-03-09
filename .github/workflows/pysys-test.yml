@@ -72,10 +72,11 @@ jobs:
       - uses: actions/checkout@v2
       
       # Install Python and dependencies
-      - run: |
+      - name: Configure Python dependency requirements
+        run: |
           echo setuptools      > setup-python-package-requirements.txt
           echo wheel           >> setup-python-package-requirements.txt
-          # Pinning to 6.2 due to hanging on SIGTERM under Linux and Python 3.10 (GH-1310)
+          # Pinning to 6.2 due to 6.3 hanging on SIGTERM under Linux and Python 3.10 (GH-1310)
           echo coverage==6.2.0 >> setup-python-package-requirements.txt
       - uses: actions/setup-python@v2
         with:
@@ -131,8 +132,6 @@ jobs:
         working-directory: test
         id: pysys
         run: |
-          python -m pip install codecov
-          
           export PYTHONWARNINGS=error
           if [[ ${{ matrix.test-run-id }} = win-py3.10 ]]; then
             # see also same logic in pysys-extensions/pysysinternalhelpers.py
