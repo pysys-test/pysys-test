@@ -131,6 +131,8 @@ jobs:
         working-directory: test
         id: pysys
         run: |
+	  python -m pip install codecov
+	  
           export PYTHONWARNINGS=error
           if [[ ${{ matrix.test-run-id }} = win-py3.10 ]]; then
             # see also same logic in pysys-extensions/pysysinternalhelpers.py
@@ -148,13 +150,17 @@ jobs:
           python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
           # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
           rm ./__coverage_python.main/coverage.xml
-
-      - name: Upload Python code coverage 
-        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # 2021-09 v2.1.0
-        if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
-        with:
-          name: ${{matrix.test-run-id}}
-          directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
+	  
+          cd __coverage_python.main
+	  ls -l
+          codecov
+	  
+      #- name: Upload Python code coverage 
+      #  uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # 2021-09 v2.1.0
+      #  if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
+      #  with:
+      #    name: ${{matrix.test-run-id}}
+      #    directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
           
       - name: Upload archive artifacts for any test failures
         uses: actions/upload-artifact@v2
