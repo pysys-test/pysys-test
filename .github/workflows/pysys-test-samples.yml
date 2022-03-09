@@ -7,7 +7,7 @@ on:
   push:
     branches: [ release ]
   pull_request:
-    branches: [ release ]
+    branches: [ release, workflows ]
     
   workflow_dispatch: # also allow manually invoking this
   
