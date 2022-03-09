@@ -212,12 +212,17 @@ class ProcessImpl(Process):
 			return self.exitStatus
 
 
-	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']):
+	def stop(self, timeout=TIMEOUTS['WaitForProcessStop'], hard=False):
 		"""Stop a process running.
 		
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
+		# PySys has always done a non-hard SIGTERM on Unix; so far this seems ok but could cause problems for 
+		# poorly behaved processes that don't SIGTERM cleanly
+		
+		sig = signal.SIGKILL if hard else signal.SIGTERM
+		
 		try:
 			with self.__lock:
 				if self.exitStatus is not None: return 
@@ -225,19 +230,29 @@ class ProcessImpl(Process):
 				# do the kill before the killpg, as there's a small race in which we might try to stop a process 
 				# before it has added itself to its own process group, in which case this is essential to avoid 
 				# leaking
-				os.kill(self.pid, signal.SIGTERM)
+				os.kill(self.pid, sig)
 				
 				# nb assuming setpgrp was called when we forked, this will signal the entire process group, 
 				# so any children are also killed; small chance this could fail if the process was stopped 
 				# before it had a chance to create its process group
 				if not self.disableKillingChildProcesses:
 					try:
-						os.killpg(self.pid, SIGTERM)
+						os.killpg(self.pid, sig)
 					except Exception as ex:
 						# Best not to worry about these
 						log.debug('Failed to kill process group (but process itself was killed fine) for %s: %s', self, ex)
 			
-			self.wait(timeout=timeout)
+			try:
+				self.wait(timeout=timeout)
+			except Exception as ex: # pragma: no cover
+				# if it times out on SIGTERM, do our best to SIGKILL it anyway to avoid leaking processes, but still report as an error
+				try:
+					log.debug('Failed to SIGTERM process %r, will now SIGKILL before re-raising the exception')
+					if sig != signal.SIGKILL: os.killpg(self.pid, signal.SIGKILL)
+				except Exception:
+					pass
+				
+				raise
 		except Exception as ex:
 			raise ProcessError("Error stopping process: %s"%ex)
 

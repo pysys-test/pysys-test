@@ -149,11 +149,16 @@ class Process(object):
 	def setExitStatus(self): raise Exception('Not implemented')
 	def startBackgroundProcess(self): raise Exception('Not implemented')
 	def writeStdin(self): raise Exception('Not implemented')
-	def stop(self): 
-		"""Stop a running process.
+	def stop(self, timeout=TIMEOUTS['WaitForProcessStop'], hard=False): 
+		"""Stop a running process and wait until it has finished.
 		
 		Does nothing if the process is not running. 
 		
+		On Windows, this uses TerminateProcess, on Linux this sends a SIGTERM signal (which allows the process a chance 
+		to exit gracefully including possibly dumping code coverage output) unless the ``hard=True`` parameter is specified. 
+		
+		:param bool hard: Set to True to use a hard termination (e.g. SIGKILL). 
+		:param float timeout: The time to wait for the process to complete before raising an exception. 
 		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to stop the process.		
 		"""
 		raise Exception('Not implemented')

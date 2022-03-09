@@ -251,11 +251,9 @@ class ProcessImpl(Process):
 			return self.exitStatus
 
 
-	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']): 
-		"""Stop a process running.
-		
-		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
-		
+	def stop(self, timeout=TIMEOUTS['WaitForProcessStop'], hard=False): 
+		"""Stop a process running. On Windows this is always a hard termination. 
+	
 		"""
 		try:
 			with self.__lock:
