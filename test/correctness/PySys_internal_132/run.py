@@ -14,7 +14,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		p = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
 
-		self.signalProcess(p, signal.SIGTERM)
+		self.signalProcess(p, signal.SIGKILL)
 
 		self.waitForBackgroundProcesses(checkExitStatus=False, timeout=60)
 	def validate(self):
