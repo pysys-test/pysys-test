@@ -149,7 +149,7 @@ jobs:
 
           python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
           # have to delete coverage.xml otherwise codecov doesn't create a new one based on the .coverage* files
-          rm ./__coverage_python.main/coverage.xml
+          #rm ./__coverage_python.main/coverage.xml
           
           cd __coverage_python.main
           ls -la
