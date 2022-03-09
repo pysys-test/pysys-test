@@ -82,6 +82,7 @@ jobs:
           cache-dependency-path: setup-python-package-requirements.txt
       - run: pip install -r setup-python-package-requirements.txt
       - run: echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
+        shell: bash
 
       - name: Pre-build deployment tailoring
         if: matrix.doc-and-deploy
