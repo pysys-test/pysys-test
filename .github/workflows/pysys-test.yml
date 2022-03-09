@@ -80,7 +80,7 @@ jobs:
           python-version: ${{matrix.python-version}}
           cache: pip
           cache-dependency-path: setup-python-package-requirements.txt
-      - run: pip install -r setup-python-package-requirements.txt
+      - run: pip install --upgrade -r setup-python-package-requirements.txt
       - run: echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
         shell: bash
 
@@ -125,7 +125,7 @@ jobs:
           python -m pip install --no-cache-dir dist/PySys*.whl
 
           # Once it's installed, also add the coverage module
-          python -m pip install coverage
+          python -m pip install coverage==4.5.4
       
       - name: Tests
         shell: bash
