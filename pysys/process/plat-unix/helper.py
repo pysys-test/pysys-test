@@ -215,6 +215,8 @@ class ProcessImpl(Process):
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']):
 		"""Stop a process running.
 		
+		Uses SIGTERM to give processes a chance to gracefully exit including dump code coverage information if needed. 
+		
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""

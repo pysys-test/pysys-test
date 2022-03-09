@@ -225,7 +225,7 @@
 			
 			<!-- This causes the archive to be published to any interested writers with the specified category 
 				name (e.g. some CI systems have a mechanism for publishing arifacts) -->
-			<property name="publishArtifactArchiveCategory" value="performanceGraphsArchive"/>
+			<property name="publishArtifactArchiveCategory" value="PerformanceGraphsArchive"/>
 		</writer>
 		
 		<!-- CI writers automatically enable themselves only if running under 
