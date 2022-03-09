@@ -73,21 +73,15 @@ jobs:
       
       # Install Python and dependencies
       - run: |
-          cat > setup-python-package-requirements.txt << EOF
-          setuptools
-          wheel
-          EOF
-          
-          echo Contents are:
-          cat setup-python-package-requirements.txt
-
-          echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
+          echo setuptools   > setup-python-package-requirements.txt
+          echo wheel       >> setup-python-package-requirements.txt
       - uses: actions/setup-python@v2
         with:
           python-version: ${{matrix.python-version}}
           cache: pip
           cache-dependency-path: setup-python-package-requirements.txt
       - run: pip install -r setup-python-package-requirements.txt
+      - run: echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
 
       - name: Pre-build deployment tailoring
         if: matrix.doc-and-deploy
