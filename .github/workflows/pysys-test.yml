@@ -69,33 +69,21 @@ jobs:
     runs-on: ${{matrix.os}}
     
     steps:
-      # Install the desired version of Python and PySys
       - uses: actions/checkout@v2
+          
+      - run: |
+          cat > setup-python-package-requirements.txt << EOF
+          setuptools
+          wheel
+          EOF
+
+          echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
 
       - uses: actions/setup-python@v2
         with:
           python-version: ${{matrix.python-version}}
-          
-      - name: Cache Python deps (get location)
-        id: pip-cache
-        run: |
-            python -m pip install -U "pip>=20.1"
-            echo "::set-output name=dir::$(pip cache dir)"
-      - name: Cache Python deps
-        uses: actions/cache@v2
-        with:
-            path: ${{ steps.pip-cache.outputs.dir }}
-            key: ${{ matrix.test-run-id }}-pip
-
-      - name: Python dependencies - install
-        id: deps
-        shell: bash
-        run: |
-          python --version
-          python -m pip install --upgrade setuptools wheel
-          
-          # Set this env var ready for later steps
-          echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
+          cache: pip
+          cache-dependency-path: tests/pysys-requirements.txt
 
       - name: Pre-build deployment tailoring
         if: matrix.doc-and-deploy
