@@ -215,6 +215,8 @@ class ProcessImpl(Process):
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']):
 		"""Stop a process running.
 		
+		Uses SIGTERM to give processes a chance to gracefully exit including dump code coverage information if needed. 
+		
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
@@ -225,7 +227,7 @@ class ProcessImpl(Process):
 				# do the kill before the killpg, as there's a small race in which we might try to stop a process 
 				# before it has added itself to its own process group, in which case this is essential to avoid 
 				# leaking
-				os.kill(self.pid, signal.SIGKILL)
+				os.kill(self.pid, signal.SIGTERM)
 				
 				# nb assuming setpgrp was called when we forked, this will signal the entire process group, 
 				# so any children are also killed; small chance this could fail if the process was stopped 
