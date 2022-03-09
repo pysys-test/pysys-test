@@ -66,7 +66,7 @@ jobs:
         if: ${{ always() }}
         uses: scacap/action-surefire-report@v1
         with:
-          report_paths: ${{ steps.pysys.outputs.artifact_JUnitXMLResultsDir }}/**
+          report_paths: "${{ steps.pysys.outputs.artifact_JUnitXMLResultsDir }}/*.xml"
 
       - name: Upload Python code coverage 
         uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # 2021-09 v2.1.0
