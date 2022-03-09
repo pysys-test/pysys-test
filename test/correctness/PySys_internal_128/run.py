@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 
 		block = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
 		self.waitForBackgroundProcesses(excludes=[block])
-		block.stop(timeout=60) # weirdly can take ages on macos
+		block.stop()
 		del self.processList[:]
 
 		self.startTestProcess(stdouterr='failure1', background=True)
