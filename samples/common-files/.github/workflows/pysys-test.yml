@@ -41,8 +41,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pysys==2.1
 
-          # Use older version of coverage as 5.0 requires an SQLite version that doesn't work on this macos image currently
-          pip install coverage==4.5.4
+          pip install coverage
 
       - name: Test with PySys
         working-directory: test
@@ -51,12 +50,13 @@ jobs:
         run: |
           python -m pysys run --ci --outdir=${{matrix.test-run-id}}
 
-      - name: Upload Python code coverage
-        uses: codecov/codecov-action@v1
+      - name: Upload Python code coverage 
+        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # 2021-09 v2.1.0
         if: steps.pysys.outputs.artifact_PythonCoverageDir
         with:
-          file: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}/coverage.xml
-        
+          name: ${{matrix.test-run-id}}
+          directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
+
       # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
       
       - name: Upload performance CSV artifacts
