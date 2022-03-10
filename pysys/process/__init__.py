@@ -205,7 +205,7 @@ class Process(object):
 		if self._outQueue == None:
 			# start thread on demand
 			self._outQueue = Queue.Queue()
-			t = threading.Thread(target=self.writeStdin, name='pysys.stdinreader_%s'%str(self))
+			t = threading.Thread(target=self.writeStdin, name='pysys.stdinreader_%s'%str(self), daemon=True)
 			t.start()
 			
 		self._outQueue.put(data)
