@@ -755,7 +755,7 @@ class _XMLDescriptorParser(object):
 										created=self.kvDict.pop('created', None) or (self.root.getAttribute('created') if self.root else None) or None,
 										isDirConfig=not self.istest)
 		
-		if self.kvDict: # should all have been popped during parsing
+		if self.kvDict and os.getenv('PYSYS_IGNORE_UNKNOWN_DESCRIPTOR_FIELDS','').lower()!='true': # should all have been popped during parsing
 			raise UserError(f'Unknown {self.KV_PATTERN % "KEY"} key(s) in test descriptor "{self.file}": {", ".join(self.kvDict.keys())}')
 		
 		if not self.istest:
