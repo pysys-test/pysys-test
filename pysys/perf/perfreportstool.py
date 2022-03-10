@@ -248,7 +248,7 @@ class PerformanceComparisonGenerator:
 			out('%s from %s'%(colorFormatter.formatArg(LOG_TEST_PERFORMANCE, k.resultKey), files[-1].keyedResults[k]['testId']))
 			
 			r = files[-1].keyedResults[k]
-			out(' '+f"Mean from this run = {self.valueToDisplayString(r['value'])} {r['unit']}"+
+			out(' '+f"Mean from this run = {colorFormatter.formatArg(LOG_TEST_PERFORMANCE, self.valueToDisplayString(r['value']))} {r['unit']}"+
 							('' if r['samples']==1 or ['value'] == 0 else f" with stdDev={self.valueToDisplayString(r['stdDev'])} ({100.0*r['stdDev']/r['value']:0.1f}% of mean)")+
 							('' if not r.get('toleranceStdDevs') else f"; configured toleranceStdDevs={self.valueToDisplayString(r['toleranceStdDevs'])}"),
 					)
