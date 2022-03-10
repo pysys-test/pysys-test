@@ -55,7 +55,7 @@ class BaseTest(ProcessUser):
 		self.input = os.path.join(descriptor.testDir, 
 			(
 				'Input' if os.path.exists(os.path.join(descriptor.testDir, 'Input')) else '.'
-			) if descriptor.input=='!Input_dir_if_present_else_testDir!' else descriptor.input
+			) if descriptor.input in ['!Input_dir_if_present_else_testDir!','!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!'] else descriptor.input
 			).rstrip('/\\.') # strip /. suffix if input is ''
 
 		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir).rstrip('/\\.')

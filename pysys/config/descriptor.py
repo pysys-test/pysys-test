@@ -288,7 +288,7 @@ class TestDescriptor(object):
 			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
 
 		s=s+"Test classname:    %s; module: %s\n" % (self.classname, self.module)
-		if self.input not in [DEFAULT_INPUT, '.', '!Input_dir_if_present_else_testDir!']: s=s+"Test input:        %s\n" % self.input
+		if self.input not in [DEFAULT_INPUT, '.', '!Input_dir_if_present_else_testDir!', '!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!']: s=s+"Test input:        %s\n" % self.input
 		if self.output != DEFAULT_OUTPUT: s=s+"Test output:       %s\n" % self.output
 		if self.reference != DEFAULT_REFERENCE: s=s+"Test reference:    %s\n" % self.reference
 		if self.traceability:

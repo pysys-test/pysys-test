@@ -95,6 +95,8 @@ Misc new features:
   ``pysys.*`` would be included. The log level for any Python logger can be changed using the 
   ``-vcategory=DEBUG`` argument to ``pysys run``, and category may be any Python log category, or may be a  
   category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
+- Added ``<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>`` as alternative syntax for 
+  ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
 
 Fixes:
 

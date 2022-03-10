@@ -392,7 +392,7 @@
 			<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
 				without the need to update or potentially create bugs in existing tests
 			-->
-			<!-- <input-dir>!Input_dir_if_present_else_testDir!</input-dir> -->
+			<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
 	
 		<!-- Could optionally override the default directory names for reference and output too. The following are the 
 			default values and do not need to be specified explicitly. 

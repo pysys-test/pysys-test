@@ -97,7 +97,7 @@ class DefaultTestMaker(object):
 					defaults.output,
 					defaults.reference
 				]
-				if defaults.input != '!Input_dir_if_present_else_testDir!':
+				if defaults.input not in ['!Input_dir_if_present_else_testDir!', '!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!']:
 					t['mkdir'].append(defaults.input)
 			
 			t['testOutputDir'] = defaults.output
