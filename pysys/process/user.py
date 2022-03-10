@@ -1131,9 +1131,10 @@ class ProcessUser(object):
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 
-		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra 
-			information about the wait condition. e.g. ``detailMessage='(downstream message received)'``. 
-			Added in v1.5.1. 
+		:param str detailMessage: An extra string to add to the start of the message logged when waiting to provide extra 
+			information about the wait condition. e.g. ``detailMessage='Wait for server startup: '``. 
+			
+			Added in v1.5.1. From v2.1+ the detail string is added at the beginning not the end. 
 
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
@@ -1167,12 +1168,13 @@ class ProcessUser(object):
 		
 		matches = []
 		startTime = time.time()
-		msg = "Waiting for {expr} {condition}in {file}{detail}".format(
-			expr=quotestring(expr), # repr performs escaping of embedded quotes, newlines, etc
+		msg = "Waiting for {expr} {condition}in {file}".format(
+			expr=quotestring(expr), # performs escaping of embedded quotes, newlines, etc
 			condition=condition.strip()+' ' if condition!='>=1' else '', # only include if non-default
 			file=os.path.basename(file),
-			detail=' '+detailMessage.strip(' ') if detailMessage else ''
 			)
+		if detailMessage: # prior to v2.1 this was appended at the end but actually it's more useful at the beginning
+			msg = detailMessage.strip(': ')+': '+msg
 
 		log.debug("Performing wait for grep signal %s %s in file %s with ignores %s", expr, condition, f, ignores)
 		
@@ -1308,7 +1310,7 @@ class ProcessUser(object):
 				try:
 					if process.running(): process.stop()
 				except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
-					log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 					exceptions.append('Failed to stop process %s: %s'%(process, e))
 			self.processCount = {}
 			

@@ -76,6 +76,19 @@ Misc new features:
   automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
 - Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 
   wait for End Of File before completing. 
+- Changed the behaviour of the ``assertMessage`` in all assertion methods (e.g. `BaseTest.assertGrep`) so that instead 
+  of replacing the default PySys message (e.g. ``Grep on foo.txt contains "Bar"``), it will be added before the 
+  default message, when the assertion fails. This means there is no loss of information when using ``assertMessage=``, 
+  making it easier to justify using it to provide a more high-level explanation of what each assertion should 
+  achieve. For example::
+  
+		self.assertLineCount('server.log', 'ERROR ', condition='<= 10', 
+			assertMessage='Assert that throttling of error messages keeps them below configured limit')
+
+- The ``detailMessage`` passed to `BaseTest.waitForGrep` is now added at the beginning rather than the end of the 
+  log line, to make the user's high-level description of what is being waited for more prominent::
+  
+		self.waitForGrep('server.log', 'Ready for .*', detailMessage='Waiting until server is up')
 
 Fixes:
 
