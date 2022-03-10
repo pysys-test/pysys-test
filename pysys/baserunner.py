@@ -1311,7 +1311,7 @@ class TestContainer(object):
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 
 			except Exception:
-				log.warning("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.warning("%s occurred while running test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
 
 			# call the cleanup method to tear down the test
@@ -1325,8 +1325,8 @@ class TestContainer(object):
 			except UserError as ex: # will already have been logged with stack trace
 				self.testObj.addOutcome(BLOCKED, str(ex), abortOnError=False)
 			except Exception as ex:
-				log.warning("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
+				log.warning("%s occurred while cleaning up test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0].__name__), abortOnError=False)
 
 			# in case the thread log handlers got overwritten by a naughty test, restore before printing the final summary
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
