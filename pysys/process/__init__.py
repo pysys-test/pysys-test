@@ -45,6 +45,7 @@ import queue as Queue
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.pycompat import *
+from pysys.internal.initlogging import pysysLogHandler
 
 log = logging.getLogger('pysys.process')
 
@@ -148,7 +149,6 @@ class Process(object):
 	# these abstract methods must be implemented by subclasses; no need to publically document
 	def setExitStatus(self): raise Exception('Not implemented')
 	def startBackgroundProcess(self): raise Exception('Not implemented')
-	def writeStdin(self): raise Exception('Not implemented')
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop'], hard=False): 
 		"""Stop a running process and wait until it has finished.
 		
@@ -209,16 +209,24 @@ class Process(object):
 			# start thread on demand
 			self._outQueue = Queue.Queue()
 			
+			__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
 			def writeStdinThread():
-				while self._outQueue:
-					try:
-						data = self._outQueue.get(block=True, timeout=0.25)
-					except Queue.Empty:
-						if not self.running(): 
-							# no need to close stdin here, as previous call's setExitCode() method will do it
-							break
-					else:
-						self._writeStdin(data)
+				pysysLogHandler.setLogHandlersForCurrentThread(__parentLogHandlers)
+				try:
+					while self._outQueue:
+						try:
+							data = self._outQueue.get(block=True, timeout=0.25)
+						except Queue.Empty:
+							if not self.running(): 
+								# no need to close stdin here, as previous call's setExitCode() method will do it
+								break
+						else:
+							try:
+								self._writeStdin(data)
+							except Exception as ex:
+								(log.debug if not self.running() else log.error)('Failed to write %r to stdin of process %r', data, self, exc_info=True)
+				finally:
+					pysysLogHandler.setLogHandlersForCurrentThread([])
 			
 			t = threading.Thread(target=writeStdinThread, name='pysys.stdinreader_%s'%str(self), daemon=True)
 			t.start()
