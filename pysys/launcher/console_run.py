@@ -309,7 +309,10 @@ e.g.
 				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
 
 			elif option in ["-n", "-j", "--threads"]:
-				N_CPUS = multiprocessing.cpu_count()
+				try:
+					N_CPUS = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
+				except Exception: # no always available, e.g. on Windows
+					N_CPUS = os.cpu_count()
 				if value.lower()=='auto': value='0'
 				if value.lower().startswith('x'):
 					self.threads = max(1, int(float(value[1:])*N_CPUS))

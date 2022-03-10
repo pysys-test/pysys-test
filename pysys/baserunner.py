@@ -326,7 +326,7 @@ class BaseRunner(ProcessUser):
 		self.runDetails = collections.OrderedDict()
 		for p in ['outDirName', 'hostname']:
 			self.runDetails[p] = self.project.properties[p]
-		self.runDetails['cpuCount'] = str(multiprocessing.cpu_count())
+		self.runDetails['cpuCount'] = str(os.cpu_count())
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
 
