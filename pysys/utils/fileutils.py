@@ -26,6 +26,7 @@ import collections
 import json
 import logging
 import io
+import stat
 
 from pysys.constants import IS_WINDOWS, PREFERRED_ENCODING
 
@@ -138,6 +139,8 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), 
 	but deletes as many files as possible before doing so. 
 	
+	This method will attempt to change the permissions/file attributes to permit deletion if necessary. 
+	
 	:param retries: The number of retries to attempt. This can be useful to 
 		work around temporary failures causes by Windows file locking. 
 	
@@ -156,13 +159,25 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 		
 		# then try again, being more careful
 		if os.path.exists(path) and not ignore_errors:
-			shutil.rmtree(path, onerror=onerror)
+			def pysysOnError(function, path, excinfo):
+				try: # helps with both Windows "readonly" attribute and linux permissions issues
+					os.chmod(path, stat.S_IWRITE | stat.S_IMODE(os.lstat(path).st_mode))
+					if os.path.isdir(path):
+						os.rmdir(path)
+					else:
+						os.remove(path)
+				except Exception as ex:
+					pass
+				if os.path.exists(path): raise
+						
+			shutil.rmtree(path, onerror=onerror or pysysOnError)
 	except Exception as ex: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
 		if retries <= 0:
 			raise
 		time.sleep(1.0) # work around windows file-locking issues
 		log.debug('Retrying directory deletion of "%s" %d times after %s', path, retries, ex)
+		
 		deletedir(path, retries = retries-1, onerror=onerror)
 
 def deletefile(path, retries=1, ignore_errors=False):

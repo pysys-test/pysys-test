@@ -97,6 +97,9 @@ Misc new features:
   category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
 - Added ``<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>`` as alternative syntax for 
   ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
+- The `BaseTest.deleteDir` method (and the test output dir cleanup code) automatically changes permissions 
+  and file attributes to permit deletion if possible. This is useful when dealing with tools that create read-only 
+  files. 
 
 Fixes:
 
