@@ -1223,9 +1223,9 @@ class BaseTest(ProcessUser):
 			# including the expression it found that should not have been there
 			outcome = PASSED if (result!=None) == contains else (BLOCKED if namedGroupsMode else FAILED)
 			if outcome == PASSED: 
-				if contains: log.debug('Grep on input file %s successfully matched expression %s with line: %s', 
+				if contains: log.debug('Grep on file %s successfully matched expression %s with line: %s', 
 					file, quotestring(expr), quotestring(result.string))
-				msg = assertMessage or ('Grep on input file %s' % file)
+				msg = assertMessage or ('Grep on file %s' % file)
 			else:
 			
 				if assertMessage:
@@ -1320,7 +1320,7 @@ class BaseTest(ProcessUser):
 			match = None
 		else:
 			result = (match is not None) == contains
-			if result: msg = assertMessage or ('Grep on input file %s' % file)
+			if result: msg = assertMessage or ('Grep on file %s' % file)
 			self.addOutcome(PASSED if result else (BLOCKED if namedGroupsMode else FAILED), msg, abortOnError=abortOnError)
 
 		# special-case if they're using named regex named groups to make it super-easy to use with assertThat - 
@@ -1389,7 +1389,7 @@ class BaseTest(ProcessUser):
 	
 		log.debug("Performing contains=%s ordered grep on %s for %s", contains, f, exprList)
 		
-		msg = assertMessage or ('Ordered grep on input file %s' % file)
+		msg = assertMessage or ('Ordered grep on file %s' % file)
 		expr = None
 		try:
 			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
@@ -1418,12 +1418,12 @@ class BaseTest(ProcessUser):
 		r"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
-		input file matching the specified regular expression evaluate to true when evaluated against 
+		file matching the specified regular expression evaluate to true when evaluated against 
 		the supplied ``condition``.
 		
 		:param file: The basename of the file used in the line count
 		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		:param expr: The regular expression string used to match a line of the input file
+		:param expr: The regular expression string used to match a line of the file
 		:param condition: The condition to be met for the number of lines matching the regular expression
 		:param ignores: A list of regular expressions that will cause lines to be excluded from the count.
 			Ignore expressions are applied *after* any mappers. 
@@ -1481,7 +1481,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			if (pysys.utils.safeeval.safeEval("%d %s" % (numberLines, condition), extraNamespace={'self':self})):
-				msg = assertMessage or ('Line count on input file %s' % file)
+				msg = assertMessage or ('Line count on file %s' % file)
 				self.addOutcome(PASSED, msg)
 				return True
 			else:
