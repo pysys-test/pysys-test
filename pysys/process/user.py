@@ -300,6 +300,10 @@ class ProcessUser(object):
 
 		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` 
 		to allocate a free port before calling this method. 
+		
+		Note that although is is possible to use this command to execute OS shell commands, that should only used for 
+		testing of shell scripts - other logic such as file system operations can be executed more easily and robustly 
+		using built-in Python (``os`` module) or PySys (e.g. `BaseTest.copy`) functions. 
 
 		.. versionchanged:: 1.6.0
 			Added onError parameter and default behaviour of logging stderr/out when there's a failure.
