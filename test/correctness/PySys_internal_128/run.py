@@ -57,4 +57,4 @@ class PySysTest(BaseTest):
 
 
 	def validate(self):
-		self.assertDiff('output.txt')
+		self.assertDiff('output.txt', replace=[('for (0|1) background process', 'for 0|1 background process')])
