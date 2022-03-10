@@ -110,7 +110,7 @@ class ProcessImpl(Process):
 		with self.__lock:
 			if not self.__stdin: return
 			if data is None:
-				self.__stdin.close()
+				os.close(self.__stdin)
 			else:
 				os.write(self.__stdin, data)	
 	
