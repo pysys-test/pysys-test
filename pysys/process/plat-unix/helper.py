@@ -240,7 +240,7 @@ class ProcessImpl(Process):
 				if not self.disableKillingChildProcesses:
 					try:
 						os.killpg(self.pid, sig)
-					except Exception as ex:
+					except Exception as ex: # pragma: no cover
 						# Best not to worry about these
 						log.debug('Failed to kill process group (but process itself was killed fine) for %s: %s', self, ex)
 			
@@ -248,14 +248,16 @@ class ProcessImpl(Process):
 				self.wait(timeout=timeout)
 			except Exception as ex: # pragma: no cover
 				# if it times out on SIGTERM, do our best to SIGKILL it anyway to avoid leaking processes, but still report as an error
-				try:
-					log.debug('Failed to SIGTERM process %r, will now SIGKILL before re-raising the exception')
-					if sig != signal.SIGKILL: os.killpg(self.pid, signal.SIGKILL)
-				except Exception:
-					pass
+				if sig != signal.SIGKILL:
+					log.warning('Failed to SIGTERM process %r, will now SIGKILL the process group before re-raising the exception', self)
+					try:
+						os.killpg(self.pid, signal.SIGKILL)
+					except Exception as ex2:
+						log.debug('Failed to SIGKILL process group %r: %s', self, ex2)
 				
 				raise
-		except Exception as ex:
-			raise ProcessError("Error stopping process: %s"%ex)
+		except Exception as ex: # pragma: no cover
+			log.debug('Failed to stop process %r: ', self, exc_info=True)
+			raise ProcessError("Error stopping process %r due to %s: %s"%(self, type(ex).__name__, ex))
 
 ProcessWrapper = ProcessImpl # old name for compatibility

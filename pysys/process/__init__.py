@@ -236,7 +236,7 @@ class Process(object):
 		while self.running():
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				raise ProcessTimeout('Waiting for completion of %s timed out after %d seconds'%(self, int(timeout)))
+				raise ProcessTimeout('Waiting for completion of %r timed out after %d seconds'%(self, int(timeout)))
 			time.sleep(0.05)
 		
 
