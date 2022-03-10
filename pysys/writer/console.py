@@ -195,7 +195,7 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 		self.format = self.format or os.getenv('PYSYS_CONSOLE_FAILURE_ANNOTATIONS','') or self.DEFAULT_FORMAT
 		if self.format.lower()=='true': self.format = self.DEFAULT_FORMAT
 		
-		self.includeNonFailureOutcomes = [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		self.includeNonFailureOutcomes = OUTCOMES if self.includeNonFailureOutcomes=='*' else [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
 		for o in self.includeNonFailureOutcomes:
 			if not any(o == str(outcome) for outcome in OUTCOMES):
 				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)

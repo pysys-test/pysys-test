@@ -29,6 +29,10 @@
 			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 		
+		<writer classname="pysys.writer.outcomes.JSONResultsWriter">
+			<property name="file" value="__pysys_testsummary_${outDirName}.json"/>
+		</writer>
+		
 		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
 		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 		

@@ -69,6 +69,9 @@ Misc new features:
   releases version 304::
   
     DeprecationWarning: getargs: The 'u' format is deprecated. Use 'U' instead.
+  
+- Added `pysys.writer.outcomes.JSONResultsWriter` which writes test outcomes (and the runner's ``runDetails``) to a 
+  single machine-readable ``.json`` file. 
 - Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which will 
   automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
 - Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 

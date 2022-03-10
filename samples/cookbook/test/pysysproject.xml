@@ -245,6 +245,14 @@
 			-->
 			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
+		
+		<!-- Writes all outcomes (or just the failure outcomes) to a .json file suitable for machine parsing.
+			Only enabled when the record flag is specified. 
+		-->
+		<writer classname="pysys.writer.outcomes.JSONResultsWriter" file="__pysys_testsummary_${outDirName}.json">
+			<property name="includeTitle" value="true"/>
+			<property name="includeNonFailureOutcomes" value="NOT VERIFIED, "/>
+		</writer>
 
 		<!-- Writes all outcomes to a single XML file; only enabled when the record flag is specified. -->
 		<writer classname="pysys.writer.outcomes.XMLResultsWriter">

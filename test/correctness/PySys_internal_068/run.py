@@ -157,3 +157,14 @@ class PySysTest(BaseTest):
 
 		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 
 			expected='2%srun.log:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])'%os.sep)
+
+		js = pysys.utils.fileutils.loadJSON(self.output+'/__pysys_outcomes.json')
+		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results'])
+		self.assertThat('jsonOutDir == expected', jsonOutDir__eval="js['runDetails']['outDirName']", expected='myoutdir')
+		self.assertThat('hasCycle', hasCycle__eval="'cycle' in js['results'][0]")
+		self.assertThat('testDir == expected', testDir=next(x for x in js['results'] if x['testId']=='NestedFail')['testDir'], expected='test/NestedFail')
+		self.assertThat('hasTitle', hasTitle__eval="js['results'][0]['title']")
+		self.assertThat('testIds == expected', testIds=sorted(t['testId'] for t in js['results']), expected=[
+			# NB: does NOT include passed, since we didn't list that one
+			'NestedFail', 'NestedFail', 'NestedNotVerified', 'NestedNotVerified', 'NestedSkipped', 'NestedSkipped', 'NestedTimedout', 'NestedTimedout'
+		])

@@ -33,6 +33,12 @@
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y.log">
 			<property name="outputDir" value="${root}"/>
 		</writer>
+
+		<writer classname="pysys.writer.outcomes.JSONResultsWriter" file="__pysys_outcomes.json">
+			<property name="outputDir" value="${testRootDir}"/>
+			<property name="includeNonFailureOutcomes" value=" SKIPPED , NOT VERIFIED "/>
+		</writer>
+		
 		
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary.log">
 			<property name="outputDir" value="${root}"/>
