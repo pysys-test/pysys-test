@@ -90,6 +90,12 @@ Misc new features:
   
 		self.waitForGrep('server.log', 'Ready for .*', detailMessage='Waiting until server is up')
 
+- Simplify how PySys interacts with Python's ``logging`` library. PySys will now record log messages from any Python 
+  logger category to ``run.log`` and the console, whereas previously only messages from log categories starting 
+  ``pysys.*`` would be included. The log level for any Python logger can be changed using the 
+  ``-vcategory=DEBUG`` argument to ``pysys run``, and category may be any Python log category, or may be a  
+  category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
+
 Fixes:
 
 - Add missing ``<skipped message="..."/>`` element in JUnit XML reports when a test is skipped. 
@@ -1012,6 +1018,8 @@ pysys.py and project configuration improvements
   using a "python:" prefix on the category name, e.g.::
   
     pysys run -v python:myorg.mycategory=debug
+  
+  Note that this ``python:`` prefix is deprecated and no longer required from PySys 2.1 onwards. 
 
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. See ``pysys run --help`` for more information. 

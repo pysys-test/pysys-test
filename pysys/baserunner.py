@@ -563,7 +563,7 @@ class BaseRunner(ProcessUser):
 			def write(self, s): 
 				if self.logWarning is True:
 					self.logWarning = False
-					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
+					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) (or the Python "logging" module) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or PREFERRED_ENCODING, errors='replace')
