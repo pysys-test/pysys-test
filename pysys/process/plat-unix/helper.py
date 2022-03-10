@@ -106,22 +106,13 @@ class ProcessImpl(Process):
 		# private instance variables
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
 
-
-	def writeStdin(self):
-		"""Thread method to write to the process stdin pipe.
-		
-		"""
-		while self._outQueue:
-			try:
-				data = self._outQueue.get(block=True, timeout=0.25)
-			except Queue.Empty:
-				if not self.running(): 
-					# no need to close stdin here, as previous call's setExitCode() method will do it
-					break
+	def _writeStdin(self, data):
+		with self.__lock:
+			if not self.__stdin: return
+			if data is None:
+				self.__stdin.close()
 			else:
-				with self.__lock:
-					if self.__stdin:
-						os.write(self.__stdin, data)	
+				os.write(self.__stdin, data)	
 	
 
 	def startBackgroundProcess(self):

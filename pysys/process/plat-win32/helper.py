@@ -106,21 +106,14 @@ class ProcessImpl(Process):
 		self.fStdout = self.stdout
 		self.fStderr = self.stderr
 
-	def writeStdin(self):
-		"""Method to write to the process stdin pipe.
-		
-		"""
-		while self._outQueue:
-			try:
-				data = self._outQueue.get(block=True, timeout=0.25)
-			except Queue.Empty:
-				if not self.running():
-					break
-			else:
-				with self.__lock:
-					if self.__stdin:
-						win32file.WriteFile(self.__stdin, data, None)
 
+	def _writeStdin(self, data):
+		with self.__lock:
+			if not self.__stdin: return
+			if data is None:
+				win32file.CloseHandle(self.__stdin)
+			else:
+				win32file.WriteFile(self.__stdin, data, None)
 
 	def __quotePath(self, input):
 		"""Private method to escape a windows path according to documented guidelines for this OS.

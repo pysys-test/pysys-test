@@ -177,7 +177,7 @@ class Process(object):
 			raise ProcessError("Error sending signal %s to process %r"%(signal, self))
 
 
-	def write(self, data, addNewLine=True):
+	def write(self, data, addNewLine=True, closeStdinAfterWrite=False):
 		"""Write binary data to the stdin of the process.
 		
 		Note that when the addNewLine argument is set to true, if a new line does not 
@@ -186,18 +186,21 @@ class Process(object):
 		require to add data without the method appending a new line charater set 
 		addNewLine to false.
 		
-		:param data: The data to write to the process stdin. 
+		:param bytes|str data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
 			given by ``PREFERRED_ENCODING``. 
-		:param addNewLine: True if a new line character is to be added to the end of 
+		:param bool addNewLine: True if a new line character is to be added to the end of 
 			the data string
+		:param bool closeStdinAfterWrite: If True, the stdin file handle will be closed after this write. 
+			Added in v2.1. 
+			
 		
 		"""
 		if not self.running(): raise Exception('Cannot write to process stdin when it is not running')
 		
-		if not data: return
+		if data is None: return
 		if type(data) != binary_type:
 			data = data.encode(PREFERRED_ENCODING)
 		if addNewLine and not data.endswith(b'\n'): data = data+b'\n'
@@ -205,10 +208,23 @@ class Process(object):
 		if self._outQueue == None:
 			# start thread on demand
 			self._outQueue = Queue.Queue()
-			t = threading.Thread(target=self.writeStdin, name='pysys.stdinreader_%s'%str(self), daemon=True)
+			
+			def writeStdinThread():
+				while self._outQueue:
+					try:
+						data = self._outQueue.get(block=True, timeout=0.25)
+					except Queue.Empty:
+						if not self.running(): 
+							# no need to close stdin here, as previous call's setExitCode() method will do it
+							break
+					else:
+						self._writeStdin(data)
+			
+			t = threading.Thread(target=writeStdinThread, name='pysys.stdinreader_%s'%str(self), daemon=True)
 			t.start()
 			
-		self._outQueue.put(data)
+		if data: self._outQueue.put(data)
+		if closeStdinAfterWrite: self._outQueue.put(None) # None is a sentinel value for EOF
 		
 	def running(self):
 		"""Check to see if a process is running.

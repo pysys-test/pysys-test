@@ -3,19 +3,10 @@
 #
 import time, sys, os.path
 
-def run(loops):
-	count = 0
-	while 1:
-		line = sys.stdin.readline()
-		sys.stdout.write("Line (%s): Read in %s" % (count, line))
-		sys.stdout.flush()
-		count = count + 1
-		if count >= loops: break
-		time.sleep(0.5)
-
-# entry point for running the script as an executable
-if __name__ == "__main__":
-	if len(sys.argv) < 1:
-		sys.stdout.write("Usage: %s <count>\n" % os.path.basename(sys.argv[0]))
-	else:
-		run(int(sys.argv[1]))
+count = 0
+for line in sys.stdin:
+	sys.stdout.write("Line %s: Read in %r\n" % (count, line))
+	sys.stdout.flush()
+	count+=1
+sys.stdout.write('EOF\n')
+sys.stdout.flush()
