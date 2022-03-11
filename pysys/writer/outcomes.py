@@ -271,65 +271,61 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 		
-		try:
-			self.fp = io.open(toLongPathSafe(self.logfile), "wb")
-		
-			impl = getDOMImplementation()
-			self.document = impl.createDocument(None, "pysyslog", None)
-			if self.stylesheet:
-				stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (self.stylesheet))
-				self.document.insertBefore(stylesheet, self.document.childNodes[0])
-
-			# create the root and add in the status, number of tests and number completed
-			self.rootElement = self.document.documentElement
-			self.statusAttribute = self.document.createAttribute("status")
-			self.statusAttribute.value="running"
-			self.rootElement.setAttributeNode(self.statusAttribute)
-
-			self.completedAttribute = self.document.createAttribute("completed")
-			self.completedAttribute.value="%s/%s" % (self.numResults, self.numTests)
-			self.rootElement.setAttributeNode(self.completedAttribute)
+		self.fp = io.open(toLongPathSafe(self.logfile), "wb")
 	
-			# add the data node
-			element = self.document.createElement("timestamp")
-			element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
-			self.rootElement.appendChild(element)
+		impl = getDOMImplementation()
+		self.document = impl.createDocument(None, "pysyslog", None)
+		if self.stylesheet:
+			stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (self.stylesheet))
+			self.document.insertBefore(stylesheet, self.document.childNodes[0])
 
-			# add the platform node
-			element = self.document.createElement("platform")
-			element.appendChild(self.document.createTextNode(PLATFORM))
-			self.rootElement.appendChild(element)
+		# create the root and add in the status, number of tests and number completed
+		self.rootElement = self.document.documentElement
+		self.statusAttribute = self.document.createAttribute("status")
+		self.statusAttribute.value="running"
+		self.rootElement.setAttributeNode(self.statusAttribute)
 
-			# add the test host node
-			element = self.document.createElement("host")
-			element.appendChild(self.document.createTextNode(HOSTNAME))
-			self.rootElement.appendChild(element)
+		self.completedAttribute = self.document.createAttribute("completed")
+		self.completedAttribute.value="%s/%s" % (self.numResults, self.numTests)
+		self.rootElement.setAttributeNode(self.completedAttribute)
 
-			# add the test host node
-			element = self.document.createElement("root")
-			element.appendChild(self.document.createTextNode(self.__pathToURL(kwargs['runner'].project.root)))
-			self.rootElement.appendChild(element)
+		# add the data node
+		element = self.document.createElement("timestamp")
+		element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
+		self.rootElement.appendChild(element)
 
-			# add the extra params nodes
-			element = self.document.createElement("xargs")
-			if "xargs" in kwargs: 
-				for key in list(kwargs["xargs"].keys()):
-					childelement = self.document.createElement("xarg")
-					nameAttribute = self.document.createAttribute("name")
-					valueAttribute = self.document.createAttribute("value") 
-					nameAttribute.value=key
-					valueAttribute.value=kwargs["xargs"][key].__str__()
-					childelement.setAttributeNode(nameAttribute)
-					childelement.setAttributeNode(valueAttribute)
-					element.appendChild(childelement)
-			self.rootElement.appendChild(element)
-				
-			# write the file out
-			self._writeXMLDocument()
+		# add the platform node
+		element = self.document.createElement("platform")
+		element.appendChild(self.document.createTextNode(PLATFORM))
+		self.rootElement.appendChild(element)
+
+		# add the test host node
+		element = self.document.createElement("host")
+		element.appendChild(self.document.createTextNode(HOSTNAME))
+		self.rootElement.appendChild(element)
+
+		# add the test host node
+		element = self.document.createElement("root")
+		element.appendChild(self.document.createTextNode(self.__pathToURL(kwargs['runner'].project.root)))
+		self.rootElement.appendChild(element)
+
+		# add the extra params nodes
+		element = self.document.createElement("xargs")
+		if "xargs" in kwargs: 
+			for key in list(kwargs["xargs"].keys()):
+				childelement = self.document.createElement("xarg")
+				nameAttribute = self.document.createAttribute("name")
+				valueAttribute = self.document.createAttribute("value") 
+				nameAttribute.value=key
+				valueAttribute.value=kwargs["xargs"][key].__str__()
+				childelement.setAttributeNode(nameAttribute)
+				childelement.setAttributeNode(valueAttribute)
+				element.appendChild(childelement)
+		self.rootElement.appendChild(element)
 			
-		except Exception:
-			log.info("caught %s in XMLResultsWriter: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
+		# write the file out
+		self._writeXMLDocument()
+			
 	def cleanup(self, **kwargs):
 		# Updates the test run status in the DOM, and re-writes to logfile.
 
