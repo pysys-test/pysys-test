@@ -14,11 +14,13 @@ Change Log
 What's new in 2.1
 -----------------
 
-PySys 2.1 is under development. 
+PySys 2.1 was released on March 2022. 
 
-New features:
+The main changes are new features to help with triaging performance results, and improved usability for the new 
+``pysystest.py`` descriptor format and modes support that was added in v2.0. This release also add support for 
+Python 3.10, upgrades to the sample GitHub Actions workflows, and a lot of minor enhancements and fixes. 
 
-New features related to ``pysystest.py`` descriptors:
+Enhancements in ``pysystest.py`` descriptors:
 
 - Descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
   approach used for non-Python ``pysys.*`` files. This allows normal Python syntax to be used for things like 
@@ -31,9 +33,9 @@ New features related to ``pysystest.py`` descriptors:
 - Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
   most cases users would prefer not to worry about it. 
 
-New features related to reporting of performance testing:
+New features related around performance testing:
 
-- Added details documentation about how to use PySys for performance testing to the :doc:`/pysys/UserGuide`. 
+- Added detailed documentation about how to use PySys for performance testing to the :doc:`/pysys/UserGuide`. 
 - Added a new performance reporter class `pysys.perf.reporters.JSONPerformanceReporter` which writes performance 
   results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
   as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
@@ -70,12 +72,6 @@ Misc new features:
   
     DeprecationWarning: getargs: The 'u' format is deprecated. Use 'U' instead.
   
-- Added `pysys.writer.outcomes.JSONResultsWriter` which writes test outcomes (and the runner's ``runDetails``) to a 
-  single machine-readable ``.json`` file. 
-- Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which will 
-  automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
-- Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 
-  wait for End Of File before completing. 
 - Changed the behaviour of the ``assertMessage`` in all assertion methods (e.g. `BaseTest.assertGrep`) so that instead 
   of replacing the default PySys message (e.g. ``Grep on foo.txt contains "Bar"``), it will be added before the 
   default message, when the assertion fails. This means there is no loss of information when using ``assertMessage=``, 
@@ -84,6 +80,12 @@ Misc new features:
   
     self.assertLineCount('server.log', 'ERROR ', condition='<= 10', 
       assertMessage='Assert that throttling of error messages keeps them below configured limit')
+- Added `pysys.writer.outcomes.JSONResultsWriter` which writes test outcomes (and the runner's ``runDetails``) to a 
+  single machine-readable ``.json`` file. 
+- Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which will 
+  automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
+- Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 
+  wait for End Of File before completing. 
 
 - The ``detailMessage`` passed to `BaseTest.waitForGrep` is now added at the beginning rather than the end of the 
   log line, to make the user's high-level description of what is being waited for more prominent::
