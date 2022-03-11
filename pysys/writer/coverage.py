@@ -102,9 +102,6 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		super(PythonCoverageWriter, self).setup(*args, **kwargs)
 		import coverage
 		if self.includeCoverageFromPySysProcess:
-			if sys.version_info[0] == 2: 
-				log.warning('Ignoring includeCoverageFromPySysProcess option - not supported by Python 2')
-				return
 			args = self.getCoverageArgsList()
 			assert len(args)==1 and args[0].startswith('--rcfile='), 'includeCoverageFromPySysProcess can only be used if pythonCoverageArgs is set to "--rcfile=XXXX"'
 			mkdir(self.destDir)

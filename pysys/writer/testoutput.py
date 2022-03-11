@@ -37,7 +37,7 @@ from pysys.constants import *
 from pysys.writer.api import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, openfile
+from pysys.utils.pycompat import openfile
 from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.writer')
@@ -157,7 +157,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		if self.skippedTests:
 			# if we hit a limit, at least record the names of the tests we missed
 			mkdir(self.destDir)
-			with openfile(self.destDir+os.sep+'skipped_artifacts.txt', 'w', encoding=None if PY2 else 'utf-8') as f:
+			with openfile(self.destDir+os.sep+'skipped_artifacts.txt', 'w', encoding='utf-8') as f:
 				f.write('\n'.join(os.path.normpath(t) for t in self.skippedTests))
 		
 		(log.info if self.archivesCreated else log.debug)('%s created %d test output archive artifacts in: %s', 
@@ -221,8 +221,6 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 		try:
 			outputDir = toLongPathSafe(outputDir)
-			if PY2: # it's simpler if we always deal with unicode strings (which would happen on windows anyway due to the longpathsafe stuff)
-				if isinstance(outputDir, str): outputDir = unicode(outputDir, PREFERRED_ENCODING)
 			skippedFiles = []
 			
 			# this is performance-critical so worth caching these

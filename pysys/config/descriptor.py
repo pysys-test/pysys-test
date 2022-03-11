@@ -33,7 +33,7 @@ import pysys
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
+from pysys.utils.pycompat import isstring
 
 log = logging.getLogger('pysys.config.descriptor')
 

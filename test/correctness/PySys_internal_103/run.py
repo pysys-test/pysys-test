@@ -1,7 +1,6 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.manual.ui import ManualTester
-from pysys.utils.pycompat import PY2
 
 class PySysTest(BaseTest):
 	def execute(self):

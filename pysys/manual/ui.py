@@ -23,10 +23,7 @@ The Manual Test User Interface used by `pysys.basetest.BaseTest.startManualTeste
 
 import sys
 try:
-	if sys.version_info[0] == 2:
-		from Tkinter import *
-	else:
-		from tkinter import *
+	from tkinter import *
 except Exception:
 	pass 
 

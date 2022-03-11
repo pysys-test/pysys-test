@@ -1,7 +1,6 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.exceptions import *
-from pysys.utils.pycompat import PY2
 
 class PySysTest(BaseTest):
 	testBooleanProperty = False

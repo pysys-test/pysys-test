@@ -1,7 +1,7 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.exceptions import *
-from pysys.utils.pycompat import PY2, openfile
+from pysys.utils.pycompat import openfile
 from pysys.utils.fileutils import *
 
 class PySysTest(BaseTest):

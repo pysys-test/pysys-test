@@ -27,10 +27,7 @@ Thread pool implementation used by BaseRunner.
 # with minor modifications.
  
 import sys, time, threading, traceback
-if sys.version_info[0] == 2:
-	import Queue
-else:
-	import queue as Queue
+import queue as Queue
 
 from pysys import log
 
