@@ -144,7 +144,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		self.skippedTests = []
 		self.archivesCreated = 0
 		
-		self.includeNonFailureOutcomes = map(str,OUTCOMES) if self.includeNonFailureOutcomes=='*' else [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		self.includeNonFailureOutcomes = [str(o) for o in OUTCOMES] if self.includeNonFailureOutcomes=='*' else [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
 		for o in self.includeNonFailureOutcomes:
 			if not any(o == str(outcome) for outcome in OUTCOMES):
 				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)
