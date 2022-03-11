@@ -182,6 +182,16 @@ class TestDescriptor(object):
 		
 		self.userData = collections.OrderedDict() if userData is None else userData
 	
+	def _getTestFile(self):
+		# undocumented API currently
+		# Gets the file containing the test logic - typically a .py file, but could be some other format e.g. .java (but not XML)
+		# Usually relative to testDir, but may be an absolute path
+		if self.file.endswith('.xml'):
+			return self.module
+		
+		if self.file.startswith(self.testDir): return self.file[len(self.testDir)+1:]
+		return self.file
+	
 	def _createDescriptorForMode(self, mode):
 		"""
 		Internal API for creating a test descriptor for a specific mode of this test.

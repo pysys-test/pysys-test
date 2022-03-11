@@ -1,3 +1,4 @@
+# -*- coding: latin-1 -*-
 
 from pysys.constants import *
 from pysys.basetest import BaseTest

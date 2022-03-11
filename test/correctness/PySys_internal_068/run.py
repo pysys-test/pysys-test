@@ -156,7 +156,7 @@ class PySysTest(BaseTest):
 			expected=u'NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
 
 		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 
-			expected='2%srun.log:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])'%os.sep)
+			expected=f'NestedNotVerified{os.sep}run.py:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])')
 
 		js = pysys.utils.fileutils.loadJSON(self.output+'/__pysys_outcomes.json')
 		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results'])

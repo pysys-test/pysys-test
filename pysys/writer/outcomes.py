@@ -23,7 +23,7 @@ Writers that record test outcomes to a variety of file formats.
 """
 
 __all__ = [
-	"TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter",
+	"TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter","JSONResultsWriter",
 	]
 
 import time, stat, logging, sys, io
@@ -85,8 +85,19 @@ class flushfile():
 class JSONResultsWriter(BaseRecordResultsWriter):
 	"""Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner.
 	
-	Note that times are given in local timezone using format ``%Y-%m-%d %H:%M:%S``. 
+	The following fields are always included for each test result:
 	
+	  - testId: the test id, including ``~mode`` suffix if it has modes defined.
+	  - outcome: the outcome string e.g. "NOT VERIFIED". 
+	  - outcomeReason: the string explaining the reason for the outcome, or empty if not available. 
+	  - startTime: the time the test started, in ``%Y-%m-%d %H:%M:%S`` format and in the local timezone.
+	  - durationSecs: how long the test executed for (or ``None``/``null`` if unknown). 
+	  - testDir: the path to this test under the ``testRootDir``, using forward slashes. 
+	  - testFile: the path (typically relative to testDir, using forward slashes) of the main file containing the 
+	    test's logic, e.g. ``pysystest.py``, ``run.py`` etc. This is usually, but not always, a Python file. 
+
+	If applicable, some tests/runs may have additional fields such as ``cycle``, ``title`` and ``outputDir``. 
+
 	.. versionadded:: 2.1
 	
 	"""
@@ -101,7 +112,7 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 	includeNonFailureOutcomes = '*'
 	"""
 	In addition to failure outcomes, any outcomes listed here (as comma-separated display names, e.g. 
-	``"NOT VERIFIED, INSPECT"``) will be included. To include all outcomes, set this to the special value ``"*"``. 
+	``"NOT VERIFIED, INSPECT"``) will be included. To include all non-failure outcomes, set this to the special value ``"*"``. 
 	
 	To save disk space and record only failure outcomes, you may set this to an empty string. 
 	"""
@@ -114,12 +125,15 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 	"""
 	
 	def __init__(self, logfile, **kwargs):
+		super().__init__(logfile, **kwargs)
 		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.fp = None
 
 	def setup(self, **kwargs):
-		self.includeNonFailureOutcomes = map(str,OUTCOMES) if self.includeNonFailureOutcomes=='*' else [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		self.runner = kwargs['runner']
+		# NB: this method is also called by ConsoleFailureAnnotationsWriter
+		self.includeNonFailureOutcomes = [str(o) for o in OUTCOMES] if self.includeNonFailureOutcomes=='*' else [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
 		for o in self.includeNonFailureOutcomes:
 			if not any(o == str(outcome) for outcome in OUTCOMES):
 				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)
@@ -163,10 +177,11 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 			'outcome': str(testObj.getOutcome()),
 			'outcomeReason': testObj.getOutcomeReason(),
 			'startTime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime( kwargs.get('testStart', time.time()) )),
-			'durationSecs': kwargs.get("testTime", None),
+			'durationSecs': kwargs.get("testTime", -1),
 			'testDir': testDir.replace('\\', '/'),
+			'testFile': testObj.descriptor._getTestFile().replace('\\','/'),
 		}
-		if self.cycles:
+		if self.cycles > 1:
 			data['cycle'] = kwargs["cycle"]+1
 		if testObj.descriptor.output != 'Output': data['outputDir'] = testObj.descriptor.output.replace('\\', '/')
 		

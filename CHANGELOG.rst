@@ -72,6 +72,11 @@ Misc new features:
   
 - Added `pysys.writer.outcomes.JSONResultsWriter` which writes test outcomes (and the runner's ``runDetails``) to a 
   single machine-readable ``.json`` file. 
+- Added a ``@json@`` substitution value to the `pysys.writer.console.ConsoleFailureAnnotationsWriter` class which can 
+  be used to provide comprehensive machine-readable information about each test result. 
+- Changed the behaviour of `pysys.writer.console.ConsoleFailureAnnotationsWriter` so that if a format is provided by 
+  the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable it will always override any ``format`` in the 
+  ``pysysproject.xml`` configuration. 
 - Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which will 
   automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
 - Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 
@@ -115,6 +120,8 @@ Fixes:
   contents of the file being displayed. 
 - When using ``--threads=auto``, the number of available CPUs is now based on the number available to the PySys 
   process (``len(os.sched_getaffinity(0))``) rather than the total number of physical CPUs on the machine. 
+- Fixed the `pysys.writer.console.ConsoleFailureAnnotationsWriter` ``@testFile@`` fallback to point to the Python file 
+  when there was no failure outcome. 
 
 Deprecations:
 
