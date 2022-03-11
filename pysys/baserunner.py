@@ -863,7 +863,7 @@ class BaseRunner(ProcessUser):
 		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
 		assert isinstance(unit, pysys.perf.api.PerformanceUnit), repr(unit)
 
-		if testObj.getOutcome().isFailure(): # pragma: no cover
+		if testObj.getOutcome().isFailure() and testObj.getOutcome() != BADPERF: # pragma: no cover
 			testObj.log.warning('Performance result "%s" will not be recorded as test has failed so results could be invalid', resultKey)
 			return
 		

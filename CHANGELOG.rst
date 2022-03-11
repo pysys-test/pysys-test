@@ -16,9 +16,7 @@ What's new in 2.1
 
 PySys 2.1 is under development. 
 
-New features:
-
-New features related to ``pysystest.py`` descriptors:
+New features to make ``pysystest.py`` descriptors easier to use:
 
 - Descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
   approach used for non-Python ``pysys.*`` files. This allows normal Python syntax to be used for things like 
@@ -31,21 +29,21 @@ New features related to ``pysystest.py`` descriptors:
 - Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
   most cases users would prefer not to worry about it. 
 
-New features related to reporting of performance testing:
+New features related to performance testing:
 
-- Added details documentation about how to use PySys for performance testing to the :doc:`/pysys/UserGuide`. 
-- Added a new performance reporter class `pysys.perf.reporters.JSONPerformanceReporter` which writes performance 
-  results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
-  as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
 - Added a new performance reporter class `pysys.perf.reporters.PrintSummaryPerformanceReporter` which prints a 
   summary of performance results (including mean and stdDev calculation if aggregating across multiple cycles) at the 
   end of the test run. This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
-  not explicit list of ``<performance-reporters>`` has been configured. 
+  an explicit list of ``<performance-reporters>`` has been configured in ``pysysproject.xml``. 
 - The default performance reporter class `pysys.perf.reporters.CSVPerformanceReporter` has a new property 
   called ``aggregateCycles`` which instructs it to automatically rewrite the summary file at the end of a run where you 
   have executed multiple cycles, to give aggregate statistics such as mean and standard deviation (and 
   ``samples``=``cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
   generate stable numbers for comparisons while optimizing your application. 
+- Added documentation about how to use PySys for performance testing to the :doc:`/pysys/UserGuide`. 
+- Added a new performance reporter class `pysys.perf.reporters.JSONPerformanceReporter` which writes performance 
+  results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
+  as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
 - Extended the performance reporter API. Added a new class `pysys.perf.api.BasePerformanceReporter` for creating 
   custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for 
   each using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
@@ -63,6 +61,9 @@ New features related to reporting of performance testing:
 - Added ``pysys run`` option ``--sort=random`` which randomly sorts/shuffles the order of tests and modes within each 
   cycle. This is useful for reducing systematic performance interactions between different tests/modes when running 
   multiple cycles. 
+- Added a new test outcome `pysys.constants.BADPERF` which can be used instead of ``FAILED`` to indicate the measured 
+  performance was deemed insufficient. Unlike other failure outcomes, ``BADPERF`` does not prevent subsequent numeric 
+  results from being recorded by `BaseTest.reportPerformanceResult`. 
 
 Misc new features:
 
