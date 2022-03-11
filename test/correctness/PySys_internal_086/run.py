@@ -76,13 +76,13 @@ class PySysTest(BaseTest):
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
-					'PYTHONIOENCODING':None if PY2 else 'ascii', # sets stdout encoding
+					'PYTHONIOENCODING':'ascii', # sets stdout encoding
 					}, LANG='ascii')))
 			runid=os.path.basename(self.mkdir('default=ascii,stdout=none,color=false,threads=2'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'false', # this affects the stdout stream
-					'PYTHONIOENCODING': None if PY2 else 'ascii', # sets stdout encoding
+					'PYTHONIOENCODING': 'ascii', # sets stdout encoding
 					}, LANG='ascii')))
 				
 		runid=os.path.basename(self.mkdir('default=utf8,stdout=ascii,color=true,threads=2'))
@@ -95,7 +95,7 @@ class PySysTest(BaseTest):
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
-				'PYTHONIOENCODING':None if PY2 else 'utf-8', # sets stdout encoding
+				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
 		runid=os.path.basename(self.mkdir('default=utf8,stdout=utf8,color=false,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
@@ -136,8 +136,6 @@ class PySysTest(BaseTest):
 
 			
 			# sanity check that nested python is running with expected locale, which rest of testcase assumes
-			if PY2:
-				self.assertGrep('default=ascii,stdout=none,color=false,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(ascii|ANSI_X3.4-1968), stdout encoding=None')
 			self.assertGrep('default=ascii,stdout=utf8,color=true,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(ascii|ANSI_X3.4-1968), stdout encoding=(utf-8)', encoding='utf-8')
 			self.assertGrep('default=utf8,stdout=ascii,color=true,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(utf-8|UTF-8), stdout encoding=(ascii|ANSI_X3.4-1968)')
 
@@ -154,8 +152,7 @@ class PySysTest(BaseTest):
 			
 			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message without i18n.*string', encoding='utf-8') # byte format strings are formatted differently in py 2 vs 3
 			
-			if not PY2:
-				self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message including i18n string .+ end', encoding='utf-8')
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message including i18n string .+ end', encoding='utf-8')
 			
 			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED: outcome reason .+end"', encoding='utf-8')
 			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED: outcome reason %s end"'%self.utf8teststring, encoding='utf-8')
@@ -193,8 +190,7 @@ class PySysTest(BaseTest):
 				
 				# test messages aren't entirely lost
 				self.assertGrep(outfile, expr='Log message including i18n string .+ end', encoding=enc)
-				if not PY2: # in python2 this would give an exception in the run.py so we don't even attempt it
-					self.assertGrep(outfile, expr='Log bytes message including i18n string .+ end', encoding=enc)
+				self.assertGrep(outfile, expr='Log bytes message including i18n string .+ end', encoding=enc)
 				self.assertGrep(outfile, expr='Other log message', encoding=enc)
 				self.assertGrep(outfile, expr='Test outcome reason: %soutcome reason.*end'%('.*' if outfile.endswith('.out') else ''), encoding=enc)
 

@@ -1,7 +1,6 @@
 # -*- coding: latin-1 -*-
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.utils.pycompat import PY2
 import io, locale
 
 # contains a non-ascii � character that is different in utf-8 vs latin-1

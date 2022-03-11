@@ -2,7 +2,6 @@ import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, re, shutil
-from pysys.utils.pycompat import PY2
 from pysys.utils.fileutils import *
 from pysys.config.project import createProjectConfig
 

@@ -109,9 +109,7 @@ class PySysTest(BaseTest):
 			'[0-9].*Summary of failures: ',
 			'[0-9].*CYCLE 1.*TIMED OUT.*NestedTimedout',
 			'[0-9].*Reason for timed out outcome is general tardiness - %s'%(
-				# stdout seems to get written in utf-8 not local encoding on python2 for some unknown reason, so skip verification of extra chars on that version; 
-				# for python 3 we can do the full verification
-				'Hello' if sys.version_info[0] == 2 else TEST_STR),
+				TEST_STR),
 			'[0-9].*CYCLE 1.*FAILED.*NestedFail',
 			'[0-9].*CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])

@@ -3,7 +3,6 @@ import gzip
 import io, locale
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.utils.pycompat import PY2
 from pysys.utils.fileunzip import *
 
 # for test string, use all possible newline types, and also some non-ascii characters that would 

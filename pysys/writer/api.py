@@ -95,7 +95,6 @@ import shlex
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, openfile
 from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.writer')

@@ -38,7 +38,7 @@ from pysys.constants import *
 from pysys.writer.api import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, openfile
+from pysys.utils.pycompat import openfile
 from pysys.exceptions import UserError
 
 from xml.dom.minidom import getDOMImplementation
@@ -229,7 +229,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 
-		self.fp = flushfile(openfile(self.logfile, "w", encoding=None if PY2 else 'utf-8'))
+		self.fp = flushfile(openfile(self.logfile, "w", encoding='utf-8'))
 		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
 		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
@@ -543,7 +543,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 
-		self.fp = flushfile(openfile(self.logfile, "w", encoding=None if PY2 else 'utf-8'))
+		self.fp = flushfile(openfile(self.logfile, "w", encoding='utf-8'))
 		self.fp.write('id, title, cycle, startTime, duration, outcome\n')
 
 	def cleanup(self, **kwargs):

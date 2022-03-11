@@ -24,10 +24,7 @@ import string, os.path, time, logging, sys, threading, platform
 
 import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, win32job
 
-if sys.version_info[0] == 2:
-	import Queue
-else:
-	import queue as Queue
+import queue as Queue
 
 from pysys import process_lock
 from pysys.constants import *

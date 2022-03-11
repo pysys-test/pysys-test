@@ -1166,12 +1166,6 @@ class TestContainer(object):
 					if self.descriptor.mode:
 						self.outsubdir += '~'+self.descriptor.mode
 
-				# In python2, ensure self.output is a byte string not a unicode string even when --outdir abspath is specified
-				if PY2 and isinstance(self.outsubdir, unicode):
-					self.outsubdir = self.outsubdir.encode()
-					# special-case for custom descriptor loader which gives us \\?\ paths
-					if self.outsubdir.startswith(u'\\\\?\\'): self.outsubdir = fromLongPathSafe(self.outsubdir)
-
 				try:
 					if not self.runner.validateOnly: 
 						if self.runner.cycle <= 1: 

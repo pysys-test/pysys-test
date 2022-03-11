@@ -1,7 +1,6 @@
 # -*- coding: latin-1 -*-
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.utils.pycompat import PY2
 import io, locale
 
 # contains a non-ascii � character that is different in utf-8 vs latin-1
@@ -28,10 +27,9 @@ class PySysTest(BaseTest):
 		# re.search(TEST_STR,TEST_STR.encode('utf-8'))==False
 		# (python 3 doesn't have that issue). since the goal here is mostly to check current behaviour 
 		# hasn't changed, just skip the weirdness
-		if (not PY2) or TEST_ENCODING == 'utf-8':
-			self.assertLineCount('test-local.txt', expr=TEST_STR, condition='==2')
-			self.assertGrep('test-local.txt', expr=TEST_STR, contains=True)
-			self.waitForGrep('test-local.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
+		self.assertLineCount('test-local.txt', expr=TEST_STR, condition='==2')
+		self.assertGrep('test-local.txt', expr=TEST_STR, contains=True)
+		self.waitForGrep('test-local.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
 
 		if not exceptionReadingNonLocal:
 			self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==0')
@@ -44,24 +42,6 @@ class PySysTest(BaseTest):
 		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True, encoding=TEST_ENCODING)
 
 		# test using a bytes object, currently works only for Python 2
-		if not PY2:
-			self.log.info('skipping tests that use a bytes object as not currently supported for Python 3')
-			# we could potentially get this working by having assertLineCount/assertGrep open files in 
-			# binary mode if a bytes object was passed for the expr, if we wanted to
-			return
-		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==0')
-		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), condition='==2')
-		
-		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2')
-		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), condition='==0')
-		# this one varies depending on utf8/latin1, so condition is permissive; just here to ensure there's no exception
-		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='>=0', encoding=TEST_ENCODING)
-
-		self.assertGrep('test-local.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=False)
-		self.assertGrep('test-local.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), contains=True)
-
-		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=True)
-		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), contains=False)
-
-		self.waitForGrep('test-local.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), condition='==2', timeout=2, abortOnError=True)
-		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2', timeout=2, abortOnError=True)
+		self.log.info('skipping tests that use a bytes object as not currently supported for Python 3')
+		# we could potentially get this working by having assertLineCount/assertGrep open files in 
+		# binary mode if a bytes object was passed for the expr, if we wanted to

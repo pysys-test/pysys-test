@@ -1,7 +1,6 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.utils.pycompat import PY2
 
 class PySysTest(BaseTest):
 

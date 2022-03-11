@@ -19,8 +19,7 @@ class PySysTest(BaseTest):
 		self.log.info(u'Log message including i18n string %s end', utf8teststring) # unicode string
 		
 		self.log.info(b'Log bytes message without i18n %s', b'string') # byte string - fine
-		if not PY2: # doesn't work in python 2
-			self.log.info(b'Log bytes message including i18n string %s end'%utf8teststring.encode('utf-8')) # byte string
+		self.log.info(b'Log bytes message including i18n string %s end'%utf8teststring.encode('utf-8')) # byte string
 		
 		self.log.info('Logging file using latin-1 encoding:') # check logging still works
 		assert self.logFileContents('utf8.txt', encoding='latin-1') # deliberately use wrong encoding

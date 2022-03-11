@@ -2,7 +2,6 @@ import time, logging, sys, threading, os
 
 from pysys.writer import BaseResultsWriter
 from pysys.utils.logutils import stdoutPrint
-from pysys.utils.pycompat import PY2
 
 log = logging.getLogger('pysys.writer')
 

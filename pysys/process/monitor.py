@@ -230,7 +230,6 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 	def __init__(self, file, columns=None, delimiter=None, writeHeaderLine=None):
 		self.columns = columns or self.DEFAULT_COLUMNS
 		self.delimiter = delimiter or self.DEFAULT_DELIMITER
-		if PY2 and isinstance(self.delimiter, str): self.delimiter=self.delimiter.decode('utf-8')
 		assert file, 'file must be specified'
 		if isstring(file):
 			assert os.path.isabs(file), 'File must be an absolute path: %s'%file

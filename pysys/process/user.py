@@ -1363,13 +1363,6 @@ class ProcessUser(object):
 			if outcomeReason is None:
 				outcomeReason = ''
 			else: 
-				if PY2 and isinstance(outcomeReason, str): 
-					# The python2 logger is very unhappy about byte str objects containing 
-					# non-ascii characters (specifically it will fail to log them and dump a 
-					# traceback on stderr). Since it's pretty important that assertion 
-					# messages and test outcome reasons don't get swallowed, add a 
-					# workaround for this here. Not a problem in python 3. 
-					outcomeReason = outcomeReason.decode('ascii', errors='replace')
 				outcomeReason = stripANSIEscapeCodes(outcomeReason).strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
 			
 			if override: 
@@ -2330,7 +2323,7 @@ class ProcessUser(object):
 					if e.is_symlink() and symlinks:
 						linkdest = dest+os.sep+os.path.basename(path)
 						os.symlink(os.readlink(path), linkdest)
-						shutil.copystat(path, linkdest, **({} if PY2 else {'follow_symlinks':False}))
+						shutil.copystat(path, linkdest, follow_symlinks=False)
 						continue
 					
 					self.copy(path, dest+os.sep+os.path.basename(path), 

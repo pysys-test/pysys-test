@@ -5,7 +5,6 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, math, shutil, glob, re
 import xml.dom.minidom
-from pysys.utils.pycompat import PY2
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -41,11 +40,6 @@ class PySysTest(BaseTest):
 
 		escapedcontrolchars = re.escape(u'!? !? tab\x09tab !? !? !? !? !? !? space\x20space BMP: \uD7FF \uE000 \uFFFD !? !?')
 		smpchars = re.escape(u' SMP: \U00010000 \U00010001 \U0010FFFF')
-		if PY2:
-			# python 2 has less good support for supplementary multilingual plane characters, 
-			# though some builds of python (e.g. on Travis) seem to work ok. 
-			#check we get either correct characters, or that it degrades gracefully with some substitution chars
-			smpchars = u'('+smpchars+u'|'+re.escape(u' SMP: ?? ?? ??')+u')'
 		escapedcontrolchars += smpchars
 		self.logFileContents('junit-report/TEST-NestedFail.xml', encoding='utf-8', includes=['Log with control characters:.*'])
 		self.assertGrep('junit-report/TEST-NestedFail.xml', expr=u'Log with control characters: .+ end', encoding='utf-8')

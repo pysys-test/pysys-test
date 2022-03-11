@@ -33,10 +33,7 @@ def stripANSIEscapeCodes(text):
 	"""
 	if not text: return text
 	
-	if PY2 and isinstance(text, binary_type):
-		return re.sub(b'\\033\\[[0-9;]+m', b'', text)
-	else:
-		return re.sub(u'\\033\\[[0-9;]+m', u'', text)
+	return re.sub(u'\\033\\[[0-9;]+m', u'', text)
 
 class BaseLogFormatter(logging.Formatter):
 	"""Base class for formatting log messages.
