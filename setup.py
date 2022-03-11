@@ -37,7 +37,6 @@ assert int(setuptools.__version__.split(".", 1)[0]) >= 37, 'Please upgrade setup
 # classifiers come from PyPi's official list https://pypi.org/classifiers/
 PLATFORMS_CLASSIFIERS = [
 	"Operating System :: Microsoft :: Windows",
-	"Operating System :: POSIX :: SunOS/Solaris",
 	"Operating System :: POSIX :: Linux",
 	"Operating System :: OS Independent",
 	"Operating System :: MacOS",
@@ -52,6 +51,7 @@ CLASSIFIERS = [
 	"Programming Language :: Python :: 3.7", 
 	"Programming Language :: Python :: 3.8", 
 	"Programming Language :: Python :: 3.9", 
+	"Programming Language :: Python :: 3.10", 
 	# see also python_requires
 	"Programming Language :: Python :: Implementation :: CPython",
 	"Environment :: Console",
