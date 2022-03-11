@@ -55,9 +55,9 @@ class PySysTest(BaseTest):
 		self.assertThatGrep('MyNewTest/pysystest.xml', 'User is "(.*)"', expected='pysystestuser', encoding='utf-8')
 		self.assertThatGrep('MyNewTest/pysystest.xml', 'Test ID is "(.*)"', expected='MyNewTest', encoding='utf-8')
 		self.assertThatGrep('MyNewTest/MySubDir/myfile.txt', 'Substituted dirname=(.*),', expected='MyNewTest', encoding='latin-1')
-		self.assertThatGrep('MyNewTest/SubDir1/Subdir2/subfile.txt', 'user=(.*)', expected='pysystestuser', encoding='utf-8')
-		self.assertGrep('MyNewTest/SubDir1/Subdir2/subfile.txt', '@', contains=False, assertMessage='Check all @@s were substituted')
-		self.assertGrep('MyNewTest/SubDir1/Subdir2/subfile.txt', '__pysys_title__', assertMessage='Check DEFAULT_DESCRIPTOR_MINIMAL did something reasonable')
+		self.assertThatGrep('MyNewTest/SubDir1/SubDir2/subfile.txt', 'user=(.*)', expected='pysystestuser', encoding='utf-8')
+		self.assertGrep('MyNewTest/SubDir1/SubDir2/subfile.txt', '@', contains=False, assertMessage='Check all @@s were substituted')
+		self.assertGrep('MyNewTest/SubDir1/SubDir2/subfile.txt', '__pysys_title__', assertMessage='Check DEFAULT_DESCRIPTOR_MINIMAL did something reasonable')
 
 		self.assertThatGrep('MyNewTestWithCustomMkdir/pysystest.xml', 'User is "(.*)"', expected='\\pysystestuser\\', encoding='utf-8')
 		self.assertThatGrep('MyNewTestWithCustomMkdir/pysystest.xml', 'Test ID is "(.*)"', expected='@@DIR_NAME@@', encoding='utf-8')
