@@ -369,6 +369,7 @@ class DefaultTestMaker(object):
 				['@@USERNAME@@', '@{USERNAME}'], 
 				['@@DIR_NAME@@', '@{DIR_NAME}'], 
 				['@@DEFAULT_DESCRIPTOR@@', '@{DEFAULT_DESCRIPTOR}'], 
+				['@@DEFAULT_DESCRIPTOR_MINIMAL@@', '@{DEFAULT_DESCRIPTOR_MINIMAL}'], 
 				['@@LINE_LENGTH_GUIDE@@', '@{LINE_LENGTH_GUIDE}'],
 			]
 		
@@ -379,11 +380,15 @@ class DefaultTestMaker(object):
 			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@USERNAME@@', '@{USERNAME}')
 			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@LINE_LENGTH_GUIDE@@', '@{LINE_LENGTH_GUIDE}')
 		
+		DEFAULT_DESCRIPTOR_MINIMAL = '\n'.join([l for l in DEFAULT_DESCRIPTOR.split('\n') if (
+			(l.startswith('#__pysys_skipped_reason__') or not l.startswith('#__pysys_'))
+			)])
 		
 		replace = [
 			(re.compile(r1.encode('ascii')), 
-				r2 # in addition to ${...] project properties, add some that are especially useful here
+				r2 # in addition to ${...} project properties, add some that are especially useful here
 					.replace('@{DEFAULT_DESCRIPTOR}', DEFAULT_DESCRIPTOR.replace('\\', '\\\\'))
+					.replace('@{DEFAULT_DESCRIPTOR_MINIMAL}', DEFAULT_DESCRIPTOR_MINIMAL.replace('\\', '\\\\'))
 					.replace('@{DATE}', self.project.startDate)
 					.replace('@{USERNAME}', self.project.username)
 					.replace('@{DIR_NAME}', os.path.basename(dest))

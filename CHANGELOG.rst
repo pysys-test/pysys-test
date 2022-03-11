@@ -108,6 +108,8 @@ Misc new features:
 - The `BaseTest.deleteDir` method (and the test output dir cleanup code) automatically changes permissions 
   and file attributes to permit deletion if possible. This is useful when dealing with tools that create read-only 
   files. 
+- Added ``pysys make`` template substitution variable ``@@DEFAULT_DESCRIPTOR_MINIMAL@@`` as an alternative to 
+  ``@@DEFAULT_DESCRIPTOR@@`` for cases where you want to exclude most of the commented example lines. 
 
 Fixes:
 
