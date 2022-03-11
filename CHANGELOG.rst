@@ -57,7 +57,7 @@ New features related around performance testing:
 - Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
   will continue to work so this is not a breaking change. 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
-  especially when performance testing. This is the value returned by Python's ``multiprocessing.cpu_count()`` function. 
+  especially when performance testing. This is the value returned by Python's ``os.cpu_count()`` function. 
 - Added ``reportPerformanceResult`` variable to ``BaseTest``, which can be set to ``True`` by any commands that would 
   make recording of performance results pointless (e.g. enablement of profiling). 
 - If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
