@@ -245,7 +245,7 @@ e.g.
 				verbosity = value
 				if '=' in verbosity:
 					loggername, verbosity = value.split('=')
-					if loggername.startswith('python:'): # this is weird and undocumented, but leave it in place just in case someone is using it
+					if loggername.startswith('python:'): # this is weird but was documented, so leave it in place just in case someone is using it
 						loggername = loggername[len('python:'):]
 						assert not loggername.startswith('pysys'), 'Cannot use python: with pysys.*' # would produce a duplicate log handler
 				else:
