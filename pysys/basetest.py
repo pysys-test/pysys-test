@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -587,6 +587,9 @@ class BaseTest(ProcessUser):
 			explicitly escaped using ``repr()``, and only permits stringifiable 
 			data structures to be used by the conditionstring. Instead use named ``keyword=`` in all new tests. 
 		
+		:param failureOutcome=FAILED: The outcome that will be added if the condition fails. For example you could 
+			set this to `pysys.constants.BADPERF` for a performance assertion. Added in PySys v2.1. 
+		
 		:param abortOnError=False: Set to True to make the test immediately abort if the
 			assertion fails. By default this method produces a BLOCKED output 
 			but does not throw if the eval(...) cannot be executed. 
@@ -600,6 +603,7 @@ class BaseTest(ProcessUser):
 		"""
 		abortOnError = kwargs.pop('abortOnError',False)
 		assertMessage = kwargs.pop('assertMessage',None)
+		failureOutcome = kwargs.pop('failureOutcome',FAILED)
 		namedvalues = {}
 		displayvalues = []
 		
@@ -650,7 +654,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(PASSED, assertMessage)
 			return True
 		else:
-			self.addOutcome(FAILED, assertMessage, abortOnError=abortOnError)
+			self.addOutcome(failureOutcome, assertMessage, abortOnError=abortOnError)
 			
 			# namesInUse impl is a bit rough-and-ready, but does a good enough job at identifying when it makes 
 			# sense to compare two of the parameters passed in

@@ -62,6 +62,9 @@ New features related around performance testing:
   make recording of performance results pointless (e.g. enablement of profiling). 
 - If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
   parameters from the test's mode will be recorded as the ``resultDetails``. 
+- Added ``failureOutcome`` parameter to `BaseTest.assertThat` which could be used to add a `pysys.constants.BADPERF` 
+  outcome for a performance assertion.
+
 
 Misc new features:
 
