@@ -240,7 +240,7 @@ License
 
 PySys System Test Framework
 
-Copyright (C) 2006-2021 M.B. Grieve
+Copyright (C) 2006-2022 M.B. Grieve
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
