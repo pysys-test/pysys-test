@@ -614,8 +614,8 @@ class BaseTest(ProcessUser):
 					if sys.version_info[0:2] >= (3, 6): # only do this if we have ordered kwargs, else it'd be non-deterministic
 						namespace.update(namedvalues) # also add in any named values we already have
 					v = pysys.utils.safeeval.safeEval(v, extraNamespace=namespace, errorMessage='Failed to evaluate named parameter %s=(%s): {error}'%(k+EVAL_SUFFIX, v))
-				except Exception as ex:
-					self.addOutcome(BLOCKED, '%s'%ex, abortOnError=abortOnError)
+				except pysys.utils.safeeval.SafeEvalException as ex:
+					self.addOutcome(BLOCKED, str(ex), abortOnError=abortOnError)
 					return False
 			else:
 				displayvalues.append(k)
@@ -640,8 +640,8 @@ class BaseTest(ProcessUser):
 			namespace['self'] = self
 			result = bool(pysys.utils.safeeval.safeEval(conditionstring, extraNamespace=namespace, errorMessage='Failed to evaluate (%s)%s - {error}'%(conditionstring, displayvalues)))
 
-		except Exception as e:
-			self.addOutcome(BLOCKED, str(e), abortOnError=abortOnError)
+		except pysys.utils.safeeval.SafeEvalException as ex:
+			self.addOutcome(BLOCKED, str(ex), abortOnError=abortOnError)
 			return False
 		
 		assertMessage = self._concatAssertMessages(assertMessage, 'Assert that (%s)%s'%(conditionstring, displayvalues), short=result)

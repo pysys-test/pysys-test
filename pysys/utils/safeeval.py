@@ -43,6 +43,8 @@ import pysys
 import importlib
 from importlib import import_module
 
+class SafeEvalException(Exception): pass
+
 def safeEval(expr, errorMessage='Failed to evaluate "{expr}" due to {error}', emptyNamespace=False, extraNamespace={}):
 	"""
 	Executes eval(...) on the specified string expression, using a controlled globals()/locals() environment to 
@@ -80,6 +82,10 @@ def safeEval(expr, errorMessage='Failed to evaluate "{expr}" due to {error}', em
 	try:
 		return eval(expr, env)
 	except Exception as e:
-		raise Exception(errorMessage.format(expr=expr.replace('\n',' ').replace('\r','').strip(), error='%s - %s'%(e.__class__.__name__, e or '<no message>')).strip())
+		log.debug('Evaluation of %r failed: ', expr, exc_info=True)
+		# nb: must use .replace() not .format() since errorMessage could include {...} string literals
+		raise SafeEvalException(errorMessage.replace('{expr}', expr.replace('\n',' ').replace('\r','').strip())
+			.replace('{error}', '%s - %s'%(e.__class__.__name__, e or '<no message>'))
+			.strip())
 
 	
