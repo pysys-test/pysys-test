@@ -106,22 +106,13 @@ class ProcessImpl(Process):
 		# private instance variables
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
 
-
-	def writeStdin(self):
-		"""Thread method to write to the process stdin pipe.
-		
-		"""
-		while self._outQueue:
-			try:
-				data = self._outQueue.get(block=True, timeout=0.25)
-			except Queue.Empty:
-				if not self.running(): 
-					# no need to close stdin here, as previous call's setExitCode() method will do it
-					break
+	def _writeStdin(self, data):
+		with self.__lock:
+			if not self.__stdin: return
+			if data is None:
+				os.close(self.__stdin)
 			else:
-				with self.__lock:
-					if self.__stdin:
-						os.write(self.__stdin, data)	
+				os.write(self.__stdin, data)	
 	
 
 	def startBackgroundProcess(self):
@@ -212,7 +203,7 @@ class ProcessImpl(Process):
 			return self.exitStatus
 
 
-	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']):
+	def stop(self, timeout=TIMEOUTS['WaitForProcessStop'], hard=False):
 		"""Stop a process running.
 		
 		Uses SIGTERM to give processes a chance to gracefully exit including dump code coverage information if needed. 
@@ -220,6 +211,11 @@ class ProcessImpl(Process):
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
+		# PySys has always done a non-hard SIGTERM on Unix; so far this seems ok but could cause problems for 
+		# poorly behaved processes that don't SIGTERM cleanly
+		
+		sig = signal.SIGKILL if hard else signal.SIGTERM
+		
 		try:
 			with self.__lock:
 				if self.exitStatus is not None: return 
@@ -227,20 +223,32 @@ class ProcessImpl(Process):
 				# do the kill before the killpg, as there's a small race in which we might try to stop a process 
 				# before it has added itself to its own process group, in which case this is essential to avoid 
 				# leaking
-				os.kill(self.pid, signal.SIGTERM)
+				os.kill(self.pid, sig)
 				
 				# nb assuming setpgrp was called when we forked, this will signal the entire process group, 
 				# so any children are also killed; small chance this could fail if the process was stopped 
 				# before it had a chance to create its process group
 				if not self.disableKillingChildProcesses:
 					try:
-						os.killpg(self.pid, SIGTERM)
-					except Exception as ex:
+						os.killpg(self.pid, sig)
+					except Exception as ex: # pragma: no cover
 						# Best not to worry about these
 						log.debug('Failed to kill process group (but process itself was killed fine) for %s: %s', self, ex)
 			
-			self.wait(timeout=timeout)
-		except Exception as ex:
-			raise ProcessError("Error stopping process: %s"%ex)
+			try:
+				self.wait(timeout=timeout)
+			except Exception as ex: # pragma: no cover
+				# if it times out on SIGTERM, do our best to SIGKILL it anyway to avoid leaking processes, but still report as an error
+				if sig != signal.SIGKILL:
+					log.warning('Failed to SIGTERM process %r, will now SIGKILL the process group before re-raising the exception', self)
+					try:
+						os.killpg(self.pid, signal.SIGKILL)
+					except Exception as ex2:
+						log.debug('Failed to SIGKILL process group %r: %s', self, ex2)
+				
+				raise
+		except Exception as ex: # pragma: no cover
+			log.debug('Failed to stop process %r: ', self, exc_info=True)
+			raise ProcessError("Error stopping process %r due to %s: %s"%(self, type(ex).__name__, ex))
 
 ProcessWrapper = ProcessImpl # old name for compatibility

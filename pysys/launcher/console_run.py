@@ -55,8 +55,12 @@ class ConsoleLaunchHelper(object):
 		self.userOptions = {}
 		self.descriptors = []
 		self.grep = None
-		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=', 'ci']
+		self.sort = None
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:s:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=",
+			"mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=', 
+			'ci', 'sort=', 
+			]
 
 
 	def getProjectHelp(self):
@@ -111,8 +115,7 @@ Execution options
        --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
                                  --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES -XcodeCoverage
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
-                   CAT=LEVEL   set the verbosity for a specific PySys logging category e.g. -vassertions=, -vprocess=
-                               (or to set the verbosity for a non-PySys Python logger category use "python:CAT=LEVEL")
+                   CAT=LEVEL   set the verbosity for a PySys/Python logging category e.g. -vassertions=, -vprocess=
    -y, --validateOnly          test the validate() method without re-running execute()
    -h, --help                  print this message
  
@@ -127,6 +130,7 @@ Advanced:
    -p, --purge                 purge files except run.log from the output directory to save space (unless test fails)
    --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 
                                console; options are: all|none|failures (default is all).
+   -s, --sort      STRING      sort by: random (useful for performance testing and and reproducing test races)
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
    -XcodeCoverage              enable collecting and reporting on code coverage with all coverage writers in the project
@@ -241,14 +245,9 @@ e.g.
 				verbosity = value
 				if '=' in verbosity:
 					loggername, verbosity = value.split('=')
-					assert not loggername.startswith('pysys.'), 'The "pysys." prefix is assumed and should not be explicitly specified'
-					if loggername.startswith('python:'):
+					if loggername.startswith('python:'): # this is weird but was documented, so leave it in place just in case someone is using it
 						loggername = loggername[len('python:'):]
 						assert not loggername.startswith('pysys'), 'Cannot use python: with pysys.*' # would produce a duplicate log handler
-						# in the interests of performance and simplicity we normally only add the pysys.* category 
-						logging.getLogger(loggername).addHandler(pysys.internal.initlogging.pysysLogHandler)
-					else:
-						loggername = 'pysys.'+loggername
 				else:
 					loggername = None
 				
@@ -269,11 +268,15 @@ e.g.
 					# not necessarily downgrade the root level (would make run.log less useful and break 
 					# some PrintLogs behaviour)
 					stdoutHandler.setLevel(verbosity)
-					if verbosity == logging.DEBUG: logging.getLogger('pysys').setLevel(logging.DEBUG)
+					if verbosity == logging.DEBUG: 
+						logging.getLogger('pysys').setLevel(logging.DEBUG)
+						logging.getLogger().setLevel(logging.DEBUG)
 				else:
 					# for specific level setting we need the opposite - only change stdoutHandler if we're 
 					# turning up the logging (since otherwise it wouldn't be seen) but also change the specified level
+					# make the user of "pysys." prefix optional
 					logging.getLogger(loggername).setLevel(verbosity)
+					logging.getLogger('pysys.'+loggername).setLevel(verbosity)
 				
 			elif option in ("-a", "--type"):
 				self.type = value
@@ -309,7 +312,10 @@ e.g.
 				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
 
 			elif option in ["-n", "-j", "--threads"]:
-				N_CPUS = multiprocessing.cpu_count()
+				try:
+					N_CPUS = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
+				except Exception: # no always available, e.g. on Windows
+					N_CPUS = os.cpu_count()
 				if value.lower()=='auto': value='0'
 				if value.lower().startswith('x'):
 					self.threads = max(1, int(float(value[1:])*N_CPUS))
@@ -352,6 +358,12 @@ e.g.
 			elif option in ("-G", "--grep"):
 				self.grep = value
 
+			elif option in ("-s", "--sort"):
+				self.sort = value
+				if value not in ['random']:
+					print("The only supported sort type for pysys run is currently 'random'")
+					sys.exit(10)
+				
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
@@ -371,6 +383,7 @@ e.g.
 			'progressWritersEnabled':self.progress,
 			'printLogs': printLogs,
 			'printLogsDefault': printLogsDefault, # to use if not provided by a CI writer or cmdline
+			'sort': self.sort
 		}
 		
 		# load project AFTER we've parsed the arguments, which opens the possibility of using cmd line config in 

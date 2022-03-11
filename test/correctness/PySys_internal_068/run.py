@@ -87,6 +87,10 @@ class PySysTest(BaseTest):
 			expected='name=NestedTimedout, tests=1, failures=1, skipped=0')
 		self.assertThatGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', '<failure .*/>', 
 			expected='<failure message="TIMED OUT: Reason for timed out outcome is general tardiness - %s" type="TIMED OUT"/>'%TEST_STR, encoding='utf-8')
+
+		self.assertThatGrep('target/pysys-reports/TEST-NestedSkipped.1.xml', '<skipped .*/>', 
+			expected='<skipped message="SKIPPED: This is the reason this test is skipped"/>', encoding='utf-8')
+
 		# check stdout is included, and does not have any ANSI control characters in it
 		self.assertThat('junitStdoutOutcome == expected', expected='TIMED OUT', 
 			junitStdoutOutcome=self.getExprFromFile('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='Test final outcome: *(.*)', encoding='utf-8'))
@@ -152,4 +156,15 @@ class PySysTest(BaseTest):
 			expected=u'NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
 
 		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 
-			expected='2%srun.log:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])'%os.sep)
+			expected=f'NestedNotVerified{os.sep}run.py:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])')
+
+		js = pysys.utils.fileutils.loadJSON(self.output+'/__pysys_outcomes.json')
+		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results'])
+		self.assertThat('jsonOutDir == expected', jsonOutDir__eval="js['runDetails']['outDirName']", expected='myoutdir')
+		self.assertThat('hasCycle', hasCycle__eval="'cycle' in js['results'][0]")
+		self.assertThat('testDir == expected', testDir=next(x for x in js['results'] if x['testId']=='NestedFail')['testDir'], expected='test/NestedFail')
+		self.assertThat('hasTitle', hasTitle__eval="js['results'][0]['title']")
+		self.assertThat('testIds == expected', testIds=sorted(t['testId'] for t in js['results']), expected=[
+			# NB: does NOT include passed, since we didn't list that one
+			'NestedFail', 'NestedFail', 'NestedNotVerified', 'NestedNotVerified', 'NestedSkipped', 'NestedSkipped', 'NestedTimedout', 'NestedTimedout'
+		])

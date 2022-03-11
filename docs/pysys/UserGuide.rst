@@ -69,10 +69,11 @@ the cookbook sample)::
 	</pysysdirconfig>
 
 For customizing the PySysTest class the best approach is usually to create a ``pysystest.py`` template test 
-containing ``@@DEFAULT_DESCRIPTOR@@`` to include the default PySys descriptor values (this means your template will 
-automatically benefit from any future changes to the defaults), and put it in a ``_pysys_templates/<templatename>`` 
-directory alongside the ``pysystestdir.xml`` file. The ``_pysys_templates`` directory should contain a file 
-named ``.pysysignore`` file (which avoids the template being loaded as a real test). 
+containing ``@@DEFAULT_DESCRIPTOR@@`` (or `@@DEFAULT_DESCRIPTOR_MINIMAL@@`) to include the default PySys descriptor 
+values (this means your template will automatically benefit from any future changes to the defaults), and put it in a 
+``_pysys_templates/<templatename>`` directory alongside the ``pysystestdir.xml`` file. 
+The ``_pysys_templates`` directory should contain a file named ``.pysysignore`` file (which avoids the template being 
+loaded as a real test). 
 
 other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
 ``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
@@ -497,6 +498,14 @@ from being added on some operation systems (in this example, on all non-fictiona
 You can find the mode that this test is running in using `self.mode <BaseTest>`, which returns an instance of 
 `pysys.config.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
 via a ``params`` field. 
+
+You can also use Python list comprehensions to generate sets of modes from a ``range`` like this::
+
+	__pysys_modes__   = lambda helper: helper.createModeCombinations(
+			helper.inheritedModes, 
+			[ {'mode':'CompressionGZip', 'compressionType':'gzip'}, ],
+			[ {'serverThreads': t} for t in range(1, 3) ],
+		)
 
 Here's an example showing how a test plugin might use modes configuration to configure the test object 
 during test setup::

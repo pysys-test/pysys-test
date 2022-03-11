@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 		# by using a raw string and triple quotes and literal=True we can avoid the need to add any (additional) escaping for this assertion, 
 		# so this is what's actually in the run.log
 		self.assertGrep('testoutput/NestedPass/run.log', expr=
-			r"""Waiting for '["\']Hello["\'] ' in myprocess.log (to ensure myprocess logs appropriate greetings); timeout=123.5s""", literal=True)
+			r"""(to ensure myprocess logs appropriate greetings): Waiting for '["\']Hello["\'] ' in myprocess.log; timeout=123.5s""", literal=True)
 
 		# This should be suppressed due to quiet=True
 		self.assertGrep('testoutput/NestedPass/run.log', expr='"Hell"', contains=False)

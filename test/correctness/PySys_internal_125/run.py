@@ -16,6 +16,10 @@ class PySysTest(BaseTest):
 	
 		# start with the failures
 		self.log.info('--- Expected failures:')
+		self.assertThat('actual == expected', actual=12, expected=34)
+		self.addOutcome(PASSED, override=True)
+
+
 		self.assertThat('actual == expected', actual__eval="'prefix'+' foo bar '+'suffix'", extraParamNotUsed='baz', expected='foobar')
 		reasonFailedEvalAssert = self.getOutcomeReason()
 		self.addOutcome(PASSED, override=True)

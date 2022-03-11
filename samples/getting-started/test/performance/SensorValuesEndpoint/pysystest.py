@@ -9,7 +9,11 @@ __pysys_purpose__ = r""" To measure the throughout and a sample of the latencies
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_modes__   = lambda helper: helper.inheritedModes+[ {'mode':'CompressionGZip', 'compressionType':'gzip'} ]
+__pysys_modes__   = lambda helper: helper.createModeCombinations(
+		helper.inheritedModes, 
+		[ {'mode':'CompressionGZip', 'compressionType':'gzip'}, ],
+		[ {'serverThreads': t} for t in range(1, 3) ],
+	)
 
 import pysys
 from pysys.constants import *
@@ -35,6 +39,7 @@ class PySysTest(pysys.basetest.BaseTest):
 			f'http://127.0.0.1:{server.info["port"]}/sensorValues', 
 			str(self.iterations), 
 			'gzip',
+			f"--threads={self.mode.params['serverThreads']}",
 			], stdouterr='http_perf_client')
 
 	def validate(self):	
@@ -81,4 +86,4 @@ class PySysTest(pysys.basetest.BaseTest):
 		
 		# Optionally, you could also produce some detailed files (e.g. graphical plots of the performance 
 		# characteristics for which many Python plugins are available) and then collect together the file types of 
-		# interest 
+		# interest using pysys.writer.testoutput.CollectTestOutputWriter

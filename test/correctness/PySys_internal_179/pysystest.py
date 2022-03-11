@@ -23,7 +23,7 @@ import os, sys, math, shutil, glob
 class PySysTest(pysys.basetest.BaseTest):
 
 	def execute(self):
-		self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--cycle=3'], workingDir=self.input)
+		self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--cycle=3'], workingDir=self.input, expectedExitStatus='==2')
 		self.logFileContents('pysys-run.out', tail=True)
 		
 	def validate(self):

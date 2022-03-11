@@ -11,6 +11,9 @@ class PySysTest(pysys.basetest.BaseTest):
 
 	def execute(self):
 		self.reportPerformanceResult(1000+(self.testCycle+1)*10, 'Rate of doing a foo bar', '/s')
+		
+		self.addOutcome(BADPERF, 'Sanity check to ensure that BADPERF is not treated like other failure outcomes which would prevent the result being recorded')
+		
 		self.reportPerformanceResult(2000+(self.testCycle+1), 'Rate of doing a badda-badda-bing', '/s')
 		
 	def validate(self):

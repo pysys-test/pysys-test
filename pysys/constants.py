@@ -163,6 +163,13 @@ FAILED = Outcome('FAILED', isFailure=True)
 """ Failure test `Outcome` indicating validation steps with a negative outcome. """
 TIMEDOUT = Outcome('TIMEDOUT', isFailure=True, displayName='TIMED OUT')
 """ Failure test `Outcome` indicating that the test timed out while performing execution or validation operations. """
+BADPERF = Outcome('BADPERF', isFailure=True, displayName='BAD PERFORMANCE')
+""" Failure test `Outcome` indicating that the measured performance (speed, memory use, etc) was deemed insufficient. 
+When using this outcome, it is always best to also report the underlying numeric values using 
+`pysys.basetest.BaseTest.reportPerformanceResult` to provide a record of how close to the limit the performance has been 
+historically. Note that until other failure outcomes, the ``BADPERF`` outcome will not prevent ``reportPerformanceResult`` 
+from recording subsequent results. 
+"""
 DUMPEDCORE = Outcome('DUMPEDCORE', isFailure=True, displayName='DUMPED CORE')
 """ Failure test `Outcome` indicating that a crash occurred, and a `core` file was generated (UNIX only). """
 BLOCKED = Outcome('BLOCKED', isFailure=True)
@@ -174,7 +181,7 @@ SKIPPED = Outcome('SKIPPED', isFailure=False)
 
 
 # set the precedent for the test outcomes
-OUTCOMES = (SKIPPED, BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED, INSPECT, PASSED)
+OUTCOMES = (SKIPPED, BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, BADPERF, NOTVERIFIED, INSPECT, PASSED)
 """
 Lists all possible test outcomes, in descending order of precedence. 
 
@@ -184,12 +191,13 @@ Lists all possible test outcomes, in descending order of precedence.
 	DUMPEDCORE
 	TIMEDOUT
 	FAILED
+	BADPERF
 	NOTVERIFIED
 	INSPECT
 	PASSED
 
 If a test adds multiple outcomes, the outcome with highest precedence is used as the final test outcome 
-(i.e. SKIPPED rather than FAILED, FAILED rather than PASSED etc). 
+(i.e. SKIPPED rather than FAILED, and FAILED rather than PASSED etc). 
 
 Each item is an instance of `Outcome`. Use `Outcome.isFailure()` to check whether a given outcome is classed as a failure for reporting purposes. 
 

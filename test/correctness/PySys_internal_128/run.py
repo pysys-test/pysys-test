@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 
 		block = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
 		self.waitForBackgroundProcesses(excludes=[block])
-		block.stop()
+		block.stop(hard=True) # doesn't have to be hard, but this is a good place to check that works
 		del self.processList[:]
 
 		self.startTestProcess(stdouterr='failure1', background=True)
@@ -57,4 +57,4 @@ class PySysTest(BaseTest):
 
 
 	def validate(self):
-		self.assertDiff('output.txt')
+		self.assertDiff('output.txt', replace=[('for (0|1) background process', 'for 0|1 background process')])

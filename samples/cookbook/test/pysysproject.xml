@@ -245,6 +245,14 @@
 			-->
 			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
+		
+		<!-- Writes all outcomes (or just the failure outcomes) to a .json file suitable for machine parsing.
+			Only enabled when the record flag is specified. 
+		-->
+		<writer classname="pysys.writer.outcomes.JSONResultsWriter" file="__pysys_testsummary_${outDirName}.json">
+			<property name="includeTitle" value="true"/>
+			<property name="includeNonFailureOutcomes" value="NOT VERIFIED, "/>
+		</writer>
 
 		<!-- Writes all outcomes to a single XML file; only enabled when the record flag is specified. -->
 		<writer classname="pysys.writer.outcomes.XMLResultsWriter">
@@ -384,7 +392,7 @@
 			<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
 				without the need to update or potentially create bugs in existing tests
 			-->
-			<!-- <input-dir>!Input_dir_if_present_else_testDir!</input-dir> -->
+			<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
 	
 		<!-- Could optionally override the default directory names for reference and output too. The following are the 
 			default values and do not need to be specified explicitly. 

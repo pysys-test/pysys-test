@@ -182,6 +182,16 @@ class TestDescriptor(object):
 		
 		self.userData = collections.OrderedDict() if userData is None else userData
 	
+	def _getTestFile(self):
+		# undocumented API currently
+		# Gets the file containing the test logic - typically a .py file, but could be some other format e.g. .java (but not XML)
+		# Usually relative to testDir, but may be an absolute path
+		if self.file.endswith('.xml'):
+			return self.module
+		
+		if self.file.startswith(self.testDir): return self.file[len(self.testDir)+1:]
+		return self.file
+	
 	def _createDescriptorForMode(self, mode):
 		"""
 		Internal API for creating a test descriptor for a specific mode of this test.
@@ -288,7 +298,7 @@ class TestDescriptor(object):
 			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
 
 		s=s+"Test classname:    %s; module: %s\n" % (self.classname, self.module)
-		if self.input not in [DEFAULT_INPUT, '.', '!Input_dir_if_present_else_testDir!']: s=s+"Test input:        %s\n" % self.input
+		if self.input not in [DEFAULT_INPUT, '.', '!Input_dir_if_present_else_testDir!', '!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!']: s=s+"Test input:        %s\n" % self.input
 		if self.output != DEFAULT_OUTPUT: s=s+"Test output:       %s\n" % self.output
 		if self.reference != DEFAULT_REFERENCE: s=s+"Test reference:    %s\n" % self.reference
 		if self.traceability:
@@ -755,7 +765,7 @@ class _XMLDescriptorParser(object):
 										created=self.kvDict.pop('created', None) or (self.root.getAttribute('created') if self.root else None) or None,
 										isDirConfig=not self.istest)
 		
-		if self.kvDict: # should all have been popped during parsing
+		if self.kvDict and os.getenv('PYSYS_IGNORE_UNKNOWN_DESCRIPTOR_FIELDS','').lower()!='true': # should all have been popped during parsing
 			raise UserError(f'Unknown {self.KV_PATTERN % "KEY"} key(s) in test descriptor "{self.file}": {", ".join(self.kvDict.keys())}')
 		
 		if not self.istest:
@@ -1195,6 +1205,15 @@ class _XMLDescriptorParser(object):
 		if node is None: return default
 		return self.getText(node)
 
+IGNORED_PYSYSTEST_SUFFIXES = tuple( (os.getenv('PYSYS_IGNORED_PYSYSTEST_SUFFIXES', '')+',~,.tmp,.bak,.swp,.orig').strip(',').replace(' ','').split(',') )
+"""
+A tuple listing ``pysystest.*`` suffixes that will be ignored due to being temporary/backup/swap files for common 
+editors and IDEs. 
+
+The list can be extended by setting the ``PYSYS_IGNORED_PYSYSTEST_SUFFIXES`` environment variable to a comma-separated 
+list of additional extensions. 
+"""
+
 class DescriptorLoader(object):
 	"""
 	This class is responsible for locating and loading all available testcase 
@@ -1356,7 +1375,7 @@ class DescriptorLoader(object):
 					return
 				
 				if descriptorSet is None: 
-					intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
+					intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(IGNORED_PYSYSTEST_SUFFIXES)]
 				else: # compatibility mode
 					intersection = descriptorSet & set(files)
 					

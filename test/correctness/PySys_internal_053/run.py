@@ -13,6 +13,6 @@ class PySysTest(BaseTest):
 		
 	def validate(self):
 		del self.outcome[:]
-		self.assertGrep('run.log.proc', expr='Looking for Foo ... passed')
-		self.assertGrep('run.log.proc', expr='Looking for Fi ... failed')
+		self.assertGrep('run.log.proc', expr='Looking for Foo: Line count on .* ... passed')
+		self.assertGrep('run.log.proc', expr='Looking for Fi: Line count .* >=15.* ... failed')
 		

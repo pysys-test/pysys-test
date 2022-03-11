@@ -45,6 +45,7 @@ import queue as Queue
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.pycompat import *
+from pysys.internal.initlogging import pysysLogHandler
 
 log = logging.getLogger('pysys.process')
 
@@ -148,12 +149,16 @@ class Process(object):
 	# these abstract methods must be implemented by subclasses; no need to publically document
 	def setExitStatus(self): raise Exception('Not implemented')
 	def startBackgroundProcess(self): raise Exception('Not implemented')
-	def writeStdin(self): raise Exception('Not implemented')
-	def stop(self): 
-		"""Stop a running process.
+	def stop(self, timeout=TIMEOUTS['WaitForProcessStop'], hard=False): 
+		"""Stop a running process and wait until it has finished.
 		
 		Does nothing if the process is not running. 
 		
+		On Windows, this uses TerminateProcess, on Linux this sends a SIGTERM signal (which allows the process a chance 
+		to exit gracefully including possibly dumping code coverage output) unless the ``hard=True`` parameter is specified. 
+		
+		:param bool hard: Set to True to use a hard termination (e.g. SIGKILL). 
+		:param float timeout: The time to wait for the process to complete before raising an exception. 
 		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to stop the process.		
 		"""
 		raise Exception('Not implemented')
@@ -172,7 +177,7 @@ class Process(object):
 			raise ProcessError("Error sending signal %s to process %r"%(signal, self))
 
 
-	def write(self, data, addNewLine=True):
+	def write(self, data, addNewLine=True, closeStdinAfterWrite=False):
 		"""Write binary data to the stdin of the process.
 		
 		Note that when the addNewLine argument is set to true, if a new line does not 
@@ -181,18 +186,21 @@ class Process(object):
 		require to add data without the method appending a new line charater set 
 		addNewLine to false.
 		
-		:param data: The data to write to the process stdin. 
+		:param bytes|str data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
 			given by ``PREFERRED_ENCODING``. 
-		:param addNewLine: True if a new line character is to be added to the end of 
+		:param bool addNewLine: True if a new line character is to be added to the end of 
 			the data string
+		:param bool closeStdinAfterWrite: If True, the stdin file handle will be closed after this write. 
+			Added in v2.1. 
+			
 		
 		"""
 		if not self.running(): raise Exception('Cannot write to process stdin when it is not running')
 		
-		if not data: return
+		if data is None: return
 		if type(data) != binary_type:
 			data = data.encode(PREFERRED_ENCODING)
 		if addNewLine and not data.endswith(b'\n'): data = data+b'\n'
@@ -200,10 +208,31 @@ class Process(object):
 		if self._outQueue == None:
 			# start thread on demand
 			self._outQueue = Queue.Queue()
-			t = threading.Thread(target=self.writeStdin, name='pysys.stdinreader_%s'%str(self))
+			
+			__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
+			def writeStdinThread():
+				pysysLogHandler.setLogHandlersForCurrentThread(__parentLogHandlers)
+				try:
+					while self._outQueue:
+						try:
+							data = self._outQueue.get(block=True, timeout=0.25)
+						except Queue.Empty:
+							if not self.running(): 
+								# no need to close stdin here, as previous call's setExitCode() method will do it
+								break
+						else:
+							try:
+								self._writeStdin(data)
+							except Exception as ex:
+								(log.debug if not self.running() else log.error)('Failed to write %r to stdin of process %r', data, self, exc_info=True)
+				finally:
+					pysysLogHandler.setLogHandlersForCurrentThread([])
+			
+			t = threading.Thread(target=writeStdinThread, name='pysys.stdinreader_%s'%str(self), daemon=True)
 			t.start()
 			
-		self._outQueue.put(data)
+		if data: self._outQueue.put(data)
+		if closeStdinAfterWrite: self._outQueue.put(None) # None is a sentinel value for EOF
 		
 	def running(self):
 		"""Check to see if a process is running.
@@ -231,7 +260,7 @@ class Process(object):
 		while self.running():
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				raise ProcessTimeout('Waiting for completion of %s timed out after %d seconds'%(self, int(timeout)))
+				raise ProcessTimeout('Waiting for completion of %r timed out after %d seconds'%(self, int(timeout)))
 			time.sleep(0.05)
 		
 

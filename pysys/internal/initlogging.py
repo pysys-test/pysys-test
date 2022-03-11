@@ -155,7 +155,9 @@ class ThreadFilter(logging.Filterer):
 # subsequent logging if no handlers are defined
 logging.getLogger().addHandler(logging.NullHandler())
 
-rootLogger = logging.getLogger('pysys')
+rootLogger = logging.getLogger(
+	# PYSYS_SUPPRESS_OTHER_LOGGING is undocumented, and exists 'just in case' this v2.1 change breaks someone
+	'pysys' if os.getenv('PYSYS_SUPPRESS_OTHER_LOGGING','')=='true' else None) 
 """The root logger for logging within PySys."""
 
 log = rootLogger

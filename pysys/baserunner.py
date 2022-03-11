@@ -34,6 +34,7 @@ import importlib
 import multiprocessing
 from io import StringIO
 import queue
+import random
 
 import pysys
 from pysys.constants import *
@@ -231,6 +232,7 @@ class BaseRunner(ProcessUser):
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
 		
+		self.__randomlyShuffleTests = extraOptions['sort']=='random'
 		
 		def initWriter(writerclass, writerprops, kwargs={}):
 			writer = writerclass(**kwargs) # invoke writer's constructor
@@ -326,7 +328,7 @@ class BaseRunner(ProcessUser):
 		self.runDetails = collections.OrderedDict()
 		for p in ['outDirName', 'hostname']:
 			self.runDetails[p] = self.project.properties[p]
-		self.runDetails['cpuCount'] = str(multiprocessing.cpu_count())
+		self.runDetails['cpuCount'] = str(os.cpu_count())
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
 
@@ -473,8 +475,7 @@ class BaseRunner(ProcessUser):
 						
 
 		except OSError as ex:
-			log.warning("Caught OSError while cleaning output directory after test completed:")
-			log.warning(ex)
+			log.warning("Caught OSError while cleaning output directory after test completed: %s", ex)
 			log.warning("Output directory may not be completely clean")
 
 
@@ -563,7 +564,7 @@ class BaseRunner(ProcessUser):
 			def write(self, s): 
 				if self.logWarning is True:
 					self.logWarning = False
-					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
+					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) (or the Python "logging" module) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or PREFERRED_ENCODING, errors='replace')
@@ -611,7 +612,7 @@ class BaseRunner(ProcessUser):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
 				testoutdir=self.outsubdir, runner=self)
 			except Exception: 
-				log.warning("caught %s setting up %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+				log.error("Caught %s setting up %s: %s", sys.exc_info()[0].__name__, writer, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
 		if self.printLogs is None: self.printLogs = self.__printLogsDefault # default value, unless overridden by cmdline or writer.setup
@@ -647,7 +648,12 @@ class BaseRunner(ProcessUser):
 					self.results[cycle] = {}
 					for outcome in OUTCOMES: self.results[cycle][outcome] = []
 			
-					for descriptor in self.descriptors:
+					descriptors = self.descriptors
+					if self.__randomlyShuffleTests: # must re-shuffle within each cycle to be useful for perf testing etc
+						descriptors = list(descriptors)
+						random.shuffle(descriptors)
+						
+					for descriptor in descriptors:
 						container = TestContainer(descriptor, cycle, self)
 						if self.threads > 1:
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
@@ -679,7 +685,7 @@ class BaseRunner(ProcessUser):
 						sys.stderr.write("Keyboard interrupt detected while running cycleComplete... \n")
 						self.handleKbrdInt()
 					except:
-						log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+						log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			
 			
 			# wait for the threads to complete if more than one thread	
@@ -699,7 +705,7 @@ class BaseRunner(ProcessUser):
 			for perfreporter in self.performanceReporters:
 					try: perfreporter.cleanup()
 					except Exception as ex: # pragma: no cover
-						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+						log.error("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						sys.stderr.write('Caught exception performing performance reporter cleanup: %s\n'%traceback.format_exc()) # useful to have it on stderr too, esp during development
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
@@ -717,7 +723,7 @@ class BaseRunner(ProcessUser):
 			try:
 				self.processCoverageData()
 			except Exception as ex: 
-				log.warning("Caught %s processing coverage data %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+				log.error("Caught %s processing coverage data %s: %s", sys.exc_info()[0].__name__, writer, sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to process coverage data: %s'%ex)
 
 		finally:
@@ -725,7 +731,7 @@ class BaseRunner(ProcessUser):
 			try:
 				self.cleanup()
 			except Exception as ex:
-				log.warning("Caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.error("Caught %s performing runner cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
 		pysys.utils.allocport.logPortAllocationStats()
@@ -857,7 +863,7 @@ class BaseRunner(ProcessUser):
 		if unit in self.performanceReporters[0].unitAliases: unit = self.performanceReporters[0].unitAliases[unit]
 		assert isinstance(unit, pysys.perf.api.PerformanceUnit), repr(unit)
 
-		if testObj.getOutcome().isFailure(): # pragma: no cover
+		if testObj.getOutcome().isFailure() and testObj.getOutcome() != BADPERF: # pragma: no cover
 			testObj.log.warning('Performance result "%s" will not be recorded as test has failed so results could be invalid', resultKey)
 			return
 		
@@ -928,7 +934,7 @@ class BaseRunner(ProcessUser):
 					writer.processResult(testObj, cycle=cycle,
 										  testStart=testStart, testTime=testDurationSecs, runLogOutput=bufferedoutput)
 				except Exception as ex: 
-					log.warning("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer, sys.exc_info()[1], exc_info=1)
+					log.error("Caught %s processing %s test result by %s: %s", sys.exc_info()[0].__name__, descriptor.id, writer, sys.exc_info()[1], exc_info=1)
 					errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
 			
 			# store the result
@@ -979,7 +985,7 @@ class BaseRunner(ProcessUser):
 		:param exc_info: The tuple of values as created from sys.exc_info()
 		 
 		"""
-		log.warning("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+		log.error("Caught %s from executing test container: %s", exc_info[0].__name__, exc_info[1], exc_info=exc_info)
 		self.runnerErrors.append("caught %s from executing test container: %s"%(exc_info[0], exc_info[1]))
 
 
@@ -1008,7 +1014,7 @@ class BaseRunner(ProcessUser):
 					self.cycleComplete()
 					self.cleanup()
 				except Exception: 
-					log.warning("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					log.error("Caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			except KeyboardInterrupt:
 				log.warning("Keyboard interrupted detected during cleanup; will exit immediately")
 			sys.exit(100) # keyboard interrupt
@@ -1264,7 +1270,7 @@ class TestContainer(object):
 					if hasattr(writer, 'processTestStarting'):
 						writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
 				except Exception: 
-					log.warning("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+					log.error("Caught %s calling processTestStarting on %s: %s", sys.exc_info()[0].__name__, writer, sys.exc_info()[1], exc_info=1)
 
 			# execute the test if we can
 			try:
@@ -1277,7 +1283,7 @@ class TestContainer(object):
 				elif len(exc_info) > 0:
 					self.testObj.addOutcome(BLOCKED, 'Failed to set up test: %s'%exc_info[0][1], abortOnError=False)
 					for info in exc_info:
-						log.warning("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
+						log.error("Caught %s while setting up test %s: %s", info[0].__name__, self.descriptor.id, info[1], exc_info=info)
 						
 				elif self.kbrdInt:
 					log.warning("test interrupt from keyboard")
@@ -1311,7 +1317,7 @@ class TestContainer(object):
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 
 			except Exception:
-				log.warning("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.warning("%s occurred while running test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
 
 			# call the cleanup method to tear down the test
@@ -1325,8 +1331,8 @@ class TestContainer(object):
 			except UserError as ex: # will already have been logged with stack trace
 				self.testObj.addOutcome(BLOCKED, str(ex), abortOnError=False)
 			except Exception as ex:
-				log.warning("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
+				log.warning("%s occurred while cleaning up test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0].__name__), abortOnError=False)
 
 			# in case the thread log handlers got overwritten by a naughty test, restore before printing the final summary
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
@@ -1387,6 +1393,5 @@ class TestContainer(object):
 					if re.search('^core', file): return True
 
 		except OSError as ex:
-			log.warning("Caught OSError in detectCore():")
-			log.warning(ex)
+			log.error("Caught OSError in detectCore: %s", ex)
 			

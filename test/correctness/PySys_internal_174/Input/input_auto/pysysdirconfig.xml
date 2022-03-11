@@ -3,6 +3,6 @@
 
 	<id-prefix>input-auto.</id-prefix>
 
-	<input-dir>!Input_dir_if_present_else_testDir!</input-dir>
+	<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>
 
 </pysysdirconfig>

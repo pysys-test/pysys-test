@@ -7,4 +7,5 @@ __pysys_performance/
 __pysys_runner.pysys-run-tests/
 __pysys_testsummary_NNNN-NN-NN_NN.NN.NN.csv
 __pysys_testsummary_NNNN-NN-NN_NN.NN.NN.log
+__pysys_testsummary_pysys-run-tests.json
 __pysys_testsummary_pysys-run-tests_NNNN-NN-NN_NN.NN.NN.xml

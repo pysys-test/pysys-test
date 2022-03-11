@@ -31,23 +31,23 @@ Key features include:
 - Ability to cycle a test many times (and in parallel) to reproduce rare race 
   conditions. 
 - Support for executing the same test in several modes during your test 
-  run (for example against different web browsers, databases, etc). Python 
-  lambda expressions give the power to easily create complex and dynamic lists of 
-  modes that combine multi-dimensional parameter matrices. 
-- A process memory monitoring framework to check for memory leaks when soak 
-  testing your application.
+  run (for example against different web browsers, databases, or for writing 
+  parameterized tests). Python expressions give the power to easily create 
+  complex and dynamic lists of modes that combine multi-dimensional sets of parameters. 
 - A performance monitoring framework for recording and aggregating latency, 
   throughput and other performance metrics.
-- A pluggable "writers" framework for recording test outcomes in any format, 
-  including a standard JUnit-compatible XML results writer and output archiver 
-  in the box, and support for running tests under CI providers such as 
-  GitHub(R) Actions and Travis CI(R).
+- A process memory monitoring framework to monitor memory usage when soak 
+  testing your application.
+- A pluggable "writers" framework for recording test outcomes in any format. Includes 
+  a test output archiver, a writer for the ubiquitous JUnit/Ant(TM) XML file format, 
+  and built-in support for running tests 
+  under CI providers such as GitHub(R) Actions and Travis CI(R).
 - Integrated support for running PyUnit tests and doctests, in case your 
   application is also written in Python.
 - Integrated support for executing manual/interactively driven test cases.
 - Test categorization and selective include/exclude execution, using per-test 
   classification groups.
-- Support for Windows, Linux, macOS and Solaris. 
+- Support for Windows, Linux and macOS. 
 
 PySys was created by Moray Grieve. The maintainer is now Ben Spiller. 
 This is a community project so we welcome your contributions, whether 

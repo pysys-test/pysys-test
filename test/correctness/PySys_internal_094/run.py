@@ -35,6 +35,8 @@ class PySysTest(BaseTest):
 	def validate(self):
 
 		for subtest in ['enabled-defaults', 'default-project', 'ci']:
+			self.waitForGrep('%s.out'%subtest, 'Summary of failures:') # make sure it's all been flushed to disk
+			
 			self.assertOrderedGrep('%s.out'%subtest, exprList=[
 				# first folding, using the test outdir name
 				# avoid using the actual literal here else travis will try to fold it!

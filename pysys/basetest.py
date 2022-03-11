@@ -55,7 +55,7 @@ class BaseTest(ProcessUser):
 		self.input = os.path.join(descriptor.testDir, 
 			(
 				'Input' if os.path.exists(os.path.join(descriptor.testDir, 'Input')) else '.'
-			) if descriptor.input=='!Input_dir_if_present_else_testDir!' else descriptor.input
+			) if descriptor.input in ['!Input_dir_if_present_else_testDir!','!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!'] else descriptor.input
 			).rstrip('/\\.') # strip /. suffix if input is ''
 
 		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir).rstrip('/\\.')
@@ -591,11 +591,10 @@ class BaseTest(ProcessUser):
 			assertion fails. By default this method produces a BLOCKED output 
 			but does not throw if the eval(...) cannot be executed. 
 
-		:param assertMessage='': Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
-			generated assertion message is usually clearer. If you want to add some additional information to 
-			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
-			keyword argument. 
+		:param str assertMessage='': A high-level description of what the assertion is achieving, used in log messages and 
+			the outcome reason. For example "Check the startup logging". Alternatively, to add some *additional* 
+			information to the default message message (e.g. which file/server it pertains to etc), just add the info as 
+			a string value with an extra keyword argument e.g. ``server="server1"``. 
 		
 		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
 		"""
@@ -615,8 +614,8 @@ class BaseTest(ProcessUser):
 					if sys.version_info[0:2] >= (3, 6): # only do this if we have ordered kwargs, else it'd be non-deterministic
 						namespace.update(namedvalues) # also add in any named values we already have
 					v = pysys.utils.safeeval.safeEval(v, extraNamespace=namespace, errorMessage='Failed to evaluate named parameter %s=(%s): {error}'%(k+EVAL_SUFFIX, v))
-				except Exception as ex:
-					self.addOutcome(BLOCKED, '%s'%ex, abortOnError=abortOnError)
+				except pysys.utils.safeeval.SafeEvalException as ex:
+					self.addOutcome(BLOCKED, str(ex), abortOnError=abortOnError)
 					return False
 			else:
 				displayvalues.append(k)
@@ -641,11 +640,11 @@ class BaseTest(ProcessUser):
 			namespace['self'] = self
 			result = bool(pysys.utils.safeeval.safeEval(conditionstring, extraNamespace=namespace, errorMessage='Failed to evaluate (%s)%s - {error}'%(conditionstring, displayvalues)))
 
-		except Exception as e:
-			self.addOutcome(BLOCKED, str(e), abortOnError=abortOnError)
+		except pysys.utils.safeeval.SafeEvalException as ex:
+			self.addOutcome(BLOCKED, str(ex), abortOnError=abortOnError)
 			return False
 		
-		assertMessage = assertMessage or ('Assert that (%s)%s'%(conditionstring, displayvalues))
+		assertMessage = self._concatAssertMessages(assertMessage, 'Assert that (%s)%s'%(conditionstring, displayvalues), short=result)
 		
 		if result:
 			self.addOutcome(PASSED, assertMessage)
@@ -667,7 +666,7 @@ class BaseTest(ProcessUser):
 				})
 
 			return False
-
+	
 	def logValueDiff(self, actual=None, expected=None, logFunction=None, **namedvalues):
 		"""Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by `assertThat`). 
 		
@@ -736,17 +735,23 @@ class BaseTest(ProcessUser):
 			seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 			
 			matches = seq.get_matching_blocks()
-			lastmatch = matches[-1] if len(matches) in [2,1] else matches[-2] # may be of zero size
 			
-			# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
-			# Colouring will be red, white(first match, if any), red, white(last match, if any)
-			ijk = []
-			for v in [0,1]:
-				ijk.append([
-					matches[0][v], # i - start of first matching block
-					matches[0][v]+matches[0].size, # j - end of first matching block
-					lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
-				])
+			if len(matches)==0 and matches[0].size == 0: 
+				# special case where there as no matching substrings at all
+				ijk.append( (0,0,0) )
+				ijk.append( (0,0,0) )
+			else:
+				lastmatch = matches[-1] if 1 <= len(matches) <= 2 else matches[-2] # may be of zero size
+				# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
+				# Colouring will be red, white(first match, if any), red, white(last match, if any)
+				ijk = []
+				for v in [0,1]:
+					ijk.append([
+						matches[0][v], # i - start of first matching block
+						matches[0][v]+matches[0].size, # j - end of first matching block
+						lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
+					])
+					
 			i1, j1, k1 = ijk[0]
 			i2, j2, k2 = ijk[1]
 			
@@ -894,8 +899,9 @@ class BaseTest(ProcessUser):
 		:param bool abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		:param str assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. 
+		:param str assertMessage: An additional high-level description of what this assertion is checking, 
+			e.g. "Assert message contents match expected values". 
+			Used in log messages and the outcome reason. 
 			
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
@@ -915,8 +921,8 @@ class BaseTest(ProcessUser):
 		
 		if stripWhitespace is None: stripWhitespace = self.getBoolProperty('defaultAssertDiffStripWhitespace', default=False)
 		
-		msg = assertMessage or ('File comparison between %s and %s'%(
-			self.__stripTestDirPrefix(f1), self.__stripTestDirPrefix(f2)))
+		msg = 'File comparison between %s and %s'%(
+				self.__stripTestDirPrefix(f1), self.__stripTestDirPrefix(f2))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
 		
@@ -940,10 +946,12 @@ class BaseTest(ProcessUser):
 
 				break
 		except Exception:
-			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			return False
 		else:
+			msg = self._concatAssertMessages(assertMessage, msg, short=result)
+		
 			result = PASSED if result else FAILED
 			try:
 				self.addOutcome(result, msg, abortOnError=abortOnError)
@@ -1018,12 +1026,11 @@ class BaseTest(ProcessUser):
 			assertion fails. By default this method produces a BLOCKED output 
 			but does not throw if the eval(...) cannot be executed. 
 
-		:param str assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
-			generated assertion message is usually clearer. If you want to add some additional information to 
-			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
-			keyword argument. 
-			
+		:param str assertMessage='': A high-level description of what the assertion is achieving, used in log messages and 
+			the outcome reason. For example "Check the startup logging". Alternatively, to add some *additional* 
+			information to the default message message (e.g. which file/server it pertains to etc), just add the info as 
+			a string value with an extra keyword argument e.g. ``server="server1"``. 
+		
 		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
 			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated 
 			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
@@ -1149,8 +1156,9 @@ class BaseTest(ProcessUser):
 		:param bool abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		:param str assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. 
+		:param str assertMessage: An additional high-level description of what this assertion is checking, 
+			e.g. "Check for expected error message". 
+			Used in log messages and the outcome reason. 
 
 		:param str filedir: The directory of the file (defaults to the testcase output subdirectory); this is 
 			deprecated, as it's simpler to just include the directory in the file parameter. 
@@ -1208,7 +1216,7 @@ class BaseTest(ProcessUser):
 				matchcount = len(result)
 				result = None if matchcount==0 else result[0]
 		except Exception:
-			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			result = None
@@ -1217,14 +1225,12 @@ class BaseTest(ProcessUser):
 			# including the expression it found that should not have been there
 			outcome = PASSED if (result!=None) == contains else (BLOCKED if namedGroupsMode else FAILED)
 			if outcome == PASSED: 
-				if contains: log.debug('Grep on input file %s successfully matched expression %s with line: %s', 
+				if contains: log.debug('Grep on file %s successfully matched expression %s with line: %s', 
 					file, quotestring(expr), quotestring(result.string))
-				msg = assertMessage or ('Grep on input file %s' % file)
+				msg = self._concatAssertMessages(assertMessage, 'Grep on file %s' % file)
 			else:
 			
-				if assertMessage:
-					msg = assertMessage
-				elif contains:
+				if contains:
 					msg = 'Grep on %s contains %s'%(file, quotestring(expr))
 					if mappers: msg += ', using mappers %s'%mappers
 				else:
@@ -1238,6 +1244,7 @@ class BaseTest(ProcessUser):
 						quotestring(
 							(result.group(0) if expr.endswith('*') else result.string).rstrip('\n\r')
 							))
+			msg = self._concatAssertMessages(assertMessage, msg)
 			self.addOutcome(outcome, msg, abortOnError=abortOnError)
 		
 		# special-case if they're using named regex named groups to make it super-easy to use with assertThat - 
@@ -1273,8 +1280,9 @@ class BaseTest(ProcessUser):
 		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 
-		:param assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. 				
+		:param str assertMessage: An additional high-level description of what this assertion is checking, 
+			e.g. "Assert error message is as expected". 
+			Used in log messages and the outcome reason. 
 
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
@@ -1302,19 +1310,19 @@ class BaseTest(ProcessUser):
 
 		log.debug("Performing contains=%s grep on last line of file: %s", contains, f)
 
-		msg = assertMessage or ('Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
+		msg = self._concatAssertMessages(assertMessage, 'Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		namedGroupsMode = False
 		try:
 			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
 			match = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f), returnMatch=True, flags=reFlags)
 		except Exception:
-			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			match = None
 		else:
 			result = (match is not None) == contains
-			if result: msg = assertMessage or ('Grep on input file %s' % file)
+			if result: msg = assertMessage or ('Grep on file %s' % file)
 			self.addOutcome(PASSED if result else (BLOCKED if namedGroupsMode else FAILED), msg, abortOnError=abortOnError)
 
 		# special-case if they're using named regex named groups to make it super-easy to use with assertThat - 
@@ -1359,8 +1367,9 @@ class BaseTest(ProcessUser):
 		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 
-		:param assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. 
+		:param str assertMessage: An additional high-level description of what this assertion is checking, 
+			e.g. "Assert error messages are as expected". 
+			Used in log messages and the outcome reason. 
 
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
@@ -1383,12 +1392,12 @@ class BaseTest(ProcessUser):
 	
 		log.debug("Performing contains=%s ordered grep on %s for %s", contains, f, exprList)
 		
-		msg = assertMessage or ('Ordered grep on input file %s' % file)
+		msg = self._concatAssertMessages(assertMessage, 'Ordered grep on file %s' % file)
 		expr = None
 		try:
 			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
 		except Exception:
-			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			if expr is None and contains:
@@ -1412,12 +1421,12 @@ class BaseTest(ProcessUser):
 		r"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
-		input file matching the specified regular expression evaluate to true when evaluated against 
+		file matching the specified regular expression evaluate to true when evaluated against 
 		the supplied ``condition``.
 		
 		:param file: The basename of the file used in the line count
 		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		:param expr: The regular expression string used to match a line of the input file
+		:param expr: The regular expression string used to match a line of the file
 		:param condition: The condition to be met for the number of lines matching the regular expression
 		:param ignores: A list of regular expressions that will cause lines to be excluded from the count.
 			Ignore expressions are applied *after* any mappers. 
@@ -1439,8 +1448,9 @@ class BaseTest(ProcessUser):
 		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		:param assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. 
+		:param str assertMessage: An additional high-level description of what this assertion is checking, 
+			e.g. "Assert all messages received". 
+			Used in log messages and the outcome reason. 
 
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
@@ -1470,16 +1480,17 @@ class BaseTest(ProcessUser):
 				firstMatch = None
 			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
-			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))
+			log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+			msg = self._concatAssertMessages(assertMessage, 'Line count on %s for %s%s '%(file, quotestring(expr), condition))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			if (pysys.utils.safeeval.safeEval("%d %s" % (numberLines, condition), extraNamespace={'self':self})):
-				msg = assertMessage or ('Line count on input file %s' % file)
+				msg = self._concatAssertMessages(assertMessage, 'Line count on file %s' % file)
 				self.addOutcome(PASSED, msg)
 				return True
 			else:
-				msg = assertMessage or ('Line count on %s for %s expected %s but got %d%s'%(file, quotestring(expr), condition.strip(), numberLines, 
+				msg = self._concatAssertMessages(assertMessage, 
+					'Line count on %s for %s expected %s but got %d%s'%(file, quotestring(expr), condition.strip(), numberLines, 
 					('; first is: '+quotestring( # special handling for condition==0, to match assertGrep(..., contains=False)
 							(firstMatch.group(0) if expr.endswith('*') else firstMatch.string).rstrip('\n\r') # see assertGrep
 					)) if firstMatch else ''))
@@ -1629,3 +1640,10 @@ class BaseTest(ProcessUser):
 				for line in failure:
 					log.warning('  %s'%line.rstrip())
 				log.info('')
+
+	def _concatAssertMessages(self, userMessage, pysysMessage, short=False):
+		# private/undocumented API for now
+		if not userMessage: return pysysMessage
+		
+		if short: return userMessage # if assertion passed, use the shorter message from the user to avoid spam
+		return userMessage.strip(' :')+': '+pysysMessage
