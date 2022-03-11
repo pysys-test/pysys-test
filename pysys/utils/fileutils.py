@@ -153,24 +153,26 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	
 	path = toLongPathSafe(path)
 	try:
+		def pysysOnError(function, path, excinfo):
+			try: # helps with both Windows "readonly" attribute and linux permissions issues
+				perms = stat.S_IWRITE | stat.S_IREAD
+				if os.path.isdir(path): perms = perms | stat.S_IEXEC
+				os.chmod(path, perms | stat.S_IMODE(os.lstat(path).st_mode))
+				if os.path.isdir(path):
+					os.rmdir(path)
+				else:
+					os.remove(path)
+			except Exception as ex:
+				log.debug('deletedir failed to update permissions and delete %s on this attempt: %s', path, ex)
+				pass
+
 		# delete as many files as we can first, so if there's an error deleting some files (e.g. due to windows file 
-		# locking) we don't use any more disk space than we need to
-		shutil.rmtree(path, ignore_errors=True)
+		# locking) we don't use any more disk space than we need to. This is ignores errors BUT attempts to change permissions first
+		shutil.rmtree(path, onerror=pysysOnError)
 		
 		# then try again, being more careful
-		if os.path.exists(path) and not ignore_errors:
-			def pysysOnError(function, path, excinfo):
-				try: # helps with both Windows "readonly" attribute and linux permissions issues
-					os.chmod(path, stat.S_IWRITE | stat.S_IMODE(os.lstat(path).st_mode))
-					if os.path.isdir(path):
-						os.rmdir(path)
-					else:
-						os.remove(path)
-				except Exception as ex:
-					pass
-				if os.path.exists(path): raise
-						
-			shutil.rmtree(path, onerror=onerror or pysysOnError)
+		if os.path.exists(path) and not ignore_errors:					
+			shutil.rmtree(path, onerror=onerror)
 	except Exception as ex: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
 		if retries <= 0:
