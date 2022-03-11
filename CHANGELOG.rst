@@ -60,6 +60,9 @@ New features related to reporting of performance testing:
   make recording of performance results pointless (e.g. enablement of profiling). 
 - If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
   parameters from the test's mode will be recorded as the ``resultDetails``. 
+- Added ``pysys run`` option ``--sort=random`` which randomly sorts/shuffles the order of tests and modes within each 
+  cycle. This is useful for reducing systematic performance interactions between different tests/modes when running 
+  multiple cycles. 
 
 Misc new features:
 

@@ -34,6 +34,7 @@ import importlib
 import multiprocessing
 from io import StringIO
 import queue
+import random
 
 import pysys
 from pysys.constants import *
@@ -231,6 +232,7 @@ class BaseRunner(ProcessUser):
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
 		
+		self.__randomlyShuffleTests = extraOptions['sort']=='random'
 		
 		def initWriter(writerclass, writerprops, kwargs={}):
 			writer = writerclass(**kwargs) # invoke writer's constructor
@@ -646,7 +648,12 @@ class BaseRunner(ProcessUser):
 					self.results[cycle] = {}
 					for outcome in OUTCOMES: self.results[cycle][outcome] = []
 			
-					for descriptor in self.descriptors:
+					descriptors = self.descriptors
+					if self.__randomlyShuffleTests: # must re-shuffle within each cycle to be useful for perf testing etc
+						descriptors = list(descriptors)
+						random.shuffle(descriptors)
+						
+					for descriptor in descriptors:
 						container = TestContainer(descriptor, cycle, self)
 						if self.threads > 1:
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)

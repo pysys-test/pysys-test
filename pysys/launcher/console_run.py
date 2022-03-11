@@ -55,8 +55,12 @@ class ConsoleLaunchHelper(object):
 		self.userOptions = {}
 		self.descriptors = []
 		self.grep = None
-		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=', 'ci']
+		self.sort = None
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:s:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=",
+			"mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=', 
+			'ci', 'sort=', 
+			]
 
 
 	def getProjectHelp(self):
@@ -126,6 +130,7 @@ Advanced:
    -p, --purge                 purge files except run.log from the output directory to save space (unless test fails)
    --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 
                                console; options are: all|none|failures (default is all).
+   -s, --sort      STRING      sort by: random (useful for performance testing and and reproducing test races)
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
    -XcodeCoverage              enable collecting and reporting on code coverage with all coverage writers in the project
@@ -353,6 +358,12 @@ e.g.
 			elif option in ("-G", "--grep"):
 				self.grep = value
 
+			elif option in ("-s", "--sort"):
+				self.sort = value
+				if value not in ['random']:
+					print("The only supported sort type for pysys run is currently 'random'")
+					sys.exit(10)
+				
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
@@ -372,6 +383,7 @@ e.g.
 			'progressWritersEnabled':self.progress,
 			'printLogs': printLogs,
 			'printLogsDefault': printLogsDefault, # to use if not provided by a CI writer or cmdline
+			'sort': self.sort
 		}
 		
 		# load project AFTER we've parsed the arguments, which opens the possibility of using cmd line config in 
