@@ -1318,6 +1318,11 @@ class DescriptorLoader(object):
 		if project.projectFile:
 			projectroot = toLongPathSafe(os.path.normpath(os.path.dirname(project.projectFile)))
 
+		def fastdirname(path): 
+			# This is much faster than os.path.dirname
+			# The "or" is to account for minor difference fastdirname('/foo')='' whereas os.path.dirname='/'
+			return path[:path.rfind(os.sep)] or '/'
+		
 		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
 		if not project.projectFile or not dir.startswith(projectroot):
 			dirconfigs = None
@@ -1343,10 +1348,11 @@ class DescriptorLoader(object):
 					currentconfig = self._parseTestDescriptor(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=currentconfig, isDirConfig=True)
 					log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
 			# this is the top-level directory that will be checked below
-			dirconfigs[os.path.dirname(dir)] = currentconfig
+			dirconfigs[fastdirname(dir)] = currentconfig
 
 		descriptorsToParse = []
 
+		# NB: if changing this logic be sure to test the special case dir='/foo'
 		def visitDir(root):
 			with os.scandir(root) as it:
 				dirs = []
@@ -1364,7 +1370,7 @@ class DescriptorLoader(object):
 
 				parentconfig = None
 				if dirconfigs is not None:
-					parentconfig = dirconfigs[root[:root.rfind(os.sep)]] # rfind is much faster than dirname
+					parentconfig = dirconfigs[fastdirname(root)]
 					if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
 						parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
 						log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
