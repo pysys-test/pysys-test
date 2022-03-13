@@ -373,6 +373,9 @@ e.g.
 
 		# log this once we've got the log levels setup
 		log.debug('PySys is installed at: %s; python from %s', os.path.dirname(pysys.__file__), sys.executable)
+		log.debug('Working dir=%s, args=%s', os.getcwd(), " ".join(sys.argv))
+		log.debug('Main environment vars: %s', '\n  '.join(f'{envvar}={os.environ[envvar]}' for envvar in sorted(os.environ.keys()) 
+			if envvar.endswith('PATH') or envvar.startswith(('PYTHON', 'PYSYS'))))
 
 		# retained for compatibility, but PYSYS_DEFAULT_ARGS is a better way to achieve the same thing
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
