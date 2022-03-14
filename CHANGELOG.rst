@@ -14,43 +14,46 @@ Change Log
 What's new in 2.1
 -----------------
 
-PySys 2.1 was released on March 2022. 
+PySys 2.1 was released in March 2022. 
 
 The main changes are new features to help with triaging performance results, and improved usability for the new 
-``pysystest.py`` descriptor format and modes support that was added in v2.0. This release also add support for 
-Python 3.10, upgrades to the sample GitHub Actions workflows, and a lot of minor enhancements and fixes. 
+``pysystest.py`` descriptor format and modes support that was added in version 2.0. 
 
-Enhancements in ``pysystest.py`` descriptors:
+This release also adds support for Python 3.10, upgrades to the sample GitHub Actions workflows, and includes a lot of 
+minor enhancements and fixes. 
 
-- Descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
+Usability enhancements to the ``pysystest.py`` descriptors:
+
+- Added a ``__pysys_parameterized_test_modes__`` field to the ``pysystest.py`` descriptor which makes it easier to 
+  configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing 
+  scenarios. See :doc:`/pysys/UserGuide` for detailed information about modes. 
+- Renamed ``combineModeDimensions`` to `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` for 
+  improved usability. 
+- Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to ``true``) since in 
+  most cases users would prefer not to worry about it. 
+- Test descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
   approach used for non-Python ``pysys.*`` files. This allows normal Python syntax to be used for things like 
-  the ``lambda`` expressions (in ``__pysys_modes__``) which is more intuitive compared to the Python 2.0 approach 
+  the ``lambda`` expressions (in ``__pysys_modes__``) which is more intuitive compared to the PySys 2.0 approach 
   of nesting them inside multi-line strings. The samples and the default ``pysys make`` test template have been updated 
   accordingly. 
   All descriptor values should go at the start of the file, before any ``import`` statements - this is important for 
   efficient parsing. For optimum parsing performance, make sure your first import is an ``import XXX`` rather than 
   a ``from XXX import YYY`` statement. 
-- Added ``__pysys_parameterized_test_modes__`` field to the ``pysystest.py`` descriptor which makes it easier to 
-  configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing 
-  scenarios. See :doc:`/pysys/UserGuide` for detailed information about modes. 
-- Renamed ``combineModeDimensions`` to `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` for 
-  improved usability. 
-- Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
-  most cases users would prefer not to worry about it. 
 
-New features related around performance testing:
+New features related to performance testing:
 
-- Added detailed documentation about how to use PySys for performance testing to the :doc:`/pysys/UserGuide`. 
+- Added detailed documentation to the :doc:`/pysys/UserGuide` about how to use PySys for performance testing. 
 - Added a new performance reporter class `pysys.perf.reporters.JSONPerformanceReporter` which writes performance 
   results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
   as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
 - Added a new performance reporter class `pysys.perf.reporters.PrintSummaryPerformanceReporter` which prints a 
-  summary of performance results (including mean and stdDev calculation if aggregating across multiple cycles) at the 
-  end of the test run. This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
+  summary of performance results (including mean and standard deviation calculation if aggregating across multiple 
+  cycles) at the end of the test run. 
+  This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
   no explicit list of ``<performance-reporters>`` has been configured in ``pysysproject.xml``. 
 - The default performance reporter class `pysys.perf.reporters.CSVPerformanceReporter` has a new property 
-  called ``aggregateCycles`` which instructs it to automatically rewrite the summary file at the end of a run where you 
-  have executed multiple cycles, to give aggregate statistics such as mean and standard deviation (and 
+  called ``aggregateCycles`` which means automatically rewriting the summary file at the end of a run where you 
+  have executed multiple cycles, to record aggregate statistics such as mean and standard deviation (with 
   ``samples=cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
   generate stable numbers for comparisons while optimizing your application. 
 - Extended the performance reporter API. Added a new class `pysys.perf.api.BasePerformanceReporter` for creating 
@@ -62,12 +65,12 @@ New features related around performance testing:
 - Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
   will continue to work so this is not a breaking change. 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
-  especially when performance testing. This is the value returned by Python's ``os.cpu_count()`` function. 
-- Added ``reportPerformanceResult`` variable to ``BaseTest``, which can be set to ``True`` by any commands that would 
-  make recording of performance results pointless (e.g. enablement of profiling). 
-- If no ``resultDetails`` are specified explicitly when reporting a result in a test that has modes, then the name and 
-  parameters from the test's mode will be recorded as the ``resultDetails``. 
-- Added ``failureOutcome`` parameter to `BaseTest.assertThat` which could be used to add a `pysys.constants.BADPERF` 
+  especially in performance test summary files. This is the value returned by Python's ``os.cpu_count()`` function. 
+- Added a ``reportPerformanceResult`` boolean variable to ``BaseTest``, which can be set to ``True`` by any commands 
+  that would make recording of performance results pointless (such as enablement of profiling). 
+- If no ``resultDetails`` are explicitly specified when reporting a result in a test that has modes, then the name and 
+  parameters from the test's mode are recorded as the ``resultDetails``. 
+- Added a ``failureOutcome`` parameter to `BaseTest.assertThat` which could be used to add a `pysys.constants.BADPERF` 
   outcome for a performance assertion.
 - Added ``pysys run`` option ``--sort=random`` which randomly sorts/shuffles the order of tests and modes within each 
   cycle. This is useful for reducing systematic performance interactions between different tests/modes when running 
@@ -76,17 +79,17 @@ New features related around performance testing:
   performance was deemed insufficient. Unlike other failure outcomes, ``BADPERF`` does not prevent subsequent numeric 
   results from being recorded by `BaseTest.reportPerformanceResult`. 
 
-Misc new features:
+Miscellaneous new features:
 
 - Upgraded the sample GitHub workflows to use the new CodeCov uploader as the old v1 uploader was deprecated. 
-  If you use this functionality in your own GitHub Actions workflow you should make the same change. 
+  If you use this functionality in your own GitHub Actions workflow, you should make the same change. 
 - Added support for Python 3.10. Note that on Windows the following deprecation warning may be seen until PyWin32 
   releases version 304::
   
     DeprecationWarning: getargs: The 'u' format is deprecated. Use 'U' instead.
   
-- Changed the behaviour of the ``assertMessage`` in all assertion methods (e.g. `BaseTest.assertGrep`) so that instead 
-  of replacing the default PySys message (e.g. ``Grep on foo.txt contains "Bar"``), it will be added before the 
+- Changed the behavior of the ``assertMessage`` in all assertion methods (e.g. `BaseTest.assertGrep`) so that 
+  instead of replacing the default PySys message (e.g. ``Grep on foo.txt contains "Bar"``), it is added before the 
   default message, when the assertion fails. This means there is no loss of information when using ``assertMessage=``, 
   making it easier to justify using it to provide a more high-level explanation of what each assertion should 
   achieve. For example::
@@ -97,23 +100,23 @@ Misc new features:
   single machine-readable ``.json`` file. 
 - Added a ``@json@`` substitution value to the `pysys.writer.console.ConsoleFailureAnnotationsWriter` class which can 
   be used to provide comprehensive machine-readable information about each test result. 
-- Changed the behaviour of `pysys.writer.console.ConsoleFailureAnnotationsWriter` so that if a format is provided by 
+- Changed the behavior of `pysys.writer.console.ConsoleFailureAnnotationsWriter` so that if a format is provided by 
   the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable it will always override any ``format`` in the 
   ``pysysproject.xml`` configuration. 
-- Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which will 
-  automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
-- Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 
-  wait for End Of File before completing. 
+- Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which 
+  automatically attempts a SIGKILL if the SIGTERM times out (though it still raises an exception in this case). 
+- Added a ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes 
+  that wait for "End Of File" before completing. 
 
 - The ``detailMessage`` passed to `BaseTest.waitForGrep` is now added at the beginning rather than the end of the 
-  log line, to make the user's high-level description of what is being waited for more prominent::
+  log line, to give more prominence to the the user's high-level description of what is being waited for::
   
     self.waitForGrep('server.log', 'Ready for .*', detailMessage='Waiting until server is up')
 
-- Simplify how PySys interacts with Python's ``logging`` library. PySys will now record log messages from any Python 
+- Simplified how PySys interacts with Python's ``logging`` library. PySys now records log messages from any Python 
   logger category to ``run.log`` and the console, whereas previously only messages from log categories starting 
   ``pysys.*`` would be included. The log level for any Python logger can be changed using the 
-  ``-vcategory=DEBUG`` argument to ``pysys run``, and category may be any Python log category, or may be a  
+  ``-vcategory=DEBUG`` argument to ``pysys run``, and the category may be any Python log category, or may be a  
   category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
 - Added ``<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>`` as alternative syntax for 
   ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
@@ -124,14 +127,14 @@ Misc new features:
 
 Fixes:
 
-- Add missing ``<skipped message="..."/>`` element in JUnit XML reports when a test is skipped. 
+- Added missing ``<skipped message="..."/>`` element in JUnit XML reports when a test is skipped. 
 - Ignore common editor swap/temporary file extensions such as ``~`` and ``.swp`` when identifying ``pysystest.*`` 
   files. The environment variable ``PYSYS_IGNORED_PYSYSTEST_SUFFIXES`` allows additional exclusions to be added if 
   needed. 
-- Fix ``IndexError`` during handling of a non-matching ``assertThat``. 
-- Fix bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
-- Fix a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
-- Fix display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
+- Fixed ``IndexError`` during handling of a non-matching ``assertThat``. 
+- Fixed bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
+- Fixed a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
+- Fixed display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
 - Removed the normal logging prefix from PySys in each `BaseTest.logFileContents` line to avoid distracting from the 
   contents of the file being displayed. 
 - When using ``--threads=auto``, the number of available CPUs is now based on the number available to the PySys 
@@ -143,7 +146,7 @@ Fixes:
 Deprecations:
 
 - Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
-  will continue to work so this is not a breaking change. 
+  is not planned for removal so this is not a breaking change. 
 
 -----------------
 What's new in 2.0
