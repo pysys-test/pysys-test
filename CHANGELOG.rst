@@ -135,7 +135,8 @@ Fixes:
 - Removed the normal logging prefix from PySys in each `BaseTest.logFileContents` line to avoid distracting from the 
   contents of the file being displayed. 
 - When using ``--threads=auto``, the number of available CPUs is now based on the number available to the PySys 
-  process (``len(os.sched_getaffinity(0))``) rather than the total number of physical CPUs on the machine. 
+  process (``len(os.sched_getaffinity(0))`` - on operating systems that support this concept) rather than the total 
+  number of physical CPUs on the machine. 
 - Fixed the `pysys.writer.console.ConsoleFailureAnnotationsWriter` ``@testFile@`` fallback to point to the Python file 
   when there was no failure outcome. 
 
