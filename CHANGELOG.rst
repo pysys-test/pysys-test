@@ -47,11 +47,11 @@ New features related around performance testing:
 - Added a new performance reporter class `pysys.perf.reporters.PrintSummaryPerformanceReporter` which prints a 
   summary of performance results (including mean and stdDev calculation if aggregating across multiple cycles) at the 
   end of the test run. This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
-  not explicit list of ``<performance-reporters>`` has been configured. 
+  no explicit list of ``<performance-reporters>`` has been configured in ``pysysproject.xml``. 
 - The default performance reporter class `pysys.perf.reporters.CSVPerformanceReporter` has a new property 
   called ``aggregateCycles`` which instructs it to automatically rewrite the summary file at the end of a run where you 
   have executed multiple cycles, to give aggregate statistics such as mean and standard deviation (and 
-  ``samples``=``cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
+  ``samples=cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
   generate stable numbers for comparisons while optimizing your application. 
 - Extended the performance reporter API. Added a new class `pysys.perf.api.BasePerformanceReporter` for creating 
   custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for 
@@ -69,7 +69,12 @@ New features related around performance testing:
   parameters from the test's mode will be recorded as the ``resultDetails``. 
 - Added ``failureOutcome`` parameter to `BaseTest.assertThat` which could be used to add a `pysys.constants.BADPERF` 
   outcome for a performance assertion.
-
+- Added ``pysys run`` option ``--sort=random`` which randomly sorts/shuffles the order of tests and modes within each 
+  cycle. This is useful for reducing systematic performance interactions between different tests/modes when running 
+  multiple cycles. 
+- Added a new test outcome `pysys.constants.BADPERF` which can be used instead of ``FAILED`` to indicate the measured 
+  performance was deemed insufficient. Unlike other failure outcomes, ``BADPERF`` does not prevent subsequent numeric 
+  results from being recorded by `BaseTest.reportPerformanceResult`. 
 
 Misc new features:
 
@@ -90,6 +95,11 @@ Misc new features:
       assertMessage='Assert that throttling of error messages keeps them below configured limit')
 - Added `pysys.writer.outcomes.JSONResultsWriter` which writes test outcomes (and the runner's ``runDetails``) to a 
   single machine-readable ``.json`` file. 
+- Added a ``@json@`` substitution value to the `pysys.writer.console.ConsoleFailureAnnotationsWriter` class which can 
+  be used to provide comprehensive machine-readable information about each test result. 
+- Changed the behaviour of `pysys.writer.console.ConsoleFailureAnnotationsWriter` so that if a format is provided by 
+  the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable it will always override any ``format`` in the 
+  ``pysysproject.xml`` configuration. 
 - Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which will 
   automatically attempt a SIGKILL if the SIGTERM times out (though will still raise an exception in this case). 
 - Added ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes that 
@@ -105,6 +115,12 @@ Misc new features:
   ``pysys.*`` would be included. The log level for any Python logger can be changed using the 
   ``-vcategory=DEBUG`` argument to ``pysys run``, and category may be any Python log category, or may be a  
   category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
+- Added ``<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>`` as alternative syntax for 
+  ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
+- The `BaseTest.deleteDir` method (and the test output dir cleanup code) now changes permissions and file attributes 
+  to permit deletion if possible. This is useful when tests execute tools that create read-only files. 
+- Added ``pysys make`` template substitution variable ``@@DEFAULT_DESCRIPTOR_MINIMAL@@`` as an alternative to 
+  ``@@DEFAULT_DESCRIPTOR@@`` for cases where you want to exclude most of the commented example lines. 
 
 Fixes:
 
@@ -120,6 +136,8 @@ Fixes:
   contents of the file being displayed. 
 - When using ``--threads=auto``, the number of available CPUs is now based on the number available to the PySys 
   process (``len(os.sched_getaffinity(0))``) rather than the total number of physical CPUs on the machine. 
+- Fixed the `pysys.writer.console.ConsoleFailureAnnotationsWriter` ``@testFile@`` fallback to point to the Python file 
+  when there was no failure outcome. 
 
 Deprecations:
 
