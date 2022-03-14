@@ -30,6 +30,11 @@ Enhancements in ``pysystest.py`` descriptors:
   All descriptor values should go at the start of the file, before any ``import`` statements - this is important for 
   efficient parsing. For optimum parsing performance, make sure your first import is an ``import XXX`` rather than 
   a ``from XXX import YYY`` statement. 
+- Added ``__pysys_parameterized_test_modes__`` field to the ``pysystest.py`` descriptor which makes it easier to 
+  configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing 
+  scenarios. See :doc:`/pysys/UserGuide` for detailed information about modes. 
+- Renamed ``combineModeDimensions`` to `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` for 
+  improved usability. 
 - Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to true) since in 
   most cases users would prefer not to worry about it. 
 
@@ -338,16 +343,17 @@ The mode name can be automatically generated from the parameters, or provided ex
 For those still using ``pysystest.xml`` files, the same Python lambda can also be added in your ``<modes>...</modes>`` 
 element. 
 
-There is also a helper function provided (in `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions`) 
-to combine multiple mode "dimensions" together, for example every combination of your supported databases and your 
-supported web browsers. This allows for some quite sophisticated logic to generate the mode list such as:
+There is also a helper function provided in `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` 
+(previously known as ``combineModeDimensions``) to combine multiple mode "dimensions" together, for example every 
+combination of your supported databases and your supported web browsers. 
+This allows for some quite sophisticated logic to generate the mode list such as:
 
 .. code-block:: python
 	
 	__pysys_modes__ = r""" 
 		lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
