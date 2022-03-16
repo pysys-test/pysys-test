@@ -63,7 +63,7 @@ New features related to performance testing:
   for any initialization (it is recommended to move any such code out of the ``__init__`` constructor which should 
   no longer be used in most cases). 
 - Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
-  will continue to work so this is not a breaking change. 
+  will continue to work, so this is not a breaking change. 
 - Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
   especially in performance test summary files. This is the value returned by Python's ``os.cpu_count()`` function. 
 - Added a ``reportPerformanceResult`` boolean variable to ``BaseTest``, which can be set to ``True`` by any commands 
@@ -109,19 +109,19 @@ Miscellaneous new features:
   that wait for "End Of File" before completing. 
 
 - The ``detailMessage`` passed to `BaseTest.waitForGrep` is now added at the beginning rather than the end of the 
-  log line, to give more prominence to the the user's high-level description of what is being waited for::
+  log line, to give more prominence to the user's high-level description of what is being waited for::
   
     self.waitForGrep('server.log', 'Ready for .*', detailMessage='Waiting until server is up')
 
 - Simplified how PySys interacts with Python's ``logging`` library. PySys now records log messages from any Python 
-  logger category to ``run.log`` and the console, whereas previously only messages from log categories starting 
+  logger category to ``run.log`` and the console, whereas previously only messages from log categories starting with 
   ``pysys.*`` would be included. The log level for any Python logger can be changed using the 
   ``-vcategory=DEBUG`` argument to ``pysys run``, and the category may be any Python log category, or may be a  
   category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
 - Added ``<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>`` as alternative syntax for 
   ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
-- The `BaseTest.deleteDir` method (and the test output dir cleanup code) now changes permissions and file attributes 
-  to permit deletion if possible. This is useful when tests execute tools that create read-only files. 
+- The `BaseTest.deleteDir` method (and the test output directory cleanup code) now changes permissions and file 
+  attributes to permit deletion if possible. This is useful when tests execute tools that create read-only files. 
 - Added ``pysys make`` template substitution variable ``@@DEFAULT_DESCRIPTOR_MINIMAL@@`` as an alternative to 
   ``@@DEFAULT_DESCRIPTOR@@`` for cases where you want to exclude most of the commented example lines. 
 
