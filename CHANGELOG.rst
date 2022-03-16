@@ -39,6 +39,8 @@ Usability enhancements to the ``pysystest.py`` descriptors:
   All descriptor values should go at the start of the file, before any ``import`` statements - this is important for 
   efficient parsing. For optimum parsing performance, make sure your first import is an ``import XXX`` rather than 
   a ``from XXX import YYY`` statement. 
+- Added ``pysys make`` template substitution variable ``@@DEFAULT_DESCRIPTOR_MINIMAL@@`` as an alternative to 
+  ``@@DEFAULT_DESCRIPTOR@@`` for cases where you want to exclude most of the commented example lines. 
 
 New features related to performance testing:
 
@@ -122,8 +124,6 @@ Miscellaneous new features:
   ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
 - The `BaseTest.deleteDir` method (and the test output directory cleanup code) now changes permissions and file 
   attributes to permit deletion if possible. This is useful when tests execute tools that create read-only files. 
-- Added ``pysys make`` template substitution variable ``@@DEFAULT_DESCRIPTOR_MINIMAL@@`` as an alternative to 
-  ``@@DEFAULT_DESCRIPTOR@@`` for cases where you want to exclude most of the commented example lines. 
 
 Fixes:
 
