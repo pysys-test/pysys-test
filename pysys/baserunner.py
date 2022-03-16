@@ -390,7 +390,7 @@ class BaseRunner(ProcessUser):
 		All runner plugins will be setup and instantiated before this method is executed. 
 		
 		Always ensure you call the super implementation of setup() before adding any custom logic, using
-		``super(MY_RUNNER_CLASS_HERE, self).setup()``. 
+		``super().setup()``. 
 		
 		"""
 		pass
