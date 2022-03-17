@@ -77,7 +77,7 @@ Project Links
 Installation
 ============
 
-PySys can be installed into any Python version from 3.6 to 3.9. 
+PySys can be installed into any Python version from 3.6 to 3.10. 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
