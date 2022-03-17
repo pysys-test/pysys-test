@@ -145,8 +145,8 @@ Fixes:
 
 Deprecations:
 
-- Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
-  is not planned for removal so this is not a breaking change. 
+- Moved the performance classes from package ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is 
+  deprecated but is not planned for removal so this is not a breaking change. 
 
 -----------------
 What's new in 2.0
