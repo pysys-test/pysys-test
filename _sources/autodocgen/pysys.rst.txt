@@ -16,6 +16,7 @@ API Reference
   pysys.exceptions
   pysys.launcher
   pysys.mappers
+  pysys.perf
   pysys.process
   pysys.unit
   pysys.utils

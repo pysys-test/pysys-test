@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.config.descriptor &mdash; PySys v2.0  documentation</title>
+  <title>pysys.config.descriptor &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -92,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="pysys.config.html">pysys.config</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.config.descriptor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ignored-pysystest-suffixes">IGNORED_PYSYSTEST_SUFFIXES</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#testdescriptor">TestDescriptor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#testmodesconfighelper">TestModesConfigHelper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#testmode">TestMode</a></li>
@@ -105,6 +106,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
@@ -127,7 +129,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.0</a>
+          <a href="../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -186,6 +188,18 @@
 <p>The <a class="reference internal" href="#pysys.config.descriptor.TestDescriptor" title="pysys.config.descriptor.TestDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDescriptor</span></code></a> class holds metadata for each testcase 
 (<code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code>) or directory (<code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>), and the <a class="reference internal" href="#pysys.config.descriptor.DescriptorLoader" title="pysys.config.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DescriptorLoader</span></code></a> 
 class allows customization of the test discovery process.</p>
+<div class="section" id="ignored-pysystest-suffixes">
+<h2>IGNORED_PYSYSTEST_SUFFIXES<a class="headerlink" href="#ignored-pysystest-suffixes" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.config.descriptor.IGNORED_PYSYSTEST_SUFFIXES">
+<code class="sig-prename descclassname">pysys.config.descriptor.</code><code class="sig-name descname">IGNORED_PYSYSTEST_SUFFIXES</code><em class="property"> = ('~', '.tmp', '.bak', '.swp', '.orig')</em><a class="headerlink" href="#pysys.config.descriptor.IGNORED_PYSYSTEST_SUFFIXES" title="Permalink to this definition">¶</a></dt>
+<dd><p>A tuple listing <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> suffixes that will be ignored due to being temporary/backup/swap files for common 
+editors and IDEs.</p>
+<p>The list can be extended by setting the <code class="docutils literal notranslate"><span class="pre">PYSYS_IGNORED_PYSYSTEST_SUFFIXES</span></code> environment variable to a comma-separated 
+list of additional extensions.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="testdescriptor">
 <h2>TestDescriptor<a class="headerlink" href="#testdescriptor" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -262,6 +276,7 @@ in the descriptor. In a pysystest.xml, this can be populated by one or more <cod
 <p>A helper class that is passed to the lambda which defines test modes in a pysystest configuration. It provides access to 
 the list of inherited modes, to project properties and also helper functions for combining multiple mode lists into 
 one and for configuring a collection of modes as primary modes.</p>
+<p>See <a class="reference internal" href="../pysys/UserGuide.html"><span class="doc">User Guide</span></a> for detailed information about what you can do with PySys modes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
@@ -291,7 +306,7 @@ out different command line options) using a single PySysTest class, then you sho
 “primary” as you want all of them to execute by default in a quick local test run.</p>
 <p>You would typically combine test-specific behaviour modes with any inherited execution environment modes like 
 this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">modes</span><span class="p">:</span> <span class="n">modes</span><span class="o">.</span><span class="n">combineModeDimensions</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">modes</span><span class="p">:</span> <span class="n">modes</span><span class="o">.</span><span class="n">createModeCombinations</span><span class="p">(</span>
         <span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="p">,</span>
         <span class="n">helper</span><span class="o">.</span><span class="n">makeAllPrimary</span><span class="p">(</span>
                 <span class="p">{</span>
@@ -313,25 +328,30 @@ this:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions">
-<code class="sig-name descname">combineModeDimensions</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">dimensions</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/descriptor.html#TestModesConfigHelper.combineModeDimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a single flat mode list containing all combinations that can be generated the specified mode lists.</p>
-<p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="n">helper</span><span class="o">.</span><span class="n">combineModeDimensions</span><span class="p">(</span>
-<span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="p">,</span>
-<span class="p">{</span>
-        <span class="s1">&#39;MySQL&#39;</span><span class="p">:</span>  <span class="p">{</span><span class="s1">&#39;db&#39;</span><span class="p">:</span> <span class="s1">&#39;MySQL&#39;</span><span class="p">,</span>  <span class="s1">&#39;dbTimeoutSecs&#39;</span><span class="p">:</span><span class="mi">60</span><span class="p">},</span> 
-        <span class="s1">&#39;SQLite&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;db&#39;</span><span class="p">:</span> <span class="s1">&#39;SQLite&#39;</span><span class="p">,</span> <span class="s1">&#39;dbTimeoutSecs&#39;</span><span class="p">:</span><span class="mi">120</span><span class="p">},</span>
-        <span class="s1">&#39;Mock&#39;</span><span class="p">:</span>   <span class="p">{</span><span class="s1">&#39;db&#39;</span><span class="p">:</span> <span class="s1">&#39;Mock&#39;</span><span class="p">,</span>   <span class="s1">&#39;dbTimeoutSecs&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">},</span>
-<span class="p">},</span>
-<span class="c1"># can use dict or list format for each mode list, whichever is more convenient: </span>
-<span class="p">[</span> 
-        <span class="p">{</span><span class="s1">&#39;browser&#39;</span><span class="p">:</span><span class="s1">&#39;Chrome&#39;</span><span class="p">},</span> <span class="c1"># if mode is not explicitly specified it is auto-generated from the parameter(s)</span>
-        <span class="p">{</span><span class="s1">&#39;browser&#39;</span><span class="p">:</span><span class="s1">&#39;Firefox&#39;</span><span class="p">},</span>
-<span class="p">])</span>
+<dt id="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations">
+<code class="sig-name descname">createModeCombinations</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">dimensions</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/descriptor.html#TestModesConfigHelper.createModeCombinations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a mode list containing all the combinations from each mode list passed into the function.</p>
+<p>For example, you could combine a list of inherited modes (defined in parent directories’ <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> 
+files), with a second dimension containing modes for each database you want to test with and a third dimension with 
+modes for each web browser. The result would be a single (flat) list containing modes, with names and parameter 
+dictionaries automatically merged together from each input dimension:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="n">helper</span><span class="o">.</span><span class="n">createModeCombinations</span><span class="p">(</span>
+        <span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="p">,</span>
+        <span class="p">{</span>
+                <span class="s1">&#39;MySQL&#39;</span><span class="p">:</span>  <span class="p">{</span><span class="s1">&#39;db&#39;</span><span class="p">:</span> <span class="s1">&#39;MySQL&#39;</span><span class="p">,</span>  <span class="s1">&#39;dbTimeoutSecs&#39;</span><span class="p">:</span><span class="mi">60</span><span class="p">},</span> 
+                <span class="s1">&#39;SQLite&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;db&#39;</span><span class="p">:</span> <span class="s1">&#39;SQLite&#39;</span><span class="p">,</span> <span class="s1">&#39;dbTimeoutSecs&#39;</span><span class="p">:</span><span class="mi">120</span><span class="p">},</span>
+                <span class="s1">&#39;Mock&#39;</span><span class="p">:</span>   <span class="p">{</span><span class="s1">&#39;db&#39;</span><span class="p">:</span> <span class="s1">&#39;Mock&#39;</span><span class="p">,</span>   <span class="s1">&#39;dbTimeoutSecs&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">},</span>
+        <span class="p">},</span>
+
+        <span class="c1"># can use dict or list format for each mode list, whichever is more convenient: </span>
+        <span class="p">[</span> 
+                <span class="p">{</span><span class="s1">&#39;browser&#39;</span><span class="p">:</span><span class="s1">&#39;Chrome&#39;</span><span class="p">},</span> <span class="c1"># if mode is not explicitly specified it is auto-generated from the parameter(s)</span>
+                <span class="p">{</span><span class="s1">&#39;browser&#39;</span><span class="p">:</span><span class="s1">&#39;Firefox&#39;</span><span class="p">},</span>
+        <span class="p">]</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
-<p>would generate modes named:</p>
+<p>would generate a list of modes named:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MySQL_Chrome</span>
 <span class="n">MySQL_Firefox</span>
 <span class="n">SQLite_Chrome</span>
@@ -343,7 +363,7 @@ this:</p>
 <p>NB: By default the first mode in each dimension is designated a <em>primary</em> mode (one that executes by default 
 when no <code class="docutils literal notranslate"><span class="pre">--modes</span></code> or <code class="docutils literal notranslate"><span class="pre">--ci</span></code> argument is specified), but this can be overridden by setting <code class="docutils literal notranslate"><span class="pre">'isPrimary':</span> <span class="pre">True/False</span></code> 
 in the dict for any mode. When mode dimensions are combined, the primary modes are AND-ed together, 
-i.e. any where <em>all</em> mode dimensions were designated primary. 
+i.e. any where <em>all</em> mode dimensions will be designated primary. 
 So in the above case, since MySQL and Chrome are automatically set as 
 primary modes, the MySQL_Chrome mode would be the (only) primary mode returned from this function.
 When using modes for different execution environments/browsers etc you probably want only 
@@ -353,7 +373,7 @@ you should usually set all of the modes to be
 primary so that all of them are executed in your test runs during local development.</p>
 <p>A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
 this test:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="n">helper</span><span class="o">.</span><span class="n">combineModeDimensions</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="n">helper</span><span class="o">.</span><span class="n">createModeCombinations</span><span class="p">(</span>
         <span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="p">,</span>
 
         <span class="n">helper</span><span class="o">.</span><span class="n">makeAllPrimary</span><span class="p">(</span>
@@ -368,9 +388,15 @@ this test:</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>This is a good way to use modes for the concept of parameterized subtests, since even if you don’t initially have 
-any inherited modes, if in future you add some then everything will automatically work correctly.</p>
-<p>NB: For efficiency reasons, don’t use the <code class="docutils literal notranslate"><span class="pre">combineModeDimensions</span></code> method in your configuration if you are 
+<p>For simplicity this common case can be expressed with the more concise syntax:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_parameterized_test_modes__</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;Usage&#39;</span><span class="p">:</span>        <span class="p">{</span><span class="s1">&#39;cmd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;--help&#39;</span><span class="p">],</span> <span class="s1">&#39;expectedExitStatus&#39;</span><span class="p">:</span><span class="s1">&#39;==0&#39;</span><span class="p">},</span> 
+                <span class="s1">&#39;BadPort&#39;</span><span class="p">:</span>      <span class="p">{</span><span class="s1">&#39;cmd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;--port&#39;</span><span class="p">,</span> <span class="s1">&#39;-1&#39;</span><span class="p">],</span>  <span class="s1">&#39;expectedExitStatus&#39;</span><span class="p">:</span><span class="s1">&#39;!=0&#39;</span><span class="p">},</span> 
+                <span class="s1">&#39;MissingPort&#39;</span><span class="p">:</span>  <span class="p">{</span><span class="s1">&#39;cmd&#39;</span><span class="p">:</span> <span class="p">[],</span>  <span class="s1">&#39;expectedExitStatus&#39;</span><span class="p">:</span><span class="s1">&#39;!=0&#39;</span><span class="p">},</span> 
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>NB: For efficiency reasons, don’t use the <code class="docutils literal notranslate"><span class="pre">createModeCombinations</span></code> method in your configuration if you are 
 <em>just</em> using the inherited modes unchanged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -380,10 +406,21 @@ Alternatively, each dimension can be a dict where the mode is the key and the va
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list[dict[str,obj]] containing the flattened list of modes consisting of all combinations of the 
-passed in. This can be further manipulated using Python list comprehensions (e.g. to exclude certain 
+passed in. Mode names and parameter dictionaries will be merged. 
+For example: <code class="docutils literal notranslate"><span class="pre">[{&quot;mode&quot;:&quot;MyMode&quot;,</span> <span class="pre">&quot;param1&quot;:100},</span> <span class="pre">{&quot;mode&quot;:</span> <span class="pre">&quot;myMode2&quot;,</span> <span class="pre">&quot;param1&quot;:200}]</span></code>. 
+The returned list can be further manipulated using Python list comprehensions (e.g. to exclude certain 
 combinations) if desired.</p>
 </dd>
 </dl>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions">
+<code class="sig-name descname">combineModeDimensions</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">dimensions</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/descriptor.html#TestModesConfigHelper.combineModeDimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Old name for the <a class="reference internal" href="#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createModeCombinations</span></code></a> method.</p>
 </dd></dl>
 
 </dd></dl>
@@ -403,6 +440,8 @@ that mode.</p>
 </div>
 <p>See the <code class="docutils literal notranslate"><span class="pre">mode</span></code> parameter/field in <a class="reference internal" href="#pysys.config.descriptor.TestDescriptor" title="pysys.config.descriptor.TestDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDescriptor</span></code></a> where this class is used.</p>
 <p>This class is immutable, so create a new instance if you want to change something.</p>
+<p>The mode values can be of any type as long as it is pickleable (see Python’s <code class="xref py py-obj docutils literal notranslate"><span class="pre">pickle</span></code> module for more information). 
+Standard Python types like strings, dicts etc are fine.</p>
 <p>For convenience and compatibility, this TestMode subclasses a string holding the mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
@@ -412,7 +451,7 @@ that mode.</p>
 the test (as <code class="docutils literal notranslate"><span class="pre">self.mode.params</span></code>) and also assigned as instance fields on the test class when it 
 runs in this mode.</p></li>
 <li><p><strong>isPrimary</strong> (<em>bool</em>) – Indicates whether this is a primary mode, 
-one that executes by default even when not explicity requested with a commnad line option such as <code class="docutils literal notranslate"><span class="pre">--modes=ALL</span></code>)</p></li>
+one that executes by default even when not explicity requested with a command line option such as <code class="docutils literal notranslate"><span class="pre">--modes=ALL</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -447,6 +486,8 @@ dynamically generated list of modes identifying the possible database
 servers supported without having to hardcode that list into any descriptor 
 files on disk, and allowing for different database modes on different 
 platforms.</p>
+<p>This class may use multi-threading to improve performance, so any extensions 
+must be thread-safe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><p><strong>project</strong> (<a class="reference internal" href="pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><em>pysys.config.project.Project</em></a>) – The <a class="reference internal" href="pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.project.Project</span></code></a> instance.</p>
@@ -583,7 +624,7 @@ The exception message must contain the path of the descriptorfile.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

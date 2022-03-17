@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.logutils &mdash; PySys v2.0  documentation</title>
+  <title>pysys.utils.logutils &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.utils.logutils</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -187,10 +187,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span> <span class="k">return</span> <span class="n">text</span>
 	
-	<span class="k">if</span> <span class="n">PY2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">):</span>
-		<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">033</span><span class="se">\\</span><span class="s1">[[0-9;]+m&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">033</span><span class="se">\\</span><span class="s1">[[0-9;]+m&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+	<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">033</span><span class="se">\\</span><span class="s1">[[0-9;]+m&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseLogFormatter"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter">[docs]</a><span class="k">class</span> <span class="nc">BaseLogFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Base class for formatting log messages.</span>
@@ -214,19 +211,27 @@
 	<span class="c1"># the key to add to the extra={} dict of a logger call to specify the arg index for the category</span>
 	<span class="n">ARG_INDEX</span> <span class="o">=</span> <span class="s1">&#39;log_arg_index&#39;</span>
 
+	<span class="c1"># the key to add to the extra={} dict of a logger call to skip the timestamp and log level prefix and just format the message</span>
+	<span class="n">SUPPRESS_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;pysys_log_suppressPrefix&#39;</span>
+
 <div class="viewcode-block" id="BaseLogFormatter.tag"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter.tag">[docs]</a>	<span class="nd">@classmethod</span>
-	<span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">arg_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">arg_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;Return  dictionary to tag a string to format with color encodings.</span>
 
 <span class="sd">		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}</span>
 <span class="sd">		:param arg_index: The index of argument in the string expansion to color. This can be either a single</span>
 <span class="sd">			integer value representing the index, or a list of integers representing a set of indexes to be colored. </span>
 <span class="sd">			Note that format arguments for coloring must be of string type. </span>
+<span class="sd">		:param bool suppress_prefix: Set to True to suppress the timestamp and log level prefix, to save horizontal space </span>
+<span class="sd">			on the console. Only do this for log lines where you&#39;re sure these details aren&#39;t needed, for example where a </span>
+<span class="sd">			preceding log line with those details) has already been printed and there is no chance of other threads writing </span>
+<span class="sd">			interleaving lines to the same device. </span>
+<span class="sd">			This flag only affects the colored formatter (as used on the console). Added in v2.1. </span>
 <span class="sd">		:return: A dictionary that can then be used in calls to the logger</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span> <span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">:[</span><span class="n">arg_index</span><span class="p">]}</span>
-		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arg_index</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">:</span><span class="n">arg_index</span><span class="p">}</span>
-		<span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">}</span></div>
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span> <span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">:[</span><span class="n">arg_index</span><span class="p">],</span> <span class="bp">cls</span><span class="o">.</span><span class="n">SUPPRESS_PREFIX</span><span class="p">:</span><span class="n">suppress_prefix</span><span class="p">}</span>
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arg_index</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">:</span><span class="n">arg_index</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">SUPPRESS_PREFIX</span><span class="p">:</span><span class="n">suppress_prefix</span><span class="p">}</span>
+		<span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">SUPPRESS_PREFIX</span><span class="p">:</span><span class="n">suppress_prefix</span><span class="p">}</span></div>
 
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertiesDict</span><span class="p">):</span>
@@ -277,6 +282,8 @@
 		<span class="n">LOG_PASSES</span><span class="p">:</span> <span class="s1">&#39;GREEN&#39;</span><span class="p">,</span>
 		<span class="n">LOG_SKIPS</span><span class="p">:</span> <span class="s1">&#39;YELLOW&#39;</span><span class="p">,</span>
 		<span class="n">LOG_DIFF_ADDED</span><span class="p">:</span> <span class="s1">&#39;CYAN&#39;</span><span class="p">,</span> <span class="n">LOG_DIFF_REMOVED</span><span class="p">:</span> <span class="s1">&#39;MAGENTA&#39;</span><span class="p">,</span> <span class="c1"># can&#39;t use red/green here without confusion with fail/pass</span>
+		<span class="n">LOG_PERF_BETTER</span><span class="p">:</span><span class="s1">&#39;GREEN&#39;</span><span class="p">,</span> <span class="n">LOG_PERF_WORSE</span><span class="p">:</span><span class="s1">&#39;RED&#39;</span><span class="p">,</span>
+		
 		<span class="n">LOG_END</span><span class="p">:</span><span class="s1">&#39;END&#39;</span><span class="p">,</span>
 	<span class="p">}</span>
 	
@@ -420,9 +427,11 @@
 						<span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatArg</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
 						<span class="n">record</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 					
-			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.utils.logutils&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to format log message &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 
+		<span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SUPPRESS_PREFIX</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+			<span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">msg</span> <span class="o">%</span> <span class="n">record</span><span class="o">.</span><span class="n">args</span>
 		<span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
 
 
@@ -496,7 +505,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

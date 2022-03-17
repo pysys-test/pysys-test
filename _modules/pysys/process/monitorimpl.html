@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.monitorimpl &mdash; PySys v2.0  documentation</title>
+  <title>pysys.process.monitorimpl &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -155,7 +155,7 @@
             
   <h1>Source code for pysys.process.monitorimpl</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -215,7 +215,7 @@
 
 	<span class="k">def</span> <span class="nf">_getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
 		<span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># loop until we have both a &quot;new&quot; and a &quot;last&quot; value for CPU time</span>
-			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopping</span><span class="o">.</span><span class="n">isSet</span><span class="p">():</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Requested to stop&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopping</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Requested to stop&#39;</span><span class="p">)</span>
 
 			<span class="n">newvalues</span> <span class="o">=</span> <span class="p">{}</span>
 			<span class="n">newvalues</span><span class="p">[</span><span class="s1">&#39;time_ns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer_ns</span><span class="p">()</span>
@@ -288,7 +288,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

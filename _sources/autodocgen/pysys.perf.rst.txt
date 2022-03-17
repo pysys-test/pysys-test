@@ -1,0 +1,14 @@
+
+pysys.perf
+~~~~~~~~~~
+
+.. automodule:: pysys.perf
+
+.. currentmodule:: pysys.perf
+
+
+.. autosummary::
+  :toctree: ./
+
+  pysys.perf.api
+  pysys.perf.reporters

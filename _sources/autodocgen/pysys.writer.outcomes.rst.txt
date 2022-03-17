@@ -8,6 +8,13 @@ pysys.writer.outcomes
 
 
 
+JSONResultsWriter
+=================
+
+.. autoclass:: JSONResultsWriter
+   :members:
+
+
 TextResultsWriter
 =================
 

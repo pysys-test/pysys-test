@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to PySys! &mdash; PySys v2.0  documentation</title>
+  <title>Welcome to PySys! &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -50,7 +50,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> PySys v2.0
+            <a href="#" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -104,7 +104,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">PySys v2.0</a>
+          <a href="#">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -184,23 +184,23 @@ time, with a flexible mechanism for controlling execution order.</p></li>
 <li><p>Ability to cycle a test many times (and in parallel) to reproduce rare race
 conditions.</p></li>
 <li><p>Support for executing the same test in several modes during your test
-run (for example against different web browsers, databases, etc). Python
-lambda expressions give the power to easily create complex and dynamic lists of
-modes that combine multi-dimensional parameter matrices.</p></li>
-<li><p>A process memory monitoring framework to check for memory leaks when soak
-testing your application.</p></li>
+run (for example against different web browsers, databases, or for writing
+parameterized tests). Python expressions give the power to easily create
+complex and dynamic lists of modes that combine multi-dimensional sets of parameters.</p></li>
 <li><p>A performance monitoring framework for recording and aggregating latency,
 throughput and other performance metrics.</p></li>
-<li><p>A pluggable “writers” framework for recording test outcomes in any format,
-including a standard JUnit-compatible XML results writer and output archiver
-in the box, and support for running tests under CI providers such as
-GitHub(R) Actions and Travis CI(R).</p></li>
+<li><p>A process memory monitoring framework to monitor memory usage when soak
+testing your application.</p></li>
+<li><p>A pluggable “writers” framework for recording test outcomes in any format. Includes
+a test output archiver, a writer for the ubiquitous JUnit/Ant(TM) XML file format,
+and built-in support for running tests
+under CI providers such as GitHub(R) Actions and Travis CI(R).</p></li>
 <li><p>Integrated support for running PyUnit tests and doctests, in case your
 application is also written in Python.</p></li>
 <li><p>Integrated support for executing manual/interactively driven test cases.</p></li>
 <li><p>Test categorization and selective include/exclude execution, using per-test
 classification groups.</p></li>
-<li><p>Support for Windows, Linux, macOS and Solaris.</p></li>
+<li><p>Support for Windows, Linux and macOS.</p></li>
 </ul>
 <p>PySys was created by Moray Grieve. The maintainer is now Ben Spiller.
 This is a community project so we welcome your contributions, whether
@@ -242,6 +242,10 @@ request in the PySys test framework. For how-tos and advice,
 <li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#thread-safety">Thread-safety</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#producing-code-coverage-reports">Producing code coverage reports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#running-tests-in-multiple-modes">Running tests in multiple modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#performance-tests-recording-results">Performance tests - recording results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#performance-tests-design-considerations">Performance tests - design considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#performance-tests-running-them">Performance tests - running them</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#performance-tests-comparing-results">Performance tests - comparing results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/UserGuide.html#controlling-execution-order">Controlling execution order</a></li>
 </ul>
@@ -252,6 +256,7 @@ request in the PySys test framework. For how-tos and advice,
 <li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#special-project-properties">Special project properties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#configuring-plugins">Configuring plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#writers">Writers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#performance-reporters">Performance reporters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#configuration-for-how-tests-execute">Configuration for how tests execute</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#test-descriptor-defaults">Test descriptor defaults</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys/ProjectConfiguration.html#pysys-run-log-and-console-formatters">PySys run.log and console formatters</a></li>
@@ -271,6 +276,7 @@ request in the PySys test framework. For how-tos and advice,
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.utils.html">pysys.utils</a></li>
@@ -279,6 +285,7 @@ request in the PySys test framework. For how-tos and advice,
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-2-1">What’s new in 2.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-2-0">What’s new in 2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-1-6-1">What’s new in 1.6.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-1-6-0">What’s new in 1.6.0</a></li>
@@ -308,7 +315,7 @@ request in the PySys test framework. For how-tos and advice,
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; PySys v2.0  documentation</title>
+  <title>API Reference &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
@@ -117,7 +118,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.0</a>
+          <a href="../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -178,7 +179,7 @@ implementations of PySys classes described in this API reference:</p>
 <div><ul class="simple">
 <li><p><a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> to customize orchestration of all the tests in a test run.</p></li>
 <li><p><a class="reference internal" href="pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a> classes to customize how test outcomes are recorded.</p></li>
-<li><p><a class="reference internal" href="pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a> to customize how numeric performance results are reported.</p></li>
+<li><p><a class="reference internal" href="pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a> to customize how numeric performance results are reported.</p></li>
 <li><p><a class="reference internal" href="pysys.config.descriptor.html#pysys.config.descriptor.DescriptorLoader" title="pysys.config.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.DescriptorLoader</span></code></a> to customize how PySys find and runs tests (e.g. to support running tests 
 from other frameworks within PySys).</p></li>
 <li><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter" title="pysys.utils.logutils.BaseLogFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.BaseLogFormatter</span></code></a> for advanced customization of log message format.</p></li>
@@ -211,16 +212,19 @@ job on <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest
 <tr class="row-even"><td><p><a class="reference internal" href="pysys.mappers.html#module-pysys.mappers" title="pysys.mappers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers</span></code></a></p></td>
 <td><p>Mapper filter or transform lines of input, for use with methods such as <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy</span></code></a>  and <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertGrep</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.process.html#module-pysys.process" title="pysys.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a></p></td>
+<td><p>Performance reporters are configurable plugins responsible for storing or displaying performance result numbers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.process.html#module-pysys.process" title="pysys.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process</span></code></a></p></td>
 <td><p>Process execution and monitoring implementations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.unit.html#module-pysys.unit" title="pysys.unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.unit</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.unit.html#module-pysys.unit" title="pysys.unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.unit</span></code></a></p></td>
 <td><p>Unit test support (currently just PyUnit).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.html#module-pysys.utils" title="pysys.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.html#module-pysys.utils" title="pysys.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils</span></code></a></p></td>
 <td><p>Utility functions and classes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a></p></td>
 <td><p>Writers are configurable plugins responsible for summarising test results or processing test output as each test  completes, or at the end when all tests has completed.</p></td>
 </tr>
 </tbody>
@@ -247,7 +251,7 @@ job on <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

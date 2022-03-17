@@ -10,10 +10,147 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
+-----------------
+What's new in 2.1
+-----------------
 
--------------------
+PySys 2.1 was released in March 2022. 
+
+The main changes are new features to help with triaging performance results, and improved usability for the new 
+``pysystest.py`` descriptor format and modes support that was added in version 2.0. 
+
+This release also adds support for Python 3.10, upgrades to the sample GitHub Actions workflows, and includes a lot of 
+minor enhancements and fixes. 
+
+Usability enhancements to the ``pysystest.py`` descriptors:
+
+- Added a ``__pysys_parameterized_test_modes__`` field to the ``pysystest.py`` descriptor which makes it easier to 
+  configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing 
+  scenarios. See :doc:`/pysys/UserGuide` for detailed information about modes. 
+- Renamed ``combineModeDimensions`` to `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` for 
+  improved usability. 
+- Made the ``__pysys_groups__`` inheritance specifier ``inherit=true/false`` optional (defaults to ``true``) since in 
+  most cases users would prefer not to worry about it. 
+- Test descriptors with a ``.py`` extension are now loaded using Python's own parser instead of the regular expression 
+  approach used for non-Python ``pysys.*`` files. This allows normal Python syntax to be used for things like 
+  the ``lambda`` expressions (in ``__pysys_modes__``) which is more intuitive compared to the PySys 2.0 approach 
+  of nesting them inside multi-line strings. The samples and the default ``pysys make`` test template have been updated 
+  accordingly. 
+  All descriptor values should go at the start of the file, before any ``import`` statements - this is important for 
+  efficient parsing. For optimum parsing performance, make sure your first import is an ``import XXX`` rather than 
+  a ``from XXX import YYY`` statement. 
+- Added ``pysys make`` template substitution variable ``@@DEFAULT_DESCRIPTOR_MINIMAL@@`` as an alternative to 
+  ``@@DEFAULT_DESCRIPTOR@@`` for cases where you want to exclude most of the commented example lines. 
+
+New features related to performance testing:
+
+- Added detailed documentation to the :doc:`/pysys/UserGuide` about how to use PySys for performance testing. 
+- Added a new performance reporter class `pysys.perf.reporters.JSONPerformanceReporter` which writes performance 
+  results in a format that's easy to machine-read for handling by other systems. To use this instead of (or as well) 
+  as the default CSV reporter, add ``<performance-reporter classname="..."/>`` elements to your project configuration.
+- Added a new performance reporter class `pysys.perf.reporters.PrintSummaryPerformanceReporter` which prints a 
+  summary of performance results (including mean and standard deviation calculation if aggregating across multiple 
+  cycles) at the end of the test run. 
+  This performance reporter is now added by default (alongside ``CSVPerformanceReporter``), if 
+  no explicit list of ``<performance-reporters>`` has been configured in ``pysysproject.xml``. 
+- The default performance reporter class `pysys.perf.reporters.CSVPerformanceReporter` has a new property 
+  called ``aggregateCycles`` which means automatically rewriting the summary file at the end of a run where you 
+  have executed multiple cycles, to record aggregate statistics such as mean and standard deviation (with 
+  ``samples=cycles``) instead of individual results for each cycle. This is useful when cycling tests locally to 
+  generate stable numbers for comparisons while optimizing your application. 
+- Extended the performance reporter API. Added a new class `pysys.perf.api.BasePerformanceReporter` for creating 
+  custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for 
+  each using the same ``<property>`` or ``"key"="value"`` XML syntax as for writers. Performance reporters now have an 
+  additional ``setup`` method which is called just after `pysys.baserunner.BaseRunner.setup`, and is now the best place 
+  for any initialization (it is recommended to move any such code out of the ``__init__`` constructor which should 
+  no longer be used in most cases). 
+- Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
+  will continue to work, so this is not a breaking change. 
+- Added ``cpuCount`` to the default ``runDetails`` dictionary, since it's useful information to have available, 
+  especially in performance test summary files. This is the value returned by Python's ``os.cpu_count()`` function. 
+- Added a ``reportPerformanceResult`` boolean variable to ``BaseTest``, which can be set to ``True`` by any commands 
+  that would make recording of performance results pointless (such as enablement of profiling). 
+- If no ``resultDetails`` are explicitly specified when reporting a result in a test that has modes, then the name and 
+  parameters from the test's mode are recorded as the ``resultDetails``. 
+- Added a ``failureOutcome`` parameter to `BaseTest.assertThat` which could be used to add a `pysys.constants.BADPERF` 
+  outcome for a performance assertion.
+- Added ``pysys run`` option ``--sort=random`` which randomly sorts/shuffles the order of tests and modes within each 
+  cycle. This is useful for reducing systematic performance interactions between different tests/modes when running 
+  multiple cycles. 
+- Added a new test outcome `pysys.constants.BADPERF` which can be used instead of ``FAILED`` to indicate the measured 
+  performance was deemed insufficient. Unlike other failure outcomes, ``BADPERF`` does not prevent subsequent numeric 
+  results from being recorded by `BaseTest.reportPerformanceResult`. 
+
+Miscellaneous new features:
+
+- Upgraded the sample GitHub workflows to use the new CodeCov uploader as the old v1 uploader was deprecated. 
+  If you use this functionality in your own GitHub Actions workflow, you should make the same change. 
+- Added support for Python 3.10. Note that on Windows the following deprecation warning may be seen until PyWin32 
+  releases version 304::
+  
+    DeprecationWarning: getargs: The 'u' format is deprecated. Use 'U' instead.
+  
+- Changed the behavior of the ``assertMessage`` in all assertion methods (e.g. `BaseTest.assertGrep`) so that 
+  instead of replacing the default PySys message (e.g. ``Grep on foo.txt contains "Bar"``), it is added before the 
+  default message, when the assertion fails. This means there is no loss of information when using ``assertMessage=``, 
+  making it easier to justify using it to provide a more high-level explanation of what each assertion should 
+  achieve. For example::
+  
+    self.assertLineCount('server.log', 'ERROR ', condition='<= 10', 
+      assertMessage='Assert that throttling of error messages keeps them below configured limit')
+- Added `pysys.writer.outcomes.JSONResultsWriter` which writes test outcomes (and the runner's ``runDetails``) to a 
+  single machine-readable ``.json`` file. 
+- Added a ``@json@`` substitution value to the `pysys.writer.console.ConsoleFailureAnnotationsWriter` class which can 
+  be used to provide comprehensive machine-readable information about each test result. 
+- Changed the behavior of `pysys.writer.console.ConsoleFailureAnnotationsWriter` so that if a format is provided by 
+  the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable it will always override any ``format`` in the 
+  ``pysysproject.xml`` configuration. 
+- Added ``timeout`` and ``hard=True/False`` flags to `pysys.process.Process.stop`. Also added logic on Linux which 
+  automatically attempts a SIGKILL if the SIGTERM times out (though it still raises an exception in this case). 
+- Added a ``closeStdinAfterWrite`` parameter to `pysys.process.Process.write` which can be used for child processes 
+  that wait for "End Of File" before completing. 
+
+- The ``detailMessage`` passed to `BaseTest.waitForGrep` is now added at the beginning rather than the end of the 
+  log line, to give more prominence to the user's high-level description of what is being waited for::
+  
+    self.waitForGrep('server.log', 'Ready for .*', detailMessage='Waiting until server is up')
+
+- Simplified how PySys interacts with Python's ``logging`` library. PySys now records log messages from any Python 
+  logger category to ``run.log`` and the console, whereas previously only messages from log categories starting with 
+  ``pysys.*`` would be included. The log level for any Python logger can be changed using the 
+  ``-vcategory=DEBUG`` argument to ``pysys run``, and the category may be any Python log category, or may be a  
+  category under the ``pysys.`` logger such as ``-vprocess=DEBUG``. 
+- Added ``<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir>`` as alternative syntax for 
+  ``<input-dir>!Input_dir_if_present_else_testDir!</input-dir>``.
+- The `BaseTest.deleteDir` method (and the test output directory cleanup code) now changes permissions and file 
+  attributes to permit deletion if possible. This is useful when tests execute tools that create read-only files. 
+
+Fixes:
+
+- Added missing ``<skipped message="..."/>`` element in JUnit XML reports when a test is skipped. 
+- Ignore common editor swap/temporary file extensions such as ``~`` and ``.swp`` when identifying ``pysystest.*`` 
+  files. The environment variable ``PYSYS_IGNORED_PYSYSTEST_SUFFIXES`` allows additional exclusions to be added if 
+  needed. 
+- Fixed ``IndexError`` during handling of a non-matching ``assertThat``. 
+- Fixed bug in which a directory named ``!Input_dir_if_present_else_testDir!`` could be created by ``pysys make``. 
+- Fixed a rare circular dependency import issue with ``pysys.constants.Project`` / ``PROJECT``. 
+- Fixed display of duplicate newlines when setting ``stripWhitespace=False`` in `BaseTest.logFileContents`. 
+- Removed the normal logging prefix from PySys in each `BaseTest.logFileContents` line to avoid distracting from the 
+  contents of the file being displayed. 
+- When using ``--threads=auto``, the number of available CPUs is now based on the number available to the PySys 
+  process (``len(os.sched_getaffinity(0))`` - on operating systems that support this concept) rather than the total 
+  number of physical CPUs on the machine. 
+- Fixed the `pysys.writer.console.ConsoleFailureAnnotationsWriter` ``@testFile@`` fallback to point to the Python file 
+  when there was no failure outcome. 
+
+Deprecations:
+
+- Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
+  is not planned for removal so this is not a breaking change. 
+
+-----------------
 What's new in 2.0
--------------------
+-----------------
 
 PySys 2.0 was released in August 2021. Highlights from this release are:
 
@@ -223,19 +360,22 @@ The mode name can be automatically generated from the parameters, or provided ex
 			]
 	"""
 
+(Note that as of PySys 2.1 the enclosing``"""`` string is not required). 
+
 For those still using ``pysystest.xml`` files, the same Python lambda can also be added in your ``<modes>...</modes>`` 
 element. 
 
-There is also a helper function provided (in `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions`) 
-to combine multiple mode "dimensions" together, for example every combination of your supported databases and your 
-supported web browsers. This allows for some quite sophisticated logic to generate the mode list such as:
+There is also a helper function provided in `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` 
+(previously known as ``combineModeDimensions``) to combine multiple mode "dimensions" together, for example every 
+combination of your supported databases and your supported web browsers. 
+This allows for some quite sophisticated logic to generate the mode list such as:
 
 .. code-block:: python
 	
 	__pysys_modes__ = r""" 
 		lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
@@ -379,7 +519,8 @@ Additional improvements which will be of use to some users:
   (with ``condition="==0"``) to include both the first matching expression and the total number of matches. This 
   is useful when checking log files for unexpected errors and warnings. 
 - Added `pysys.utils.allocport.excludedTCPPorts` which can be set before the `pysys.baserunner.BaseRunner` is 
-  constructed to prevent the specified ports being allocated by `~pysys.basetest.BaseTest.getNextAvailableTCPPort`. 
+  constructed (e.g. in your runner module) to prevent the specified ports being allocated by 
+  `~pysys.basetest.BaseTest.getNextAvailableTCPPort`. 
   By default PySys comes with exclusions for a handful of ports that are commonly blocked by web browsers for security 
   reasons. 
 - Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
@@ -524,6 +665,11 @@ directory they wish to use to store test input by specifying one of the followin
         the new behaviour for new tests without the need to update or potentially create bugs in existing tests
       -->
       <input-dir>!Input_dir_if_present_else_testDir!</input-dir>
+      
+      <!-- The following is preferred from 2.1 onwards: 
+				<input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> 
+			-->
+      
 
     </pysysdirconfig>
   
@@ -910,6 +1056,8 @@ pysys.py and project configuration improvements
   using a "python:" prefix on the category name, e.g.::
   
     pysys run -v python:myorg.mycategory=debug
+  
+  Note that this ``python:`` prefix is deprecated and no longer required from PySys 2.1 onwards. 
 
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. See ``pysys run --help`` for more information. 

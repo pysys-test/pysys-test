@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.constants &mdash; PySys v2.0  documentation</title>
+  <title>pysys.constants &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.0</a>
+          <a href="../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.constants</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -183,6 +183,7 @@
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
 
 <span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">stdoutHandler</span>
+<span class="c1"># do not add extra pysys import here - must keep minimal to avoid possible circular dependencies</span>
 
 <span class="c1"># set the platform and platform related constants</span>
 <span class="n">HOSTNAME</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getfqdn</span><span class="p">()</span>
@@ -316,6 +317,13 @@
 <span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating validation steps with a negative outcome. &quot;&quot;&quot;</span>
 <span class="n">TIMEDOUT</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;TIMEDOUT&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;TIMED OUT&#39;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating that the test timed out while performing execution or validation operations. &quot;&quot;&quot;</span>
+<span class="n">BADPERF</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;BADPERF&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;BAD PERFORMANCE&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating that the measured performance (speed, memory use, etc) was deemed insufficient. </span>
+<span class="sd">When using this outcome, it is always best to also report the underlying numeric values using </span>
+<span class="sd">`pysys.basetest.BaseTest.reportPerformanceResult` to provide a record of how close to the limit the performance has been </span>
+<span class="sd">historically. Note that until other failure outcomes, the ``BADPERF`` outcome will not prevent ``reportPerformanceResult`` </span>
+<span class="sd">from recording subsequent results. </span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="n">DUMPEDCORE</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;DUMPEDCORE&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;DUMPED CORE&#39;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating that a crash occurred, and a `core` file was generated (UNIX only). &quot;&quot;&quot;</span>
 <span class="n">BLOCKED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;BLOCKED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -327,7 +335,7 @@
 
 
 <span class="c1"># set the precedent for the test outcomes</span>
-<span class="n">OUTCOMES</span> <span class="o">=</span> <span class="p">(</span><span class="n">SKIPPED</span><span class="p">,</span> <span class="n">BLOCKED</span><span class="p">,</span> <span class="n">DUMPEDCORE</span><span class="p">,</span> <span class="n">TIMEDOUT</span><span class="p">,</span> <span class="n">FAILED</span><span class="p">,</span> <span class="n">NOTVERIFIED</span><span class="p">,</span> <span class="n">INSPECT</span><span class="p">,</span> <span class="n">PASSED</span><span class="p">)</span>
+<span class="n">OUTCOMES</span> <span class="o">=</span> <span class="p">(</span><span class="n">SKIPPED</span><span class="p">,</span> <span class="n">BLOCKED</span><span class="p">,</span> <span class="n">DUMPEDCORE</span><span class="p">,</span> <span class="n">TIMEDOUT</span><span class="p">,</span> <span class="n">FAILED</span><span class="p">,</span> <span class="n">BADPERF</span><span class="p">,</span> <span class="n">NOTVERIFIED</span><span class="p">,</span> <span class="n">INSPECT</span><span class="p">,</span> <span class="n">PASSED</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Lists all possible test outcomes, in descending order of precedence. </span>
 
@@ -337,12 +345,13 @@
 <span class="sd">	DUMPEDCORE</span>
 <span class="sd">	TIMEDOUT</span>
 <span class="sd">	FAILED</span>
+<span class="sd">	BADPERF</span>
 <span class="sd">	NOTVERIFIED</span>
 <span class="sd">	INSPECT</span>
 <span class="sd">	PASSED</span>
 
 <span class="sd">If a test adds multiple outcomes, the outcome with highest precedence is used as the final test outcome </span>
-<span class="sd">(i.e. SKIPPED rather than FAILED, FAILED rather than PASSED etc). </span>
+<span class="sd">(i.e. SKIPPED rather than FAILED, and FAILED rather than PASSED etc). </span>
 
 <span class="sd">Each item is an instance of `Outcome`. Use `Outcome.isFailure()` to check whether a given outcome is classed as a failure for reporting purposes. </span>
 
@@ -417,6 +426,8 @@
 <span class="n">LOG_SKIPS</span> <span class="o">=</span> <span class="s1">&#39;skipped&#39;</span>
 <span class="n">LOG_DIFF_ADDED</span> <span class="o">=</span> <span class="s1">&#39;diff+&#39;</span>
 <span class="n">LOG_DIFF_REMOVED</span> <span class="o">=</span> <span class="s1">&#39;diff-&#39;</span>
+<span class="n">LOG_PERF_BETTER</span> <span class="o">=</span> <span class="s1">&#39;performancebetter&#39;</span>
+<span class="n">LOG_PERF_WORSE</span> <span class="o">=</span> <span class="s1">&#39;performanceworse&#39;</span>
 <span class="n">LOG_END</span> <span class="o">=</span> <span class="s1">&#39;end&#39;</span>
 
 <div class="viewcode-block" id="PrintLogs"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.PrintLogs">[docs]</a><span class="k">class</span> <span class="nc">PrintLogs</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
@@ -432,16 +443,11 @@
 	<span class="n">FAILURES</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.FAILURES&#39;</span>
 	<span class="sd">&quot;&quot;&quot;Detailed run.log output is only printed to the stdout console for failed testcases. &quot;&quot;&quot;</span></div>
 
-<span class="n">PROJECT</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="sd">&quot;&quot;&quot;:meta private: Hide this since 1.5.1 since we don&#39;t want people to use it. </span>
-
-<span class="sd">Holds the L{pysys.config.project.Project} instance containing settings for this PySys project.</span>
-<span class="sd">Instead of using this constant, use `pysys.basetest.BaseTest.project` (or`pysys.process.user.ProcessUser.project`) </span>
-<span class="sd">field to access this. If this is not possible, use Project.getInstance().</span>
-
-<span class="sd">This is set by the console_XXX modules when the project is loaded. </span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pysys.config.project</span> <span class="kn">import</span> <span class="n">Project</span> <span class="c1"># retained for compatibility when using &#39;from constants import *&#39;</span>
+<span class="c1"># Prior to v2.1 the &quot;Project&quot; class and &quot;PROJECT&quot; constant were imported here; the former was removed to avoid circular </span>
+<span class="c1"># dependencies during initialization but for compatibility when using &#39;from constants import *&#39; in testcases both are </span>
+<span class="c1"># assigned into this module during console_XXX when the project has been loaded. </span>
+<span class="c1"># Instead of using these constants, it is recommended to use the `pysys.basetest.BaseTest.project` </span>
+<span class="c1"># (or`pysys.process.user.ProcessUser.project`) field to access this. If this is not possible, use Project.getInstance().</span>
 </pre></div>
 
            </div>
@@ -454,7 +460,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

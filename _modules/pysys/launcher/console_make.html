@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.launcher.console_make &mdash; PySys v2.0  documentation</title>
+  <title>pysys.launcher.console_make &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -152,7 +152,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for pysys.launcher.console_make</h1><div class="highlight"><pre>
-<span></span><span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span></span><span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -186,7 +186,7 @@
 <span class="kn">from</span> <span class="nn">pysys.launcher</span> <span class="kn">import</span> <span class="n">createDescriptors</span>
 <span class="kn">from</span> <span class="nn">pysys.config.project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span><span class="p">,</span> <span class="n">PY2</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span><span class="p">,</span> <span class="n">mkdir</span>
 
 <div class="viewcode-block" id="DefaultTestMaker"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker">[docs]</a><span class="k">class</span> <span class="nc">DefaultTestMaker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -249,9 +249,10 @@
 			<span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
 				<span class="n">t</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
 					<span class="n">defaults</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
-					<span class="n">defaults</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> 
 					<span class="n">defaults</span><span class="o">.</span><span class="n">reference</span>
 				<span class="p">]</span>
+				<span class="k">if</span> <span class="n">defaults</span><span class="o">.</span><span class="n">input</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;!Input_dir_if_present_else_testDir!&#39;</span><span class="p">,</span> <span class="s1">&#39;!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!&#39;</span><span class="p">]:</span>
+					<span class="n">t</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">defaults</span><span class="o">.</span><span class="n">input</span><span class="p">)</span>
 			
 			<span class="n">t</span><span class="p">[</span><span class="s1">&#39;testOutputDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">output</span>
 			
@@ -522,6 +523,7 @@
 				<span class="p">[</span><span class="s1">&#39;@@USERNAME@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{USERNAME}</span><span class="s1">&#39;</span><span class="p">],</span> 
 				<span class="p">[</span><span class="s1">&#39;@@DIR_NAME@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DIR_NAME}</span><span class="s1">&#39;</span><span class="p">],</span> 
 				<span class="p">[</span><span class="s1">&#39;@@DEFAULT_DESCRIPTOR@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DEFAULT_DESCRIPTOR}</span><span class="s1">&#39;</span><span class="p">],</span> 
+				<span class="p">[</span><span class="s1">&#39;@@DEFAULT_DESCRIPTOR_MINIMAL@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{DEFAULT_DESCRIPTOR_MINIMAL}</span><span class="s1">&#39;</span><span class="p">],</span> 
 				<span class="p">[</span><span class="s1">&#39;@@LINE_LENGTH_GUIDE@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{LINE_LENGTH_GUIDE}</span><span class="s1">&#39;</span><span class="p">],</span>
 			<span class="p">]</span>
 		
@@ -532,11 +534,15 @@
 			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@@USERNAME@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{USERNAME}</span><span class="s1">&#39;</span><span class="p">)</span>
 			<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@@LINE_LENGTH_GUIDE@@&#39;</span><span class="p">,</span> <span class="s1">&#39;@</span><span class="si">{LINE_LENGTH_GUIDE}</span><span class="s1">&#39;</span><span class="p">)</span>
 		
+		<span class="n">DEFAULT_DESCRIPTOR_MINIMAL</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span>
+			<span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#__pysys_skipped_reason__&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#__pysys_&#39;</span><span class="p">))</span>
+			<span class="p">)])</span>
 		
 		<span class="n">replace</span> <span class="o">=</span> <span class="p">[</span>
 			<span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)),</span> 
-				<span class="n">r2</span> <span class="c1"># in addition to ${...] project properties, add some that are especially useful here</span>
+				<span class="n">r2</span> <span class="c1"># in addition to ${...} project properties, add some that are especially useful here</span>
 					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DEFAULT_DESCRIPTOR}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">))</span>
+					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DEFAULT_DESCRIPTOR_MINIMAL}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">DEFAULT_DESCRIPTOR_MINIMAL</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">))</span>
 					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DATE}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">startDate</span><span class="p">)</span>
 					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{USERNAME}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
 					<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">{DIR_NAME}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dest</span><span class="p">))</span>
@@ -555,7 +561,7 @@
 			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
 				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot copy to </span><span class="si">%s</span><span class="s1"> as it already exists&#39;</span><span class="o">%</span><span class="n">target</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
-			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Copied </span><span class="si">%s%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Copied </span><span class="si">%s%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
 		<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]:</span>	
 			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
@@ -761,7 +767,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

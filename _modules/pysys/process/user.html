@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.user &mdash; PySys v2.0  documentation</title>
+  <title>pysys.process.user &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -155,7 +155,7 @@
             
   <h1>Source code for pysys.process.user</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -305,12 +305,12 @@
 <span class="sd">		which can be used for the `startProcess` ``stdouterr`` parameter. </span>
 <span class="sd">		</span>
 <span class="sd">		The first time this is called it will return names like </span>
-<span class="sd">		``(&#39;myprocess.out&#39;, &#39;myprocess.err&#39;)``, the second time it will return </span>
-<span class="sd">		``(&#39;myprocess.1.out&#39;, &#39;myprocess.1.err&#39;)``, then </span>
-<span class="sd">		``(&#39;myprocess.2.out&#39;, &#39;myprocess.2.err&#39;)`` etc. </span>
+<span class="sd">		``(&#39;outdir/myprocess.out&#39;, &#39;outdir/myprocess.err&#39;)``, the second time it will return </span>
+<span class="sd">		``(&#39;outdir/myprocess.1.out&#39;, &#39;outdir/myprocess.1.err&#39;)``, then </span>
+<span class="sd">		``(&#39;outdir/myprocess.2.out&#39;, &#39;outdir/myprocess.2.err&#39;)`` etc. </span>
 <span class="sd">		</span>
 <span class="sd">		:param str processKey: A user-defined identifier that will form the prefix onto which ``[.n].out`` is appended</span>
-<span class="sd">		:return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)</span>
+<span class="sd">		:return: A STDOUTERR_TUPLE named tuple of (stdout, stderr), where each is an absolute path. </span>
 <span class="sd">		:rtype: STDOUTERR_TUPLE</span>
 
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -456,6 +456,10 @@
 
 <span class="sd">		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` </span>
 <span class="sd">		to allocate a free port before calling this method. </span>
+<span class="sd">		</span>
+<span class="sd">		Note that although is is possible to use this command to execute OS shell commands, that should only used for </span>
+<span class="sd">		testing of shell scripts - other logic such as file system operations can be executed more easily and robustly </span>
+<span class="sd">		using built-in Python (``os`` module) or PySys (e.g. `BaseTest.copy`) functions. </span>
 
 <span class="sd">		.. versionchanged:: 1.6.0</span>
 <span class="sd">			Added onError parameter and default behaviour of logging stderr/out when there&#39;s a failure.</span>
@@ -1287,9 +1291,10 @@
 <span class="sd">			The default value is None which indicates that the decision will be delegated </span>
 <span class="sd">			to the L{getDefaultFileEncoding()} method. </span>
 
-<span class="sd">		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra </span>
-<span class="sd">			information about the wait condition. e.g. ``detailMessage=&#39;(downstream message received)&#39;``. </span>
-<span class="sd">			Added in v1.5.1. </span>
+<span class="sd">		:param str detailMessage: An extra string to add to the start of the message logged when waiting to provide extra </span>
+<span class="sd">			information about the wait condition. e.g. ``detailMessage=&#39;Wait for server startup: &#39;``. </span>
+<span class="sd">			</span>
+<span class="sd">			Added in v1.5.1. From v2.1+ the detail string is added at the beginning not the end. </span>
 
 <span class="sd">		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, </span>
 <span class="sd">			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. </span>
@@ -1323,12 +1328,13 @@
 		
 		<span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-		<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Waiting for </span><span class="si">{expr}</span><span class="s2"> </span><span class="si">{condition}</span><span class="s2">in </span><span class="si">{file}{detail}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-			<span class="n">expr</span><span class="o">=</span><span class="n">quotestring</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="c1"># repr performs escaping of embedded quotes, newlines, etc</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Waiting for </span><span class="si">{expr}</span><span class="s2"> </span><span class="si">{condition}</span><span class="s2">in </span><span class="si">{file}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+			<span class="n">expr</span><span class="o">=</span><span class="n">quotestring</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="c1"># performs escaping of embedded quotes, newlines, etc</span>
 			<span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39; &#39;</span> <span class="k">if</span> <span class="n">condition</span><span class="o">!=</span><span class="s1">&#39;&gt;=1&#39;</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="c1"># only include if non-default</span>
 			<span class="n">file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">),</span>
-			<span class="n">detail</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">detailMessage</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">detailMessage</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
 			<span class="p">)</span>
+		<span class="k">if</span> <span class="n">detailMessage</span><span class="p">:</span> <span class="c1"># prior to v2.1 this was appended at the end but actually it&#39;s more useful at the beginning</span>
+			<span class="n">msg</span> <span class="o">=</span> <span class="n">detailMessage</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;: &#39;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;: &#39;</span><span class="o">+</span><span class="n">msg</span>
 
 		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Performing wait for grep signal </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> in file </span><span class="si">%s</span><span class="s2"> with ignores </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">ignores</span><span class="p">)</span>
 		
@@ -1464,7 +1470,7 @@
 				<span class="k">try</span><span class="p">:</span>
 					<span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> <span class="n">process</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c1"># this is pretty unlikely to fail, but we&#39;d like to know if it does</span>
-					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 					<span class="n">exceptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Failed to stop process </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">processCount</span> <span class="o">=</span> <span class="p">{}</span>
 			
@@ -1513,13 +1519,6 @@
 			<span class="k">if</span> <span class="n">outcomeReason</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="n">outcomeReason</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 			<span class="k">else</span><span class="p">:</span> 
-				<span class="k">if</span> <span class="n">PY2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outcomeReason</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> 
-					<span class="c1"># The python2 logger is very unhappy about byte str objects containing </span>
-					<span class="c1"># non-ascii characters (specifically it will fail to log them and dump a </span>
-					<span class="c1"># traceback on stderr). Since it&#39;s pretty important that assertion </span>
-					<span class="c1"># messages and test outcome reasons don&#39;t get swallowed, add a </span>
-					<span class="c1"># workaround for this here. Not a problem in python 3. </span>
-					<span class="n">outcomeReason</span> <span class="o">=</span> <span class="n">outcomeReason</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span>
 				<span class="n">outcomeReason</span> <span class="o">=</span> <span class="n">stripANSIEscapeCodes</span><span class="p">(</span><span class="n">outcomeReason</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; ; &#39;</span><span class="p">)</span>
 			
 			<span class="k">if</span> <span class="n">override</span><span class="p">:</span> 
@@ -1952,7 +1951,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.logFileContents"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.logFileContents">[docs]</a>	<span class="k">def</span> <span class="nf">logFileContents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">includes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">excludes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-			<span class="n">logFunction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stripWhitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[]):</span>
+			<span class="n">logFunction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stripWhitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot; Logs some or all of the lines from the specified file.</span>
 <span class="sd">		</span>
 <span class="sd">		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key</span>
@@ -2001,6 +2000,9 @@
 
 <span class="sd">		:param bool stripWhitespace: By default blank lines are removed; set this to False to disable that behaviour. </span>
 <span class="sd">			Added in PySys 2.0. </span>
+<span class="sd">		</span>
+<span class="sd">		:param bool color: By default logged lines are colored blue to distinguish from the rest of the log contents. </span>
+<span class="sd">			Set this to False to disable coloring. Added in PySys 2.1. </span>
 
 <span class="sd">		:return: True if anything was logged, False if not.</span>
 <span class="sd">		</span>
@@ -2030,6 +2032,8 @@
 				<span class="k">if</span> <span class="n">stripWhitespace</span><span class="p">:</span>
 					<span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
 					<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span>
 				
 				<span class="k">if</span> <span class="n">includes</span><span class="p">:</span>
 					<span class="n">l</span> <span class="o">=</span> <span class="n">matchesany</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">includes</span><span class="p">)</span>
@@ -2049,14 +2053,17 @@
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">tolog</span><span class="p">:</span>
 			<span class="k">return</span> <span class="kc">False</span>
 		
-		<span class="n">logextra</span> <span class="o">=</span> <span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FILE_CONTENTS</span><span class="p">)</span>
+		<span class="n">logextra</span> <span class="o">=</span> <span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FILE_CONTENTS</span> <span class="k">if</span> <span class="n">color</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">logFunction</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
 			<span class="k">def</span> <span class="nf">logFunction</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">logextra</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> 
+					<span class="c1"># special-case printing of lines that already have coloring - don&#39;t add any extra colors to such lines</span>
+					<span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">color</span> <span class="ow">and</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">else</span> <span class="n">logextra</span><span class="p">)</span>
 
 		<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">):</span> <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;Contents of </span><span class="si">%s%s</span><span class="s1">: &#39;</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39; (filtered)&#39;</span> <span class="k">if</span> <span class="n">includes</span> <span class="ow">or</span> <span class="n">excludes</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">logextra</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;Contents of </span><span class="si">%s%s</span><span class="s1">: &#39;</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39; (filtered)&#39;</span> <span class="k">if</span> <span class="n">includes</span> <span class="ow">or</span> <span class="n">excludes</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> 
+			<span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FILE_CONTENTS</span><span class="p">,</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 		<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">tolog</span><span class="p">:</span>
 			<span class="n">logFunction</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;  -----&#39;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">logextra</span><span class="p">)</span>
@@ -2472,7 +2479,7 @@
 					<span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">and</span> <span class="n">symlinks</span><span class="p">:</span>
 						<span class="n">linkdest</span> <span class="o">=</span> <span class="n">dest</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 						<span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">linkdest</span><span class="p">)</span>
-						<span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">linkdest</span><span class="p">,</span> <span class="o">**</span><span class="p">({}</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="p">{</span><span class="s1">&#39;follow_symlinks&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">}))</span>
+						<span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">linkdest</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 						<span class="k">continue</span>
 					
 					<span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dest</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> 
@@ -2530,7 +2537,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

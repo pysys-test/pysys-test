@@ -1,0 +1,526 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.perf.api &mdash; PySys v2.1.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.perf.reporters" href="pysys.perf.reporters.html" />
+    <link rel="prev" title="pysys.perf" href="pysys.perf.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.perf.html">pysys.perf</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.perf.api</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#performanceunit">PerformanceUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#baseperformancereporter">BasePerformanceReporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#performancerundata">PerformanceRunData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#csvperformancefile">CSVPerformanceFile</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.perf.reporters.html">pysys.perf.reporters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v2.1.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.perf.html">pysys.perf</a> &raquo;</li>
+        
+      <li>pysys.perf.api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.perf.api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.perf.api">
+<span id="pysys-perf-api"></span><h1>pysys.perf.api<a class="headerlink" href="#module-pysys.perf.api" title="Permalink to this headline">¶</a></h1>
+<p>API for creating new performance reporters (for manipulating performance run files outside the framework).</p>
+<div class="section" id="performanceunit">
+<h2>PerformanceUnit<a class="headerlink" href="#performanceunit" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.api.PerformanceUnit">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.api.</code><code class="sig-name descname">PerformanceUnit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">biggerIsBetter</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#PerformanceUnit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.PerformanceUnit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class which identifies the unit in which a performance result is measured.</p>
+<p>Every unit encodes whether big numbers are better or worse (which can be used 
+to calculate the improvement or regression when results are compared), e.g. 
+better for throughput numbers, worse for time taken or latency numbers.</p>
+<p>For consistency, we recommend using the pre-defined units where possible. 
+For throughput numbers or rates, that means using PER_SECOND. For latency 
+measurements that means using SECONDS if long time periods of several 
+seconds are expected, or NANO_SECONDS (=10**-9 seconds) if sub-second 
+time periods are expected (since humans generally find numbers such as 
+1,234,000 ns easier to skim-read and compare than fractional numbers like 
+0.001234).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the unit . Should be short, for example “/s”.</p></li>
+<li><p><strong>biggerIsBetter</strong> (<em>bool</em>) – Indicates whether larger values are good (e.g. rate/TPS/throughput) or bad (latency/memory).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="baseperformancereporter">
+<h2>BasePerformanceReporter<a class="headerlink" href="#baseperformancereporter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.api.BasePerformanceReporter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.api.</code><code class="sig-name descname">BasePerformanceReporter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">project</span></em>, <em class="sig-param"><span class="n">summaryfile</span></em>, <em class="sig-param"><span class="n">testoutdir</span></em>, <em class="sig-param"><span class="n">runner</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>API base class for creating a reporter that handles or stores performance results for later analysis.</p>
+<p>Each performance result consists of a value, a result key (which must 
+be unique across all test cases and modes, and also stable across different 
+runs), and a unit (which also encodes whether bigger values are better or worse). 
+Each test can report any number of performance results.</p>
+<p>Performance reporter implementations are required to be thread-safe.</p>
+<p>Project configuration of performance reporters is through the PySys project XML file using the 
+<code class="docutils literal notranslate"><span class="pre">&lt;performance-reporter&gt;</span></code> tag. Multiple reporters may be configured and their individual properties set through the 
+nested <code class="docutils literal notranslate"><span class="pre">&lt;property&gt;</span></code> tag or XML attributes. Properties are set as Python attributes on the instance just after 
+construction, with automatic conversion of type to match the default value if specified as a static attribute on the 
+class.</p>
+<p>If no reporters are explicitly configured, default reporters will be added.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> (<a class="reference internal" href="pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><em>pysys.config.project.Project</em></a>) – The project configuration instance.</p></li>
+<li><p><strong>testoutdir</strong> (<em>str</em>) – The output directory used for this test run 
+(equal to <code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.outsubdir</span></code>), an identifying string which often contains 
+the platform, or when there are multiple test runs on the same machine 
+may be used to distinguish between them. This is usually a relative path 
+but may be an absolute path.</p></li>
+<li><p><strong>runner</strong> – A reference to the runner.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.setup">
+<code class="sig-name descname">setup</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project 
+configuration properties for this performance reporter have been assigned to this instance.</p>
+<p>Usually there is no reason to override the constructor, and any initialization can be done in this method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.getRunDetails">
+<code class="sig-name descname">getRunDetails</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.getRunDetails"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.getRunDetails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an dictionary of information about this test run (e.g. hostname, start time, etc).</p>
+<p>Overriding this method is discouraged; customization of the run details should usually be performed by changing 
+the <code class="docutils literal notranslate"><span class="pre">runner.runDetails</span></code> dictionary from the <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>testobj</strong> – the test case instance registering the value</p>
+</dd>
+</dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0: </span>Added testobj parameter, for advanced cases where you want to 
+to provide different <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> based on some feature of the test object or mode. </p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.valueToDisplayString">
+<em class="property">static </em><code class="sig-name descname">valueToDisplayString</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.valueToDisplayString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.valueToDisplayString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty-print an integer or float value to a moderate number of significant figures.</p>
+<p>The method additionally adds a “,” grouping for large numbers.</p>
+<p>Subclasses may customize this if desired, including by reimplementing as a non-static method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – the value to be displayed, which must be a numeric type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.getRunSummaryFile">
+<code class="sig-name descname">getRunSummaryFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.getRunSummaryFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.getRunSummaryFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fully substituted location of the file to which summary performance results will be written.</p>
+<p>This may include the following substitutions: <code class="docutils literal notranslate"><span class="pre">&#64;OUTDIR&#64;</span></code> (=``${outDirName}``, the basename of the output directory for this run,
+e.g. “linux”), <code class="docutils literal notranslate"><span class="pre">&#64;HOSTNAME&#64;</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;DATE&#64;</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;TIME&#64;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&#64;TESTID&#64;</span></code>. The default is given by <code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SUMMARY_FILE</span></code>. 
+If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
+run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>testobj</strong> – the test case instance registering the value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.reportResult">
+<code class="sig-name descname">reportResult</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testobj</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">resultKey</span></em>, <em class="sig-param"><span class="n">unit</span></em>, <em class="sig-param"><span class="n">toleranceStdDevs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resultDetails</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.reportResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.reportResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report a performance result, with an associated unique key that identifies it.</p>
+<p>This method must be implemented by performance reporters. However do not ever call it directly - always use 
+<a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.reportPerformanceResult</span></code></a> which performs some critical input validations before calling 
+all the registered reporters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testobj</strong> – the test case instance registering the value. Use <code class="docutils literal notranslate"><span class="pre">testobj.descriptor.id</span></code> to get the <code class="docutils literal notranslate"><span class="pre">testId</span></code>.</p></li>
+<li><p><strong>value</strong> (<em>int|float</em>) – the value to be reported. This may be an int or a float.</p></li>
+<li><p><strong>resultKey</strong> (<em>str</em>) – a unique string that fully identifies what was measured.</p></li>
+<li><p><strong>unit</strong> (<a class="reference internal" href="#pysys.perf.api.PerformanceUnit" title="pysys.perf.api.PerformanceUnit"><em>PerformanceUnit</em></a>) – identifies the unit the value is measured in.</p></li>
+<li><p><strong>toleranceStdDevs</strong> (<em>float</em>) – indicates how many standard deviations away from the mean for a regression.</p></li>
+<li><p><strong>resultDetails</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>obj</em><em>]</em>) – A dictionary of detailed information that should be recorded together with the result.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.cleanup">
+<code class="sig-name descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when PySys has finished executing tests.</p>
+<p>This is where any file footer and other I/O finalization can be written to the end of performance log files, and 
+is also a good time to do any required aggregation, printing of summaries or artifact publishing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.BasePerformanceReporter.tryDeserializePerformanceFile">
+<em class="property">static </em><code class="sig-name descname">tryDeserializePerformanceFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#BasePerformanceReporter.tryDeserializePerformanceFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.BasePerformanceReporter.tryDeserializePerformanceFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advanced method which allows performance reporters to deserialize the files they write to allow them to be used 
+as comparison baselines.</p>
+<p>Most reporters do not need to worry about this method.</p>
+<p>If you do implement it, return an instance of PerformanceRunData, or None if you do not support this file type, for 
+example because the extension does not match. It is best to declare this as a static method if possible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pysys.perf.api.PerformanceRunData" title="pysys.perf.api.PerformanceRunData">PerformanceRunData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="performancerundata">
+<h2>PerformanceRunData<a class="headerlink" href="#performancerundata" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.api.PerformanceRunData">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.api.</code><code class="sig-name descname">PerformanceRunData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">runDetails</span></em>, <em class="sig-param"><span class="n">results</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#PerformanceRunData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.PerformanceRunData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Holds performance data for a single test run, consisting of runDetails and a list of performance results covering 
+one or more cycles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name, typically a filename.</p></li>
+<li><p><strong>runDetails</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>str</em><em>]</em>) – A dictionary containing (string key, string value) information about the whole test 
+run, for example operating system and hostname.</p></li>
+<li><p><strong>results</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em>) – A list where each item is a dictionary containing information about a given result. 
+The current keys are: resultKey, testId, value, unit, biggerIsBetter, toleranceStdDevs, samples, stdDev, 
+resultDetails.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pysys.perf.api.PerformanceRunData.aggregate">
+<em class="property">static </em><code class="sig-name descname">aggregate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">runs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#PerformanceRunData.aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.PerformanceRunData.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregate a list of multiple runs and/or cycles into a single performance run data object with a single 
+entry for each unique resultKey with the value given as a mean of all the observed samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>files</strong> (<em>list</em><em>[</em><a class="reference internal" href="#pysys.perf.api.PerformanceRunData" title="pysys.perf.api.PerformanceRunData"><em>PerformanceRunData</em></a><em>]</em>) – the list of run objects to aggregate.</p>
+</dd>
+<dt class="field-even">Rtype PerformanceRunData</dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="csvperformancefile">
+<h2>CSVPerformanceFile<a class="headerlink" href="#csvperformancefile" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.api.CSVPerformanceFile">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.api.</code><code class="sig-name descname">CSVPerformanceFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">contents</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#CSVPerformanceFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.CSVPerformanceFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.perf.api.PerformanceRunData" title="pysys.perf.api.PerformanceRunData"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.perf.api.PerformanceRunData</span></code></a></p>
+<p>Holds performance data for a single test run in a CSV performance file.</p>
+<p>If this file contains aggregated results the number of “samples” may be greater than 1 and the “value”
+will specify the mean result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>runDetails</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>obj</em><em>]</em>) – A dictionary containing (string key, string value) information about the whole test run.</p></li>
+<li><p><strong>results</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em>) – A list where each item is a dictionary containing information about a given result, 
+containing values for each of the keys in <code class="xref py py-obj docutils literal notranslate"><span class="pre">COLUMNS</span></code>, for example ‘resultKey’, ‘value’, etc.</p></li>
+<li><p><strong>RUN_DETAILS</strong> (<em>str</em>) – The constant prefix identifying information about the whole test run</p></li>
+<li><p><strong>RESULT_DETAILS</strong> (<em>str</em>) – The constant prefix identifying detailed information about a given result</p></li>
+<li><p><strong>COLUMNS</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Constant list of the columns in the performance output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>contents</strong> (<em>str</em>) – A string containing the contents of the file to be parsed (can be empty)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pysys.perf.api.CSVPerformanceFile" title="pysys.perf.api.CSVPerformanceFile">CSVPerformanceFile</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pysys.perf.api.CSVPerformanceFile.aggregate">
+<em class="property">static </em><code class="sig-name descname">aggregate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#CSVPerformanceFile.aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.CSVPerformanceFile.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregate a list of performance file objects into a single CSVPerformanceFile object.</p>
+<p>Takes a list of one or more CSVPerformanceFile objects and returns a single aggregated
+CSVPerformanceFile with a single row for each resultKey (with the “value” set to the
+mean if there are multiple results with that key, and the stdDev also set appropriately).</p>
+<p>This method is now deprecated in favour of <a class="reference internal" href="#pysys.perf.api.PerformanceRunData.aggregate" title="pysys.perf.api.PerformanceRunData.aggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PerformanceRunData.aggregate</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>files</strong> (<em>list</em><em>[</em><a class="reference internal" href="#pysys.perf.api.CSVPerformanceFile" title="pysys.perf.api.CSVPerformanceFile"><em>CSVPerformanceFile</em></a><em>]</em>) – the list of performance file objects to aggregate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.CSVPerformanceFile.load">
+<em class="property">static </em><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">src</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#CSVPerformanceFile.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.CSVPerformanceFile.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the runDetails and results from the specified .csv file on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>src</strong> (<em>str</em>) – The path to read.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#pysys.perf.api.CSVPerformanceFile" title="pysys.perf.api.CSVPerformanceFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSVPerformanceFile</span></code></a> instance.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.CSVPerformanceFile.dump">
+<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dest</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#CSVPerformanceFile.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.CSVPerformanceFile.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the runDetails and results from this object to a CSV at the specified location.</p>
+<p>Any existing file is overwritten.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dest</strong> (<em>str</em>) – The destination path or file handle to write to.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.perf.api.CSVPerformanceFile.toCSVLine">
+<em class="property">static </em><code class="sig-name descname">toCSVLine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/api.html#CSVPerformanceFile.toCSVLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.api.CSVPerformanceFile.toCSVLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list or dictionary of input values into a CSV string.</p>
+<p>Note that no new line character is return in the CSV string. The input values can either be
+a list (any nested dictionaries are expanded into KEY=VALUE entries), or a dictionary (or OrderedDict)
+whose keys will be added in the same order as COLUMNS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>values</strong> – the input list or dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.perf.reporters.html" class="btn btn-neutral float-right" title="pysys.perf.reporters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.perf.html" class="btn btn-neutral float-left" title="pysys.perf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

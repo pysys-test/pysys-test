@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.perf.reporters &mdash; PySys v2.1.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.process" href="pysys.process.html" />
+    <link rel="prev" title="pysys.perf.api" href="pysys.perf.api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.config.html">pysys.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.perf.html">pysys.perf</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.perf.api.html">pysys.perf.api</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.perf.reporters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#csvperformancereporter">CSVPerformanceReporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jsonperformancereporter">JSONPerformanceReporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#printsummaryperformancereporter">PrintSummaryPerformanceReporter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v2.1.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.perf.html">pysys.perf</a> &raquo;</li>
+        
+      <li>pysys.perf.reporters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.perf.reporters.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.perf.reporters">
+<span id="pysys-perf-reporters"></span><h1>pysys.perf.reporters<a class="headerlink" href="#module-pysys.perf.reporters" title="Permalink to this headline">¶</a></h1>
+<p>Contains the built-in reporter classes.</p>
+<div class="section" id="csvperformancereporter">
+<h2>CSVPerformanceReporter<a class="headerlink" href="#csvperformancereporter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.reporters.CSVPerformanceReporter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.reporters.</code><code class="sig-name descname">CSVPerformanceReporter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">project</span></em>, <em class="sig-param"><span class="n">summaryfile</span></em>, <em class="sig-param"><span class="n">testoutdir</span></em>, <em class="sig-param"><span class="n">runner</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/reporters.html#CSVPerformanceReporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.reporters.CSVPerformanceReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter" title="pysys.perf.api.BasePerformanceReporter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.perf.api.BasePerformanceReporter</span></code></a></p>
+<p>Performance reporter which writes to a CSV file.</p>
+<p>This reporter writes to a UTF-8 file of 
+comma-separated values that is both machine and human readable and 
+easy to view and use in any spreadsheet program, and after the columns containing 
+the information for each result, contains comma-separated metadata containing 
+key=value information about the entire run (e.g. hostname, date/time, etc), 
+and (optionally) associated with each individual test result (e.g. test mode etc). 
+The per-run and per-result metadata is not arranged in columns since the structure 
+differs from row to row.</p>
+<p>After tests have run, the summary file is published with category <code class="docutils literal notranslate"><span class="pre">CSVPerformanceReport</span></code> 
+using the <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a> interface.</p>
+<p>The following properties can be set in the project configuration for this reporter:</p>
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.CSVPerformanceReporter.summaryFile">
+<code class="sig-name descname">summaryFile</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.perf.reporters.CSVPerformanceReporter.summaryFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>The filename pattern used for the summary file(s); see <a class="reference internal" href="#pysys.perf.reporters.CSVPerformanceReporter.DEFAULT_SUMMARY_FILE" title="pysys.perf.reporters.CSVPerformanceReporter.DEFAULT_SUMMARY_FILE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SUMMARY_FILE</span></code></a>.</p>
+<p>For compatibility purposes, if not specified explicitly, the summary file for the CSVPerformanceReporter can be 
+configured with the project property <code class="docutils literal notranslate"><span class="pre">csvPerformanceReporterSummaryFile</span></code>, however this is deprecated. 
+This property can also be accessed and configured under the alternative capitalization <code class="docutils literal notranslate"><span class="pre">summaryfile</span></code>, however this 
+is discouraged as of PySys 2.1+, where <code class="docutils literal notranslate"><span class="pre">summaryFile</span></code> is the preferred name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.CSVPerformanceReporter.aggregateCycles">
+<code class="sig-name descname">aggregateCycles</code><em class="property"> = False</em><a class="headerlink" href="#pysys.perf.reporters.CSVPerformanceReporter.aggregateCycles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable this if you want PySys to rewrite the summary file at the end of a multi-cycle test with an aggregated 
+file containing the mean and standard deviation for all the cycles, rather than a separate line for each cycle. 
+This may be easier to consume when triaging performance results and looking for regressions.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.CSVPerformanceReporter.publishArtifactCategory">
+<code class="sig-name descname">publishArtifactCategory</code><em class="property"> = 'CSVPerformanceReport'</em><a class="headerlink" href="#pysys.perf.reporters.CSVPerformanceReporter.publishArtifactCategory" title="Permalink to this definition">¶</a></dt>
+<dd><p>If specified, the output file will be published as an artifact using the specified category name.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.CSVPerformanceReporter.DEFAULT_SUMMARY_FILE">
+<code class="sig-name descname">DEFAULT_SUMMARY_FILE</code><em class="property"> = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'</em><a class="headerlink" href="#pysys.perf.reporters.CSVPerformanceReporter.DEFAULT_SUMMARY_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default summary file if not overridden by the <code class="docutils literal notranslate"><span class="pre">csvPerformanceReporterSummaryFile</span></code> project property, or 
+the <code class="docutils literal notranslate"><span class="pre">summaryFile=</span></code> attribute. See <code class="xref py py-obj docutils literal notranslate"><span class="pre">getRunSummaryFile()</span></code>. This is relative to the runner output+’/..’ directory 
+(typically testRootDir, unless <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> is overridden).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="jsonperformancereporter">
+<h2>JSONPerformanceReporter<a class="headerlink" href="#jsonperformancereporter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.reporters.JSONPerformanceReporter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.reporters.</code><code class="sig-name descname">JSONPerformanceReporter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">project</span></em>, <em class="sig-param"><span class="n">summaryfile</span></em>, <em class="sig-param"><span class="n">testoutdir</span></em>, <em class="sig-param"><span class="n">runner</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/reporters.html#JSONPerformanceReporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.reporters.JSONPerformanceReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter" title="pysys.perf.api.BasePerformanceReporter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.perf.api.BasePerformanceReporter</span></code></a></p>
+<p>Performance reporter which writes to a JSON file.</p>
+<p>After tests have run, the summary file is published with category <code class="docutils literal notranslate"><span class="pre">JSONPerformanceReport</span></code> 
+using the <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a> interface.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+<p>The following properties can be set in the project configuration for this reporter:</p>
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.JSONPerformanceReporter.summaryFile">
+<code class="sig-name descname">summaryFile</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.perf.reporters.JSONPerformanceReporter.summaryFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">.json</span></code> filename pattern used for the summary file(s); see <a class="reference internal" href="#pysys.perf.reporters.JSONPerformanceReporter.DEFAULT_SUMMARY_FILE" title="pysys.perf.reporters.JSONPerformanceReporter.DEFAULT_SUMMARY_FILE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SUMMARY_FILE</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.JSONPerformanceReporter.publishArtifactCategory">
+<code class="sig-name descname">publishArtifactCategory</code><em class="property"> = 'JSONPerformanceReport'</em><a class="headerlink" href="#pysys.perf.reporters.JSONPerformanceReporter.publishArtifactCategory" title="Permalink to this definition">¶</a></dt>
+<dd><p>If specified, the output file will be published as an artifact using the specified category name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.JSONPerformanceReporter.DEFAULT_SUMMARY_FILE">
+<code class="sig-name descname">DEFAULT_SUMMARY_FILE</code><em class="property"> = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.json'</em><a class="headerlink" href="#pysys.perf.reporters.JSONPerformanceReporter.DEFAULT_SUMMARY_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default summary file if not overridden by the <code class="docutils literal notranslate"><span class="pre">summaryFile=</span></code> attribute. See <code class="xref py py-obj docutils literal notranslate"><span class="pre">getRunSummaryFile()</span></code>. 
+This is relative to the runner output+’/..’ directory (typically testRootDir, unless <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> is overridden).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="printsummaryperformancereporter">
+<h2>PrintSummaryPerformanceReporter<a class="headerlink" href="#printsummaryperformancereporter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.perf.reporters.PrintSummaryPerformanceReporter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.perf.reporters.</code><code class="sig-name descname">PrintSummaryPerformanceReporter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">project</span></em>, <em class="sig-param"><span class="n">summaryfile</span></em>, <em class="sig-param"><span class="n">testoutdir</span></em>, <em class="sig-param"><span class="n">runner</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/perf/reporters.html#PrintSummaryPerformanceReporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.perf.reporters.PrintSummaryPerformanceReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter" title="pysys.perf.api.BasePerformanceReporter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.perf.api.BasePerformanceReporter</span></code></a></p>
+<p>Performance reporter which logs a human-friendly summary of all performance results to the console at the end of 
+the test run.</p>
+<p>By setting the <a class="reference internal" href="#pysys.perf.reporters.PrintSummaryPerformanceReporter.BASELINES_ENV_VAR" title="pysys.perf.reporters.PrintSummaryPerformanceReporter.BASELINES_ENV_VAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BASELINES_ENV_VAR</span></code></a> environment variable, this reporter will also print out an 
+automatic comparison from the named baseline file(s) to the results from the current test run. 
+This feature is very useful when comparingdifferent strategies for optimizing your application.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+<dl class="py attribute">
+<dt id="pysys.perf.reporters.PrintSummaryPerformanceReporter.BASELINES_ENV_VAR">
+<code class="sig-name descname">BASELINES_ENV_VAR</code><em class="property"> = 'PYSYS_PERFORMANCE_BASELINES'</em><a class="headerlink" href="#pysys.perf.reporters.PrintSummaryPerformanceReporter.BASELINES_ENV_VAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set this environment variable to a comma-separated list of performance (e.g. <code class="docutils literal notranslate"><span class="pre">.csv</span></code>) files to print out an 
+automatic comparison from the baseline file(s) to the results from the current test run.</p>
+<p>This feature is very useful when comparing different strategies for optimizing your application.</p>
+<p>For best results, use multiple cycles for all test runs so that standard deviation can be calculated.</p>
+<p>The filenames can be absolute paths, glob paths using <code class="docutils literal notranslate"><span class="pre">*</span></code> and <code class="docutils literal notranslate"><span class="pre">**</span></code>, or relative to the testRootDir. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">PYSYS_PERFORMANCE_BASELINES</span><span class="o">=</span><span class="n">__pysys_performance</span><span class="o">/</span><span class="n">mybaseline</span><span class="o">*/**/*.</span><span class="n">csv</span><span class="p">,</span><span class="n">__pysys_performance</span><span class="o">/</span><span class="n">optimization1</span><span class="o">*/**/*.</span><span class="n">csv</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.process.html" class="btn btn-neutral float-right" title="pysys.process" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.perf.api.html" class="btn btn-neutral float-left" title="pysys.perf.api" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

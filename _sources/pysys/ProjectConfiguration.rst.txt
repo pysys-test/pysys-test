@@ -27,7 +27,7 @@ Header
   	-->
   	<!-- Specify a minimum required PySys version to run these tests. Update this each time you upgrade your project 
   	so that everyone gets a clear message if accidentally running tests using an old version. -->
-  	<requires-pysys>2.0</requires-pysys>
+  	<requires-pysys>2.1</requires-pysys>
   
   	<!-- Specify a minimum required python version to run these tests. -->
   	<requires-python>3.6</requires-python>
@@ -258,7 +258,7 @@ Each writer element specifies the classname (which should be available on the py
   			
   			<!-- This causes the archive to be published to any interested writers with the specified category 
   				name (e.g. some CI systems have a mechanism for publishing arifacts) -->
-  			<property name="publishArtifactArchiveCategory" value="performanceGraphsArchive"/>
+  			<property name="publishArtifactArchiveCategory" value="PerformanceGraphsArchive"/>
   		</writer>
   		
   		<!-- CI writers automatically enable themselves only if running under 
@@ -277,6 +277,14 @@ Each writer element specifies the classname (which should be available on the py
   			test root dir (or the outdir if specified on the pysys run command).
   			-->
   			<property name="outputDir" value="__pysys_junit_xml"/>
+  		</writer>
+  		
+  		<!-- Writes all outcomes (or just the failure outcomes) to a .json file suitable for machine parsing.
+  			Only enabled when the record flag is specified. 
+  		-->
+  		<writer classname="pysys.writer.outcomes.JSONResultsWriter" file="__pysys_testsummary_${outDirName}.json">
+  			<property name="includeTitle" value="true"/>
+  			<property name="includeNonFailureOutcomes" value="NOT VERIFIED, "/>
   		</writer>
   
   		<!-- Writes all outcomes to a single XML file; only enabled when the record flag is specified. -->
@@ -332,6 +340,29 @@ Each writer element specifies the classname (which should be available on the py
   		</writer>
   	</writers>
   
+  
+Performance reporters
+~~~~~~~~~~~~~~~~~~~~~
+
+By default PySys will record performance results using a default instance of 
+`pysys.perf.reporters.CSVPerformanceReporter`. However if desired you can configure an alternative list of 
+reporters such as `pysys.perf.reporters.JSONPerformanceReporter` or custom reporters of your own. 
+
+.. code-block:: xml
+
+  	<performance-reporters>
+  	
+  		<performance-reporter classname="pysys.perf.reporters.CSVPerformanceReporter">
+  			<property name="aggregateCycles" value="true"/>
+  			<property name="summaryFile" value="__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv"/>
+  		</performance-reporter>
+  		
+  		<performance-reporter classname="pysys.perf.reporters.JSONPerformanceReporter"/>
+  
+  		<performance-reporter classname="pysys.perf.reporters.PrintSummaryPerformanceReporter"/>
+  		
+  	</performance-reporters>
+  	
   
 Configuration for how tests execute
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -397,7 +428,7 @@ including how to customize how new tests are created using maker templates.
   			<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
   				without the need to update or potentially create bugs in existing tests
   			-->
-  			<!-- <input-dir>!Input_dir_if_present_else_testDir!</input-dir> -->
+  			<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
   		<!-- Could optionally override the default directory names for reference and output too. The following are the 
   			default values and do not need to be specified explicitly. 
   		-->

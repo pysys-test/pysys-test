@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.perf.reporters &mdash; PySys v2.1.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.perf.reporters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.perf.reporters</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the built-in reporter classes. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">from</span> <span class="nn">pysys.perf.api</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">BaseLogFormatter</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">toLongPathSafe</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.perfreporter&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CSVPerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.CSVPerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">CSVPerformanceReporter</span><span class="p">(</span><span class="n">BasePerformanceReporter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Performance reporter which writes to a CSV file.</span>
+<span class="sd">	</span>
+<span class="sd">	This reporter writes to a UTF-8 file of </span>
+<span class="sd">	comma-separated values that is both machine and human readable and </span>
+<span class="sd">	easy to view and use in any spreadsheet program, and after the columns containing </span>
+<span class="sd">	the information for each result, contains comma-separated metadata containing </span>
+<span class="sd">	key=value information about the entire run (e.g. hostname, date/time, etc), </span>
+<span class="sd">	and (optionally) associated with each individual test result (e.g. test mode etc). </span>
+<span class="sd">	The per-run and per-result metadata is not arranged in columns since the structure </span>
+<span class="sd">	differs from row to row.</span>
+
+<span class="sd">	After tests have run, the summary file is published with category ``CSVPerformanceReport`` </span>
+<span class="sd">	using the `pysys.writer.api.ArtifactPublisher` interface. </span>
+
+<span class="sd">	The following properties can be set in the project configuration for this reporter:		</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">summaryFile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. </span>
+<span class="sd">	</span>
+<span class="sd">	For compatibility purposes, if not specified explicitly, the summary file for the CSVPerformanceReporter can be </span>
+<span class="sd">	configured with the project property ``csvPerformanceReporterSummaryFile``, however this is deprecated. </span>
+<span class="sd">	This property can also be accessed and configured under the alternative capitalization ``summaryfile``, however this </span>
+<span class="sd">	is discouraged as of PySys 2.1+, where ``summaryFile`` is the preferred name. </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">aggregateCycles</span> <span class="o">=</span> <span class="kc">False</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Enable this if you want PySys to rewrite the summary file at the end of a multi-cycle test with an aggregated </span>
+<span class="sd">	file containing the mean and standard deviation for all the cycles, rather than a separate line for each cycle. </span>
+<span class="sd">	This may be easier to consume when triaging performance results and looking for regressions. </span>
+<span class="sd">	</span>
+<span class="sd">	.. versionadded:: 2.1</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">publishArtifactCategory</span> <span class="o">=</span> <span class="s1">&#39;CSVPerformanceReport&#39;</span> 
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	If specified, the output file will be published as an artifact using the specified category name. </span>
+
+<span class="sd">	.. versionadded:: 2.1</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">DEFAULT_SUMMARY_FILE</span> <span class="o">=</span> <span class="s1">&#39;__pysys_performance/$</span><span class="si">{outDirName}</span><span class="s1">_$</span><span class="si">{hostname}</span><span class="s1">/perf_$</span><span class="si">{startDate}</span><span class="s1">_$</span><span class="si">{startTime}</span><span class="s1">.$</span><span class="si">{outDirName}</span><span class="s1">.csv&#39;</span>
+	<span class="sd">&quot;&quot;&quot;The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or </span>
+<span class="sd">	the ``summaryFile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+&#39;/..&#39; directory </span>
+<span class="sd">	(typically testRootDir, unless ``--outdir`` is overridden).</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+
+		<span class="c1"># for backwards compat</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">summaryfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summaryfile</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">summaryFile</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;csvPerformanceReporterSummaryFile&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SUMMARY_FILE</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="nf">getRunHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Return the header string to the CSV file.</span>
+<span class="sd">		</span>
+<span class="sd">		There should usually be no reason to override this method. </span>
+<span class="sd">		</span>
+<span class="sd">		:meta private:</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">runDetails</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunDetails</span><span class="p">(</span><span class="n">testobj</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="c1"># for pre-2.0 signature</span>
+			<span class="n">runDetails</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunDetails</span><span class="p">()</span>
+		
+		<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">makeCSVHeaderLine</span><span class="p">(</span><span class="n">runDetails</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span><span class="p">)):</span>
+					
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycle</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregateCycles</span><span class="p">:</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">perfFile</span> <span class="o">=</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+							<span class="n">perfFile</span> <span class="o">=</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">aggregate</span><span class="p">([</span><span class="n">perfFile</span><span class="p">])</span>
+						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+							<span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Failed to read and aggregate performance information for </span><span class="si">%s</span><span class="s1">: &#39;</span><span class="o">%</span><span class="n">p</span><span class="p">)</span>
+							<span class="c1"># Don&#39;t make it fatal, more useful to go ahead and publish it as best we can</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Rewriting CSV to aggregate results across all </span><span class="si">%d</span><span class="s1"> cycles&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycles</span><span class="p">)</span>
+							<span class="n">perfFile</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+				
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performance results were written to: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">))</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;  (add the above path to env </span><span class="si">%s</span><span class="s1"> to show a comparison against that baseline on future test runs)&#39;</span><span class="p">,</span> <span class="n">PrintSummaryPerformanceReporter</span><span class="o">.</span><span class="n">BASELINES_ENV_VAR</span><span class="p">)</span>
+					
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactCategory</span><span class="p">:</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactCategory</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">reportResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="n">formatted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatResult</span><span class="p">(</span><span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="p">,</span> <span class="n">resultDetails</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">recordResult</span><span class="p">(</span><span class="n">formatted</span><span class="p">,</span> <span class="n">testobj</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">formatResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="p">,</span> <span class="n">resultDetails</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).</span>
+
+<span class="sd">		:meta private:</span>
+
+<span class="sd">		:param testobj: the test case instance registering the value</span>
+<span class="sd">		:param value: the value to be reported</span>
+<span class="sd">		:param resultKey: a unique string that fully identifies what was measured</span>
+<span class="sd">		:param unit: identifies the unit the value is measured in</span>
+<span class="sd">		:param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression</span>
+<span class="sd">		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;resultKey&#39;</span><span class="p">:</span><span class="n">resultKey</span><span class="p">,</span>
+				<span class="s1">&#39;testId&#39;</span><span class="p">:</span><span class="n">testobj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+				<span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+				<span class="s1">&#39;unit&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
+				<span class="s1">&#39;biggerIsBetter&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">biggerIsBetter</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+				<span class="s1">&#39;toleranceStdDevs&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">toleranceStdDevs</span><span class="p">)</span> <span class="k">if</span> <span class="n">toleranceStdDevs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+				<span class="s1">&#39;samples&#39;</span><span class="p">:</span><span class="s1">&#39;1&#39;</span><span class="p">,</span>
+				<span class="s1">&#39;stdDev&#39;</span><span class="p">:</span><span class="s1">&#39;0&#39;</span> <span class="p">,</span>
+				<span class="s1">&#39;resultDetails&#39;</span><span class="p">:</span><span class="n">resultDetails</span>
+				<span class="p">}</span>
+		<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">toCSVLine</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+	<span class="k">def</span> <span class="nf">recordResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formatted</span><span class="p">,</span> <span class="n">testobj</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Record results to the performance summary file.</span>
+
+<span class="sd">		:meta private:</span>
+
+<span class="sd">		:param formatted: the formatted string to write</span>
+<span class="sd">		:param testobj: object reference to the calling test</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c1"># generate a file in the test output directory for convenience/triaging, plus add to the global summary</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="n">testobj</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/performance_results.csv&#39;</span>
+		<span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span>
+		
+		<span class="k">def</span> <span class="nf">callGetRunHeader</span><span class="p">():</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunHeader</span><span class="p">(</span><span class="n">testobj</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="c1"># pragma: no cover - for pre-2.0 signature </span>
+				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunHeader</span><span class="p">()</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+			<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">callGetRunHeader</span><span class="p">())</span>
+		<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+		
+		<span class="c1"># now the global one</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunSummaryFile</span><span class="p">(</span><span class="n">testobj</span><span class="p">)</span>
+		<span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+			<span class="n">alreadyexists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+			<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">alreadyexists</span><span class="p">:</span> 
+					<span class="n">testobj</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Creating performance summary log file at: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+					<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">callGetRunHeader</span><span class="p">())</span>
+				<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+	
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">tryDeserializePerformanceFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+		<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JSONPerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.JSONPerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">JSONPerformanceReporter</span><span class="p">(</span><span class="n">BasePerformanceReporter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Performance reporter which writes to a JSON file.</span>
+<span class="sd">	</span>
+<span class="sd">	After tests have run, the summary file is published with category ``JSONPerformanceReport`` </span>
+<span class="sd">	using the `pysys.writer.api.ArtifactPublisher` interface. </span>
+
+<span class="sd">	.. versionadded:: 2.1</span>
+
+<span class="sd">	The following properties can be set in the project configuration for this reporter:		</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">summaryFile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The ``.json`` filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">publishArtifactCategory</span> <span class="o">=</span> <span class="s1">&#39;JSONPerformanceReport&#39;</span> 
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	If specified, the output file will be published as an artifact using the specified category name. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">DEFAULT_SUMMARY_FILE</span> <span class="o">=</span> <span class="s1">&#39;__pysys_performance/$</span><span class="si">{outDirName}</span><span class="s1">_$</span><span class="si">{hostname}</span><span class="s1">/perf_$</span><span class="si">{startDate}</span><span class="s1">_$</span><span class="si">{startTime}</span><span class="s1">.$</span><span class="si">{outDirName}</span><span class="s1">.json&#39;</span>
+	<span class="sd">&quot;&quot;&quot;The default summary file if not overridden by the ``summaryFile=`` attribute. See `getRunSummaryFile()`. </span>
+<span class="sd">	This is relative to the runner output+&#39;/..&#39; directory (typically testRootDir, unless ``--outdir`` is overridden).</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+		
+	<span class="k">def</span> <span class="nf">reportResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunSummaryFile</span><span class="p">(</span><span class="n">testobj</span><span class="p">)</span>
+		<span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+			<span class="n">alreadyexists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+			<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">alreadyexists</span><span class="p">:</span> 
+					<span class="n">testobj</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Creating performance summary log file at: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+					<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;{&quot;runDetails&quot;: &#39;</span><span class="p">)</span>
+					<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getRunDetails</span><span class="p">(</span><span class="n">testobj</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+					<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;, &quot;results&quot;:[</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+					
+				<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span>
+					<span class="s1">&#39;resultKey&#39;</span><span class="p">:</span><span class="n">resultKey</span><span class="p">,</span>
+					<span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">,</span>
+					<span class="s1">&#39;unit&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
+					<span class="s1">&#39;biggerIsBetter&#39;</span><span class="p">:</span><span class="n">unit</span><span class="o">.</span><span class="n">biggerIsBetter</span><span class="p">,</span>
+					<span class="s1">&#39;samples&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+					<span class="s1">&#39;stdDev&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+					<span class="s1">&#39;toleranceStdDevs&#39;</span><span class="p">:</span><span class="n">toleranceStdDevs</span><span class="p">,</span>
+					<span class="s1">&#39;testId&#39;</span><span class="p">:</span><span class="n">testobj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+					<span class="s1">&#39;resultDetails&#39;</span><span class="p">:</span><span class="n">resultDetails</span> <span class="ow">or</span> <span class="p">{}</span>
+				<span class="p">},</span> <span class="n">f</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span><span class="p">)):</span>
+					<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+						<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">]}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+					
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performance results were written to: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">))</span>
+
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactCategory</span><span class="p">:</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactCategory</span><span class="p">)</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">tryDeserializePerformanceFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+		<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">PerformanceRunData</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;runDetails&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PrintSummaryPerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.PrintSummaryPerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">PrintSummaryPerformanceReporter</span><span class="p">(</span><span class="n">BasePerformanceReporter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Performance reporter which logs a human-friendly summary of all performance results to the console at the end of </span>
+<span class="sd">	the test run. </span>
+
+<span class="sd">	By setting the `BASELINES_ENV_VAR` environment variable, this reporter will also print out an </span>
+<span class="sd">	automatic comparison from the named baseline file(s) to the results from the current test run. </span>
+<span class="sd">	This feature is very useful when comparingdifferent strategies for optimizing your application. </span>
+<span class="sd">	</span>
+<span class="sd">	.. versionadded:: 2.1</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">BASELINES_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;PYSYS_PERFORMANCE_BASELINES&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Set this environment variable to a comma-separated list of performance (e.g. ``.csv``) files to print out an </span>
+<span class="sd">	automatic comparison from the baseline file(s) to the results from the current test run. </span>
+<span class="sd">	</span>
+<span class="sd">	This feature is very useful when comparing different strategies for optimizing your application. </span>
+<span class="sd">	</span>
+<span class="sd">	For best results, use multiple cycles for all test runs so that standard deviation can be calculated. </span>
+<span class="sd">	</span>
+<span class="sd">	The filenames can be absolute paths, glob paths using ``*`` and ``**``, or relative to the testRootDir. For example::</span>
+<span class="sd">	</span>
+<span class="sd">		export PYSYS_PERFORMANCE_BASELINES=__pysys_performance/mybaseline*/**/*.csv,__pysys_performance/optimization1*/**/*.csv</span>
+<span class="sd">		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+		
+		<span class="kn">import</span> <span class="nn">pysys.perf.perfreportstool</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">comparisonGenerator</span> <span class="o">=</span> <span class="n">pysys</span><span class="o">.</span><span class="n">perf</span><span class="o">.</span><span class="n">perfreportstool</span><span class="o">.</span><span class="n">PerformanceComparisonGenerator</span><span class="p">(</span><span class="n">reporters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">performanceReporters</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">baselines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparisonGenerator</span><span class="o">.</span><span class="n">loadFiles</span><span class="p">(</span>
+			<span class="n">baselineBaseDir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">,</span>
+			<span class="n">paths</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BASELINES_ENV_VAR</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">),</span> 
+			<span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">baselines</span><span class="p">:</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Successfully loaded performance comparison data from </span><span class="si">%d</span><span class="s1"> files: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baselines</span><span class="p">),</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">baselines</span><span class="p">))</span>
+
+	<span class="k">def</span> <span class="nf">reportResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+						<span class="s1">&#39;resultKey&#39;</span><span class="p">:</span><span class="n">resultKey</span><span class="p">,</span>
+						<span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">,</span>
+						<span class="s1">&#39;unit&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span>
+						<span class="s1">&#39;biggerIsBetter&#39;</span><span class="p">:</span><span class="n">unit</span><span class="o">.</span><span class="n">biggerIsBetter</span><span class="p">,</span>
+						<span class="s1">&#39;samples&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+						<span class="s1">&#39;stdDev&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+						<span class="s1">&#39;toleranceStdDevs&#39;</span><span class="p">:</span><span class="n">toleranceStdDevs</span><span class="p">,</span>
+						<span class="s1">&#39;testId&#39;</span><span class="p">:</span><span class="n">testobj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+						<span class="s1">&#39;resultDetails&#39;</span><span class="p">:</span><span class="n">resultDetails</span> <span class="ow">or</span> <span class="p">{}</span>
+					<span class="p">})</span>
+
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">return</span> <span class="kc">True</span>
+	
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">():</span> <span class="k">return</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span> <span class="k">return</span>
+		
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+			<span class="n">logmethod</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.perfreporter.summary&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span>
+
+			<span class="c1"># perform aggregation in case there are multiple cycles</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">PerformanceRunData</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">PerformanceRunData</span><span class="p">(</span><span class="s1">&#39;this&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRunDetails</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">))</span>
+
+			<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">baselines</span><span class="p">:</span>
+				<span class="n">logmethod</span><span class="p">(</span><span class="s1">&#39;Performance results summary:&#39;</span><span class="p">)</span>
+				<span class="c1"># simple formatting when there&#39;s no comparisons to be done</span>
+				<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+					<span class="n">logmethod</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">)</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueToDisplayString</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]),</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">],</span>
+						 <span class="s1">&#39;bigger is better&#39;</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;biggerIsBetter&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;smaller is better&#39;</span><span class="p">,</span>
+							<span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="ow">or</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;, stdDev=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">valueToDisplayString</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;stdDev&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="mf">100.0</span><span class="o">*</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;stdDev&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">% of mean)&quot;</span><span class="p">,</span>
+							<span class="n">r</span><span class="p">[</span><span class="s1">&#39;testId&#39;</span><span class="p">],</span>
+								<span class="n">extra</span> <span class="o">=</span> <span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_PERFORMANCE</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+				
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">logmethod</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">comparisonGenerator</span><span class="o">.</span><span class="n">logComparisons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baselines</span><span class="o">+</span><span class="p">[</span><span class="n">p</span><span class="p">])</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

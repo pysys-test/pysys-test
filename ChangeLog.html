@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Change Log &mdash; PySys v2.0  documentation</title>
+  <title>Change Log &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -50,7 +50,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PySys v2.0
+            <a href="index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-new-in-2-1">What’s new in 2.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-new-in-2-0">What’s new in 2.0</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#version-and-documentation-changes">Version and documentation changes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#new-test-structure-and-descriptors">New test structure and descriptors</a></li>
@@ -173,7 +174,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PySys v2.0</a>
+          <a href="index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -230,6 +231,143 @@
 <p>Use the <a class="reference external" href="https://github.com/pysys-test/pysys-test/issues">issue tracker</a> if you want to report a bug or feature
 request in the PySys test framework. For how-tos and advice,
 <a class="reference external" href="https://stackoverflow.com/questions/ask?tags=pysys">ask a question</a>.</p>
+</div>
+<div class="section" id="what-s-new-in-2-1">
+<h2>What’s new in 2.1<a class="headerlink" href="#what-s-new-in-2-1" title="Permalink to this headline">¶</a></h2>
+<p>PySys 2.1 was released in March 2022.</p>
+<p>The main changes are new features to help with triaging performance results, and improved usability for the new
+<code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> descriptor format and modes support that was added in version 2.0.</p>
+<p>This release also adds support for Python 3.10, upgrades to the sample GitHub Actions workflows, and includes a lot of
+minor enhancements and fixes.</p>
+<p>Usability enhancements to the <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> descriptors:</p>
+<ul class="simple">
+<li><p>Added a <code class="docutils literal notranslate"><span class="pre">__pysys_parameterized_test_modes__</span></code> field to the <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> descriptor which makes it easier to
+configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing
+scenarios. See <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">User Guide</span></a> for detailed information about modes.</p></li>
+<li><p>Renamed <code class="docutils literal notranslate"><span class="pre">combineModeDimensions</span></code> to <a class="reference internal" href="autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.createModeCombinations</span></code></a> for
+improved usability.</p></li>
+<li><p>Made the <code class="docutils literal notranslate"><span class="pre">__pysys_groups__</span></code> inheritance specifier <code class="docutils literal notranslate"><span class="pre">inherit=true/false</span></code> optional (defaults to <code class="docutils literal notranslate"><span class="pre">true</span></code>) since in
+most cases users would prefer not to worry about it.</p></li>
+<li><p>Test descriptors with a <code class="docutils literal notranslate"><span class="pre">.py</span></code> extension are now loaded using Python’s own parser instead of the regular expression
+approach used for non-Python <code class="docutils literal notranslate"><span class="pre">pysys.*</span></code> files. This allows normal Python syntax to be used for things like
+the <code class="docutils literal notranslate"><span class="pre">lambda</span></code> expressions (in <code class="docutils literal notranslate"><span class="pre">__pysys_modes__</span></code>) which is more intuitive compared to the PySys 2.0 approach
+of nesting them inside multi-line strings. The samples and the default <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> test template have been updated
+accordingly.
+All descriptor values should go at the start of the file, before any <code class="docutils literal notranslate"><span class="pre">import</span></code> statements - this is important for
+efficient parsing. For optimum parsing performance, make sure your first import is an <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">XXX</span></code> rather than
+a <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">XXX</span> <span class="pre">import</span> <span class="pre">YYY</span></code> statement.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> template substitution variable <code class="docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR_MINIMAL&#64;&#64;</span></code> as an alternative to
+<code class="docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR&#64;&#64;</span></code> for cases where you want to exclude most of the commented example lines.</p></li>
+</ul>
+<p>New features related to performance testing:</p>
+<ul class="simple">
+<li><p>Added detailed documentation to the <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">User Guide</span></a> about how to use PySys for performance testing.</p></li>
+<li><p>Added a new performance reporter class <a class="reference internal" href="autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.JSONPerformanceReporter" title="pysys.perf.reporters.JSONPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.JSONPerformanceReporter</span></code></a> which writes performance
+results in a format that’s easy to machine-read for handling by other systems. To use this instead of (or as well)
+as the default CSV reporter, add <code class="docutils literal notranslate"><span class="pre">&lt;performance-reporter</span> <span class="pre">classname=&quot;...&quot;/&gt;</span></code> elements to your project configuration.</p></li>
+<li><p>Added a new performance reporter class <a class="reference internal" href="autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.PrintSummaryPerformanceReporter" title="pysys.perf.reporters.PrintSummaryPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.PrintSummaryPerformanceReporter</span></code></a> which prints a
+summary of performance results (including mean and standard deviation calculation if aggregating across multiple
+cycles) at the end of the test run.
+This performance reporter is now added by default (alongside <code class="docutils literal notranslate"><span class="pre">CSVPerformanceReporter</span></code>), if
+no explicit list of <code class="docutils literal notranslate"><span class="pre">&lt;performance-reporters&gt;</span></code> has been configured in <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>.</p></li>
+<li><p>The default performance reporter class <a class="reference internal" href="autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.CSVPerformanceReporter" title="pysys.perf.reporters.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.CSVPerformanceReporter</span></code></a> has a new property
+called <code class="docutils literal notranslate"><span class="pre">aggregateCycles</span></code> which means automatically rewriting the summary file at the end of a run where you
+have executed multiple cycles, to record aggregate statistics such as mean and standard deviation (with
+<code class="docutils literal notranslate"><span class="pre">samples=cycles</span></code>) instead of individual results for each cycle. This is useful when cycling tests locally to
+generate stable numbers for comparisons while optimizing your application.</p></li>
+<li><p>Extended the performance reporter API. Added a new class <a class="reference internal" href="autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter" title="pysys.perf.api.BasePerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.api.BasePerformanceReporter</span></code></a> for creating
+custom reporters. Now you can have multiple performance reporters in the same project, and configure properties for
+each using the same <code class="docutils literal notranslate"><span class="pre">&lt;property&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;key&quot;=&quot;value&quot;</span></code> XML syntax as for writers. Performance reporters now have an
+additional <code class="docutils literal notranslate"><span class="pre">setup</span></code> method which is called just after <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup</span></code></a>, and is now the best place
+for any initialization (it is recommended to move any such code out of the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> constructor which should
+no longer be used in most cases).</p></li>
+<li><p>Moved the performance classes from <code class="docutils literal notranslate"><span class="pre">pysys.utils.perfreporters</span></code> to <a class="reference internal" href="autodocgen/pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a>. The old module is deprecated but
+will continue to work, so this is not a breaking change.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">cpuCount</span></code> to the default <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> dictionary, since it’s useful information to have available,
+especially in performance test summary files. This is the value returned by Python’s <code class="docutils literal notranslate"><span class="pre">os.cpu_count()</span></code> function.</p></li>
+<li><p>Added a <code class="docutils literal notranslate"><span class="pre">reportPerformanceResult</span></code> boolean variable to <code class="docutils literal notranslate"><span class="pre">BaseTest</span></code>, which can be set to <code class="docutils literal notranslate"><span class="pre">True</span></code> by any commands
+that would make recording of performance results pointless (such as enablement of profiling).</p></li>
+<li><p>If no <code class="docutils literal notranslate"><span class="pre">resultDetails</span></code> are explicitly specified when reporting a result in a test that has modes, then the name and
+parameters from the test’s mode are recorded as the <code class="docutils literal notranslate"><span class="pre">resultDetails</span></code>.</p></li>
+<li><p>Added a <code class="docutils literal notranslate"><span class="pre">failureOutcome</span></code> parameter to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertThat</span></code></a> which could be used to add a <a class="reference internal" href="autodocgen/pysys.constants.html#pysys.constants.BADPERF" title="pysys.constants.BADPERF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.BADPERF</span></code></a>
+outcome for a performance assertion.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> option <code class="docutils literal notranslate"><span class="pre">--sort=random</span></code> which randomly sorts/shuffles the order of tests and modes within each
+cycle. This is useful for reducing systematic performance interactions between different tests/modes when running
+multiple cycles.</p></li>
+<li><p>Added a new test outcome <a class="reference internal" href="autodocgen/pysys.constants.html#pysys.constants.BADPERF" title="pysys.constants.BADPERF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.BADPERF</span></code></a> which can be used instead of <code class="docutils literal notranslate"><span class="pre">FAILED</span></code> to indicate the measured
+performance was deemed insufficient. Unlike other failure outcomes, <code class="docutils literal notranslate"><span class="pre">BADPERF</span></code> does not prevent subsequent numeric
+results from being recorded by <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.reportPerformanceResult</span></code></a>.</p></li>
+</ul>
+<p>Miscellaneous new features:</p>
+<ul>
+<li><p>Upgraded the sample GitHub workflows to use the new CodeCov uploader as the old v1 uploader was deprecated.
+If you use this functionality in your own GitHub Actions workflow, you should make the same change.</p></li>
+<li><p>Added support for Python 3.10. Note that on Windows the following deprecation warning may be seen until PyWin32
+releases version 304:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">DeprecationWarning</span><span class="p">:</span> <span class="n">getargs</span><span class="p">:</span> <span class="n">The</span> <span class="s1">&#39;u&#39;</span> <span class="nb">format</span> <span class="ow">is</span> <span class="n">deprecated</span><span class="o">.</span> <span class="n">Use</span> <span class="s1">&#39;U&#39;</span> <span class="n">instead</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>Changed the behavior of the <code class="docutils literal notranslate"><span class="pre">assertMessage</span></code> in all assertion methods (e.g. <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrep</span></code></a>) so that
+instead of replacing the default PySys message (e.g. <code class="docutils literal notranslate"><span class="pre">Grep</span> <span class="pre">on</span> <span class="pre">foo.txt</span> <span class="pre">contains</span> <span class="pre">&quot;Bar&quot;</span></code>), it is added before the
+default message, when the assertion fails. This means there is no loss of information when using <code class="docutils literal notranslate"><span class="pre">assertMessage=</span></code>,
+making it easier to justify using it to provide a more high-level explanation of what each assertion should
+achieve. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertLineCount</span><span class="p">(</span><span class="s1">&#39;server.log&#39;</span><span class="p">,</span> <span class="s1">&#39;ERROR &#39;</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="s1">&#39;&lt;= 10&#39;</span><span class="p">,</span>
+  <span class="n">assertMessage</span><span class="o">=</span><span class="s1">&#39;Assert that throttling of error messages keeps them below configured limit&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Added <a class="reference internal" href="autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter" title="pysys.writer.outcomes.JSONResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.JSONResultsWriter</span></code></a> which writes test outcomes (and the runner’s <code class="docutils literal notranslate"><span class="pre">runDetails</span></code>) to a
+single machine-readable <code class="docutils literal notranslate"><span class="pre">.json</span></code> file.</p></li>
+<li><p>Added a <code class="docutils literal notranslate"><span class="pre">&#64;json&#64;</span></code> substitution value to the <a class="reference internal" href="autodocgen/pysys.writer.console.html#pysys.writer.console.ConsoleFailureAnnotationsWriter" title="pysys.writer.console.ConsoleFailureAnnotationsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.console.ConsoleFailureAnnotationsWriter</span></code></a> class which can
+be used to provide comprehensive machine-readable information about each test result.</p></li>
+<li><p>Changed the behavior of <a class="reference internal" href="autodocgen/pysys.writer.console.html#pysys.writer.console.ConsoleFailureAnnotationsWriter" title="pysys.writer.console.ConsoleFailureAnnotationsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.console.ConsoleFailureAnnotationsWriter</span></code></a> so that if a format is provided by
+the <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS</span></code> environment variable it will always override any <code class="docutils literal notranslate"><span class="pre">format</span></code> in the
+<code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> configuration.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">timeout</span></code> and <code class="docutils literal notranslate"><span class="pre">hard=True/False</span></code> flags to <a class="reference internal" href="autodocgen/pysys.process.html#pysys.process.Process.stop" title="pysys.process.Process.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.Process.stop</span></code></a>. Also added logic on Linux which
+automatically attempts a SIGKILL if the SIGTERM times out (though it still raises an exception in this case).</p></li>
+<li><p>Added a <code class="docutils literal notranslate"><span class="pre">closeStdinAfterWrite</span></code> parameter to <a class="reference internal" href="autodocgen/pysys.process.html#pysys.process.Process.write" title="pysys.process.Process.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.Process.write</span></code></a> which can be used for child processes
+that wait for “End Of File” before completing.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">detailMessage</span></code> passed to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.waitForGrep" title="pysys.basetest.BaseTest.waitForGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.waitForGrep</span></code></a> is now added at the beginning rather than the end of the
+log line, to give more prominence to the user’s high-level description of what is being waited for:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;server.log&#39;</span><span class="p">,</span> <span class="s1">&#39;Ready for .*&#39;</span><span class="p">,</span> <span class="n">detailMessage</span><span class="o">=</span><span class="s1">&#39;Waiting until server is up&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Simplified how PySys interacts with Python’s <code class="docutils literal notranslate"><span class="pre">logging</span></code> library. PySys now records log messages from any Python
+logger category to <code class="docutils literal notranslate"><span class="pre">run.log</span></code> and the console, whereas previously only messages from log categories starting with
+<code class="docutils literal notranslate"><span class="pre">pysys.*</span></code> would be included. The log level for any Python logger can be changed using the
+<code class="docutils literal notranslate"><span class="pre">-vcategory=DEBUG</span></code> argument to <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code>, and the category may be any Python log category, or may be a
+category under the <code class="docutils literal notranslate"><span class="pre">pysys.</span></code> logger such as <code class="docutils literal notranslate"><span class="pre">-vprocess=DEBUG</span></code>.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">&lt;input-dir&gt;!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!&lt;/input-dir&gt;</span></code> as alternative syntax for
+<code class="docutils literal notranslate"><span class="pre">&lt;input-dir&gt;!Input_dir_if_present_else_testDir!&lt;/input-dir&gt;</span></code>.</p></li>
+<li><p>The <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.deleteDir" title="pysys.basetest.BaseTest.deleteDir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.deleteDir</span></code></a> method (and the test output directory cleanup code) now changes permissions and file
+attributes to permit deletion if possible. This is useful when tests execute tools that create read-only files.</p></li>
+</ul>
+<p>Fixes:</p>
+<ul class="simple">
+<li><p>Added missing <code class="docutils literal notranslate"><span class="pre">&lt;skipped</span> <span class="pre">message=&quot;...&quot;/&gt;</span></code> element in JUnit XML reports when a test is skipped.</p></li>
+<li><p>Ignore common editor swap/temporary file extensions such as <code class="docutils literal notranslate"><span class="pre">~</span></code> and <code class="docutils literal notranslate"><span class="pre">.swp</span></code> when identifying <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code>
+files. The environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_IGNORED_PYSYSTEST_SUFFIXES</span></code> allows additional exclusions to be added if
+needed.</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">IndexError</span></code> during handling of a non-matching <code class="docutils literal notranslate"><span class="pre">assertThat</span></code>.</p></li>
+<li><p>Fixed bug in which a directory named <code class="docutils literal notranslate"><span class="pre">!Input_dir_if_present_else_testDir!</span></code> could be created by <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code>.</p></li>
+<li><p>Fixed a rare circular dependency import issue with <code class="docutils literal notranslate"><span class="pre">pysys.constants.Project</span></code> / <code class="docutils literal notranslate"><span class="pre">PROJECT</span></code>.</p></li>
+<li><p>Fixed display of duplicate newlines when setting <code class="docutils literal notranslate"><span class="pre">stripWhitespace=False</span></code> in <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.logFileContents" title="pysys.basetest.BaseTest.logFileContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.logFileContents</span></code></a>.</p></li>
+<li><p>Removed the normal logging prefix from PySys in each <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.logFileContents" title="pysys.basetest.BaseTest.logFileContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.logFileContents</span></code></a> line to avoid distracting from the
+contents of the file being displayed.</p></li>
+<li><p>When using <code class="docutils literal notranslate"><span class="pre">--threads=auto</span></code>, the number of available CPUs is now based on the number available to the PySys
+process (<code class="docutils literal notranslate"><span class="pre">len(os.sched_getaffinity(0))</span></code> - on operating systems that support this concept) rather than the total
+number of physical CPUs on the machine.</p></li>
+<li><p>Fixed the <a class="reference internal" href="autodocgen/pysys.writer.console.html#pysys.writer.console.ConsoleFailureAnnotationsWriter" title="pysys.writer.console.ConsoleFailureAnnotationsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.console.ConsoleFailureAnnotationsWriter</span></code></a> <code class="docutils literal notranslate"><span class="pre">&#64;testFile&#64;</span></code> fallback to point to the Python file
+when there was no failure outcome.</p></li>
+</ul>
+<p>Deprecations:</p>
+<ul class="simple">
+<li><p>Moved the performance classes from <code class="docutils literal notranslate"><span class="pre">pysys.utils.perfreporters</span></code> to <a class="reference internal" href="autodocgen/pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a>. The old module is deprecated but
+is not planned for removal so this is not a breaking change.</p></li>
+</ul>
 </div>
 <div class="section" id="what-s-new-in-2-0">
 <h2>What’s new in 2.0<a class="headerlink" href="#what-s-new-in-2-0" title="Permalink to this headline">¶</a></h2>
@@ -429,15 +567,17 @@ The mode name can be automatically generated from the parameters, or provided ex
 <span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 </div>
+<p>(Note that as of PySys 2.1 the enclosing``”””`` string is not required).</p>
 <p>For those still using <code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code> files, the same Python lambda can also be added in your <code class="docutils literal notranslate"><span class="pre">&lt;modes&gt;...&lt;/modes&gt;</span></code>
 element.</p>
-<p>There is also a helper function provided (in <a class="reference internal" href="autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions" title="pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions</span></code></a>)
-to combine multiple mode “dimensions” together, for example every combination of your supported databases and your
-supported web browsers. This allows for some quite sophisticated logic to generate the mode list such as:</p>
+<p>There is also a helper function provided in <a class="reference internal" href="autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.createModeCombinations</span></code></a>
+(previously known as <code class="docutils literal notranslate"><span class="pre">combineModeDimensions</span></code>) to combine multiple mode “dimensions” together, for example every
+combination of your supported databases and your supported web browsers.
+This allows for some quite sophisticated logic to generate the mode list such as:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        lambda helper: [</span>
 <span class="s2">                mode for mode in</span>
-<span class="s2">                        helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list</span>
+<span class="s2">                        helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list</span>
 <span class="s2">                                helper.inheritedModes,</span>
 <span class="s2">                                {</span>
 <span class="s2">                                                &#39;CompressionNone&#39;: {&#39;compressionType&#39;:None, &#39;isPrimary&#39;:True},</span>
@@ -589,7 +729,8 @@ when running executables.</p></li>
 (with <code class="docutils literal notranslate"><span class="pre">condition=&quot;==0&quot;</span></code>) to include both the first matching expression and the total number of matches. This
 is useful when checking log files for unexpected errors and warnings.</p></li>
 <li><p>Added <a class="reference internal" href="autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.excludedTCPPorts" title="pysys.utils.allocport.excludedTCPPorts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.allocport.excludedTCPPorts</span></code></a> which can be set before the <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> is
-constructed to prevent the specified ports being allocated by <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getNextAvailableTCPPort</span></code></a>.
+constructed (e.g. in your runner module) to prevent the specified ports being allocated by
+<a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.getNextAvailableTCPPort" title="pysys.basetest.BaseTest.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getNextAvailableTCPPort</span></code></a>.
 By default PySys comes with exclusions for a handful of ports that are commonly blocked by web browsers for security
 reasons.</p></li>
 <li><p>Added <a class="reference internal" href="autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.logPortAllocationStats" title="pysys.utils.allocport.logPortAllocationStats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.allocport.logPortAllocationStats</span></code></a> which can be useful for configuring an appropriately sized
@@ -601,7 +742,7 @@ plugin, for example <code class="docutils literal notranslate"><span class="pre"
 current module/test, but including access to standard Python modules such as <code class="docutils literal notranslate"><span class="pre">os/sys/math</span></code> and PySys constants.</p></li>
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">includeCoverageFromPySysProcess</span></code> option to <a class="reference internal" href="autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter" title="pysys.writer.coverage.PythonCoverageWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.coverage.PythonCoverageWriter</span></code></a> which is useful
 for measuring code coverage when testing custom PySys plugins.</p></li>
-<li><p>Added <code class="docutils literal notranslate"><span class="pre">testobj</span></code> argument to <a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails" title="pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails</span></code></a> in case you wish
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">testobj</span></code> argument to <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails</span></code> in case you wish
 to provide different <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> based on some feature of the test object or mode.</p></li>
 <li><p>Added <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.pollWait" title="pysys.basetest.BaseTest.pollWait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.pollWait</span></code></a> which should be used instead of <code class="docutils literal notranslate"><span class="pre">time.sleep</span></code> when polling for something to happen
 without any log messages (or the existing <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.wait" title="pysys.basetest.BaseTest.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.wait</span></code></a> for longer polls where you do want logging).
@@ -693,9 +834,9 @@ stored in the <a class="reference internal" href="autodocgen/pysys.config.descri
 <li><p>It is strongly recommended to use the new <a class="reference internal" href="autodocgen/pysys.constants.html#pysys.constants.PREFERRED_ENCODING" title="pysys.constants.PREFERRED_ENCODING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.PREFERRED_ENCODING</span></code></a> constant instead of
 Python’s built-in <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code> function, to avoid thread-safety issues in your tests - use of
 that function within tests should be considered as deprecated.</p></li>
-<li><p>If you have a custom <a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a> subclass, the signatures for
-<a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails" title="pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails</span></code></a> and
-<a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader" title="pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader</span></code></a> have changed to include a <code class="docutils literal notranslate"><span class="pre">testobj</span></code> parameter.
+<li><p>If you have a custom <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code> subclass, the signatures for
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails</span></code> and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader</span></code> have changed to include a <code class="docutils literal notranslate"><span class="pre">testobj</span></code> parameter.
 Although this should not immediately break existing applications, to avoid future breaking changes you should
 update the signatures of those methods if you override them to accept a <code class="docutils literal notranslate"><span class="pre">testobj</span></code> parameter and also any arbitrary
 <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> that may be added in future.</p></li>
@@ -735,6 +876,11 @@ directory they wish to use to store test input by specifying one of the followin
       the new behaviour for new tests without the need to update or potentially create bugs in existing tests
     --&gt;
     &lt;input-dir&gt;!Input_dir_if_present_else_testDir!&lt;/input-dir&gt;
+
+    &lt;!-- The following is preferred from 2.1 onwards:
+                              &lt;input-dir&gt;!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!&lt;/input-dir&gt;
+                      --&gt;
+
 
   &lt;/pysysdirconfig&gt;
 
@@ -903,7 +1049,7 @@ writers to get a summary of test outcomes.</p>
 </li>
 <li><p>Added <a class="reference internal" href="autodocgen/pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a> interface which can be implemented by writers that support some concept of
 artifact publishing, for example CI providers that ‘upload’ artifacts. Artifacts are published by
-various <a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a> and various writers
+various <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code> and various writers
 including <a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter" title="pysys.writer.testoutput.TestOutputArchiveWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.TestOutputArchiveWriter</span></code></a>.</p></li>
 <li><p>Added <a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a> which supercedes the <code class="docutils literal notranslate"><span class="pre">collect-test-output</span></code> feature,
 providing a more powerful way to collect files of interest (e.g. performance graphs, code coverage files, etc) from
@@ -936,7 +1082,7 @@ logs the runDetails when executing 2 or more tests.</p>
 and <code class="docutils literal notranslate"><span class="pre">startTime</span></code>). Additional items can be added by runner subclasses in the <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a>
 method - for example you could add the build number of your application (perhaps read
 using <a class="reference internal" href="autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.loadProperties" title="pysys.utils.fileutils.loadProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.fileutils.loadProperties()</span></code></a>).</p>
-<p>If you had previously created a custom <a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails" title="pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()</span></code></a> method it
+<p>If you had previously created a custom <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()</span></code> method it
 is recommended to remove it and instead provide the same information in the runner <code class="docutils literal notranslate"><span class="pre">runDetails</span></code>.</p>
 </li>
 <li><p>Added property <code class="docutils literal notranslate"><span class="pre">versionControlGetCommitCommand</span></code> which if set results in the specified command line
@@ -1099,6 +1245,7 @@ using a “python:” prefix on the category name, e.g.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">-</span><span class="n">v</span> <span class="n">python</span><span class="p">:</span><span class="n">myorg</span><span class="o">.</span><span class="n">mycategory</span><span class="o">=</span><span class="n">debug</span>
 </pre></div>
 </div>
+<p>Note that this <code class="docutils literal notranslate"><span class="pre">python:</span></code> prefix is deprecated and no longer required from PySys 2.1 onwards.</p>
 </li>
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">--ci</span></code> option which automatically sets the best defaults for non-interactive execution of PySys
 to make it easier to run in CI jobs. See <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">--help</span></code> for more information.</p></li>
@@ -1307,7 +1454,7 @@ This means these timestamps will match up with the times in run.log output which
 <li><p>Performance CSV files contain some details about the test run. A couple of these have been renamed: <code class="docutils literal notranslate"><span class="pre">time</span></code> is
 now <code class="docutils literal notranslate"><span class="pre">startTime</span></code> and <code class="docutils literal notranslate"><span class="pre">outdir</span></code> is now <code class="docutils literal notranslate"><span class="pre">outDirName</span></code>. The keys and values can be changed as needed using
 the <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> field of <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>. It is encouraged to use this rather than the previous
-mechanism of <a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails" title="pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()</span></code></a>.</p></li>
+mechanism of <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()</span></code>.</p></li>
 <li><p>Exceptions from cleanup functions will now lead to test failures whereas before they were only logged, so may have
 easily gone unnoticed. You can disable this using the new “ignoreErrors=True” argument to
 <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.addCleanupFunction" title="pysys.basetest.BaseTest.addCleanupFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.addCleanupFunction</span></code></a> if desired.</p></li>
@@ -1336,7 +1483,7 @@ on the command line rather than the usual location under <code class="docutils l
 There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you
 prefer a different output directory on your machine you could customize it by setting environment variable
 <code class="docutils literal notranslate"><span class="pre">PYSYS_DEFAULT_ARGS=--outdir</span> <span class="pre">__myoutputdir</span></code>.</p></li>
-<li><p>If you created a custom subclass of <a class="reference internal" href="autodocgen/pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a> using the 1.3.0 release and
+<li><p>If you created a custom subclass of <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code> using the 1.3.0 release and
 it does not yet have (and pass through to the superclass) a <code class="docutils literal notranslate"><span class="pre">runner</span></code> and/or <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> argument you will need
 to add these, as an exception will be generated otherwise.</p></li>
 <li><p>Made it an error to change project properties after the project has been loaded. This was never intended, as projects
@@ -3075,7 +3222,7 @@ utility class</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

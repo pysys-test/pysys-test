@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.console &mdash; PySys v2.0  documentation</title>
+  <title>pysys.writer.console &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
@@ -130,7 +131,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.0</a>
+          <a href="../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -218,7 +219,7 @@ XML file, an instance of <a class="reference internal" href="#pysys.writer.conso
 <em class="property">class </em><code class="sig-prename descclassname">pysys.writer.console.</code><code class="sig-name descname">ConsoleFailureAnnotationsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/console.html#ConsoleFailureAnnotationsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
 <p>Writer that prints a single annotation line to stdout for each test failure, for IDEs 
-and CI providers that can highlight failures found by regular expression stdout parsing.</p>
+and CI providers that can highlight failures using regular expression stdout parsing.</p>
 <p>An instance of this writer is automatically added to every project, and enables itself only 
 if the <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS</span></code> environment variable is set.</p>
 <p>This class is designed for simple cases. If you need to output in a format that requires escaping of special 
@@ -226,8 +227,8 @@ characters it is best to create a custom writer class.</p>
 <dl class="py attribute">
 <dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter.format">
 <code class="sig-name descname">format</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.format" title="Permalink to this definition">¶</a></dt>
-<dd><p>The format that will be written to stdout. If not specified as a writer property in pysysproject.xml, the 
-environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS</span></code> will be used as the format.</p>
+<dd><p>The format that will be written to stdout. If the <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS</span></code> environment variable is 
+set, the environment will be used instead.</p>
 <p>The format can include the following placeholders:</p>
 <blockquote>
 <div><ul class="simple">
@@ -240,10 +241,13 @@ environment variable <code class="docutils literal notranslate"><span class="pre
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;outcome&#64;</span></code>: the outcome e.g. <code class="docutils literal notranslate"><span class="pre">FAILED</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;outcomeReason&#64;</span></code>: the string containing the reason for the failure; this string can 
 contain any characters (other than newline).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testIdAndCycle&#64;</span></code>: the test identifier, with a cycle suffix if this is a multi-cycle test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testIdAndCycle&#64;</span></code>: the test identifier, with an optional cycle suffix if this is a multi-cycle test run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;json&#64;</span></code>: a JSON dict suitable for machine-parsing; see <a class="reference internal" href="pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter" title="pysys.writer.outcomes.JSONResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.JSONResultsWriter</span></code></a> for details. 
+Added in v2.1.</p></li>
 </ul>
 </div></blockquote>
-<p>The default format if the environment variable is empty and format is not provided is <a class="reference internal" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT" title="pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_FORMAT</span></code></a>.</p>
+<p>The default format when the environment variable is empty and a format configuration is not provided is 
+given by <a class="reference internal" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT" title="pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_FORMAT</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -262,12 +266,16 @@ contain any characters (other than newline).</p></li>
 <code class="sig-name descname">includeNonFailureOutcomes</code><em class="property"> = 'NOT VERIFIED'</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.includeNonFailureOutcomes" title="Permalink to this definition">¶</a></dt>
 <dd><p>In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be reported 
 (with a <code class="docutils literal notranslate"><span class="pre">&#64;category&#64;</span></code> of <code class="docutils literal notranslate"><span class="pre">warning</span></code> rather than <code class="docutils literal notranslate"><span class="pre">error</span></code>).</p>
+<p>To include all non-failure outcomes, set this to the special value <code class="docutils literal notranslate"><span class="pre">&quot;*&quot;</span></code>.</p>
+<p>The environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS_INCLUDE_OUTCOMES</span></code> can be used to overriden the value of 
+this configuration option, for example set it to <code class="docutils literal notranslate"><span class="pre">*</span></code> to include all outcomes.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter.enableIfEnvironmentVariable">
 <code class="sig-name descname">enableIfEnvironmentVariable</code><em class="property"> = 'PYSYS_CONSOLE_FAILURE_ANNOTATIONS'</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.enableIfEnvironmentVariable" title="Permalink to this definition">¶</a></dt>
-<dd><p>The environment variable used to control whether it is enabled.</p>
+<dd><p>The environment variable used to control whether it is enabled. If it is set to any value other than <code class="docutils literal notranslate"><span class="pre">true</span></code> then 
+its value will be used to determine fhe format (see above).</p>
 <p>This writer will be enabled if the specified environment variable is set (either to any empty string or to any 
 value other than “false”).</p>
 <p>Set enableIfEnvironmentVariable to “” to ignore the environment and instead enable when running with <code class="docutils literal notranslate"><span class="pre">--record</span></code>.</p>
@@ -298,7 +306,7 @@ value other than “false”).</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

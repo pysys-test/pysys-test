@@ -10,7 +10,7 @@ It's very common to have one set of logic for Windows and another for
 all non-Windows (Unix-based) platforms, and PySys has a dedicated constant `pysys.constants.IS_WINDOWS` for 
 that::
 
-	self.startProcess('cmd.exe' if IS_WINDOWS else 'bash', ...)
+	self.startProcess('myprogram.exe' if IS_WINDOWS else 'myprogram', ...)
 
 For finer grained platform detection we recommend using the facilities built into Python, for example 
 ``sys.platform``, ``platform.platform()`` or ``platform.uname()``.
@@ -69,10 +69,11 @@ the cookbook sample)::
 	</pysysdirconfig>
 
 For customizing the PySysTest class the best approach is usually to create a ``pysystest.py`` template test 
-containing ``@@DEFAULT_DESCRIPTOR@@`` to include the default PySys descriptor values (this means your template will 
-automatically benefit from any future changes to the defaults), and put it in a ``_pysys_templates/<templatename>`` 
-directory alongside the ``pysystestdir.xml`` file. The ``_pysys_templates`` directory should contain a file 
-named ``.pysysignore`` file (which avoids the template being loaded as a real test). 
+containing ``@@DEFAULT_DESCRIPTOR@@`` (or `@@DEFAULT_DESCRIPTOR_MINIMAL@@`) to include the default PySys descriptor 
+values (this means your template will automatically benefit from any future changes to the defaults), and put it in a 
+``_pysys_templates/<templatename>`` directory alongside the ``pysystestdir.xml`` file. 
+The ``_pysys_templates`` directory should contain a file named ``.pysysignore`` file (which avoids the template being 
+loaded as a real test). 
 
 other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
 ``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
@@ -360,34 +361,74 @@ If you wish to produce coverage reports using any other language, this is easy t
 
 Running tests in multiple modes
 -------------------------------
-One of the powerful features of PySys is the ability to run the same test 
-in multiple modes from a single execution. This could be useful for cases such 
-as a set of tests that should be run against various different databases but 
-can also be run against a mocked database for quick local development. 
-Another common use case is executing the same PySysTest class in different 
-modes to test different scenarios. 
+One of the powerful features of PySys is the ability to run the same test in multiple modes from a single execution. 
+This can be useful for both parameterized tests, where the same Python logic is invoked with multiple different 
+parameters to test a range of scenarios, and for running tests against different databases, web browsers etc. 
 
-To define some modes, first edit the ``pysystest.*`` file for your test, and provide a string 
-containing a Python lambda that will be evaluated when the test descriptors are loaded to 
-return a list of named modes that the test can run in:
+In PySys, a mode consists of a mode name, and a dictionary of parameters with detailed information about how to 
+execute in that mode. The Python test can use ``self.mode.params`` to access the parameter dictionary, and ``self.mode`` 
+to get the mode name. 
 
-.. code-block:: python
-	
-	__pysys_modes__ = r""" 
-		lambda helper: helper.inheritedModes+[
-			{'mode':'CompressionGZip', 'compressionType':'gzip'},
-		]
-	"""
-
-The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper` which provides 
-access to the list of inherited modes (and more). 
+During test execution, output files are kept separate by having mode executed from a different output directory, 
+suffixed by ``~ModeName``. 
 
 When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
 may be used. Typically dot is useful for version numbers and underscore ``_`` is 
 useful for separating out different dimensions (e.g. compression vs authentication type 
-in the example described later in this section); separating dimensions cleanly will make it 
+in the example described later in this section). Separating dimensions cleanly in this way will make it 
 much easier to include/exclude the test modes you want. PySys will give an error if you use different 
 capitalization for the same mode in different places, as this can result in test bugs. 
+
+Using modes for parameterized tests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Parameterized tests provide a convenient way to re-use the same Python logic to check multiple different testing 
+scenarios. This avoids the maintenance headache of copy+pasted testcases, and provides faster and more granular test 
+outcomes than combining all the different parameters into a single test with a big ``for`` loop. 
+
+To specify modes for a parameterized test, just edit the ``pysystest.*`` file for your test, and 
+provide a dictionary of ``ModeName: {ParameterDict}`` like this::
+
+	__pysys_parameterized_test_modes__ = {
+			'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+			'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+			'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+		}
+
+This produces a test with 3 modes - named ``Usage``, ``BadPort`` and ``MissingPort`` - for the various scenarios 
+being checked. As you can see, it is possible to provide both input data, and data for use during validation. 
+The test can easily access the parameters using expressions such as ``self.mode.params["cmd"]``. 
+
+It is also possible to provide the exact same configuration using the more advanced ``__pysys_modes__`` field described 
+below, however ``__pysys_parameterized_test_modes__`` is easier for this use case, and automatically takes care of 
+marking the parameterized modes as "primary" (so they will all run by default even specifying a ``--modes`` argument), 
+and combining them with any inherited modes (e.g. for different databases, browsers, etc). 
+
+Using modes for other purposes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Modes can also be used for making your test run with different databases, web browsers, and other execution 
+environments. 
+
+Often for these use cases you will want more control than parameterized tests give, for example 
+it is likely you'll want to execute with one database/browser in local test runs (probably the fastest one!) so 
+you would not want all of them marked as primary modes. Additionally for these use cases the modes are often defined 
+at a directory level for a collection of testcases rather in each individual test. You may also need precise control 
+over which of the modes from a parent directory are inherited, since some modes may not be applicable to all tests. 
+
+All of these cases and more can be handled by the ``__pysys_modes__`` configuration, which allows you to return a 
+Python expression that returns the list (or dict) of modes for each test and/or ``pysysdirconfig``. Since you will 
+often need access to the inherited modes and (other useful methods and data) when defining your mode list, 
+a ``helper`` object (`pysys.config.descriptor.TestModesConfigHelper`) is made available to your modes expression by the 
+use of a Python lambda expression. 
+
+If you want to add some new modes in addition to the inherited ones, you would add this to your ``pysystest.py`` file:
+
+.. code-block:: python
+	
+	__pysys_modes__ = lambda helper: helper.inheritedModes+[
+			{'mode':'CompressionGZip', 'compressionType':'gzip'},
+		]
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
 file in a parent directory rather than in ``pysystest.*``, which will by 
@@ -398,57 +439,38 @@ list if you need to change them later.
 By default the first mode in each list is "primary", so the test will only run in that one primary mode by 
 default during local test runs (i.e. unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
 using modes to validate the same behaviour/conditions in different execution environments e.g. 
-browsers/databases etc. It's best to choose either the fastest mode or else the one that 
-is most likely to show up interesting issues as the primary mode. 
-
-However when using modes to validate different *behaviours/conditions* (e.g. testing 
-out different command line options) using a single PySysTest class, then you should designate all your modes as 
-"primary" as you want *all of them* to execute by default in a quick local test run. 
-The `pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary` helper function can do this. 
+browsers/databases etc (but not for parameterized tests where you usually want to run all of them). It's best to choose 
+either the fastest mode or else the one that is most likely to show up interesting issues as the primary mode. 
 
 Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
 type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
-Rather than writing out every combination manually, you can use the function 
-`pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` to automatically generate the combinations, 
+Rather than writing out every combination manually, you can use the helper function 
+`pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` to automatically generate the combinations, 
 passing it each dimension (e.g. each compression type) as a separate list. 
 
 Here is an example of multi-dimensional modes (taken from the getting-started sample):
 
 .. code-block:: python
 	
-	__pysys_modes__ = r""" 
-
-	lambda helper: [
+	__pysys_modes__ = lambda helper: [
 			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
+				
 					helper.inheritedModes,
+					
 					{
 							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
 							'CompressionGZip': {'compressionType':'gzip'},
 					}, 
+					
 					[
 						{'auth':None}, # Mode name is optional
 						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
 					], 
-					
-					# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
-					# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
-					# using modes to validate the same behaviour/conditions in different execution environments e.g. 
-					# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
-					# out different command line options) using a single PySysTest class, then you should have all your modes as 
-					# "primary" as you want all of them to execute by default in a quick local test run. 
-					helper.makeAllPrimary(
-						{
-							'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
-							'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
-							'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
-						}), 
-					)
 				
 			# This is Python list comprehension syntax for filtering the items in the list
 			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
 		]
-	"""
 
 This will create the following modes::
 
@@ -477,6 +499,14 @@ You can find the mode that this test is running in using `self.mode <BaseTest>`,
 `pysys.config.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
 via a ``params`` field. 
 
+You can also use Python list comprehensions to generate sets of modes from a ``range`` like this::
+
+	__pysys_modes__   = lambda helper: helper.createModeCombinations(
+			helper.inheritedModes, 
+			[ {'mode':'CompressionGZip', 'compressionType':'gzip'}, ],
+			[ {'serverThreads': t} for t in range(1, 3) ],
+		)
+
 Here's an example showing how a test plugin might use modes configuration to configure the test object 
 during test setup::
 
@@ -493,7 +523,10 @@ during test setup::
 			# Call the supplied method to start/configure the database
 			testObj.db = dbHelperFactory() 
 
-Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
+Executing modes with pysys run
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
 primary modes (for tests with no mode, the primary mode is ``self.mode==None``) - 
 which is great for quick checks during development of your application and 
@@ -532,8 +565,110 @@ tests::
 
   pysys run MyTest_001~MockDatabase MyTest_020~MyDatabase_2.0
 
+Performance tests - recording results
+-------------------------------------
+PySys is a great tool for running performance tests, whether unit-level microbenchmarks or complex multi-process 
+full system benchmarking. 
+
+Often performance tests will produced detailed output files (XML/JSON/PDF/logs etc) that are worth capturing for 
+analysis by a human, or for storing as a long term audit of how this build performed. To do this, you can add a 
+`pysys.writer.testoutput.CollectTestOutputWriter` to your project configuration. This writer collects files matching a 
+specified pattern from the output directory after each test, and puts them in a single directory or archive at the 
+end of the test run. 
+
+Whether or not you have some detailed files to stash, it is worth also using `BaseTest.reportPerformanceResult`, the 
+powerful built-in capability for storing some summary numbers for each test. In complex tests you probably 
+won't want to record every possible statistic - since that can quickly overwhelm once the total number of number of 
+tests grows; a better strategy is to select a few representative data points from each test/mode combination. 
+By default the numeric results are written to a CSV file (along with the runner's ``runDetails`` dictionary including 
+things like OS, CPU count, hostname and git commit of your source changes). There is also a reporter available for 
+writing in a simple JSON format, and another that produces a textual summary of the results at the end of the run. 
+You can also create your own reporters (e.g. to publish to an in-house database) using the `pysys.perf` API.
+
+The `BaseTest.reportPerformanceResult` documentation gives the details, but one point that's worth stressing is that 
+every result should be identified by a short, unique, human-friendly ``resultKey`` which should give an at-a-glance 
+definition of what is being recorded such as 
+``Message send rate with 3 topics and small 100kB messages using MyMessagingVendor``. 
+For maximum benefit, design your keys so that when sorted (imagine a big list of 100+ numbers from all your testcases!) 
+you'll see closely related results next to each other. These keys must be unique - so if a test runs in multiple modes 
+(e.g. messaging/database vendors) then you must add some kind of string to the result key to indicate which it is 
+running in, otherwise PySys will raise an exception and not persist the result. See the samples for some examples of 
+using this API. 
+
+Performance tests - design considerations
+-----------------------------------------
+Often a performance test will run for a bit longer than a simple correctness test, for example it might have a set 
+number of iterations or time duration. See the above section "Configuring and overriding test options" for an example 
+of how to make it easy to customize the iteration count/duration at runtime e.g. ``pysys run -XmyIterationCount=10``. 
+You may find you want to run your test super-quick in the early stages until it executes the steps correctly. When 
+tracking down performance problems you might want to try running it for longer than usual to get more reliable results. 
+
+It is common to have a single performance test that should run with different parameters, for example against different 
+databases, or perhaps with a variety of incoming message sizes. Avoid copy+pasting tests for this use case (which would 
+be a maintenance nightmare). It is also a bad idea to add a giant "for" loop into your test and make it do everything in 
+one invocation, since then it's very difficult to surgically re-run problematic parts of your parameter matrix when 
+tracking down test bugs or optimizing your application. Instead use the built-in "modes" concept of PySys which is 
+perfect for the job. It can even generate a combinatoric product of various different parameter dimensions for you 
+with `pysys.config.descriptor.TestModesConfigHelper.createModeCombinations` as described above. 
+
+Performance tests - running them
+--------------------------------
+When running performance tests from an automated job, it is important to ensure that you do not have multiple 
+tests executing at once since this will usually invalidate the results. It is therefore best to run your performance 
+tests in a separate ``pysys run`` invocation to your correctness testing, which does benefit from multi-threaded 
+execution. You should also disable code coverage in a performance run to avoid artificially slowing your components 
+down. So a typical automated performance run would need to modify the usual ``--ci`` default into something like::
+
+	cd performance/
+	pysys run --ci --threads=1 -XcodeCoverage=false
+
+When running performance tests locally to investigate a performance bug, it can be incredibly valuable to run 
+multiple cycles of each test to generate a more stable baseline, and also to give you a measurable indication of how 
+variable your results are. There is no point trying to track down a 10% performance regression from a test whose 
+normal variation is +/-50%! It is also worth customizing the ``--outdir`` to assign a human-friendly label each time 
+you do a run against a different build of your application. The ``outdir`` is recorded with the performance numbers 
+and also allows you to avoid overwriting previous detailed logging output when doing a new run. So a typical local 
+execution of a performance test would be::
+
+	pysys run -c5 --outdir=with-foobar-optimization MyTest~MyMode
+
+You may wish to focus on just one mode, or all modes (``--modes=ALL``) or a specific subset of the modes (perhaps 
+using a regular expression on the command line to indicate which modes are needed). At the end of the test run PySys 
+will print a summary of the results, including a calculation of the sample standard deviation (if ``cycles`` > 1) 
+which you can use to check your test is reliable and to decide whether measured increases/decreases are statistically 
+significant or just random noise. 
+
+Performance tests - comparing results
+-------------------------------------
+When using PySys tests to measure your application while you experiment with possible optimizations, consider 
+listing the ``.csv`` (or ``.json``) summary files containing your baselines (e.g. baseline before any changes, with 
+optimization A, B, C etc...) in the ``PYSYS_PERFORMANCE_BASELINES`` environment variable. The 
+`pysys.perf.reporters.PrintSummaryPerformanceReporter` will print a textual comparison from each of the listed 
+baselines to the current result. You can also run comparisons from the command line at any time by running 
+the ``pysys/perf/perfreportstool.py`` script. 
+
+When reviewing comparisons, note that some numbers are "better" when large (e.g. rate of sending messages/transactions) 
+while others are "worse" when large (e.g. latency or response time). The comparison tries to avoid confusion when 
+looking at such results side by side, by showing "+" results for all improvements and "-" when things got worse. 
+For each comparison, it prints the %improvement (with a + for bigger-is-better increases and - for reductions, and 
+vice-versa), and the speedup ratio (newValue/oldValue for bigger-is-better, or oldValue/newValue for smaller is better). 
+Typically the % is useful for small changes (< 100%) whereas the speedup ratio is more friendly for large changes 
+(e.g. 3.5x faster). Provided multiple samples are available (from a multi-cycle run), it calculates the standard 
+deviation (using whichever is the larger of the old and new stdDevs) and expresses the improvement delta as a ratio of 
+the standard deviation (aka "sigma") to give a "sigmas" value which indicates statistically how significant the result 
+is - above ``+/- 1 sigma`` means there is a 68% chance the change is a real (significant) one, and above 
+``+/- 2 sigmas`` shows a 95% probability of significance. 
+Results with less than 2 sigmas are not colour-coded since they typically don't indicate a real change; anything with a 
+red or green colour is a regression or improvement that is statistically significant and worth paying attention to. 
+
 Test ids and structuring large projects
 ---------------------------------------
+Firstly, try to have everything in a single PySys project if possible. Use subdirectories to structure your tests, 
+but don't separate into different PySys projects unless it's for testing a totally different component with different 
+testing needs. Keeping everything in the same project gives you the ability to run all your tests 
+(unit/correctness/perf) from a single command line which could be useful in the future even if you don't need it right 
+now. 
+
 Each test has a unique ``id`` which is used in various places such as when 
 reporting passed/failed outcomes. By default the id is just the name of the 
 directory containing the ``pysystest.*`` file. 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process &mdash; PySys v2.0  documentation</title>
+  <title>pysys.process &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.0</a>
+          <a href="../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.process</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -199,6 +199,7 @@
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.internal.initlogging</span> <span class="kn">import</span> <span class="n">pysysLogHandler</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.process&#39;</span><span class="p">)</span>
 
@@ -302,12 +303,16 @@
 	<span class="c1"># these abstract methods must be implemented by subclasses; no need to publically document</span>
 	<span class="k">def</span> <span class="nf">setExitStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
 	<span class="k">def</span> <span class="nf">startBackgroundProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
-	<span class="k">def</span> <span class="nf">writeStdin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="Process.stop"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;Stop a running process.</span>
+<div class="viewcode-block" id="Process.stop"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcessStop&#39;</span><span class="p">],</span> <span class="n">hard</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;Stop a running process and wait until it has finished.</span>
 <span class="sd">		</span>
 <span class="sd">		Does nothing if the process is not running. </span>
 <span class="sd">		</span>
+<span class="sd">		On Windows, this uses TerminateProcess, on Linux this sends a SIGTERM signal (which allows the process a chance </span>
+<span class="sd">		to exit gracefully including possibly dumping code coverage output) unless the ``hard=True`` parameter is specified. </span>
+<span class="sd">		</span>
+<span class="sd">		:param bool hard: Set to True to use a hard termination (e.g. SIGKILL). </span>
+<span class="sd">		:param float timeout: The time to wait for the process to complete before raising an exception. </span>
 <span class="sd">		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to stop the process.		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span></div>
@@ -326,7 +331,7 @@
 			<span class="k">raise</span> <span class="n">ProcessError</span><span class="p">(</span><span class="s2">&quot;Error sending signal </span><span class="si">%s</span><span class="s2"> to process </span><span class="si">%r</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="Process.write"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.write">[docs]</a>	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addNewLine</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Process.write"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.write">[docs]</a>	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addNewLine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">closeStdinAfterWrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;Write binary data to the stdin of the process.</span>
 <span class="sd">		</span>
 <span class="sd">		Note that when the addNewLine argument is set to true, if a new line does not </span>
@@ -335,18 +340,21 @@
 <span class="sd">		require to add data without the method appending a new line charater set </span>
 <span class="sd">		addNewLine to false.</span>
 <span class="sd">		</span>
-<span class="sd">		:param data: The data to write to the process stdin. </span>
+<span class="sd">		:param bytes|str data: The data to write to the process stdin. </span>
 <span class="sd">			As only binary data can be written to a process stdin, </span>
 <span class="sd">			if a character string rather than a byte object is passed as the data,</span>
 <span class="sd">			it will be automatically converted to a bytes object using the encoding </span>
 <span class="sd">			given by ``PREFERRED_ENCODING``. </span>
-<span class="sd">		:param addNewLine: True if a new line character is to be added to the end of </span>
+<span class="sd">		:param bool addNewLine: True if a new line character is to be added to the end of </span>
 <span class="sd">			the data string</span>
+<span class="sd">		:param bool closeStdinAfterWrite: If True, the stdin file handle will be closed after this write. </span>
+<span class="sd">			Added in v2.1. </span>
+<span class="sd">			</span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot write to process stdin when it is not running&#39;</span><span class="p">)</span>
 		
-		<span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span> <span class="k">return</span>
+		<span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span>
 		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">binary_type</span><span class="p">:</span>
 			<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">PREFERRED_ENCODING</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">addNewLine</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">+</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
@@ -354,10 +362,31 @@
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="c1"># start thread on demand</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
-			<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">writeStdin</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pysys.stdinreader_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+			
+			<span class="n">__parentLogHandlers</span> <span class="o">=</span> <span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">getLogHandlersForCurrentThread</span><span class="p">()</span>
+			<span class="k">def</span> <span class="nf">writeStdinThread</span><span class="p">():</span>
+				<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">(</span><span class="n">__parentLogHandlers</span><span class="p">)</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="p">:</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+						<span class="k">except</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+							<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> 
+								<span class="c1"># no need to close stdin here, as previous call&#39;s setExitCode() method will do it</span>
+								<span class="k">break</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="k">try</span><span class="p">:</span>
+								<span class="bp">self</span><span class="o">.</span><span class="n">_writeStdin</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+							<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+								<span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">()</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">)(</span><span class="s1">&#39;Failed to write </span><span class="si">%r</span><span class="s1"> to stdin of process </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+				<span class="k">finally</span><span class="p">:</span>
+					<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">([])</span>
+			
+			<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">writeStdinThread</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pysys.stdinreader_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 			<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 			
-		<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+		<span class="k">if</span> <span class="n">data</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">closeStdinAfterWrite</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="c1"># None is a sentinel value for EOF</span></div>
 		
 <div class="viewcode-block" id="Process.running"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.running">[docs]</a>	<span class="k">def</span> <span class="nf">running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;Check to see if a process is running.</span>
@@ -385,7 +414,7 @@
 		<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
 			<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 			<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="n">ProcessTimeout</span><span class="p">(</span><span class="s1">&#39;Waiting for completion of </span><span class="si">%s</span><span class="s1"> timed out after </span><span class="si">%d</span><span class="s1"> seconds&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeout</span><span class="p">)))</span>
+				<span class="k">raise</span> <span class="n">ProcessTimeout</span><span class="p">(</span><span class="s1">&#39;Waiting for completion of </span><span class="si">%r</span><span class="s1"> timed out after </span><span class="si">%d</span><span class="s1"> seconds&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeout</span><span class="p">)))</span>
 			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span></div>
 		
 
@@ -419,7 +448,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.safeeval &mdash; PySys v2.0  documentation</title>
+  <title>pysys.utils.safeeval &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.utils.safeeval</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B.Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B.Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -176,6 +176,10 @@
 
 <span class="c1"># It still contains lots of symbols which are likely to be useful when performing an eval such as IS_WINDOWS, etc</span>
 
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the `safeEval` function.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">math</span>
@@ -192,6 +196,8 @@
 
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+<span class="k">class</span> <span class="nc">SafeEvalException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="k">pass</span>
 
 <div class="viewcode-block" id="safeEval"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.safeeval.html#pysys.utils.safeeval.safeEval">[docs]</a><span class="k">def</span> <span class="nf">safeEval</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">errorMessage</span><span class="o">=</span><span class="s1">&#39;Failed to evaluate &quot;</span><span class="si">{expr}</span><span class="s1">&quot; due to </span><span class="si">{error}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">emptyNamespace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extraNamespace</span><span class="o">=</span><span class="p">{}):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -230,7 +236,11 @@
 	<span class="k">try</span><span class="p">:</span>
 		<span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
 	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errorMessage</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span> <span class="ow">or</span> <span class="s1">&#39;&lt;no message&gt;&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span></div>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Evaluation of </span><span class="si">%r</span><span class="s1"> failed: &#39;</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="c1"># nb: must use .replace() not .format() since errorMessage could include {...} string literals</span>
+		<span class="k">raise</span> <span class="n">SafeEvalException</span><span class="p">(</span><span class="n">errorMessage</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{expr}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{error}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span> <span class="ow">or</span> <span class="s1">&#39;&lt;no message&gt;&#39;</span><span class="p">))</span>
+			<span class="o">.</span><span class="n">strip</span><span class="p">())</span></div>
 
 	
 </pre></div>
@@ -245,7 +255,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

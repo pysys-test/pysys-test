@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.api &mdash; PySys v2.0  documentation</title>
+  <title>pysys.writer.api &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.writer.api</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -205,6 +205,9 @@
 <span class="sd">     that did not pass. </span>
 <span class="sd">     Summary writers are always enabled regardless of the flags given to the PySys launcher.</span>
 
+<span class="sd">(See also `pysys.perf.api` whcih is used for writing performance results, using a similar but slightly </span>
+<span class="sd">different API).</span>
+
 <span class="sd">Project configuration of the writers is through the PySys project XML file using the ``&lt;writer&gt;`` tag. Multiple</span>
 <span class="sd">writers may be configured and their individual properties set through the nested ``&lt;property&gt;`` tag. Writer</span>
 <span class="sd">properties are set as attributes to the writer instance just before setup is called, with automatic conversion of </span>
@@ -246,7 +249,6 @@
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span><span class="p">,</span> <span class="n">stdoutPrint</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span><span class="p">,</span> <span class="n">openfile</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
@@ -423,10 +425,10 @@
 <span class="sd">		:param str path: Absolute path of the file or directory, using forward slashes as the path separator. </span>
 <span class="sd">		:param str category: A string identifying what kind of artifact this is, e.g. </span>
 <span class="sd">			&quot;TestOutputArchive&quot; and &quot;TestOutputArchiveDir&quot; (from `pysys.writer.testoutput.TestOutputArchiveWriter`) or </span>
-<span class="sd">			&quot;CSVPerformanceReport&quot; (from `pysys.utils.perfreporter.CSVPerformanceReporter`). </span>
+<span class="sd">			&quot;CSVPerformanceReport&quot; (from `pysys.perf.reporters.CSVPerformanceReporter`). </span>
 <span class="sd">			If you create your own category, be sure to add an org/company name prefix to avoid clashes.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">pass</span></div></div>
+		<span class="k">pass</span> <span class="c1"># pragma: no cover</span></div></div>
 
 
 <div class="viewcode-block" id="TestOutputVisitor"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutputVisitor">[docs]</a><span class="k">class</span> <span class="nc">TestOutputVisitor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -569,7 +571,7 @@
 		<span class="k">if</span> <span class="n">showRunDetails</span><span class="p">:</span>
 			<span class="n">log</span><span class="p">(</span><span class="s2">&quot;Run details:&quot;</span><span class="p">)</span>
 			<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">runDetails</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-				<span class="n">log</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%23s%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="s1">&#39;: &#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_DETAILS</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+				<span class="n">log</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%23s%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="s1">&#39;: &#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">v</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_DETAILS</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 			<span class="n">log</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="n">showOutcomeStats</span><span class="p">:</span>
@@ -686,7 +688,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

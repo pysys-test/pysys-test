@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.ci &mdash; PySys v2.0  documentation</title>
+  <title>pysys.writer.ci &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.writer.ci</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -195,9 +195,10 @@
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="n">PrintLogs</span><span class="p">,</span> <span class="n">OUTCOMES</span>
 <span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">TestOutcomeSummaryGenerator</span><span class="p">,</span> <span class="n">ArtifactPublisher</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stdoutPrint</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
+
+<span class="n">github_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer.github&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GitHubActionsCIWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.ci.html#pysys.writer.ci.GitHubActionsCIWriter">[docs]</a><span class="k">class</span> <span class="nc">GitHubActionsCIWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">TestOutcomeSummaryGenerator</span><span class="p">,</span> <span class="n">ArtifactPublisher</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -260,14 +261,19 @@
 				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;%0D&#39;</span><span class="p">)</span>\
 				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;%0A&#39;</span><span class="p">)</span>
 				<span class="p">)</span>
-		<span class="k">if</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">u</span><span class="s1">&#39;set-output&#39;</span><span class="p">]:</span> <span class="c1"># since GitHub suppresses the actual commands written, it&#39;s useful to log this at debug</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GitHub Actions command </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">toprint</span><span class="p">)</span>
+		<span class="c1"># since GitHub suppresses the actual commands written, it&#39;s useful to log this at debug</span>
+		<span class="n">github_log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GitHub Actions command </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">toprint</span><span class="p">)</span>
 
 		<span class="n">stdoutPrint</span><span class="p">(</span><span class="n">toprint</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s1">&#39;set-output&#39;</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__outputs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">))</span>
 
 	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testoutdir</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="nb">super</span><span class="p">(</span><span class="n">GitHubActionsCIWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">numTests</span><span class="o">=</span><span class="n">numTests</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="n">cycles</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="n">xargs</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="n">threads</span><span class="p">,</span> 
 			<span class="n">testoutdir</span><span class="o">=</span><span class="n">testoutdir</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">runner</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+			
+		<span class="bp">self</span><span class="o">.</span><span class="n">__outputs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxAnnotations</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span> <span class="c1"># one is used up for the non-zero exit status and one is used for the summary</span>
 		<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failureTestLogAnnotations</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">!=</span><span class="s1">&#39;true&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">=</span> <span class="mi">0</span>
@@ -334,6 +340,8 @@
 					<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
 
 			<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;endgroup&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__outputs</span><span class="p">:</span>
+				<span class="n">github_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;GitHub output values: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__outputs</span><span class="p">)))</span>
 
 	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testStart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="nb">super</span><span class="p">(</span><span class="n">GitHubActionsCIWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">processResult</span><span class="p">(</span><span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="n">cycle</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="n">testTime</span><span class="p">,</span> 
@@ -409,7 +417,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

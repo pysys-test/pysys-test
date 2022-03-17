@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.api &mdash; PySys v2.0  documentation</title>
+  <title>pysys.writer.api &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
@@ -135,7 +136,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.0</a>
+          <a href="../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -222,6 +223,8 @@ that did not pass.
 Summary writers are always enabled regardless of the flags given to the PySys launcher.</p></li>
 </ul>
 </div></blockquote>
+<p>(See also <a class="reference internal" href="pysys.perf.api.html#module-pysys.perf.api" title="pysys.perf.api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.api</span></code></a> whcih is used for writing performance results, using a similar but slightly 
+different API).</p>
 <p>Project configuration of the writers is through the PySys project XML file using the <code class="docutils literal notranslate"><span class="pre">&lt;writer&gt;</span></code> tag. Multiple
 writers may be configured and their individual properties set through the nested <code class="docutils literal notranslate"><span class="pre">&lt;property&gt;</span></code> tag. Writer
 properties are set as attributes to the writer instance just before setup is called, with automatic conversion of 
@@ -453,7 +456,7 @@ in order for writers to be notified.</p>
 <li><p><strong>path</strong> (<em>str</em>) – Absolute path of the file or directory, using forward slashes as the path separator.</p></li>
 <li><p><strong>category</strong> (<em>str</em>) – A string identifying what kind of artifact this is, e.g. 
 “TestOutputArchive” and “TestOutputArchiveDir” (from <a class="reference internal" href="pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter" title="pysys.writer.testoutput.TestOutputArchiveWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.TestOutputArchiveWriter</span></code></a>) or 
-“CSVPerformanceReport” (from <a class="reference internal" href="pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a>). 
+“CSVPerformanceReport” (from <a class="reference internal" href="pysys.perf.reporters.html#pysys.perf.reporters.CSVPerformanceReporter" title="pysys.perf.reporters.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.CSVPerformanceReporter</span></code></a>). 
 If you create your own category, be sure to add an org/company name prefix to avoid clashes.</p></li>
 </ul>
 </dd>
@@ -651,7 +654,7 @@ re-encode as UTF-8 again afterwards.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

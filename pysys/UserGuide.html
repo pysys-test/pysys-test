@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>User Guide &mdash; PySys v2.0  documentation</title>
+  <title>User Guide &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -94,7 +94,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#thread-safety">Thread-safety</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#producing-code-coverage-reports">Producing code coverage reports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#running-tests-in-multiple-modes">Running tests in multiple modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-tests-in-multiple-modes">Running tests in multiple modes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-modes-for-parameterized-tests">Using modes for parameterized tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-modes-for-other-purposes">Using modes for other purposes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#executing-modes-with-pysys-run">Executing modes with pysys run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tests-recording-results">Performance tests - recording results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tests-design-considerations">Performance tests - design considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tests-running-them">Performance tests - running them</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tests-comparing-results">Performance tests - comparing results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#controlling-execution-order">Controlling execution order</a></li>
 </ul>
@@ -118,7 +127,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.0</a>
+          <a href="../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -175,7 +184,7 @@
 <p>It’s very common to have one set of logic for Windows and another for
 all non-Windows (Unix-based) platforms, and PySys has a dedicated constant <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.IS_WINDOWS" title="pysys.constants.IS_WINDOWS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.IS_WINDOWS</span></code></a> for
 that:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">startProcess</span><span class="p">(</span><span class="s1">&#39;cmd.exe&#39;</span> <span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="k">else</span> <span class="s1">&#39;bash&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">startProcess</span><span class="p">(</span><span class="s1">&#39;myprogram.exe&#39;</span> <span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="k">else</span> <span class="s1">&#39;myprogram&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For finer grained platform detection we recommend using the facilities built into Python, for example
@@ -234,10 +243,11 @@ the cookbook sample):</p>
 </pre></div>
 </div>
 <p>For customizing the PySysTest class the best approach is usually to create a <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> template test
-containing <code class="docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR&#64;&#64;</span></code> to include the default PySys descriptor values (this means your template will
-automatically benefit from any future changes to the defaults), and put it in a <code class="docutils literal notranslate"><span class="pre">_pysys_templates/&lt;templatename&gt;</span></code>
-directory alongside the <code class="docutils literal notranslate"><span class="pre">pysystestdir.xml</span></code> file. The <code class="docutils literal notranslate"><span class="pre">_pysys_templates</span></code> directory should contain a file
-named <code class="docutils literal notranslate"><span class="pre">.pysysignore</span></code> file (which avoids the template being loaded as a real test).</p>
+containing <code class="docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR&#64;&#64;</span></code> (or <code class="xref py py-obj docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR_MINIMAL&#64;&#64;</span></code>) to include the default PySys descriptor
+values (this means your template will automatically benefit from any future changes to the defaults), and put it in a
+<code class="docutils literal notranslate"><span class="pre">_pysys_templates/&lt;templatename&gt;</span></code> directory alongside the <code class="docutils literal notranslate"><span class="pre">pysystestdir.xml</span></code> file.
+The <code class="docutils literal notranslate"><span class="pre">_pysys_templates</span></code> directory should contain a file named <code class="docutils literal notranslate"><span class="pre">.pysysignore</span></code> file (which avoids the template being
+loaded as a real test).</p>
 <p>other options are possible (as above) e.g. copying files from an absolute location such as under your project’s
 <code class="docutils literal notranslate"><span class="pre">${testRootDir}</span></code>, copying from PySys default templates directly (if you just want to <em>add</em> files) by
 using <code class="docutils literal notranslate"><span class="pre">${pysysTemplatesDir}/default-test/*</span></code>, or copying from a path relative to the XML file where the template is
@@ -496,30 +506,62 @@ any changes in coverage over time. The artifact publishing capability of
 </div>
 <div class="section" id="running-tests-in-multiple-modes">
 <h2>Running tests in multiple modes<a class="headerlink" href="#running-tests-in-multiple-modes" title="Permalink to this headline">¶</a></h2>
-<p>One of the powerful features of PySys is the ability to run the same test
-in multiple modes from a single execution. This could be useful for cases such
-as a set of tests that should be run against various different databases but
-can also be run against a mocked database for quick local development.
-Another common use case is executing the same PySysTest class in different
-modes to test different scenarios.</p>
-<p>To define some modes, first edit the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file for your test, and provide a string
-containing a Python lambda that will be evaluated when the test descriptors are loaded to
-return a list of named modes that the test can run in:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        lambda helper: helper.inheritedModes+[</span>
-<span class="s2">                {&#39;mode&#39;:&#39;CompressionGZip&#39;, &#39;compressionType&#39;:&#39;gzip&#39;},</span>
-<span class="s2">        ]</span>
-<span class="s2">&quot;&quot;&quot;</span>
-</pre></div>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">helper</span></code> is an instance of <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper" title="pysys.config.descriptor.TestModesConfigHelper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper</span></code></a> which provides
-access to the list of inherited modes (and more).</p>
+<p>One of the powerful features of PySys is the ability to run the same test in multiple modes from a single execution.
+This can be useful for both parameterized tests, where the same Python logic is invoked with multiple different
+parameters to test a range of scenarios, and for running tests against different databases, web browsers etc.</p>
+<p>In PySys, a mode consists of a mode name, and a dictionary of parameters with detailed information about how to
+execute in that mode. The Python test can use <code class="docutils literal notranslate"><span class="pre">self.mode.params</span></code> to access the parameter dictionary, and <code class="docutils literal notranslate"><span class="pre">self.mode</span></code>
+to get the mode name.</p>
+<p>During test execution, output files are kept separate by having mode executed from a different output directory,
+suffixed by <code class="docutils literal notranslate"><span class="pre">~ModeName</span></code>.</p>
 <p>When naming modes, TitleCase is recommended, and dot, underscore and equals characters
 may be used. Typically dot is useful for version numbers and underscore <code class="docutils literal notranslate"><span class="pre">_</span></code> is
 useful for separating out different dimensions (e.g. compression vs authentication type
-in the example described later in this section); separating dimensions cleanly will make it
+in the example described later in this section). Separating dimensions cleanly in this way will make it
 much easier to include/exclude the test modes you want. PySys will give an error if you use different
 capitalization for the same mode in different places, as this can result in test bugs.</p>
+<div class="section" id="using-modes-for-parameterized-tests">
+<h3>Using modes for parameterized tests<a class="headerlink" href="#using-modes-for-parameterized-tests" title="Permalink to this headline">¶</a></h3>
+<p>Parameterized tests provide a convenient way to re-use the same Python logic to check multiple different testing
+scenarios. This avoids the maintenance headache of copy+pasted testcases, and provides faster and more granular test
+outcomes than combining all the different parameters into a single test with a big <code class="docutils literal notranslate"><span class="pre">for</span></code> loop.</p>
+<p>To specify modes for a parameterized test, just edit the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file for your test, and
+provide a dictionary of <code class="docutils literal notranslate"><span class="pre">ModeName:</span> <span class="pre">{ParameterDict}</span></code> like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_parameterized_test_modes__</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;Usage&#39;</span><span class="p">:</span>        <span class="p">{</span><span class="s1">&#39;cmd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;--help&#39;</span><span class="p">],</span> <span class="s1">&#39;expectedExitStatus&#39;</span><span class="p">:</span><span class="s1">&#39;==0&#39;</span><span class="p">},</span>
+                <span class="s1">&#39;BadPort&#39;</span><span class="p">:</span>      <span class="p">{</span><span class="s1">&#39;cmd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;--port&#39;</span><span class="p">,</span> <span class="s1">&#39;-1&#39;</span><span class="p">],</span>  <span class="s1">&#39;expectedExitStatus&#39;</span><span class="p">:</span><span class="s1">&#39;!=0&#39;</span><span class="p">},</span>
+                <span class="s1">&#39;MissingPort&#39;</span><span class="p">:</span>  <span class="p">{</span><span class="s1">&#39;cmd&#39;</span><span class="p">:</span> <span class="p">[],</span>  <span class="s1">&#39;expectedExitStatus&#39;</span><span class="p">:</span><span class="s1">&#39;!=0&#39;</span><span class="p">},</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>This produces a test with 3 modes - named <code class="docutils literal notranslate"><span class="pre">Usage</span></code>, <code class="docutils literal notranslate"><span class="pre">BadPort</span></code> and <code class="docutils literal notranslate"><span class="pre">MissingPort</span></code> - for the various scenarios
+being checked. As you can see, it is possible to provide both input data, and data for use during validation.
+The test can easily access the parameters using expressions such as <code class="docutils literal notranslate"><span class="pre">self.mode.params[&quot;cmd&quot;]</span></code>.</p>
+<p>It is also possible to provide the exact same configuration using the more advanced <code class="docutils literal notranslate"><span class="pre">__pysys_modes__</span></code> field described
+below, however <code class="docutils literal notranslate"><span class="pre">__pysys_parameterized_test_modes__</span></code> is easier for this use case, and automatically takes care of
+marking the parameterized modes as “primary” (so they will all run by default even specifying a <code class="docutils literal notranslate"><span class="pre">--modes</span></code> argument),
+and combining them with any inherited modes (e.g. for different databases, browsers, etc).</p>
+</div>
+<div class="section" id="using-modes-for-other-purposes">
+<h3>Using modes for other purposes<a class="headerlink" href="#using-modes-for-other-purposes" title="Permalink to this headline">¶</a></h3>
+<p>Modes can also be used for making your test run with different databases, web browsers, and other execution
+environments.</p>
+<p>Often for these use cases you will want more control than parameterized tests give, for example
+it is likely you’ll want to execute with one database/browser in local test runs (probably the fastest one!) so
+you would not want all of them marked as primary modes. Additionally for these use cases the modes are often defined
+at a directory level for a collection of testcases rather in each individual test. You may also need precise control
+over which of the modes from a parent directory are inherited, since some modes may not be applicable to all tests.</p>
+<p>All of these cases and more can be handled by the <code class="docutils literal notranslate"><span class="pre">__pysys_modes__</span></code> configuration, which allows you to return a
+Python expression that returns the list (or dict) of modes for each test and/or <code class="docutils literal notranslate"><span class="pre">pysysdirconfig</span></code>. Since you will
+often need access to the inherited modes and (other useful methods and data) when defining your mode list,
+a <code class="docutils literal notranslate"><span class="pre">helper</span></code> object (<a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper" title="pysys.config.descriptor.TestModesConfigHelper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper</span></code></a>) is made available to your modes expression by the
+use of a Python lambda expression.</p>
+<p>If you want to add some new modes in addition to the inherited ones, you would add this to your <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="o">+</span><span class="p">[</span>
+                <span class="p">{</span><span class="s1">&#39;mode&#39;</span><span class="p">:</span><span class="s1">&#39;CompressionGZip&#39;</span><span class="p">,</span> <span class="s1">&#39;compressionType&#39;</span><span class="p">:</span><span class="s1">&#39;gzip&#39;</span><span class="p">},</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
 <p>In large projects you may wish to configure modes in a <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>
 file in a parent directory rather than in <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code>, which will by
 default be inherited by all nested testcases (unless an explicit modes
@@ -528,51 +570,33 @@ list if you need to change them later.</p>
 <p>By default the first mode in each list is “primary”, so the test will only run in that one primary mode by
 default during local test runs (i.e. unless you supply a <code class="docutils literal notranslate"><span class="pre">--modes</span></code> or <code class="docutils literal notranslate"><span class="pre">--ci</span></code> argument). This is optimal when
 using modes to validate the same behaviour/conditions in different execution environments e.g.
-browsers/databases etc. It’s best to choose either the fastest mode or else the one that
-is most likely to show up interesting issues as the primary mode.</p>
-<p>However when using modes to validate different <em>behaviours/conditions</em> (e.g. testing
-out different command line options) using a single PySysTest class, then you should designate all your modes as
-“primary” as you want <em>all of them</em> to execute by default in a quick local test run.
-The <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary" title="pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary</span></code></a> helper function can do this.</p>
+browsers/databases etc (but not for parameterized tests where you usually want to run all of them). It’s best to choose
+either the fastest mode or else the one that is most likely to show up interesting issues as the primary mode.</p>
 <p>Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication
 type etc, and you may want your tests to run in all combinations of each item in each dimension list.
-Rather than writing out every combination manually, you can use the function
-<a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions" title="pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions</span></code></a> to automatically generate the combinations,
+Rather than writing out every combination manually, you can use the helper function
+<a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.createModeCombinations</span></code></a> to automatically generate the combinations,
 passing it each dimension (e.g. each compression type) as a separate list.</p>
 <p>Here is an example of multi-dimensional modes (taken from the getting-started sample):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="p">[</span>
+                <span class="n">mode</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span>
+                        <span class="n">helper</span><span class="o">.</span><span class="n">createModeCombinations</span><span class="p">(</span> <span class="c1"># Takes any number of mode lists as arguments and returns a single combined mode list</span>
 
-<span class="s2">lambda helper: [</span>
-<span class="s2">                mode for mode in</span>
-<span class="s2">                        helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list</span>
-<span class="s2">                                helper.inheritedModes,</span>
-<span class="s2">                                {</span>
-<span class="s2">                                                &#39;CompressionNone&#39;: {&#39;compressionType&#39;:None, &#39;isPrimary&#39;:True},</span>
-<span class="s2">                                                &#39;CompressionGZip&#39;: {&#39;compressionType&#39;:&#39;gzip&#39;},</span>
-<span class="s2">                                },</span>
-<span class="s2">                                [</span>
-<span class="s2">                                        {&#39;auth&#39;:None}, # Mode name is optional</span>
-<span class="s2">                                        {&#39;auth&#39;:&#39;OS&#39;}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS</span>
-<span class="s2">                                ],</span>
+                                <span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="p">,</span>
 
-<span class="s2">                                # By default only the first mode in each list is &quot;primary&quot;, so the test will only run in that one mode by</span>
-<span class="s2">                                # default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when</span>
-<span class="s2">                                # using modes to validate the same behaviour/conditions in different execution environments e.g.</span>
-<span class="s2">                                # browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing</span>
-<span class="s2">                                # out different command line options) using a single PySysTest class, then you should have all your modes as</span>
-<span class="s2">                                # &quot;primary&quot; as you want all of them to execute by default in a quick local test run.</span>
-<span class="s2">                                helper.makeAllPrimary(</span>
-<span class="s2">                                        {</span>
-<span class="s2">                                                &#39;Usage&#39;:        {&#39;cmd&#39;: [&#39;--help&#39;], &#39;expectedExitStatus&#39;:&#39;==0&#39;},</span>
-<span class="s2">                                                &#39;BadPort&#39;:      {&#39;cmd&#39;: [&#39;--port&#39;, &#39;-1&#39;],  &#39;expectedExitStatus&#39;:&#39;!=0&#39;},</span>
-<span class="s2">                                                &#39;MissingPort&#39;:  {&#39;cmd&#39;: [],  &#39;expectedExitStatus&#39;:&#39;!=0&#39;},</span>
-<span class="s2">                                        }),</span>
-<span class="s2">                                )</span>
+                                <span class="p">{</span>
+                                                <span class="s1">&#39;CompressionNone&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;compressionType&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;isPrimary&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">},</span>
+                                                <span class="s1">&#39;CompressionGZip&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;compressionType&#39;</span><span class="p">:</span><span class="s1">&#39;gzip&#39;</span><span class="p">},</span>
+                                <span class="p">},</span>
 
-<span class="s2">                # This is Python list comprehension syntax for filtering the items in the list</span>
-<span class="s2">                if (mode[&#39;auth&#39;] != &#39;OS&#39; or helper.import_module(&#39;sys&#39;).platform == &#39;MyFunkyOS&#39;)</span>
-<span class="s2">        ]</span>
-<span class="s2">&quot;&quot;&quot;</span>
+                                <span class="p">[</span>
+                                        <span class="p">{</span><span class="s1">&#39;auth&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">},</span> <span class="c1"># Mode name is optional</span>
+                                        <span class="p">{</span><span class="s1">&#39;auth&#39;</span><span class="p">:</span><span class="s1">&#39;OS&#39;</span><span class="p">},</span> <span class="c1"># In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS</span>
+                                <span class="p">],</span>
+
+                <span class="c1"># This is Python list comprehension syntax for filtering the items in the list</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">mode</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;OS&#39;</span> <span class="ow">or</span> <span class="n">helper</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;MyFunkyOS&#39;</span><span class="p">)</span>
+        <span class="p">]</span>
 </pre></div>
 </div>
 <p>This will create the following modes:</p>
@@ -599,6 +623,14 @@ from being added on some operation systems (in this example, on all non-fictiona
 <p>You can find the mode that this test is running in using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.mode</span></code></a>, which returns an instance of
 <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestMode" title="pysys.config.descriptor.TestMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestMode</span></code></a> that subclasses a <code class="docutils literal notranslate"><span class="pre">str</span></code> of the mode name, as well as the parameters
 via a <code class="docutils literal notranslate"><span class="pre">params</span></code> field.</p>
+<p>You can also use Python list comprehensions to generate sets of modes from a <code class="docutils literal notranslate"><span class="pre">range</span></code> like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_modes__</span>   <span class="o">=</span> <span class="k">lambda</span> <span class="n">helper</span><span class="p">:</span> <span class="n">helper</span><span class="o">.</span><span class="n">createModeCombinations</span><span class="p">(</span>
+                <span class="n">helper</span><span class="o">.</span><span class="n">inheritedModes</span><span class="p">,</span>
+                <span class="p">[</span> <span class="p">{</span><span class="s1">&#39;mode&#39;</span><span class="p">:</span><span class="s1">&#39;CompressionGZip&#39;</span><span class="p">,</span> <span class="s1">&#39;compressionType&#39;</span><span class="p">:</span><span class="s1">&#39;gzip&#39;</span><span class="p">},</span> <span class="p">],</span>
+                <span class="p">[</span> <span class="p">{</span><span class="s1">&#39;serverThreads&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="p">],</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
 <p>Here’s an example showing how a test plugin might use modes configuration to configure the test object
 during test setup:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyTestPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -615,7 +647,10 @@ during test setup:</p>
                 <span class="n">testObj</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">dbHelperFactory</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Finally, PySys provides a rich variety of <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> arguments to control
+</div>
+<div class="section" id="executing-modes-with-pysys-run">
+<h3>Executing modes with pysys run<a class="headerlink" href="#executing-modes-with-pysys-run" title="Permalink to this headline">¶</a></h3>
+<p>PySys provides a rich variety of <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> arguments to control
 which modes your tests will run with. By default it will run every test in its
 primary modes (for tests with no mode, the primary mode is <code class="docutils literal notranslate"><span class="pre">self.mode==None</span></code>) -
 which is great for quick checks during development of your application and
@@ -651,8 +686,105 @@ tests:</p>
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="performance-tests-recording-results">
+<h2>Performance tests - recording results<a class="headerlink" href="#performance-tests-recording-results" title="Permalink to this headline">¶</a></h2>
+<p>PySys is a great tool for running performance tests, whether unit-level microbenchmarks or complex multi-process
+full system benchmarking.</p>
+<p>Often performance tests will produced detailed output files (XML/JSON/PDF/logs etc) that are worth capturing for
+analysis by a human, or for storing as a long term audit of how this build performed. To do this, you can add a
+<a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a> to your project configuration. This writer collects files matching a
+specified pattern from the output directory after each test, and puts them in a single directory or archive at the
+end of the test run.</p>
+<p>Whether or not you have some detailed files to stash, it is worth also using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.reportPerformanceResult</span></code></a>, the
+powerful built-in capability for storing some summary numbers for each test. In complex tests you probably
+won’t want to record every possible statistic - since that can quickly overwhelm once the total number of number of
+tests grows; a better strategy is to select a few representative data points from each test/mode combination.
+By default the numeric results are written to a CSV file (along with the runner’s <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> dictionary including
+things like OS, CPU count, hostname and git commit of your source changes). There is also a reporter available for
+writing in a simple JSON format, and another that produces a textual summary of the results at the end of the run.
+You can also create your own reporters (e.g. to publish to an in-house database) using the <a class="reference internal" href="../autodocgen/pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a> API.</p>
+<p>The <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.reportPerformanceResult</span></code></a> documentation gives the details, but one point that’s worth stressing is that
+every result should be identified by a short, unique, human-friendly <code class="docutils literal notranslate"><span class="pre">resultKey</span></code> which should give an at-a-glance
+definition of what is being recorded such as
+<code class="docutils literal notranslate"><span class="pre">Message</span> <span class="pre">send</span> <span class="pre">rate</span> <span class="pre">with</span> <span class="pre">3</span> <span class="pre">topics</span> <span class="pre">and</span> <span class="pre">small</span> <span class="pre">100kB</span> <span class="pre">messages</span> <span class="pre">using</span> <span class="pre">MyMessagingVendor</span></code>.
+For maximum benefit, design your keys so that when sorted (imagine a big list of 100+ numbers from all your testcases!)
+you’ll see closely related results next to each other. These keys must be unique - so if a test runs in multiple modes
+(e.g. messaging/database vendors) then you must add some kind of string to the result key to indicate which it is
+running in, otherwise PySys will raise an exception and not persist the result. See the samples for some examples of
+using this API.</p>
+</div>
+<div class="section" id="performance-tests-design-considerations">
+<h2>Performance tests - design considerations<a class="headerlink" href="#performance-tests-design-considerations" title="Permalink to this headline">¶</a></h2>
+<p>Often a performance test will run for a bit longer than a simple correctness test, for example it might have a set
+number of iterations or time duration. See the above section “Configuring and overriding test options” for an example
+of how to make it easy to customize the iteration count/duration at runtime e.g. <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-XmyIterationCount=10</span></code>.
+You may find you want to run your test super-quick in the early stages until it executes the steps correctly. When
+tracking down performance problems you might want to try running it for longer than usual to get more reliable results.</p>
+<p>It is common to have a single performance test that should run with different parameters, for example against different
+databases, or perhaps with a variety of incoming message sizes. Avoid copy+pasting tests for this use case (which would
+be a maintenance nightmare). It is also a bad idea to add a giant “for” loop into your test and make it do everything in
+one invocation, since then it’s very difficult to surgically re-run problematic parts of your parameter matrix when
+tracking down test bugs or optimizing your application. Instead use the built-in “modes” concept of PySys which is
+perfect for the job. It can even generate a combinatoric product of various different parameter dimensions for you
+with <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.createModeCombinations</span></code></a> as described above.</p>
+</div>
+<div class="section" id="performance-tests-running-them">
+<h2>Performance tests - running them<a class="headerlink" href="#performance-tests-running-them" title="Permalink to this headline">¶</a></h2>
+<p>When running performance tests from an automated job, it is important to ensure that you do not have multiple
+tests executing at once since this will usually invalidate the results. It is therefore best to run your performance
+tests in a separate <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> invocation to your correctness testing, which does benefit from multi-threaded
+execution. You should also disable code coverage in a performance run to avoid artificially slowing your components
+down. So a typical automated performance run would need to modify the usual <code class="docutils literal notranslate"><span class="pre">--ci</span></code> default into something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">performance</span><span class="o">/</span>
+<span class="n">pysys</span> <span class="n">run</span> <span class="o">--</span><span class="n">ci</span> <span class="o">--</span><span class="n">threads</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">XcodeCoverage</span><span class="o">=</span><span class="n">false</span>
+</pre></div>
+</div>
+<p>When running performance tests locally to investigate a performance bug, it can be incredibly valuable to run
+multiple cycles of each test to generate a more stable baseline, and also to give you a measurable indication of how
+variable your results are. There is no point trying to track down a 10% performance regression from a test whose
+normal variation is +/-50%! It is also worth customizing the <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> to assign a human-friendly label each time
+you do a run against a different build of your application. The <code class="docutils literal notranslate"><span class="pre">outdir</span></code> is recorded with the performance numbers
+and also allows you to avoid overwriting previous detailed logging output when doing a new run. So a typical local
+execution of a performance test would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">-</span><span class="n">c5</span> <span class="o">--</span><span class="n">outdir</span><span class="o">=</span><span class="k">with</span><span class="o">-</span><span class="n">foobar</span><span class="o">-</span><span class="n">optimization</span> <span class="n">MyTest</span><span class="o">~</span><span class="n">MyMode</span>
+</pre></div>
+</div>
+<p>You may wish to focus on just one mode, or all modes (<code class="docutils literal notranslate"><span class="pre">--modes=ALL</span></code>) or a specific subset of the modes (perhaps
+using a regular expression on the command line to indicate which modes are needed). At the end of the test run PySys
+will print a summary of the results, including a calculation of the sample standard deviation (if <code class="docutils literal notranslate"><span class="pre">cycles</span></code> &gt; 1)
+which you can use to check your test is reliable and to decide whether measured increases/decreases are statistically
+significant or just random noise.</p>
+</div>
+<div class="section" id="performance-tests-comparing-results">
+<h2>Performance tests - comparing results<a class="headerlink" href="#performance-tests-comparing-results" title="Permalink to this headline">¶</a></h2>
+<p>When using PySys tests to measure your application while you experiment with possible optimizations, consider
+listing the <code class="docutils literal notranslate"><span class="pre">.csv</span></code> (or <code class="docutils literal notranslate"><span class="pre">.json</span></code>) summary files containing your baselines (e.g. baseline before any changes, with
+optimization A, B, C etc…) in the <code class="docutils literal notranslate"><span class="pre">PYSYS_PERFORMANCE_BASELINES</span></code> environment variable. The
+<a class="reference internal" href="../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.PrintSummaryPerformanceReporter" title="pysys.perf.reporters.PrintSummaryPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.PrintSummaryPerformanceReporter</span></code></a> will print a textual comparison from each of the listed
+baselines to the current result. You can also run comparisons from the command line at any time by running
+the <code class="docutils literal notranslate"><span class="pre">pysys/perf/perfreportstool.py</span></code> script.</p>
+<p>When reviewing comparisons, note that some numbers are “better” when large (e.g. rate of sending messages/transactions)
+while others are “worse” when large (e.g. latency or response time). The comparison tries to avoid confusion when
+looking at such results side by side, by showing “+” results for all improvements and “-” when things got worse.
+For each comparison, it prints the %improvement (with a + for bigger-is-better increases and - for reductions, and
+vice-versa), and the speedup ratio (newValue/oldValue for bigger-is-better, or oldValue/newValue for smaller is better).
+Typically the % is useful for small changes (&lt; 100%) whereas the speedup ratio is more friendly for large changes
+(e.g. 3.5x faster). Provided multiple samples are available (from a multi-cycle run), it calculates the standard
+deviation (using whichever is the larger of the old and new stdDevs) and expresses the improvement delta as a ratio of
+the standard deviation (aka “sigma”) to give a “sigmas” value which indicates statistically how significant the result
+is - above <code class="docutils literal notranslate"><span class="pre">+/-</span> <span class="pre">1</span> <span class="pre">sigma</span></code> means there is a 68% chance the change is a real (significant) one, and above
+<code class="docutils literal notranslate"><span class="pre">+/-</span> <span class="pre">2</span> <span class="pre">sigmas</span></code> shows a 95% probability of significance.
+Results with less than 2 sigmas are not colour-coded since they typically don’t indicate a real change; anything with a
+red or green colour is a regression or improvement that is statistically significant and worth paying attention to.</p>
+</div>
 <div class="section" id="test-ids-and-structuring-large-projects">
 <h2>Test ids and structuring large projects<a class="headerlink" href="#test-ids-and-structuring-large-projects" title="Permalink to this headline">¶</a></h2>
+<p>Firstly, try to have everything in a single PySys project if possible. Use subdirectories to structure your tests,
+but don’t separate into different PySys projects unless it’s for testing a totally different component with different
+testing needs. Keeping everything in the same project gives you the ability to run all your tests
+(unit/correctness/perf) from a single command line which could be useful in the future even if you don’t need it right
+now.</p>
 <p>Each test has a unique <code class="docutils literal notranslate"><span class="pre">id</span></code> which is used in various places such as when
 reporting passed/failed outcomes. By default the id is just the name of the
 directory containing the <code class="docutils literal notranslate"><span class="pre">pysystest.*</span></code> file.</p>
@@ -821,7 +953,7 @@ custom <a class="reference internal" href="../autodocgen/pysys.baserunner.html#p
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

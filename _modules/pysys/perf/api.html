@@ -1,0 +1,672 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.perf.api &mdash; PySys v2.1.dev1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.perf.api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.perf.api</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">API for creating new performance reporters (for manipulating performance run files outside the framework).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">toLongPathSafe</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.perfreporter&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PerformanceUnit"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.PerformanceUnit">[docs]</a><span class="k">class</span> <span class="nc">PerformanceUnit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Class which identifies the unit in which a performance result is measured.</span>
+<span class="sd">	</span>
+<span class="sd">	Every unit encodes whether big numbers are better or worse (which can be used </span>
+<span class="sd">	to calculate the improvement or regression when results are compared), e.g. </span>
+<span class="sd">	better for throughput numbers, worse for time taken or latency numbers. </span>
+<span class="sd">	</span>
+<span class="sd">	For consistency, we recommend using the pre-defined units where possible. </span>
+<span class="sd">	For throughput numbers or rates, that means using PER_SECOND. For latency </span>
+<span class="sd">	measurements that means using SECONDS if long time periods of several </span>
+<span class="sd">	seconds are expected, or NANO_SECONDS (=10**-9 seconds) if sub-second </span>
+<span class="sd">	time periods are expected (since humans generally find numbers such as </span>
+<span class="sd">	1,234,000 ns easier to skim-read and compare than fractional numbers like </span>
+<span class="sd">	0.001234).</span>
+
+<span class="sd">	:param str name: The name of the unit . Should be short, for example &quot;/s&quot;.</span>
+<span class="sd">	:param bool biggerIsBetter: Indicates whether larger values are good (e.g. rate/TPS/throughput) or bad (latency/memory). </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">biggerIsBetter</span><span class="p">):</span>
+		<span class="k">assert</span> <span class="n">biggerIsBetter</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="n">biggerIsBetter</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">biggerIsBetter</span> <span class="o">=</span> <span class="n">biggerIsBetter</span>
+
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+<span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">SECONDS</span> <span class="o">=</span> <span class="n">PerformanceUnit</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">NANO_SECONDS</span> <span class="o">=</span> <span class="n">PerformanceUnit</span><span class="p">(</span><span class="s1">&#39;ns&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="c1"># 10**-9 seconds</span>
+<span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">PER_SECOND</span> <span class="o">=</span> <span class="n">PerformanceUnit</span><span class="p">(</span><span class="s1">&#39;/s&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BasePerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">BasePerformanceReporter</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;API base class for creating a reporter that handles or stores performance results for later analysis.</span>
+<span class="sd">	</span>
+<span class="sd">	Each performance result consists of a value, a result key (which must </span>
+<span class="sd">	be unique across all test cases and modes, and also stable across different </span>
+<span class="sd">	runs), and a unit (which also encodes whether bigger values are better or worse). </span>
+<span class="sd">	Each test can report any number of performance results. </span>
+<span class="sd">	</span>
+<span class="sd">	Performance reporter implementations are required to be thread-safe.</span>
+<span class="sd">	 </span>
+<span class="sd">	Project configuration of performance reporters is through the PySys project XML file using the </span>
+<span class="sd">	``&lt;performance-reporter&gt;`` tag. Multiple reporters may be configured and their individual properties set through the </span>
+<span class="sd">	nested ``&lt;property&gt;`` tag or XML attributes. Properties are set as Python attributes on the instance just after </span>
+<span class="sd">	construction, with automatic conversion of type to match the default value if specified as a static attribute on the </span>
+<span class="sd">	class. </span>
+<span class="sd">	</span>
+<span class="sd">	If no reporters are explicitly configured, default reporters will be added. </span>
+
+<span class="sd">	:ivar pysys.config.project.Project ~.project: The project configuration instance.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str testoutdir: The output directory used for this test run </span>
+<span class="sd">		(equal to `runner.outsubdir`), an identifying string which often contains </span>
+<span class="sd">		the platform, or when there are multiple test runs on the same machine </span>
+<span class="sd">		may be used to distinguish between them. This is usually a relative path </span>
+<span class="sd">		but may be an absolute path. </span>
+<span class="sd">		</span>
+<span class="sd">	:ivar runner: A reference to the runner. </span>
+<span class="sd">	</span>
+<span class="sd">	.. version added:: 2.1</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">summaryfile</span><span class="p">,</span> <span class="n">testoutdir</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1"># **kwargs allows constructor to be extended in future if needed; give error if any unexpected args are passed</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">testoutdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">testoutdir</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">summaryfile</span> <span class="o">=</span> <span class="n">summaryfile</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">HOSTNAME</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># just in case we&#39;re constructing it for standalone execution in the compare script</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">runStartTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startTime</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
+		
+		<span class="c1"># anything listed here can be passed using just a string literal</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">unitAliases</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s1">&#39;s&#39;</span><span class="p">:</span><span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">SECONDS</span><span class="p">,</span> 
+			<span class="s1">&#39;ns&#39;</span><span class="p">:</span><span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">NANO_SECONDS</span><span class="p">,</span> 
+			<span class="s1">&#39;/s&#39;</span><span class="p">:</span> <span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">PER_SECOND</span>
+			<span class="p">}</span>
+			
+<div class="viewcode-block" id="BasePerformanceReporter.setup"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.setup">[docs]</a>	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project </span>
+<span class="sd">		configuration properties for this performance reporter have been assigned to this instance. </span>
+<span class="sd">		</span>
+<span class="sd">		Usually there is no reason to override the constructor, and any initialization can be done in this method. </span>
+<span class="sd">		</span>
+<span class="sd">		.. version added:: 2.1</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span> <span class="c1"># pragma: no cover</span></div>
+		
+<div class="viewcode-block" id="BasePerformanceReporter.getRunDetails"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.getRunDetails">[docs]</a>	<span class="k">def</span> <span class="nf">getRunDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Return an dictionary of information about this test run (e.g. hostname, start time, etc).</span>
+<span class="sd">		</span>
+<span class="sd">		Overriding this method is discouraged; customization of the run details should usually be performed by changing </span>
+<span class="sd">		the ``runner.runDetails`` dictionary from the `pysys.baserunner.BaseRunner.setup()` method. </span>
+
+<span class="sd">		:param testobj: the test case instance registering the value</span>
+
+<span class="sd">		.. versionchanged:: 2.0 Added testobj parameter, for advanced cases where you want to </span>
+<span class="sd">			to provide different ``runDetails`` based on some feature of the test object or mode. </span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">runDetails</span><span class="p">)</span></div>
+	
+<div class="viewcode-block" id="BasePerformanceReporter.valueToDisplayString"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.valueToDisplayString">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">valueToDisplayString</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Pretty-print an integer or float value to a moderate number of significant figures.</span>
+
+<span class="sd">		The method additionally adds a &quot;,&quot; grouping for large numbers.</span>
+<span class="sd">		</span>
+<span class="sd">		Subclasses may customize this if desired, including by reimplementing as a non-static method. </span>
+
+<span class="sd">		:param value: the value to be displayed, which must be a numeric type. </span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+			<span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0:,}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">valtostr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%0.4g</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+			<span class="k">if</span> <span class="s1">&#39;e&#39;</span> <span class="ow">in</span> <span class="n">valtostr</span><span class="p">:</span> <span class="n">valtostr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">value</span>
+			<span class="k">return</span> <span class="n">valtostr</span></div>
+
+<div class="viewcode-block" id="BasePerformanceReporter.getRunSummaryFile"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.getRunSummaryFile">[docs]</a>	<span class="k">def</span> <span class="nf">getRunSummaryFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Return the fully substituted location of the file to which summary performance results will be written.</span>
+
+<span class="sd">		This may include the following substitutions: ``@OUTDIR@`` (=``${outDirName}``, the basename of the output directory for this run,</span>
+<span class="sd">		e.g. &quot;linux&quot;), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. </span>
+<span class="sd">		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same</span>
+<span class="sd">		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.</span>
+
+<span class="sd">		:param testobj: the test case instance registering the value</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">summaryfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summaryfile</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">summaryFile</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SUMMARY_FILE</span>
+		
+		<span class="c1"># properties are already expanded if set in project config, but needs doing explicitly in case default value was used</span>
+		<span class="n">summaryfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">summaryfile</span><span class="p">)</span>
+		
+		<span class="n">summaryfile</span> <span class="o">=</span> <span class="n">summaryfile</span>\
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@OUTDIR@&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testoutdir</span><span class="p">))</span> \
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@HOSTNAME@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hostname</span><span class="p">)</span> \
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@DATE@&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runStartTime</span><span class="p">)))</span> \
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@TIME@&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H.%M.%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runStartTime</span><span class="p">)))</span> \
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@TESTID@&#39;</span><span class="p">,</span> <span class="n">testobj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+		
+		<span class="k">assert</span> <span class="n">summaryfile</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">getRunSummaryFile</span><span class="p">)</span> <span class="c1"># must not be empty</span>
+		<span class="n">summaryfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="n">summaryfile</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">summaryfile</span></div>
+
+<div class="viewcode-block" id="BasePerformanceReporter.reportResult"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.reportResult">[docs]</a>	<span class="k">def</span> <span class="nf">reportResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Report a performance result, with an associated unique key that identifies it.</span>
+<span class="sd">		</span>
+<span class="sd">		This method must be implemented by performance reporters. However do not ever call it directly - always use </span>
+<span class="sd">		`pysys.basetest.BaseTest.reportPerformanceResult` which performs some critical input validations before calling </span>
+<span class="sd">		all the registered reporters. </span>
+
+<span class="sd">		:param testobj: the test case instance registering the value. Use ``testobj.descriptor.id`` to get the ``testId``. </span>
+<span class="sd">		:param int|float value: the value to be reported. This may be an int or a float. </span>
+<span class="sd">		:param str resultKey: a unique string that fully identifies what was measured.</span>
+<span class="sd">		:param PerformanceUnit unit: identifies the unit the value is measured in.</span>
+<span class="sd">		:param float toleranceStdDevs: indicates how many standard deviations away from the mean for a regression.</span>
+<span class="sd">		:param dict[str,obj] resultDetails:  A dictionary of detailed information that should be recorded together with the result.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span> <span class="c1"># pragma: no cover</span></div>
+		
+
+<div class="viewcode-block" id="BasePerformanceReporter.cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Called when PySys has finished executing tests.</span>
+<span class="sd">		</span>
+<span class="sd">		This is where any file footer and other I/O finalization can be written to the end of performance log files, and </span>
+<span class="sd">		is also a good time to do any required aggregation, printing of summaries or artifact publishing. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span> <span class="c1"># pragma: no cover</span></div>
+	
+<div class="viewcode-block" id="BasePerformanceReporter.tryDeserializePerformanceFile"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.tryDeserializePerformanceFile">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">tryDeserializePerformanceFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Advanced method which allows performance reporters to deserialize the files they write to allow them to be used </span>
+<span class="sd">		as comparison baselines. </span>
+<span class="sd">		</span>
+<span class="sd">		Most reporters do not need to worry about this method. </span>
+<span class="sd">		</span>
+<span class="sd">		If you do implement it, return an instance of PerformanceRunData, or None if you do not support this file type, for </span>
+<span class="sd">		example because the extension does not match. It is best to declare this as a static method if possible. </span>
+<span class="sd">		</span>
+<span class="sd">		:rtype: PerformanceRunData</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="kc">None</span> <span class="c1"># pragma: no cover</span></div></div>
+
+<div class="viewcode-block" id="PerformanceRunData"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.PerformanceRunData">[docs]</a><span class="k">class</span> <span class="nc">PerformanceRunData</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Holds performance data for a single test run, consisting of runDetails and a list of performance results covering </span>
+<span class="sd">	one or more cycles. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str name: The name, typically a filename. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar dict[str,str] ~.runDetails: A dictionary containing (string key, string value) information about the whole test </span>
+<span class="sd">		run, for example operating system and hostname.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar list[dict] ~.results: A list where each item is a dictionary containing information about a given result. </span>
+<span class="sd">		The current keys are: resultKey, testId, value, unit, biggerIsBetter, toleranceStdDevs, samples, stdDev, </span>
+<span class="sd">		resultDetails. </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">runDetails</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">=</span> <span class="n">runDetails</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">results</span>
+
+	<span class="k">def</span> <span class="nf">__maybequote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+		<span class="k">return</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">s</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">else</span> <span class="n">s</span>
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="s1">&#39;PerformanceRunData&lt; </span><span class="si">%d</span><span class="s1"> results; runDetails: </span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">),</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maybequote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">[</span><span class="n">k</span><span class="p">])))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">]))</span>
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="s1">&#39;PerformanceRunData&lt;runDetails: </span><span class="si">%s%s</span><span class="se">\n</span><span class="s1">&gt;&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">]),</span>
+			<span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maybequote</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">,{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="kc">None</span><span class="p">)))))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">,{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">k</span><span class="o">!=</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">])))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="PerformanceRunData.aggregate"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.PerformanceRunData.aggregate">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">runs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Aggregate a list of multiple runs and/or cycles into a single performance run data object with a single </span>
+<span class="sd">		entry for each unique resultKey with the value given as a mean of all the observed samples.</span>
+
+<span class="sd">		:param list[PerformanceRunData] files: the list of run objects to aggregate.</span>
+<span class="sd">		:rtype PerformanceRunData:</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">runs</span><span class="p">,</span> <span class="n">PerformanceRunData</span><span class="p">):</span> <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="n">runs</span><span class="p">]</span>
+		
+		<span class="n">details</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># values are lists of unique run detail values from input files</span>
+		<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">results</span><span class="p">:</span> <span class="k">continue</span> <span class="c1"># don&#39;t even include the rundetails if there are no results</span>
+			<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+					<span class="n">results</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+					<span class="c1"># make it a deep copy</span>
+					<span class="n">results</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">]][</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span> <span class="n">results</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">,</span> <span class="p">{}))</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">e</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">]]</span> <span class="c1"># existing result which we will merge the new data into</span>
+
+					<span class="c1"># calculate new mean and stddev</span>
+					<span class="n">combinedmean</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">])</span>
+
+					<span class="c1"># nb: do this carefully to avoid subtracting large numbers from each other</span>
+					<span class="c1"># also we calculate the SAMPLE standard deviation (i.e. using the bessel-corrected unbiased estimate)</span>
+					<span class="n">e</span><span class="p">[</span><span class="s1">&#39;stdDev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+						<span class="p">((</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;stdDev&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+						 <span class="o">+</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;stdDev&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+						 <span class="o">+</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">combinedmean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="p">)</span>
+						 <span class="o">+</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">combinedmean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="p">)</span>
+						 <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+					<span class="p">)</span>
+					<span class="n">e</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">combinedmean</span>
+					<span class="n">e</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span>
+					<span class="n">e</span><span class="p">[</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="c1"># just use latest; shouldn&#39;t vary</span>
+
+			<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">runDetails</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">details</span><span class="p">:</span>
+					<span class="n">details</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+				<span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">runDetails</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">details</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+					<span class="n">details</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">runDetails</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+		<span class="k">return</span> <span class="n">PerformanceRunData</span><span class="p">(</span>
+			<span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">),</span>
+			<span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">details</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">details</span><span class="p">},</span>
+			<span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">])</span>
+			<span class="p">)</span></div></div>
+			
+		
+<div class="viewcode-block" id="CSVPerformanceFile"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile">[docs]</a><span class="k">class</span> <span class="nc">CSVPerformanceFile</span><span class="p">(</span><span class="n">PerformanceRunData</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Holds performance data for a single test run in a CSV performance file.</span>
+
+<span class="sd">	If this file contains aggregated results the number of &quot;samples&quot; may be greater than 1 and the &quot;value&quot;</span>
+<span class="sd">	will specify the mean result.</span>
+
+<span class="sd">	:ivar dict[str,obj] ~.runDetails: A dictionary containing (string key, string value) information about the whole test run.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar list[dict] ~.results: A list where each item is a dictionary containing information about a given result, </span>
+<span class="sd">		containing values for each of the keys in L{COLUMNS}, for example &#39;resultKey&#39;, &#39;value&#39;, etc. </span>
+<span class="sd">		</span>
+<span class="sd">	:ivar str ~.RUN_DETAILS: The constant prefix identifying information about the whole test run</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.RESULT_DETAILS: The constant prefix identifying detailed information about a given result</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar list[str] ~.COLUMNS: Constant list of the columns in the performance output</span>
+
+<span class="sd">	:param str contents: A string containing the contents of the file to be parsed (can be empty)</span>
+<span class="sd">	:rtype: CSVPerformanceFile</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">COLUMNS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;resultKey&#39;</span><span class="p">,</span><span class="s1">&#39;testId&#39;</span><span class="p">,</span><span class="s1">&#39;value&#39;</span><span class="p">,</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span><span class="s1">&#39;biggerIsBetter&#39;</span><span class="p">,</span><span class="s1">&#39;toleranceStdDevs&#39;</span><span class="p">,</span><span class="s1">&#39;samples&#39;</span><span class="p">,</span><span class="s1">&#39;stdDev&#39;</span><span class="p">]</span>
+	<span class="n">RUN_DETAILS</span> <span class="o">=</span> <span class="s1">&#39;#runDetails:#&#39;</span>
+	<span class="n">RESULT_DETAILS</span> <span class="o">=</span> <span class="s1">&#39;#resultDetails:#&#39;</span>
+
+<div class="viewcode-block" id="CSVPerformanceFile.aggregate"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.aggregate">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Aggregate a list of performance file objects into a single CSVPerformanceFile object.</span>
+
+<span class="sd">		Takes a list of one or more CSVPerformanceFile objects and returns a single aggregated</span>
+<span class="sd">		CSVPerformanceFile with a single row for each resultKey (with the &quot;value&quot; set to the</span>
+<span class="sd">		mean if there are multiple results with that key, and the stdDev also set appropriately).</span>
+
+<span class="sd">		This method is now deprecated in favour of `PerformanceRunData.aggregate`. </span>
+
+<span class="sd">		:param list[CSVPerformanceFile] files: the list of performance file objects to aggregate.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">CSVPerformanceFile</span><span class="p">):</span> <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">files</span><span class="p">]</span>
+		
+		<span class="n">agg</span> <span class="o">=</span> <span class="n">PerformanceRunData</span><span class="o">.</span><span class="n">aggregate</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">])</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="n">CSVPerformanceFile</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+		<span class="n">result</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">results</span>
+		<span class="n">result</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">runDetails</span>
+		<span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="CSVPerformanceFile.load"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.load">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Read the runDetails and results from the specified .csv file on disk.</span>
+<span class="sd">		</span>
+<span class="sd">		:param str src: The path to read. </span>
+<span class="sd">		:returns: A new `CSVPerformanceFile` instance. </span>
+<span class="sd">		</span>
+<span class="sd">		.. versionadded:: 2.1</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">src</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">src</span><span class="p">)</span></div>
+				
+<div class="viewcode-block" id="CSVPerformanceFile.dump"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.dump">[docs]</a>	<span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Dump the runDetails and results from this object to a CSV at the specified location. </span>
+<span class="sd">		</span>
+<span class="sd">		Any existing file is overwritten. </span>
+<span class="sd">		</span>
+<span class="sd">		:param str dest: The destination path or file handle to write to. </span>
+<span class="sd">		</span>
+<span class="sd">		.. versionadded:: 2.1</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+			<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">dest</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+				
+		<span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeCSVHeaderLine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">))</span>
+		<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+			<span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toCSVLine</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+	<span class="nd">@staticmethod</span> 
+	<span class="k">def</span> <span class="nf">makeCSVHeaderLine</span><span class="p">(</span><span class="n">runDetails</span><span class="p">):</span>
+		<span class="k">return</span> <span class="s1">&#39;# &#39;</span><span class="o">+</span><span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">toCSVLine</span><span class="p">(</span><span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">COLUMNS</span><span class="o">+</span><span class="p">[</span><span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">RUN_DETAILS</span><span class="p">,</span> <span class="n">runDetails</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+<div class="viewcode-block" id="CSVPerformanceFile.toCSVLine"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.toCSVLine">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">toCSVLine</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Convert a list or dictionary of input values into a CSV string.</span>
+
+<span class="sd">		Note that no new line character is return in the CSV string. The input values can either be</span>
+<span class="sd">		a list (any nested dictionaries are expanded into KEY=VALUE entries), or a dictionary (or OrderedDict)</span>
+<span class="sd">		whose keys will be added in the same order as COLUMNS.</span>
+
+<span class="sd">		:param values: the input list or dictionary</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+			<span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+					<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+						<span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+			
+			<span class="k">return</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">])</span>
+
+		<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+			<span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">COLUMNS</span><span class="p">:</span>
+				<span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)))</span>
+			<span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+				<span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">RESULT_DETAILS</span><span class="p">)</span>
+				<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">]:</span>
+					<span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]))</span>
+			<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">toCSVLine</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unsupported input type: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">values</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="c1"># pragma: no cover</span></div>
+		
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contents</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
+		<span class="n">header</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+			<span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="p">:</span> <span class="k">continue</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">header</span><span class="p">:</span>
+					<span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+					<span class="k">assert</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+					<span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+						<span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+						<span class="k">if</span> <span class="n">h</span><span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">RUN_DETAILS</span><span class="p">:</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+						<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+							<span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+							<span class="k">if</span> <span class="n">h</span><span class="p">:</span> <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+				<span class="k">elif</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span> <span class="k">continue</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">row</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+					<span class="n">r</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+					<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)):</span>
+						<span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+							<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Missing value for column &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># pragma: no cover</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="n">val</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+							<span class="k">if</span> <span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;toleranceStdDevs&#39;</span><span class="p">,</span> <span class="s1">&#39;stdDev&#39;</span><span class="p">]:</span>
+								<span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span> <span class="ow">or</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
+							<span class="k">elif</span> <span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]:</span>
+								<span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span>  <span class="ow">or</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
+							<span class="k">elif</span> <span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;biggerIsBetter&#39;</span><span class="p">]:</span>
+								<span class="n">val</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+							<span class="n">r</span><span class="p">[</span><span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">val</span>
+					<span class="n">resultDetails</span> <span class="o">=</span> <span class="kc">None</span>
+					<span class="n">result</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+					<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)):</span>
+						<span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+						<span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">RESULT_DETAILS</span><span class="p">:</span>
+							<span class="n">resultDetails</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+						<span class="k">elif</span> <span class="n">resultDetails</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+							<span class="n">d</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+							<span class="n">resultDetails</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+					
+					<span class="k">if</span> <span class="n">resultDetails</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span> <span class="n">resultDetails</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+					<span class="n">r</span><span class="p">[</span><span class="s1">&#39;resultDetails&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resultDetails</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot parse performance line - </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">): &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

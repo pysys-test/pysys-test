@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.baserunner &mdash; PySys v2.0  documentation</title>
+  <title>pysys.baserunner &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
@@ -120,7 +121,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.0</a>
+          <a href="../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -266,7 +267,9 @@ The project can be used to access information such as the project properties whi
 the <code class="docutils literal notranslate"><span class="pre">--record</span></code> command line argument being specified.</p></li>
 <li><p><strong>purge</strong> (<em>bool</em>) – Indicates that all files other than <code class="docutils literal notranslate"><span class="pre">run.log</span></code> should be deleted from the output directory 
 unless the test fails; this corresponds to the <code class="docutils literal notranslate"><span class="pre">--purge</span></code> command line argument.</p></li>
-<li><p><strong>cycle</strong> (<em>int</em>) – The number of times each test should be cycled; this corresponds to the <code class="docutils literal notranslate"><span class="pre">--cycle</span></code> command line argument.</p></li>
+<li><p><strong>cycles</strong> (<em>int</em>) – The total number of times each test should be cycled; this corresponds to the <code class="docutils literal notranslate"><span class="pre">--cycle</span></code> command line argument. 
+(added in PySys v2.1).</p></li>
+<li><p><strong>cycle</strong> (<em>int</em>) – Old name, identical to <code class="docutils literal notranslate"><span class="pre">cycles</span></code>.</p></li>
 <li><p><strong>mode</strong> (<em>str</em>) – No longer used.</p></li>
 <li><p><strong>threads</strong> (<em>int</em>) – The number of worker threads to execute the requested testcases.</p></li>
 <li><p><strong>descriptors</strong> (<em>list</em><em>[</em><a class="reference internal" href="pysys.config.descriptor.html#pysys.config.descriptor.TestDescriptor" title="pysys.config.descriptor.TestDescriptor"><em>pysys.config.descriptor.TestDescriptor</em></a><em>]</em>) – A list of all the <a class="reference internal" href="pysys.config.descriptor.html#pysys.config.descriptor.TestDescriptor" title="pysys.config.descriptor.TestDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestDescriptor</span></code></a> test 
@@ -317,7 +320,7 @@ An exception will be raised if the value is non-empty but cannot be converted to
 <dd><p>Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.</p>
 <p>All runner plugins will be setup and instantiated before this method is executed.</p>
 <p>Always ensure you call the super implementation of setup() before adding any custom logic, using
-<code class="docutils literal notranslate"><span class="pre">super(MY_RUNNER_CLASS_HERE,</span> <span class="pre">self).setup()</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">super().setup()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -434,7 +437,7 @@ and generate a coverage report in its cleanup method.</p>
 the <code class="docutils literal notranslate"><span class="pre">outDirName</span></code> in the filename, so that artifacts from multiple test runs/platforms do not clash.</p></li>
 <li><p><strong>category</strong> (<em>str</em>) – A string identifying what kind of artifact this is, e.g. 
 “TestOutputArchive” and “TestOutputArchiveDir” (from <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.TestOutputArchiveWriter</span></code>) or 
-“CSVPerformanceReport” (from <a class="reference internal" href="pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a>). 
+“CSVPerformanceReport” (from <a class="reference internal" href="pysys.perf.reporters.html#pysys.perf.reporters.CSVPerformanceReporter" title="pysys.perf.reporters.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.CSVPerformanceReporter</span></code></a>). 
 If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 Use alphanumeric characters and underscores only.</p></li>
 </ul>
@@ -535,15 +538,15 @@ has higher precedence.</p></li>
 <dd><p>Allocate unique filenames of the form <code class="docutils literal notranslate"><span class="pre">processKey[.n].out/.err</span></code> 
 which can be used for the <a class="reference internal" href="#pysys.baserunner.BaseRunner.startProcess" title="pysys.baserunner.BaseRunner.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startProcess</span></code></a> <code class="docutils literal notranslate"><span class="pre">stdouterr</span></code> parameter.</p>
 <p>The first time this is called it will return names like 
-<code class="docutils literal notranslate"><span class="pre">('myprocess.out',</span> <span class="pre">'myprocess.err')</span></code>, the second time it will return 
-<code class="docutils literal notranslate"><span class="pre">('myprocess.1.out',</span> <span class="pre">'myprocess.1.err')</span></code>, then 
-<code class="docutils literal notranslate"><span class="pre">('myprocess.2.out',</span> <span class="pre">'myprocess.2.err')</span></code> etc.</p>
+<code class="docutils literal notranslate"><span class="pre">('outdir/myprocess.out',</span> <span class="pre">'outdir/myprocess.err')</span></code>, the second time it will return 
+<code class="docutils literal notranslate"><span class="pre">('outdir/myprocess.1.out',</span> <span class="pre">'outdir/myprocess.1.err')</span></code>, then 
+<code class="docutils literal notranslate"><span class="pre">('outdir/myprocess.2.out',</span> <span class="pre">'outdir/myprocess.2.err')</span></code> etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>processKey</strong> (<em>str</em>) – A user-defined identifier that will form the prefix onto which <code class="docutils literal notranslate"><span class="pre">[.n].out</span></code> is appended</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A STDOUTERR_TUPLE named tuple of (stdout, stderr)</p>
+<dd class="field-even"><p>A STDOUTERR_TUPLE named tuple of (stdout, stderr), where each is an absolute path.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="pysys.process.user.html#pysys.process.user.STDOUTERR_TUPLE" title="pysys.process.user.STDOUTERR_TUPLE">STDOUTERR_TUPLE</a></p>
@@ -1295,7 +1298,7 @@ a dict[str,str] is returned where the keys are the groupNames.</p>
 
 <dl class="py method">
 <dt id="pysys.baserunner.BaseRunner.logFileContents">
-<code class="sig-name descname">logFileContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">includes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">excludes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maxLines</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">tail</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logFunction</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">stripWhitespace</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.baserunner.BaseRunner.logFileContents" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">logFileContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">includes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">excludes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maxLines</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">tail</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logFunction</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">stripWhitespace</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.baserunner.BaseRunner.logFileContents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs some or all of the lines from the specified file.</p>
 <p>If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
@@ -1337,6 +1340,8 @@ be used because expressions are matched against one line at a time. Added in PyS
 </p></li>
 <li><p><strong>stripWhitespace</strong> (<em>bool</em>) – By default blank lines are removed; set this to False to disable that behaviour. 
 Added in PySys 2.0.</p></li>
+<li><p><strong>color</strong> (<em>bool</em>) – By default logged lines are colored blue to distinguish from the rest of the log contents. 
+Set this to False to disable coloring. Added in PySys 2.1.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1439,6 +1444,9 @@ lots of processes asynchronously, since having them all execute concurrently in 
 <a class="reference internal" href="#pysys.baserunner.BaseRunner.waitForBackgroundProcesses" title="pysys.baserunner.BaseRunner.waitForBackgroundProcesses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waitForBackgroundProcesses()</span></code></a> will be a lot quicker than executing them serially in the foreground.</p>
 <p>When starting a process that will listen on a server socket, use <a class="reference internal" href="#pysys.baserunner.BaseRunner.getNextAvailableTCPPort" title="pysys.baserunner.BaseRunner.getNextAvailableTCPPort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getNextAvailableTCPPort</span></code></a> 
 to allocate a free port before calling this method.</p>
+<p>Note that although is is possible to use this command to execute OS shell commands, that should only used for 
+testing of shell scripts - other logic such as file system operations can be executed more easily and robustly 
+using built-in Python (<code class="docutils literal notranslate"><span class="pre">os</span></code> module) or PySys (e.g. <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.copy</span></code>) functions.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>Added onError parameter and default behaviour of logging stderr/out when there’s a failure.
 Added info parameter. </p>
@@ -1757,9 +1765,10 @@ project setting, which for a modern project will be True).</p></li>
 <li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to open the file and convert from bytes to characters. 
 The default value is None which indicates that the decision will be delegated 
 to the <a class="reference internal" href="#pysys.baserunner.BaseRunner.getDefaultFileEncoding" title="pysys.baserunner.BaseRunner.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p></li>
-<li><p><strong>detailMessage</strong> (<em>str</em>) – An extra string to add to the message logged when waiting to provide extra 
-information about the wait condition. e.g. <code class="docutils literal notranslate"><span class="pre">detailMessage='(downstream</span> <span class="pre">message</span> <span class="pre">received)'</span></code>. 
-Added in v1.5.1.</p></li>
+<li><p><strong>detailMessage</strong> (<em>str</em>) – <p>An extra string to add to the start of the message logged when waiting to provide extra 
+information about the wait condition. e.g. <code class="docutils literal notranslate"><span class="pre">detailMessage='Wait</span> <span class="pre">for</span> <span class="pre">server</span> <span class="pre">startup:</span> <span class="pre">'</span></code>.</p>
+<p>Added in v1.5.1. From v2.1+ the detail string is added at the beginning not the end.</p>
+</p></li>
 <li><p><strong>reFlags</strong> (<em>int</em>) – <p>Zero or more flags controlling how the behaviour of regular expression matching, 
 combined together using the <code class="docutils literal notranslate"><span class="pre">|</span></code> operator, for example <code class="docutils literal notranslate"><span class="pre">reFlags=re.VERBOSE</span> <span class="pre">|</span> <span class="pre">re.IGNORECASE</span></code>.</p>
 <p>For details see the <code class="docutils literal notranslate"><span class="pre">re</span></code> module in the Python standard library. Note that <code class="docutils literal notranslate"><span class="pre">re.MULTILINE</span></code> cannot 
@@ -1921,7 +1930,7 @@ to the <a class="reference internal" href="#pysys.baserunner.BaseRunner.getDefau
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>

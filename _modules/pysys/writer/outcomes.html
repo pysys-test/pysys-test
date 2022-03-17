@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.outcomes &mdash; PySys v2.0  documentation</title>
+  <title>pysys.writer.outcomes &mdash; PySys v2.1.dev1  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.0
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.1.dev1
           
 
           
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.0</a>
+          <a href="../../../index.html">PySys v2.1.dev1</a>
         
       </nav>
 
@@ -153,7 +153,7 @@
             
   <h1>Source code for pysys.writer.outcomes</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2022 M.B. Grieve</span>
 
 <span class="c1"># This library is free software; you can redistribute it and/or</span>
 <span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
@@ -177,7 +177,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-	<span class="s2">&quot;TextResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;XMLResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;CSVResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;JUnitXMLResultsWriter&quot;</span><span class="p">,</span>
+	<span class="s2">&quot;TextResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;XMLResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;CSVResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;JUnitXMLResultsWriter&quot;</span><span class="p">,</span><span class="s2">&quot;JSONResultsWriter&quot;</span><span class="p">,</span>
 	<span class="p">]</span>
 
 <span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">io</span>
@@ -185,16 +185,14 @@
 <span class="kn">import</span> <span class="nn">locale</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">shlex</span>
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-	<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlunparse</span>
-<span class="k">else</span><span class="p">:</span>
-	<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlunparse</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlunparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span><span class="p">,</span> <span class="n">stdoutPrint</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
-<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span><span class="p">,</span> <span class="n">openfile</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
 
 <span class="kn">from</span> <span class="nn">xml.dom.minidom</span> <span class="kn">import</span> <span class="n">getDOMImplementation</span>
@@ -238,9 +236,131 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+<div class="viewcode-block" id="JSONResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">JSONResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner.</span>
+<span class="sd">	</span>
+<span class="sd">	The following fields are always included for each test result:</span>
+<span class="sd">	</span>
+<span class="sd">	  - testId: the test id, including ``~mode`` suffix if it has modes defined.</span>
+<span class="sd">	  - outcome: the outcome string e.g. &quot;NOT VERIFIED&quot;. </span>
+<span class="sd">	  - outcomeReason: the string explaining the reason for the outcome, or empty if not available. </span>
+<span class="sd">	  - startTime: the time the test started, in ``%Y-%m-%d %H:%M:%S`` format and in the local timezone.</span>
+<span class="sd">	  - durationSecs: how long the test executed for (or ``None``/``null`` if unknown). </span>
+<span class="sd">	  - testDir: the path to this test under the ``testRootDir``, using forward slashes. </span>
+<span class="sd">	  - testFile: the path (typically relative to testDir, using forward slashes) of the main file containing the </span>
+<span class="sd">	    test&#39;s logic, e.g. ``pysystest.py``, ``run.py`` etc. This is usually, but not always, a Python file. </span>
+
+<span class="sd">	If applicable, some tests/runs may have additional fields such as ``cycle``, ``title`` and ``outputDir``. </span>
+
+<span class="sd">	.. versionadded:: 2.1</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">includeTitle</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	By default the title of each test is included in the output. </span>
+<span class="sd">	</span>
+<span class="sd">	To save disk space you can set this to False if it is not needed. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	In addition to failure outcomes, any outcomes listed here (as comma-separated display names, e.g. </span>
+<span class="sd">	``&quot;NOT VERIFIED, INSPECT&quot;``) will be included. To include all non-failure outcomes, set this to the special value ``&quot;*&quot;``. </span>
+<span class="sd">	</span>
+<span class="sd">	To save disk space and record only failure outcomes, you may set this to an empty string. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">outputDir</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The directory to write the logfile, if an absolute path is not specified. The default is the working directory. </span>
+
+<span class="sd">	Project ``${...}`` properties can be used in the path. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="c1"># substitute into the filename template</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="kc">None</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span>
+		<span class="c1"># NB: this method is also called by ConsoleFailureAnnotationsWriter</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="o">==</span><span class="s1">&#39;*&#39;</span> <span class="k">else</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+		<span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown outcome display name &quot;</span><span class="si">%s</span><span class="s1">&quot; in includeNonFailureOutcomes&#39;</span><span class="o">%</span><span class="n">o</span><span class="p">)</span>
+
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
+		<span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">resultsWritten</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycles</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># this condition allows a subclass to write to something other than a .json file</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;{&quot;runDetails&quot;: &#39;</span><span class="p">)</span>
+		<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">runDetails</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;, &quot;results&quot;:[</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span> <span class="k">return</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">]}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+			<span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="c1"># sanity check that valid JSON was generated by this JSONResultsWriter</span>
+
+
+<div class="viewcode-block" id="JSONResultsWriter.createTestResultDict"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter.createTestResultDict">[docs]</a>	<span class="k">def</span> <span class="nf">createTestResultDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Creates the dict that will be output for each test result.</span>
+<span class="sd">		</span>
+<span class="sd">		@returns: The dict, or ``None`` if this result should not be included/ </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">testDir</span> <span class="o">=</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">testDir</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">):</span>
+			<span class="n">testDir</span> <span class="o">=</span> <span class="n">testDir</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+
+		<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s1">&#39;testId&#39;</span><span class="p">:</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="c1"># includes mode suffix</span>
+			<span class="s1">&#39;outcome&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()),</span>
+			<span class="s1">&#39;outcomeReason&#39;</span><span class="p">:</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">(),</span>
+			<span class="s1">&#39;startTime&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;testStart&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="p">)),</span>
+			<span class="s1">&#39;durationSecs&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;testTime&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+			<span class="s1">&#39;testDir&#39;</span><span class="p">:</span> <span class="n">testDir</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">),</span>
+			<span class="s1">&#39;testFile&#39;</span><span class="p">:</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">_getTestFile</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">),</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">data</span><span class="p">[</span><span class="s1">&#39;cycle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
+		<span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">output</span> <span class="o">!=</span> <span class="s1">&#39;Output&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outputDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeTitle</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">title</span>
+		
+		<span class="k">return</span> <span class="n">data</span></div>
+
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		
+		<span class="n">outcome</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="p">):</span> <span class="k">return</span>
+
+		<span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createTestResultDict</span><span class="p">(</span><span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span> <span class="k">return</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resultsWritten</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">resultsWritten</span> <span class="o">+=</span> <span class="mi">1</span>
+		
+		<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="TextResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.TextResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">TextResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Class to log a summary of the results to a logfile in .txt format.</span>
+	<span class="sd">&quot;&quot;&quot;Writer to log a summary of the results to a logfile in .txt format.</span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
@@ -263,7 +383,7 @@
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">flushfile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">flushfile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DATE:       </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S (%Z)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span> <span class="p">))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PLATFORM:   </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">PLATFORM</span><span class="p">))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TEST HOST:  </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">HOSTNAME</span><span class="p">))</span>
@@ -290,8 +410,9 @@
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">(),</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">))</span></div>
 
+
 <div class="viewcode-block" id="XMLResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.XMLResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">XMLResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Class to log results to logfile in a single XML file.</span>
+	<span class="sd">&quot;&quot;&quot;Writer to log results to logfile in a single XML file.</span>
 <span class="sd">	</span>
 <span class="sd">	The class creates a DOM document to represent the test output results and writes the DOM to the </span>
 <span class="sd">	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can </span>
@@ -319,65 +440,61 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">numTests</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;numTests&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;numTests&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mi">0</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
 		
-		<span class="k">try</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>
-		
-			<span class="n">impl</span> <span class="o">=</span> <span class="n">getDOMImplementation</span><span class="p">()</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">document</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">createDocument</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;pysyslog&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stylesheet</span><span class="p">:</span>
-				<span class="n">stylesheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createProcessingInstruction</span><span class="p">(</span><span class="s2">&quot;xml-stylesheet&quot;</span><span class="p">,</span> <span class="s2">&quot;href=</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> type=</span><span class="se">\&quot;</span><span class="s2">text/xsl</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stylesheet</span><span class="p">))</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">insertBefore</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-			<span class="c1"># create the root and add in the status, number of tests and number completed</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">documentElement</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">statusAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">statusAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="s2">&quot;running&quot;</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">statusAttribute</span><span class="p">)</span>
-
-			<span class="bp">self</span><span class="o">.</span><span class="n">completedAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;completed&quot;</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">completedAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numResults</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numTests</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">completedAttribute</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>
 	
-			<span class="c1"># add the data node</span>
-			<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
-			<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))))</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+		<span class="n">impl</span> <span class="o">=</span> <span class="n">getDOMImplementation</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">document</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">createDocument</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;pysyslog&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stylesheet</span><span class="p">:</span>
+			<span class="n">stylesheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createProcessingInstruction</span><span class="p">(</span><span class="s2">&quot;xml-stylesheet&quot;</span><span class="p">,</span> <span class="s2">&quot;href=</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> type=</span><span class="se">\&quot;</span><span class="s2">text/xsl</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stylesheet</span><span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">insertBefore</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-			<span class="c1"># add the platform node</span>
-			<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">)</span>
-			<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="n">PLATFORM</span><span class="p">))</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+		<span class="c1"># create the root and add in the status, number of tests and number completed</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">documentElement</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">statusAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">statusAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="s2">&quot;running&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">statusAttribute</span><span class="p">)</span>
 
-			<span class="c1"># add the test host node</span>
-			<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">)</span>
-			<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="n">HOSTNAME</span><span class="p">))</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">completedAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;completed&quot;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">completedAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numResults</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numTests</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">completedAttribute</span><span class="p">)</span>
 
-			<span class="c1"># add the test host node</span>
-			<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">)</span>
-			<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pathToURL</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">root</span><span class="p">)))</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+		<span class="c1"># add the data node</span>
+		<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
+		<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
 
-			<span class="c1"># add the extra params nodes</span>
-			<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;xargs&quot;</span><span class="p">)</span>
-			<span class="k">if</span> <span class="s2">&quot;xargs&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> 
-				<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;xargs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-					<span class="n">childelement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;xarg&quot;</span><span class="p">)</span>
-					<span class="n">nameAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
-					<span class="n">valueAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span> 
-					<span class="n">nameAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">key</span>
-					<span class="n">valueAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;xargs&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
-					<span class="n">childelement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">nameAttribute</span><span class="p">)</span>
-					<span class="n">childelement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">valueAttribute</span><span class="p">)</span>
-					<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">childelement</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-				
-			<span class="c1"># write the file out</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_writeXMLDocument</span><span class="p">()</span>
+		<span class="c1"># add the platform node</span>
+		<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">)</span>
+		<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="n">PLATFORM</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+		<span class="c1"># add the test host node</span>
+		<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">)</span>
+		<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="n">HOSTNAME</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+		<span class="c1"># add the test host node</span>
+		<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">)</span>
+		<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createTextNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pathToURL</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">root</span><span class="p">)))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+		<span class="c1"># add the extra params nodes</span>
+		<span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;xargs&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="s2">&quot;xargs&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> 
+			<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;xargs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+				<span class="n">childelement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;xarg&quot;</span><span class="p">)</span>
+				<span class="n">nameAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+				<span class="n">valueAttribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span> 
+				<span class="n">nameAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">key</span>
+				<span class="n">valueAttribute</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;xargs&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+				<span class="n">childelement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">nameAttribute</span><span class="p">)</span>
+				<span class="n">childelement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">valueAttribute</span><span class="p">)</span>
+				<span class="n">element</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">childelement</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rootElement</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
 			
-		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;caught </span><span class="si">%s</span><span class="s2"> in XMLResultsWriter: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+		<span class="c1"># write the file out</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_writeXMLDocument</span><span class="p">()</span>
+			
 	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="c1"># Updates the test run status in the DOM, and re-writes to logfile.</span>
 
@@ -453,7 +570,7 @@
 
 	
 <div class="viewcode-block" id="JUnitXMLResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JUnitXMLResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">JUnitXMLResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Class to log test results in the widely-used Apache Ant JUnit XML format (one output file per test per cycle). </span>
+	<span class="sd">&quot;&quot;&quot;Writer to log test results in the widely-used Apache Ant JUnit XML format (one output file per test per cycle). </span>
 <span class="sd">	</span>
 <span class="sd">	If you need to integrate with any CI provider that doesn&#39;t have built-in support (e.g. Jenkins) this standard </span>
 <span class="sd">	output format will usually be the easiest way to do it. </span>
@@ -482,6 +599,8 @@
 	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="c1"># Creates a test summary file in the Apache Ant JUnit XML format. </span>
 		
+		<span class="n">outcome</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span>
+		
 		<span class="k">if</span> <span class="s2">&quot;cycle&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> 
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">!=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]</span>
@@ -494,9 +613,9 @@
 		<span class="n">attr2</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;tests&#39;</span><span class="p">)</span>
 		<span class="n">attr2</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="s1">&#39;1&#39;</span>
 		<span class="n">attr3</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;failures&#39;</span><span class="p">)</span>
-		<span class="n">attr3</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">int</span><span class="p">)(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">())</span>	
+		<span class="n">attr3</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">int</span><span class="p">(</span><span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">())</span>	
 		<span class="n">attr4</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;skipped&#39;</span><span class="p">)</span>	
-		<span class="n">attr4</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">int</span><span class="p">)(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span> <span class="o">==</span> <span class="n">SKIPPED</span><span class="p">)</span>		
+		<span class="n">attr4</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">int</span><span class="p">(</span><span class="n">outcome</span> <span class="o">==</span> <span class="n">SKIPPED</span><span class="p">)</span>		
 		<span class="n">attr5</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>	
 		<span class="n">attr5</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;testTime&#39;</span><span class="p">]</span>
 		<span class="n">rootElement</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr1</span><span class="p">)</span>
@@ -518,15 +637,16 @@
 		<span class="n">testcase</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr2</span><span class="p">)</span>
 		
 		<span class="c1"># add in failure information if the test has failed</span>
-		<span class="k">if</span> <span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()):</span>
-			<span class="n">failure</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;failure&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">or</span> <span class="n">outcome</span> <span class="o">==</span> <span class="n">SKIPPED</span><span class="p">):</span>
+			<span class="n">failure</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;skipped&#39;</span> <span class="k">if</span> <span class="n">outcome</span><span class="o">==</span><span class="n">SKIPPED</span> <span class="k">else</span> <span class="s1">&#39;failure&#39;</span><span class="p">)</span>
 			<span class="n">attr</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">)</span>
-			<span class="n">attr</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">(),</span> <span class="p">(</span><span class="s1">&#39;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">())</span> <span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+			<span class="n">attr</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">())</span> <span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 			<span class="n">failure</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
-			<span class="n">attr</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="c1"># would be an exception class in a JUnit test</span>
-			<span class="n">attr</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">())</span>
-			<span class="n">failure</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">outcome</span> <span class="o">!=</span> <span class="n">SKIPPED</span><span class="p">:</span>
+				<span class="n">attr</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="c1"># would be an exception class in a JUnit test</span>
+				<span class="n">attr</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">())</span>
+				<span class="n">failure</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
 			<span class="n">stdout</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;system-out&#39;</span><span class="p">)</span>
 			<span class="n">runLogOutput</span> <span class="o">=</span> <span class="n">stripANSIEscapeCodes</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;runLogOutput&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="c1"># always unicode characters</span>
@@ -556,7 +676,7 @@
 
 
 <div class="viewcode-block" id="CSVResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.CSVResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">CSVResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Class to log results to logfile in CSV format.</span>
+	<span class="sd">&quot;&quot;&quot;Writer to log results to logfile in CSV format.</span>
 
 <span class="sd">	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys</span>
 <span class="sd">	project file using the nested &lt;property&gt; tag on the &lt;writer&gt; tag. The CSV column output is in the form::</span>
@@ -577,7 +697,7 @@
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">flushfile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">flushfile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;id, title, cycle, startTime, duration, outcome</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
 	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -615,7 +735,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2021 M.B. Grieve; documentation last updated on 2021-08-22
+        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
 
     </p>
   </div>
