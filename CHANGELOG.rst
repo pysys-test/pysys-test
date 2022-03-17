@@ -17,7 +17,7 @@ What's new in 2.1
 PySys 2.1 was released in March 2022. 
 
 The main changes are new features to help with triaging performance results, and improved usability for the new 
-``pysystest.py`` descriptor format and modes support that was added in version 2.0. 
+``pysystest.py`` descriptor and modes support that was added in version 2.0. 
 
 This release also adds support for Python 3.10, upgrades to the sample GitHub Actions workflows, and includes a lot of 
 minor enhancements and fixes. 
@@ -145,8 +145,8 @@ Fixes:
 
 Deprecations:
 
-- Moved the performance classes from ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is deprecated but 
-  is not planned for removal so this is not a breaking change. 
+- Moved the performance classes from package ``pysys.utils.perfreporters`` to `pysys.perf`. The old module is 
+  deprecated but is not planned for removal so this is not a breaking change. 
 
 -----------------
 What's new in 2.0
