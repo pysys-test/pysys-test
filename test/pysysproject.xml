@@ -2,7 +2,7 @@
 <pysysproject>
 
 	<!-- It doesn't matter enormously whether this is kept up to date -->
-	<requires-pysys>2.0</requires-pysys>
+	<requires-pysys>2.1</requires-pysys>
 
 
 	<!-- Unlike the samples, we do need to run these with all PySys versions we support -->

@@ -10,6 +10,20 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
+---
+2.2
+---
+
+Version 2.2 is under development. 
+
+New features:
+
+- XXX
+
+Fixes:
+
+- XXX
+
 -----------------
 What's new in 2.1
 -----------------
