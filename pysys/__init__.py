@@ -51,7 +51,7 @@ __maintainer_email__ = "pysys-dev@googlegroups.com"
 __status__  = "Production"
 """The status of this release."""
 
-__version__ = "2.1.dev1"
+__version__ = "2.1"
 """The version of this release."""
 
 __date__ = "yyyy-mm-dd"
@@ -70,6 +70,7 @@ __all__  = [
 	"process",
 	"unit",
 	"utils",
+	"perf",
 	"writer",
 	"xml", 
 	"config",
