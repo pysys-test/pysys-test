@@ -118,6 +118,14 @@ class ProcessImpl(Process):
 		"""
 		return '\"%s\"'%input.replace('"', '""')
 
+	def __buildCommandLine(self, command, args):
+		""" Private method to build a Windows command line from a command plus argument list.
+		
+		"""
+		new_command = command_line = self.__quotePath(command)
+		for arg in args: command_line = '%s %s' % (command_line, self.__quotePath(arg))
+		return new_command, command_line
+
 	def startBackgroundProcess(self):
 		"""Method to start a process running in the background.
 		
@@ -155,13 +163,12 @@ class ProcessImpl(Process):
 
 				# start the process, and close down the copies of the process handles
 				# we have open after the process creation (no longer needed here)
-				old_command = command = self.__quotePath(self.command)
-				for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
+				new_command, command_line = self.__buildCommandLine(self.command, self.arguments)
 				
 				# Windows CreateProcess maximum lpCommandLine length is 32,768
 				# http://msdn.microsoft.com/en-us/library/ms682425%28VS.85%29.aspx
-				if len(command)>=32768: # pragma: no cover
-					raise ValueError("Command line length exceeded 32768 characters: %s..."%command[:1000])
+				if len(command_line)>=32768: # pragma: no cover
+					raise ValueError("Command line length exceeded 32768 characters: %s..."%command_line[:1000])
 
 				dwCreationFlags = 0
 				if IS_PRE_WINDOWS_8: # pragma: no cover
@@ -178,10 +185,10 @@ class ProcessImpl(Process):
 				self.__job = self._createParentJob()
 
 				try:
-					self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 
+					self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command_line, None, None, 1, 
 						dwCreationFlags, self.environs, os.path.normpath(self.workingDir), StartupInfo)
 				except pywintypes.error as e:
-					raise ProcessError("Error creating process %s: %s" % (old_command, e))
+					raise ProcessError("Error creating process %s: %s" % (new_command, e))
 
 				try:
 					if not self.disableKillingChildProcesses:

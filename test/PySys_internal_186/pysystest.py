@@ -24,12 +24,6 @@ class PySysTest(pysys.basetest.BaseTest):
 		# We need a ProcessImpl so we can call its private methods
 		self.pimpl = ProcessImpl("", [], self.createEnvirons(), "", FOREGROUND, 0)
 
-	def __buildCmdLine(self, command, args):
-		# Build a command line the same way startBackgroundProcess() does
-		cmdline = self.pimpl._ProcessImpl__quotePath(command)
-		for arg in args: cmdline = '%s %s' % (cmdline, self.pimpl._ProcessImpl__quotePath(arg))
-		return cmdline
-
 	def testCmdLine(self, command, args, expected=None):
 		""" Test parsing of a command line built from a command + argument list
 		
@@ -37,7 +31,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		1. The quoted/escaped command line matches the expected one (if provided)
 		2. CommandLineToArgv() on the command line gets back the original arguments
 		"""
-		cmdline = self.__buildCmdLine(command, args)
+		newcmd, cmdline = self.pimpl._ProcessImpl__buildCommandLine(command, args)
 		oldargv = [command] + args
 		newargv = win32api.CommandLineToArgv(cmdline)
 		self.log.info("Original: %s" % oldargv)
