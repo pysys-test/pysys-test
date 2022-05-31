@@ -118,12 +118,58 @@ class ProcessImpl(Process):
 		"""
 		return '\"%s\"'%input.replace('"', '""')
 
+	def __quoteArgument(self, input):
+		"""Private method to quote and escape a command line argument correctly for Windows.
+
+		The returned value can be added to the end of a command line, with an intervening
+		space, and will be treated as a separate argument by the standard Windows command
+		line parsers (CommandLineToArgvW and parse_cmdline).  Double quotes, whitespace
+		and backslashes in the argument will be preserved for the parser to see them.
+		
+		Windows' quoting and escaping rules are somewhat complex and the implementation
+		of this method was derived from a few different sources:
+		https://docs.microsoft.com/en-us/previous-versions/17w5ykft(v=vs.85)
+		http://www.windowsinspired.com/the-correct-way-to-quote-command-line-arguments/
+		http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
+		http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
+		"""
+		output = ""
+		whitespace = False
+		backslash = 0
+		for ch in input:
+			if ch == ' ' or ch == '\t':
+				output += (2 * backslash * '\\')
+				backslash = 0
+				if not whitespace:
+					output += '"'
+					whitespace = True
+				output += ch
+			else:
+				if whitespace:
+					output += '"'
+					whitespace = False
+				if ch == '\\':
+					backslash += 1
+				elif ch == '"':
+					output += (2 * backslash * '\\')
+					backslash = 0
+					output += '\\"'
+				else:
+					output += (backslash * '\\')
+					backslash = 0
+					output += ch
+		if whitespace:
+			output += '"'
+		else:
+			output += (backslash * '\\')
+		return output
+
 	def __buildCommandLine(self, command, args):
 		""" Private method to build a Windows command line from a command plus argument list.
 		
 		"""
-		new_command = command_line = self.__quotePath(command)
-		for arg in args: command_line = '%s %s' % (command_line, self.__quotePath(arg))
+		new_command = command_line = command
+		for arg in args: command_line = '%s %s' % (command_line, self.__quoteArgument(arg))
 		return new_command, command_line
 
 	def startBackgroundProcess(self):
