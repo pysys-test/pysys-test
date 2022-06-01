@@ -151,20 +151,28 @@ class ProcessImpl(Process):
 		whitespace = (' ' in input or '\t' in input)
 		backslash = 0
 		for ch in input:
+			# Count backslashes until we hit a non-backslash
 			if ch == '\\':
 				backslash += 1
 			elif ch == '\"':
+				# Add any pending backslashes (escaped)
+				# Then add the escaped double quote
 				output += (2 * backslash * '\\')
 				backslash = 0
 				output += '\\\"'
 			else:
+				# Add any pending backslashes (unescaped)
+				# Then add the next character
 				output += (backslash * '\\')
 				backslash = 0
 				output += ch
+		# Add any pending backslashes (unescaped)
 		output += (backslash * '\\')
 		if whitespace:
+			# Escape any trailing backslash
 			if ch == '\\':
 				output += '\\'
+			# Wrap the whole argument in double quotes
 			output = '\"%s\"' % output
 		return output
 
