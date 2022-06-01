@@ -166,14 +166,14 @@ class ProcessImpl(Process):
 				output += (backslash * '\\')
 				backslash = 0
 				output += ch
-		# Add any pending backslashes (unescaped)
-		output += (backslash * '\\')
 		if whitespace:
-			# Escape any trailing backslash
-			if ch == '\\':
-				output += '\\'
+			# Add any pending backslashes (escaped)
+			output += (2 * backslash * '\\')
 			# Wrap the whole argument in double quotes
 			output = '\"%s\"' % output
+		else:
+			# Add any pending backslashes (unescaped)
+			output += (backslash * '\\')
 		return output
 
 	def __buildCommandLine(self, command, args):

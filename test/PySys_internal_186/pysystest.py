@@ -76,7 +76,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.testCmdLine('program.exe', ['arg1', '\\\\a\\r\\g\\2\\\\'])
 
 		# Mixed special characters in arguments
-		self.testCmdLine('program.exe', ['a\\\\\" r \"\\\\g1', 'arg2', 'a\t\"r g 3\\'])
+		self.testCmdLine('program.exe', ['a\\\\\" r \"\\\\g1', 'arg2', 'a\t\"r g 3\\\\'])
 
 		# Spaces in command and arguments
 		self.testCmdLine('C:\\Program Files\\MyProg\\program.exe', ['arg 1', 'arg2', 'arg 3'])
