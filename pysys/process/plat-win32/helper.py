@@ -148,7 +148,7 @@ class ProcessImpl(Process):
 		consecutive unescaped double quote characters.
 		"""
 		output = ""
-		whitespace = (' ' in input or '\t' in input)
+		whitespace = (' ' in input or '\t' in input or len(input) == 0)
 		backslash = 0
 		for ch in input:
 			# Count backslashes until we hit a non-backslash
