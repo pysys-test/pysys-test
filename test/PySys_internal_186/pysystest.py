@@ -34,6 +34,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		newcmd, cmdline = self.pimpl._ProcessImpl__buildCommandLine(command, args)
 		oldargv = [command] + args
 		newargv = win32api.CommandLineToArgv(cmdline)
+		self.log.info("-----")
 		self.log.info("Original: %s" % oldargv)
 		self.log.info("Quoted:   %s" % cmdline)
 		self.log.info("Parsed:   %s" % newargv)
