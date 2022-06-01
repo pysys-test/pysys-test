@@ -51,35 +51,40 @@ class PySysTest(pysys.basetest.BaseTest):
 		if not IS_WINDOWS:
 			self.skipTest('This test is only useful on Windows')
 
-		# TODO - Test cases to be covered:
-		# 1. Special characters in argv[1..]
-		#    - Inline whitespace (space & tab)
-		#    - Inline double quotes
-		#    - Inline backslashes (and sequences)
-		#    - Trailing whitespace
-		#    - Trailing double quotes
-		#    - Trailing backslashes
-		# 2. Special handling for argv[0]
-		# 3. Weird rules for cmd.exe /c and /k options
-
 		# No special characters in arguments
-		self.testCmdLine('program.exe', ['arg1', 'arg2', 'arg3'], 'program.exe arg1 arg2 arg3')
+		self.testCmdLine('program.exe', ['arg1', 'arg2', 'arg3'])
 
 		# Whitespace (space and tab) in arguments
-		self.testCmdLine('program.exe', ['arg 1', 'arg2', 'a r g 3'], 'program.exe arg" "1 arg2 a" "r" "g" "3')
-		self.testCmdLine('program.exe', ['arg\t1', 'arg2', 'a\tr\tg\t3'], 'program.exe arg"\t"1 arg2 a"\t"r"\t"g"\t"3')
-		self.testCmdLine('program.exe', ['a\tr g\t1', 'arg2', 'a\tr g\t3'], 'program.exe a"\t"r" "g"\t"1 arg2 a"\t"r" "g"\t"3')
+		self.testCmdLine('program.exe', ['  a r g  1  ', 'arg2'])
+		self.testCmdLine('program.exe', ['\t\ta\tr\tg\t1\t\t', 'arg2'])
+		self.testCmdLine('program.exe', ['arg1', '  a r g  2  '])
+		self.testCmdLine('program.exe', ['arg1', '\t\ta\tr\tg\t2\t\t'])
+		self.testCmdLine('program.exe', [' \ta r\tg 1\t ', '\t a\tr g\t2 \t'])
 
 		# Double quotes in arguments
-		self.testCmdLine('program.exe', ['arg"1', 'arg2', 'a"r"g"3'], 'program.exe arg\\"1 arg2 a\\"r\\"g\\"3')
-		self.testCmdLine('program.exe', ['arg""1', 'arg2', 'a"""r""""g"""""3'], 'program.exe arg\\"\\"1 arg2 a\\"\\"\\"r\\"\\"\\"\\"g\\"\\"\\"\\"\\"3')
+		self.testCmdLine('program.exe', ['\"arg1\"', 'arg2'])
+		self.testCmdLine('program.exe', ['arg1', '\"arg2\"'])
+		self.testCmdLine('program.exe', ['\"a\"r\"g\"1\"', 'arg2'])
+		self.testCmdLine('program.exe', ['arg1', '\"a\"r\"g\"2\"'])
+		self.testCmdLine('program.exe', ['\"\"a\"\"r\"\"\"g\"\"1\"\"', 'arg2'])
+		self.testCmdLine('program.exe', ['arg1', '\"\"a\"\"r\"\"\"g\"\"2\"\"'])
 
 		# Backslashes in arguments
-		self.testCmdLine('program.exe', ['a\\r\\g\\1', 'arg2', '\\arg3\\'], 'program.exe a\\r\\g\\1 arg2 \\arg3\\')
-		self.testCmdLine('program.exe', ['a\\\\r\\\\\\g\\\\\\\\1', 'arg2', '\\\\arg3\\\\'], 'program.exe a\\\\r\\\\\\g\\\\\\\\1 arg2 \\\\arg3\\\\')
+		self.testCmdLine('program.exe', ['\\a\\r\\g\\1\\', 'arg2'])
+		self.testCmdLine('program.exe', ['arg1', '\\a\\r\\g\\2\\'])
+		self.testCmdLine('program.exe', ['\\\\a\\r\\g\\1\\\\', 'arg2'])
+		self.testCmdLine('program.exe', ['arg1', '\\\\a\\r\\g\\2\\\\'])
 
 		# Mixed special characters in arguments
-		self.testCmdLine('program.exe', ['a "r" g\\1', 'arg2', 'arg3'], 'program.exe a" "\\"r\\"" "g\\1 arg2 arg3')
-		
+		self.testCmdLine('program.exe', ['a\\\\\" r \"\\\\g1', 'arg2', 'a\t\"r g 3\\'])
+
+		# Spaces in command and arguments
+		self.testCmdLine('C:\\Program Files\\MyProg\\program.exe', ['arg 1', 'arg2', 'arg 3'])
+
+		# Some specific command lines that have caused problems
+		self.testCmdLine('subst.exe', ['Z:', 'C:\\'])
+		self.testCmdLine('subst.exe', ['Z:', 'C:\\path with spaces\\'])
+		self.testCmdLine('subst.exe', ['Z:', '/D'])
+
 	def validate(self):
-		pass
+		self.addOutcome(PASSED)
