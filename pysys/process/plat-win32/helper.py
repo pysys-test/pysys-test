@@ -112,11 +112,21 @@ class ProcessImpl(Process):
 			else:
 				win32file.WriteFile(self.__stdin, data, None)
 
-	def __quotePath(self, input):
-		"""Private method to escape a windows path according to documented guidelines for this OS.
+	def __quoteCommand(self, input):
+		"""Private method to quote a command (argv[0]) "correctly" for Windows.
+
+		The returned value can be used as the start of a command line, with subsequent
+		arguments quoted using __quoteArgument() and added to the command line with
+		intervening spaces.
 		
+		The quoted command will be handled correctly by the standard Windows command
+		line parsers (CommandLineToArgvW and parse_cmdline), unless the input includes
+		double quotes, control characters, or whitespace other than spaces.  The
+		behaviour of the standard parsers is different in those cases, and given that
+		there is no way of knowing which parser the command will actually use, no
+		attempt is made to deal with these differences and the results are undefined.
 		"""
-		return '\"%s\"'%input.replace('"', '""')
+		return '\"%s\"' % input if ' ' in input else input
 
 	def __quoteArgument(self, input):
 		"""Private method to quote and escape a command line argument correctly for Windows.
@@ -132,43 +142,37 @@ class ProcessImpl(Process):
 		http://www.windowsinspired.com/the-correct-way-to-quote-command-line-arguments/
 		http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
 		http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
+		https://daviddeley.com/autohotkey/parameters/parameters.htm
+		This method tries to avoid any areas of different behaviour between the two
+		standard parsers, in particular the undocumented rules around handling of
+		consecutive unescaped double quote characters.
 		"""
 		output = ""
-		whitespace = False
+		whitespace = (' ' in input or '\t' in input)
 		backslash = 0
 		for ch in input:
-			if ch == ' ' or ch == '\t':
+			if ch == '\\':
+				backslash += 1
+			elif ch == '\"':
 				output += (2 * backslash * '\\')
 				backslash = 0
-				if not whitespace:
-					output += '"'
-					whitespace = True
-				output += ch
+				output += '\\\"'
 			else:
-				if whitespace:
-					output += '"'
-					whitespace = False
-				if ch == '\\':
-					backslash += 1
-				elif ch == '"':
-					output += (2 * backslash * '\\')
-					backslash = 0
-					output += '\\"'
-				else:
-					output += (backslash * '\\')
-					backslash = 0
-					output += ch
+				output += (backslash * '\\')
+				backslash = 0
+				output += ch
+		output += (backslash * '\\')
 		if whitespace:
-			output += '"'
-		else:
-			output += (backslash * '\\')
+			if ch == '\\':
+				output += '\\'
+			output = '\"%s\"' % output
 		return output
 
 	def __buildCommandLine(self, command, args):
 		""" Private method to build a Windows command line from a command plus argument list.
 		
 		"""
-		new_command = command_line = command
+		new_command = command_line = self.__quoteCommand(command)
 		for arg in args: command_line = '%s %s' % (command_line, self.__quoteArgument(arg))
 		return new_command, command_line
 
