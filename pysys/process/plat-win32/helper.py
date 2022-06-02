@@ -179,6 +179,8 @@ class ProcessImpl(Process):
 	def __buildCommandLine(self, command, args):
 		""" Private method to build a Windows command line from a command plus argument list.
 		
+		Returns both the quoted command (argv[0]) and the fully quoted and escaped command
+		line (including the command), because both are used elsewhere in this class.
 		"""
 		new_command = command_line = self.__quoteCommand(command)
 		for arg in args: command_line = '%s %s' % (command_line, self.__quoteArgument(arg))
