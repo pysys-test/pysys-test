@@ -16,7 +16,10 @@ from pysys.constants import *
 from pysys.process.helper import ProcessImpl
 
 import os, sys, math, shutil, glob
-import win32api
+try:
+	import win32api
+except:
+	pass
 
 class PySysTest(pysys.basetest.BaseTest):
 
