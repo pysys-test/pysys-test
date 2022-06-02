@@ -195,7 +195,9 @@ jobs:
            
            # must do this AFTER testing to avoid polluting the installed packages while running the tests
            # peg to specific versions to avoid our build breaking when there's an upgrade
-           pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3 jinja2==2.11.3 markupsafe==2.0.1
+           echo TEMPORARILY disabling PYTHONWARNINGS until we can move to Jinja2>=3.1
+           export PYTHONWARNINGS=ignore
+           pip install docutils==0.16 Jinja2==3.0.3 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
 
            pip install rstcheck
            # check the non-sphinx documentation is valid rst
