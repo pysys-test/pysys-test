@@ -83,9 +83,8 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.testCmdLine('C:\\Program Files\\MyProg\\program.exe', ['arg 1', 'arg2', 'arg 3'])
 
 		# Some specific command lines that have caused problems
-		self.testCmdLine('subst.exe', ['Z:', 'C:\\'])
-		self.testCmdLine('subst.exe', ['Z:', 'C:\\path with spaces\\'])
-		self.testCmdLine('subst.exe', ['Z:', '/D'])
+		self.testCmdLine('cacls.exe', ['C:\\'])
+		self.testCmdLine('subst.exe', ['/D', 'Z:'])
 
 	def validate(self):
 		self.addOutcome(PASSED)
