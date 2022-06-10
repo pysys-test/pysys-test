@@ -7,9 +7,7 @@ and that quoted command lines are parsed the way we expect them to be.
 	
 __pysys_authors__ = "rsm31"
 __pysys_created__ = "2022-05-30"
-#__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
-
-#__pysys_traceability_ids__ = "Bug-1234, UserStory-456" 
+__pysys_traceability_ids__ = "https://github.com/pysys-test/pysys-test/issues/65" 
 
 import pysys
 from pysys.constants import *
