@@ -37,19 +37,8 @@ class PySysTest(pysys.basetest.BaseTest):
 		newcmd, cmdline = self.pimpl._ProcessImpl__buildCommandLine(command, args)
 		oldargv = [command] + args
 		newargv = win32api.CommandLineToArgv(cmdline)
-		self.log.info("-----")
-		self.log.info("Original: %s" % oldargv)
-		self.log.info("Quoted:   %s" % cmdline)
-		self.log.info("Parsed:   %s" % newargv)
-		if expected and expected != cmdline:
-			self.addOutcome(FAILED, "Quoted command line does not match expected")
-			self.log.warn("  Original: %s" % oldargv)
-			self.log.warn("  Expected: %s" % expected)
-			self.log.warn("  Quoted:   %s" % cmdline)
-		if newargv != oldargv:
-			self.addOutcome(FAILED, "Parsed command line does not match original")
-			self.log.warn("  Original: %s" % oldargv)
-			self.log.warn("  Parsed:   %s" % newargv)
+		self.assertThat("input_argv == parsed_argv", input_argv=oldargv, parsed_argv=newargv)
+		if expected: self.assertThat("quoted_cmdline == expected_cmdline", quoted_cmdline=cmdline, expected_cmdline=expected)
 
 	def execute(self):
 		if not IS_WINDOWS:
