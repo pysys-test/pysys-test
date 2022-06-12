@@ -147,8 +147,14 @@ class ProcessImpl(Process):
 		standard parsers, in particular the undocumented rules around handling of
 		consecutive unescaped double quote characters.
 		"""
+		whitespace = None
+		if not '\"' in input:
+			whitespace = (' ' in input or '\t' in input or len(input) == 0)
+			if not whitespace: return input
+			if input[-1] != '\\': return '\"%s\"' % input
+		if whitespace == None: whitespace = (' ' in input or '\t' in input or len(input) == 0)
+
 		output = ""
-		whitespace = (' ' in input or '\t' in input or len(input) == 0)
 		backslash = 0
 		for ch in input:
 			# Count backslashes until we hit a non-backslash
