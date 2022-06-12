@@ -13,7 +13,6 @@ import pysys
 from pysys.constants import *
 from pysys.process.helper import ProcessImpl
 
-import os, sys, math, shutil, glob
 try:
 	import win32api
 except:
