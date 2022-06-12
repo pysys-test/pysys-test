@@ -154,7 +154,7 @@ class ProcessImpl(Process):
 			if input[-1] != '\\': return '\"%s\"' % input
 		if whitespace == None: whitespace = (' ' in input or '\t' in input or len(input) == 0)
 
-		output = ""
+		output = []
 		backslash = 0
 		for ch in input:
 			# Count backslashes until we hit a non-backslash
@@ -163,24 +163,22 @@ class ProcessImpl(Process):
 			elif ch == '\"':
 				# Add any pending backslashes (escaped)
 				# Then add the escaped double quote
-				output += (2 * backslash * '\\')
+				output.extend([2 * backslash * '\\', '\\\"'])
 				backslash = 0
-				output += '\\\"'
 			else:
 				# Add any pending backslashes (unescaped)
 				# Then add the next character
-				output += (backslash * '\\')
+				output.extend([backslash * '\\', ch])
 				backslash = 0
-				output += ch
 		if whitespace:
 			# Add any pending backslashes (escaped)
-			output += (2 * backslash * '\\')
 			# Wrap the whole argument in double quotes
-			output = '\"%s\"' % output
+			output.extend([2 * backslash * '\\', '\"'])
+			output.insert(0, '\"')
 		else:
 			# Add any pending backslashes (unescaped)
-			output += (backslash * '\\')
-		return output
+			output.append(backslash * '\\')
+		return ''.join(output)
 
 	def __buildCommandLine(self, command, args):
 		""" Private method to build a Windows command line from a command plus argument list.
@@ -188,9 +186,10 @@ class ProcessImpl(Process):
 		Returns both the quoted command (argv[0]) and the fully quoted and escaped command
 		line (including the command), because both are used elsewhere in this class.
 		"""
-		new_command = command_line = self.__quoteCommand(command)
-		for arg in args: command_line = '%s %s' % (command_line, self.__quoteArgument(arg))
-		return new_command, command_line
+		new_command = self.__quoteCommand(command)
+		command_line = [new_command]
+		for arg in args: command_line.append(self.__quoteArgument(arg))
+		return new_command, ' '.join(command_line)
 
 	def startBackgroundProcess(self):
 		"""Method to start a process running in the background.
