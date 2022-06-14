@@ -155,7 +155,7 @@ class ProcessImpl(Process):
 		if not '\"' in input:
 			whitespace = (' ' in input or '\t' in input or len(input) == 0)
 			if not whitespace: return input
-			if input[-1] != '\\': return '\"%s\"' % input
+			if len(input) and input[-1] != '\\': return '\"%s\"' % input
 		# Make sure we look for whitespace exactly once
 		if whitespace == None: whitespace = (' ' in input or '\t' in input or len(input) == 0)
 
