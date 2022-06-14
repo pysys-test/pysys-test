@@ -148,10 +148,15 @@ class ProcessImpl(Process):
 		consecutive unescaped double quote characters.
 		"""
 		whitespace = None
+		# Short-circuit some easy and common cases:
+		# - No quotes, no whitespace (just return the input unchanged)
+		# - No quotes, no trailing backslash, whitespace (wrap in double quotes)
+		# Everything else falls through to the more complex algorithm
 		if not '\"' in input:
 			whitespace = (' ' in input or '\t' in input or len(input) == 0)
 			if not whitespace: return input
 			if input[-1] != '\\': return '\"%s\"' % input
+		# Make sure we look for whitespace exactly once
 		if whitespace == None: whitespace = (' ' in input or '\t' in input or len(input) == 0)
 
 		output = []
