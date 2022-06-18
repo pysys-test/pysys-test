@@ -152,12 +152,13 @@ class ProcessImpl(Process):
 		# - No quotes, no whitespace (just return the input unchanged)
 		# - No quotes, no trailing backslash, whitespace (wrap in double quotes)
 		# Everything else falls through to the more complex algorithm
-		if not '\"' in input:
-			whitespace = (' ' in input or '\t' in input or len(input) == 0)
+		if '\"' not in input:
+			empty = (len(input) == 0)
+			whitespace = (empty or ' ' in input or '\t' in input)
 			if not whitespace: return input
-			if len(input) and input[-1] != '\\': return '\"%s\"' % input
+			if not empty and input[-1] != '\\': return '\"%s\"' % input
 		# Make sure we look for whitespace exactly once
-		if whitespace == None: whitespace = (' ' in input or '\t' in input or len(input) == 0)
+		if whitespace is None: whitespace = (' ' in input or '\t' in input)
 
 		output = []
 		backslash = 0
