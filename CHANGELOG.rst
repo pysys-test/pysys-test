@@ -18,7 +18,31 @@ Version 2.2 is under development.
 
 New features:
 
-- XXX
+- Defined a new recommended pattern for reusing logic across tests. Previously, users created multiple custom BaseTest classes or 
+  used the ``<test-plugin>`` element in the project configuration to define reusable peices. Both are now discouraged - 
+  BaseTest subclassing creates the possibility of unpredictable bugs due to clashes in field/method names (and other multiple 
+  inheritance dangers). The test plugin concept has the big downside that Python IDEs and editors cannot detect the ``self.PLUGIN_ALIAS`` 
+  configuration from the PySys project and therefore code completion and navigation are impossible. The preferred approach is now 
+  to use standard Python for reuse, by creating "mix-in" helper classes that expose functionality using inheritance. A key constraint 
+  is that the helper class you inherit from contain only a single field holding an instance that encapsulates all the functionality 
+  to avoid name clashes. 
+  
+  In the getting started sample there is a ```MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
+  which all of the real functionality is encapsulated and exposed to individual tests for reuse. To use it all you need to do 
+  is inherit the helper in any tests that need it::
+
+    from myorg.myserverhelper import MyServerHelper
+    class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
+
+  	def execute(self):
+	  	server = self.myserver.startServer(name="my_server")
+      ...
+
+  Since this approach uses standard Python, any IDE will be able to give assistance for the myserver methods (provided your extension 
+  classes are on its configured PYTHONPATH). 
+  
+  Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
+  classes your test inherits from. 
 
 Fixes:
 
@@ -780,12 +804,7 @@ d) none of this really lends itself well to third parties implementing and distr
 So, in this release we introduce the concept of "plugins" which use *composition* rather than *inheritance* to 
 provide a simpler way to share functionality across tests. There are currently 3 kinds of plugin: 
 
-- **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
-  to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
-  would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
-  As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
-  your test's `__init__()` constructor (for example, in `BaseTest.setup()`). 
+- **test plugins** NB: as of PySys 2.2 these are no longer recommended - instead the "helper class" paradigm is preferred.
 
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 

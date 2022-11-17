@@ -65,12 +65,20 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	return result
 
 class PySysTestPlugin:
-	def setup(self, testObj):
+	def __init__(self, testObj=None):
+		self.testObj = testObj # =None if loaded via test-plugin mechanism
+	def setup(self, testObj): # only called it loaded via test-plugin mechanism
 		self.testObj = testObj
 	
 	def pysys(self, stdouterr, *args, **kwargs):
+		""" See `runPySys` for details. """
 		runPySys(self.testObj, stdouterr, *args, **kwargs)
 
+class PySysTestHelper:
+	def __init__(self, *args):
+		super().__init__(*args)
+		self.pysys = PySysTestPlugin(self)
+	
 class PySysRunnerPlugin:
 	def setup(self, runner):
 		if not sys.warnoptions:

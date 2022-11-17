@@ -3,8 +3,10 @@ import logging
 
 import pysys
 
-class MyTestPlugin(object):
+class MyTestPlugin:
 	""" Example of a test plugin. 
+
+	Use of this paradigm is no logner recommended - make aghelper class instead. 
 	
 	An instance of each test plugin is constructed for each test object. Tests can access the methods and fields of 
 	their plugin using the alias specified in the project configuration (e.g. self.<alias>.). 

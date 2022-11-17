@@ -39,7 +39,7 @@
 	BaseTest or BaseRunner classes, or customer test output writers. 
 	-->
 	<pythonpath value="${testRootDir}/pysys-extensions" />
-	<test-plugin classname="pysysinternalhelpers.PySysTestPlugin" alias="pysys"/>
+	<test-plugin classname="pysysinternalhelpers.PySysTestPlugin" alias="pysys"/> <!-- test plugins are no longer recommended, but have not yet ported the internal tests to use helpers -->
 	<runner-plugin classname="pysysinternalhelpers.PySysRunnerPlugin"/>
 
 	<writers>

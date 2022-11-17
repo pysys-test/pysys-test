@@ -110,7 +110,7 @@ class ProcessUser(object):
 		"""The logger instance that should be used to log from this class. """
 		
 		self.project = Project.getInstance()
-		"""The L{pysys.config.project.Project} instance containing settings for this PySys project."""
+		"""The `pysys.config.project.Project` instance containing settings for this PySys project."""
 
 		if self.project is None:
 			assert 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing

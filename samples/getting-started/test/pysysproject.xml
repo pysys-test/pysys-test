@@ -12,7 +12,6 @@
 	
 	<!-- Custom test framework plugins -->
 	<pythonpath value="./pysys-extensions" />
-	<test-plugin classname="myorg.mytestplugin.MyServerTestPlugin" alias="myserver"/>
 	<runner-plugin classname="myorg.myrunnerplugin.MyServerRunnerPlugin"/>
 	
 	<writers>

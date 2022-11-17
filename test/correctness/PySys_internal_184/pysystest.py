@@ -6,13 +6,16 @@ __pysys_authors__ = "bsp"
 __pysys_created__ = "2022-03-11"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 
-import pysys
+import pysys.basetest, pysys.mappers
 from pysys.constants import *
 
 import os, sys, math, shutil, glob
 import json
 
-class PySysTest(pysys.basetest.BaseTest):
+from pysysinternalhelpers import PySysTestHelper
+
+
+class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 
 	def execute(self):
 

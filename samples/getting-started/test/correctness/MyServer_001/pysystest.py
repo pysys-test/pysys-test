@@ -12,7 +12,7 @@ __pysys_created__ = "1999-12-31"
 __pysys_groups__  = "myServerBasicSanity"
 #__pysys_skipped_reason__ = "Skipped until Bug-1234 is fixed"
 
-import pysys
+import pysys.basetest
 from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
