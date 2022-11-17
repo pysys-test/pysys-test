@@ -489,7 +489,12 @@ class _XMLProjectParser(object):
 		def classConstructor(*args, **kwargs):
 			module = import_module(mod)
 			cls = getattr(module, classname)
-			return cls(*args, **kwargs) # invoke the constructor for this class
+			try:
+				return cls(*args, **kwargs) # invoke the constructor for this class
+			except Exception as ex:
+				# The classname is not available in the higher-level exception handler, so useful to log it here in case it's not obvious
+				log.error('Failed to instantiate "%s" class due to %s: %s', cls.__name__, type(ex).__name__, ex)
+				raise
 		return classConstructor, optionsDict
 
 def getProjectConfigTemplates():
