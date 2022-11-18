@@ -156,6 +156,7 @@ jobs:
         with:
           name: ${{matrix.test-run-id}}
           directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           
       - name: Upload archive artifacts for any test failures
         uses: actions/upload-artifact@v3
