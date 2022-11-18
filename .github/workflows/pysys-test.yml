@@ -15,6 +15,8 @@ on:
     branches:
       - "master"
 
+  workflow_dispatch: # also allow manually invoking this
+
   # When a new (empty, non-draft) release is created via the GitHub UI, uploads the files to that release, upload it to PyPi 
   # and upload the doc to GitHub pages. Only do this when all the tests are passing. 
   # Requires defining secrets PYPI_USERNAME and PYPI_PASSWORD with your PyPi credentials. 
