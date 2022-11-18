@@ -15,12 +15,13 @@ class PySysTest(BaseTest):
 
 		subtest = 'test-project'
 		runPySys(self, subtest, ['run', '-o', subtest], 
-			workingDir='test', expectedExitStatus='!=0', environs={'GITHUB_ACTIONS':'true'}, background=True)
+			workingDir='test', expectedExitStatus='!=0', environs={'GITHUB_ACTIONS':'true', 'GITHUB_OUTPUT':'GITHUB_OUTPUT-test-project.txt'}, background=True)
 
 		subtest = 'default-project' 
 		createProjectConfig(self.mkdir(self.output+'/defconfig'))
 		runPySys(self, subtest, ['run', '--ci', '-o', subtest], 
 			workingDir='test', expectedExitStatus='!=0', environs={'GITHUB_ACTIONS':'true', 
+				'GITHUB_OUTPUT':'GITHUB_OUTPUT-default-project.txt',
 				'PYSYS_PROJECTFILE':self.output+'/defconfig/pysysproject.xml'}, background=True)
 
 		self.waitForBackgroundProcesses()
@@ -47,8 +48,9 @@ class PySysTest(BaseTest):
 		self.assertGrep('test-project.out', expr='Id.*:.*NestedPass', contains=False)
 
 		# outputs (to enable artifact uploading) are only set when we ran with --ci (i.e. --record)
-		self.assertGrep('default-project.out', expr='^::set-output name=artifact_TestOutputArchiveDir::..................*/__pysys_output_archives')
-		self.assertGrep('test-project.out', expr='^::set-output', contains=False)
+		self.assertGrep('default-project.out', expr='set-output', contains=False) # deprecated - should no longer be used
+		self.assertGrep('test/GITHUB_OUTPUT-default-project.txt', '^artifact_JUnitXMLResultsDir=..................*/__pysys_junit_xml$')
+		self.assertGrep('test/GITHUB_OUTPUT-default-project.txt', '^artifact_TestOutputArchive=.*NestedFail.default-project.zip,[^, ]....')
 
 		self.assertGrep('default-project.out', expr='^::warning file=.*/run.py,line=7::.*Id.*NestedTimedout2%0A.*Test duration:') # includes line number
 		self.assertLineCount('default-project.out', expr='::(warning|error)', condition='==4')
