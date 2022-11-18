@@ -1,8 +1,7 @@
-import pysys
+import pysys.basetest, pysys.mappers
 from pysys.constants import *
-from pysys.basetest import BaseTest
 
-class PySysTest(BaseTest):
+class PySysTest(pysys.basetest.BaseTest):
 	def execute(self):
 		pass
 

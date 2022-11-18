@@ -18,6 +18,16 @@ Version 2.2 is under development.
 
 New features:
 
+- Changed imports in the default new testcase templates to allow Python IDEs to correctly locate the PySys BaseTest class. 
+  This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests, 
+  change ``import pysys`` to ``import pysys.basetest, pysys.mappers``, and make sure references to `pysys.basetest.BaseTest` 
+  in the class inheritance list are fully qualified. 
+  
+  To use a Python IDE with PySys, either configure it to use a Python installation or venv that has PySys installed, or
+  specify the path to the PySys classes with a ``PYTHONPATH`` environment variable (e.g. using a ``.env`` file). 
+  If your project has any custom Python extensions configured with a ``<pythonpath>`` element you should add that to your 
+  editor's ``PYTHONPATH`` too. 
+
 - Defined a new recommended pattern for reusing logic across tests. Previously, users created multiple custom BaseTest classes or 
   used the ``<test-plugin>`` element in the project configuration to define reusable peices. Both are now discouraged - 
   BaseTest subclassing creates the possibility of unpredictable bugs due to clashes in field/method names (and other multiple 
