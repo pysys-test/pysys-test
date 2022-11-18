@@ -975,8 +975,8 @@ class BaseTest(ProcessUser):
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
 	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
-		r"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
-		the extracted value using an `assertThat` conditionstring.
+		r"""Perform a validation by using a regular expression to extract the first matching value from a text file and then check 
+		the extracted value is correct using an `assertThat` conditionstring.
 
 		For example::
 		
@@ -999,6 +999,10 @@ class BaseTest(ProcessUser):
 		:param str grepRegex: The regular expression to use for extracting the value of interest from the file. 
 			Typically this will use a ``(...)`` regular expression group to identify the part of the expression 
 			containing the value; alternatively a single ``(?P<value>...)`` named group may be used. 
+			
+			Only the first line matching this expression will be considered, so ensure the ``grepRegex`` should 
+			be "just specific enough" to uniquely identify the required line, but without duplicating the verification 
+			to be performed with the conditionstring assertion. 
 		
 		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
 			to validate that "value" is correct. For example ``value == expected``.
