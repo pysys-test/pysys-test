@@ -97,7 +97,7 @@ just set the ``pythonIndentationSpacesPerTab`` project property to a string cont
 
 Checking for error messages in log files
 -----------------------------------------
-The `BaseTest.assertGrep()` method is an easy way to check that there are no error 
+The `BaseTest.assertGrep` method is an easy way to check that there are no error 
 messages in log files from processes started by PySys. Rather than checking for 
 an expression such as `' ERROR: '`, it is recommended to define your expression 
 so that the error message itself is included, e.g.::
@@ -120,7 +120,7 @@ in the tests that need them using inheritance (via the "mix-in" pattern). A key 
 is that the helper classes themselves contain only a single field holding an instance that encapsulates all the 
 real functionality - this avoid name clashes between different helpers, and with the PySys BaseTest class itself. 
 
-In the getting started sample there is a ```MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
+In the getting started sample there is a ``MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
 which all of the real functionality is encapsulated and exposed to individual tests for reuse. To use it all you need to do 
 is inherit the helper in any tests that need it::
 
@@ -138,6 +138,7 @@ Any number of helpers can be added to each test that needs them. Just ensure tha
 classes your test inherits from. 
 
 This approach has significant advantages over these alternatives that were used in the past:
+
 - Custom BaseTest subclasses. In this paradigm, PySys methods/fields exist in the same namespace as the custom ones, creating a 
   risk of clashes and unexpected bugs and upgrade pain. Moreover as your project grows you will often end up with multiple 
   BaseTest subclasses for different parts of your testing, and there is a high chance that functionality that seemed to belong 

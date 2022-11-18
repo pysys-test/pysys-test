@@ -129,7 +129,7 @@
 	Configuring plugins
 	~~~~~~~~~~~~~~~~~~~
 	
-	See also :ref:`pysys/UserGuide:Sharing logic across tests using plugins`.
+	See also :ref:`pysys/UserGuide:Runner and writer plugins`.
 	-->
 
 	<!-- If you want to provide some custom plugins/extensions you need to add them to the PYTHONPATH used by PySys 
