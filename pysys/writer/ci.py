@@ -159,7 +159,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			return # auto-skip things that don't exist
 
 		name = 'artifact_'+category
-		val = ','.join(paths)
+		val = ','.join(sorted(paths))
 		
 		github_log.debug('GitHub Actions is setting output parameter %s=%s', name, val)
 		if not os.getenv('GITHUB_OUTPUT'):
@@ -169,6 +169,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 		with open(os.environ['GITHUB_OUTPUT'], 'a') as f: # use default encoding
 			f.write(f'{name}={val}\n')
 			f.flush()
+		self.__outputs.add(name)
 
 	def cleanup(self, **kwargs):
 		super(GitHubActionsCIWriter, self).cleanup(**kwargs)
