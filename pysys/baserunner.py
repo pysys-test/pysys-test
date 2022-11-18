@@ -1241,8 +1241,13 @@ class TestContainer(object):
 						self.testObj.testPlugins.append(plugin)
 
 						if not pluginAlias: continue
-						if hasattr(self.testObj, pluginAlias): raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
-						setattr(self.testObj, pluginAlias, plugin)
+						if hasattr(self.testObj, pluginAlias): 
+							if type(getattr(self.testObj, pluginAlias)) == type(plugin):
+								log.debug('Not setting test-plugin alias self.%s on %s as it is already set through some other means', pluginAlias, self)
+							else:
+								raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
+						else:
+							setattr(self.testObj, pluginAlias, plugin)
 
 		
 				except KeyboardInterrupt:
