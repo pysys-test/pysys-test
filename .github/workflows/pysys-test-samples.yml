@@ -33,8 +33,8 @@ jobs:
     
     steps:
       # Install the desired version of Python and PySys
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
       - name: Install Python dependencies
@@ -74,7 +74,7 @@ jobs:
       # The follow lines are a copy from the sample pysys workflow
 
       - name: Upload performance CSV artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         # Only do this if some performance results were generated
         if: always() && steps.pysys.outputs.artifact_CSVPerformanceReport
 
@@ -83,7 +83,7 @@ jobs:
           path: ${{ steps.pysys.outputs.artifact_CSVPerformanceReport }}
 
       - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
 
         with:

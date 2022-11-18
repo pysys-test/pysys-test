@@ -71,7 +71,7 @@ jobs:
     runs-on: ${{matrix.os}}
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       # Install Python and dependencies
       - name: Configure Python dependency requirements
@@ -80,7 +80,7 @@ jobs:
           echo wheel           >> setup-python-package-requirements.txt
           # Pinning to 6.2 due to 6.3 hanging on SIGTERM under Linux and Python 3.10 (GH-1310)
           echo coverage==6.2.0 >> setup-python-package-requirements.txt
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{matrix.python-version}}
           cache: pip
@@ -158,7 +158,7 @@ jobs:
           directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
           
       - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
 
         with:
@@ -214,7 +214,7 @@ jobs:
            cp CHANGELOG.rst dist/
 
       - name: Upload Python package .whl
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: success() && matrix.doc-and-deploy
         with:
           name: installation_package
