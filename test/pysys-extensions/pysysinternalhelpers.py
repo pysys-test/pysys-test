@@ -75,8 +75,8 @@ class PySysTestPlugin:
 		runPySys(self.testObj, stdouterr, *args, **kwargs)
 
 class PySysTestHelper:
-	def __init__(self, *args):
-		super().__init__(*args)
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 		self.pysys = PySysTestPlugin(self)
 	
 class PySysRunnerPlugin:

@@ -19,8 +19,8 @@ class CookbookSampleHelper:
 
 	"""
 	HELPER_MIXIN_FIELD_NAME = 'cookbook' # Informs PySys that this class should add a field of this name to the test class
-	def __init__(self, *args):
-		super().__init__(*args) # MUST start by calling super implementations
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs) # MUST start by calling super implementations
 		self.cookbook = CookbookSampleHelper.CookbookSampleHelperImpl(self)
 		""" Provides access to a set of helper methods for (something). """
 	# NB: Do NOT add ANY extra methods/fields to the helper itself - all functionality must be safely encapsulated within the nested Impl class. 

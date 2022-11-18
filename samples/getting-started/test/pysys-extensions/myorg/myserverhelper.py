@@ -16,8 +16,8 @@ class MyServerHelper:
 	
 	"""
 	HELPER_MIXIN_FIELD_NAME = 'myserver' # Informs PySys that this class should add a field of this name to the test class
-	def __init__(self, *args):
-		super().__init__(*args) # MUST start by calling super implementations
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs) # MUST start by calling super implementations
 		self.myserver = MyServerHelper.MyServerHelperImpl(self)
 		""" Provides access to a set of helper methods for configuring and starting MyServer instances. """
 	# NB: Do NOT add ANY extra methods/fields to the helper itself - all functionality must be safely encapsulated within the nested Impl class. 
