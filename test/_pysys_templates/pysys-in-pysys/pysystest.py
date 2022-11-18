@@ -1,9 +1,9 @@
 @@DEFAULT_DESCRIPTOR@@
 
-import pysys
-from pysys.constants import *
-
 import os, sys, math, shutil, glob
+
+import pysys.basetest, pysys.mappers
+from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
 

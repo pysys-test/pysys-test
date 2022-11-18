@@ -35,10 +35,11 @@ __pysys_modes__            = lambda helper: [
 	]
 
 
-import pysys
+import pysys.basetest, pysys.mappers
 from pysys.constants import *
+from myorg.myserverhelper import MyServerHelper
 
-class PySysTest(pysys.basetest.BaseTest):
+class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
 
 	def execute(self):
 		server = self.myserver.startServer(name="my_server")

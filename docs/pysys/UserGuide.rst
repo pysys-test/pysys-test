@@ -97,7 +97,7 @@ just set the ``pythonIndentationSpacesPerTab`` project property to a string cont
 
 Checking for error messages in log files
 -----------------------------------------
-The `BaseTest.assertGrep()` method is an easy way to check that there are no error 
+The `BaseTest.assertGrep` method is an easy way to check that there are no error 
 messages in log files from processes started by PySys. Rather than checking for 
 an expression such as `' ERROR: '`, it is recommended to define your expression 
 so that the error message itself is included, e.g.::
@@ -110,19 +110,48 @@ the need to open up the individual logs to find out what happened, and makes it
 much easier to triage test failures, especially if several tests fail for the 
 same reason. 
 
-Sharing logic across tests using plugins
+Sharing logic across tests using helpers
 ----------------------------------------
 Often you will have some standard logic that needs to be used in the execute or validation 
 of many/all testcases, such as starting the application you're testing, or checking log files for errors. 
 
-The recommended way to do that in PySys is to create one or more "plugins". There are currently several kinds of plugin: 
+The recommended way to do that in PySys is to create modular, independent helper classes that are included 
+in the tests that need them using inheritance (via the "mix-in" pattern). A key constraint 
+is that the helper classes themselves contain only a single field holding an instance that encapsulates all the 
+real functionality - this avoid name clashes between different helpers, and with the PySys BaseTest class itself. 
 
-- **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
-  to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
-  would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
-  As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
-  your test's `__init__()` constructor (for example, in `BaseTest.setup()`). 
+In the getting started sample there is a ``MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
+which all of the real functionality is encapsulated and exposed to individual tests for reuse. To use it all you need to do 
+is inherit the helper in any tests that need it::
+
+    from myorg.myserverhelper import MyServerHelper
+    class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
+
+  	def execute(self):
+	  	server = self.myserver.startServer(name="my_server")
+      ...
+
+Since this approach uses standard Python, any IDE will be able to give assistance for the myserver methods (provided your extension 
+classes are on its configured PYTHONPATH). 
+  
+Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
+classes your test inherits from. 
+
+This approach has significant advantages over these alternatives that were used in the past:
+
+- Custom BaseTest subclasses. In this paradigm, PySys methods/fields exist in the same namespace as the custom ones, creating a 
+  risk of clashes and unexpected bugs and upgrade pain. Moreover as your project grows you will often end up with multiple 
+  BaseTest subclasses for different parts of your testing, and there is a high chance that functionality that seemed to belong 
+  in one place will one day be needed in a different sibling BaseTest, leading to a need to refactor or complex multiple 
+  inheritance headaches. Using the composition approach of the "helper" classes avoids this complexity and keeps your test 
+  extensions nice and clean. 
+- Test plugins. These were introduced in older PySys versions to solve the encapsulation problem, but it is now recommended to 
+  avoid them because Python IDEs are not able to resolve them, leading to errors or at least a lack of code assistance when 
+  interacting with the plugin in your tests. 
+
+Runner and writer plugins
+-------------------------
+Plugins can be used to extend PySys with additional capabilities: 
 
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
@@ -147,36 +176,7 @@ of each plugin property so each property can be accessed using ``self.propname``
 is called). In addition to plugin properties, ``pysys run -Xkey=value`` command line options for the plugin 
 (if needed) can be accessed using the runner's `pysys.baserunner.BaseRunner.getXArg()` method. 
 
-A test plugin could look like this::
-
-	class MyTestPlugin(object):
-		myPluginProperty = 'default value'
-		"""
-		Example of a plugin configuration property. The value for this plugin instance can be overridden using ``<property .../>``.
-		Types such as boolean/list[str]/int/float will be automatically converted from string. 
-		"""
-
-		def setup(self, testObj):
-			self.owner = self.testObj = testObj
-			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
-			self.log.info('Created MyTestPlugin instance with myPluginProperty=%s', self.myPluginProperty)
-
-			# there is no standard cleanup() method, so do this if you need to execute something on cleanup:
-			testObj.addCleanupFunction(self.__myPluginCleanup)  
-
-		def __myPluginCleanup(self):
-			self.log.info('Cleaning up MyTestPlugin instance')
-
-		# An example of providing a method that can be accessed from each test
-		def getPythonVersion(self):
-			self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
-			return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
-
-		# A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
-		# That approach allows you to later customize the logic by changing just one single place, and also to omit 
-		# it for specific tests where it is not wanted. 
-		def checkLogsForErrors(self, logfile="my_server.log"):
-			self.assertGrep(logfile, ' (ERROR|FATAL) .*', contains=False)
+For an example of a runner plugin, see the cookbook sample. The configuration looks like this:
 
 With configuration like this::
 
@@ -185,20 +185,6 @@ With configuration like this::
 			<property name="myPluginProperty" value="my value"/>
 	    </test-plugin>
     </pysysproject>
-
-... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
-
-Alternatively, you can create a trivial `BaseTest` subclass that instantiates plugins in code (rather than XML) 
-which would allow code completion (if your editor of choice supports this) but still provide the benefits of 
-the modular composition approach. 
-
-You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
-to your application, and third party PySys plugins supporting standard tools and languages. 
-
-In addition to the alias-based lookup, plugins can get a list of the other plugin instances 
-using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
-provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
-particular project configuration.  
 
 When creating a runner plugin you may need somewhere to put output files, logs etc. Plugins that generate output 
 files/directories should by default put that output in a dedicated directory either the 

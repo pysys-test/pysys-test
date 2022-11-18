@@ -28,10 +28,11 @@ __pysys_parameterized_test_modes__  = {
 		'expectedMessage':'Server failed: Cannot specify port twice'}, 
 	}
 
-import pysys
+import pysys.basetest, pysys.mappers
 from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
+
 	def execute(self):
 		server = self.startProcess(
 			command=self.project.appHome+'/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 

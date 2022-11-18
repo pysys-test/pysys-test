@@ -15,10 +15,11 @@ __pysys_modes__   = lambda helper: helper.createModeCombinations(
 		[ {'serverThreads': t} for t in range(1, 3) ],
 	)
 
-import pysys
+import pysys.basetest, pysys.mappers
 from pysys.constants import *
+from myorg.myserverhelper import MyServerHelper
 
-class PySysTest(pysys.basetest.BaseTest):
+class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
 
 	# Class variables defined here can be overridden on the command line if desired, e.g. pysys.py run -Xiterations=500
 	

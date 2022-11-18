@@ -11,7 +11,7 @@ __pysys_created__ = "@@DATE@@"
 #__pysys_modes__            = lambda helper: helper.inheritedModes + [ {'mode':'MyMode', 'myModeParam':123}, ]
 #__pysys_parameterized_test_modes__ = {'MyParameterizedSubtestModeA':{'myModeParam':123}, 'MyParameterizedSubtestModeB':{'myModeParam':456}, }
 
-import pysys
+import pysys.basetest, pysys.mappers
 from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
