@@ -71,7 +71,7 @@ jobs:
     runs-on: ${{matrix.os}}
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       # Install Python and dependencies
       - name: Configure Python dependency requirements
@@ -80,7 +80,7 @@ jobs:
           echo wheel           >> setup-python-package-requirements.txt
           # Pinning to 6.2 due to 6.3 hanging on SIGTERM under Linux and Python 3.10 (GH-1310)
           echo coverage==6.2.0 >> setup-python-package-requirements.txt
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{matrix.python-version}}
           cache: pip
@@ -151,14 +151,15 @@ jobs:
           python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
       - name: Upload Python code coverage 
-        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # 2021-09 v2.1.0
+        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # 2022-11 https://github.com/codecov/codecov-action/releases/tag/v3.1.1
         if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
         with:
           name: ${{matrix.test-run-id}}
           directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           
       - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
 
         with:
@@ -194,7 +195,7 @@ jobs:
            
            # must do this AFTER testing to avoid polluting the installed packages while running the tests
            # peg to specific versions to avoid our build breaking when there's an upgrade
-           pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
+           pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3 jinja2==2.11.3 markupsafe==2.0.1
 
            pip install rstcheck
            # check the non-sphinx documentation is valid rst
@@ -214,7 +215,7 @@ jobs:
            cp CHANGELOG.rst dist/
 
       - name: Upload Python package .whl
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: success() && matrix.doc-and-deploy
         with:
           name: installation_package

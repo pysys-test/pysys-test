@@ -22,7 +22,9 @@ New features:
 
 Fixes:
 
-- XXX
+- Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
+  output artifacts and instead use the ``GITHUB_OUTPUT`` variable. 
+- Upgraded the sample GitHub Actions to latest versions ready for upcoming github.com upgrade of Node version. 
 
 -----------------
 What's new in 2.1

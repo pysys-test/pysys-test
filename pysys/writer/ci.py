@@ -112,8 +112,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 
 		stdoutPrint(toprint)
 		
-		if cmd == 'set-output':
-			self.__outputs.add(params.get('name', '?'))
+		assert cmd != 'set-output', '::set-output is deprecated by GitHub; please call PySys publishArtifact() instead of outputGitHubCommand()'
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		super(GitHubActionsCIWriter, self).setup(numTests=numTests, cycles=cycles, xargs=xargs, threads=threads, 
@@ -155,8 +154,22 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			self._publishToGitHub([path], category)
 
 	def _publishToGitHub(self, paths, category):
-		if not os.path.exists(paths[0]): return # auto-skip things that don't exist
-		self.outputGitHubCommand(u'set-output', u','.join(paths), params={u'name':u'artifact_'+category})
+		if not os.path.exists(paths[0]): 
+			github_log.debug('GitHub Actions cannot set output parameter "%s" due to missing files: %s', category, paths)
+			return # auto-skip things that don't exist
+
+		name = 'artifact_'+category
+		val = ','.join(sorted(paths))
+		
+		github_log.debug('GitHub Actions is setting output parameter %s=%s', name, val)
+		if not os.getenv('GITHUB_OUTPUT'):
+			github_log.warning('Cannot set GitHub Actions output "%s" since GITHUB_OUTPUT environment variable is not defined; available env vars=%s', name, ' '.join(sorted(os.environ.keys())))
+			return
+			
+		with open(os.environ['GITHUB_OUTPUT'], 'a') as f: # use default encoding
+			f.write(f'{name}={val}\n')
+			f.flush()
+		self.__outputs.add(name)
 
 	def cleanup(self, **kwargs):
 		super(GitHubActionsCIWriter, self).cleanup(**kwargs)
