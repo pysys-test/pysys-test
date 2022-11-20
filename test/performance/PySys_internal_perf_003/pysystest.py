@@ -1,4 +1,4 @@
-__pysys_title__   = r""" Process - benchmark Windows command line generation algorithms """ 
+__pysys_title__   = r""" Process Module - benchmark Windows command line generation algorithms """
 #                        ================================================================================
 __pysys_purpose__ = r"""
 Compare performance of old (simple but incomplete) and new (correct but complex)
@@ -7,6 +7,7 @@ algorithms for generating Windows command lines from a command + argv list.
 	
 __pysys_authors__ = "rsm31"
 __pysys_created__ = "2022-06-11"
+__pysys_groups__           = "process, performance, disableCoverage; inherit=true"
 __pysys_traceability_ids__ = "https://github.com/pysys-test/pysys-test/issues/65" 
 
 import pysys

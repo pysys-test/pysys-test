@@ -1,4 +1,4 @@
-__pysys_title__   = r""" Process - Windows command line quoting """ 
+__pysys_title__   = r""" Process Module - Windows command line quoting """
 #                        ================================================================================
 __pysys_purpose__ = r"""
 Check that some weird edge cases when quoting Windows command lines are handled,
@@ -7,6 +7,7 @@ and that quoted command lines are parsed the way we expect them to be.
 	
 __pysys_authors__ = "rsm31"
 __pysys_created__ = "2022-05-30"
+__pysys_groups__           = "process; inherit=true"
 __pysys_traceability_ids__ = "https://github.com/pysys-test/pysys-test/issues/65" 
 
 import pysys
