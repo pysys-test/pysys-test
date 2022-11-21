@@ -135,11 +135,6 @@ jobs:
         id: pysys
         run: |
           export PYTHONWARNINGS=error
-          if [[ ${{ matrix.test-run-id }} = win-py3.10 ]]; then
-            # see also same logic in pysys-extensions/pysysinternalhelpers.py
-            echo TEMPORARILY disabling PYTHONWARNINGS on Windows until PyWin32 v304 is released
-            export PYTHONWARNINGS=ignore
-          fi
           
           # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
           # from working
