@@ -249,7 +249,7 @@ class ProcessUser(object):
 		
 		If PySys was run with the argument ``-XcodeCoverage`` or ``-XpythonCoverage`` then 
 		`startPython` will add the necessary arguments to enable generation of 
-		code coverage. Note that this requried the coverage.py library to be 
+		code coverage. Note that this required the coverage.py library to be 
 		installed. If a project property called `pythonCoverageArgs` exists 
 		then its value will be added as (space-delimited) arguments to the 
 		coverage tool. 
@@ -2386,7 +2386,7 @@ class ProcessUser(object):
 		Create a PySys-friendly instance of Python's ThreadPoolExecutor, configured with support for PySys loggers,  
 		cleanup, and a recommended default number of workers. 
 
-		During cleanup, the thread pool is shutdown, with any unstarted futures cancelled (requried Python 3.9+), and a wait 
+		During cleanup, the thread pool is shutdown, with any unstarted futures cancelled (requires Python 3.9+), and a wait 
 		until all in-progress futures have completed.
 		
 		This is useful for tests that need to perform many latency-bound operations such as making HTTP requests. 
