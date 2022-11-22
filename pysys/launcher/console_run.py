@@ -34,6 +34,7 @@ from pysys.launcher import createDescriptors
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
 from pysys.config.project import Project
+import pysys.utils.threadutils
 
 class ConsoleLaunchHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -50,7 +51,7 @@ class ConsoleLaunchHelper(object):
 		self.outsubdir = DEFAULT_OUTDIR
 		self.modeinclude = []
 		self.modeexclude = []
-		self.threads = 1
+		self.threads = '1' # as of 2.2 we leave this as a string and decide actual value later
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
@@ -312,17 +313,9 @@ e.g.
 				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
 
 			elif option in ["-n", "-j", "--threads"]:
-				try:
-					N_CPUS = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
-				except Exception: # no always available, e.g. on Windows
-					N_CPUS = os.cpu_count()
 				if value.lower()=='auto': value='0'
-				if value.lower().startswith('x'):
-					self.threads = max(1, int(float(value[1:])*N_CPUS))
-				else:
-					self.threads = int(value)
-					if self.threads <= 0: self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
-
+				self.threads = value
+				
 			elif option in ("-b", "--abort"):
 				defaultAbortOnError = str(value.lower()=='true')
 				
@@ -408,6 +401,17 @@ e.g.
 		
 		return self.record, self.purge, self.cycle, None, self.threads, self.outsubdir, descriptors, self.userOptions
 
+def decideWorkerThreads(threads: str):
+	N_CPUS = pysys.utils.threadutils._initUsableCPUCount()
+	
+	if threads.lower().startswith('x'):
+		threads = max(1, int(float(threads[1:])*N_CPUS))
+	else:
+		threads = int(threads)
+		if threads <= 0: threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
+	return threads
+
+
 def runTest(args):
 	try:
 		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
@@ -415,6 +419,11 @@ def runTest(args):
 		
 		cls = Project.getInstance().runnerClassname.split('.')
 		module = importlib.import_module('.'.join(cls[:-1]))
+		
+		# calculate the threads at this point AFTER runner has been imported (allowing monkey-patching in custom runner if needed)
+		args = list(args)
+		args[4] = decideWorkerThreads(args[4])
+		
 		runner = getattr(module, cls[-1])(*args)
 		runner.start()
 	

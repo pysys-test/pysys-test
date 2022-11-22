@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains the L{BackgroundThread} class.
+Contains the `BackgroundThread` class and other utilities for working with threads.
 """
 
 import sys, os
@@ -27,7 +27,40 @@ import traceback
 from pysys.constants import *
 from pysys.internal.initlogging import pysysLogHandler
 
-__all__ = ['BackgroundThread']
+__all__ = ['BackgroundThread', 'createThreadInitializer', 'USABLE_CPU_COUNT']
+
+USABLE_CPU_COUNT: int = None
+"""
+The number of CPUs that are usable from this PySys process. 
+
+This may be less than the total number of CPUs due to restrictions from the operating system 
+such as the process affinity mask or cgroups. 
+
+.. versionadded:: 2.2
+"""
+
+def _initUsableCPUCount():
+	""" Internal, do not use. 
+
+	Called after importing BaseRunner (not when this module is imported) so that it's possible to monkey-patch 
+	it in user code (e.g. when the custom runner is imported) if required e.g. for a new platform. 
+
+	:meta private: Not public API
+	"""
+	global USABLE_CPU_COUNT
+	assert USABLE_CPU_COUNT == None # only set this once
+
+	log = logging.getLogger('pysys.initUsableCPUCount')
+
+	try:
+		cpus = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
+	except Exception: # no always available, e.g. on Windows
+		cpus = os.cpu_count()
+	assert cpus, cpus
+	log.debug('Usable CPU count for process = %d', cpus)
+
+	USABLE_CPU_COUNT = cpus
+	return cpus
 
 def createThreadInitializer(owner):
 	"""
