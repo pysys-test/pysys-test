@@ -54,6 +54,15 @@ New features:
   Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
   classes your test inherits from. 
 
+- Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
+  slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
+  in order to provide correct logging, cleanup, and a more useful default maximum number of worker threads. 
+
+- Added a fallback mechanism for writing log messages from unregistered threads (not created with a PySys 
+  thread pool or background thread) to stdout. Previously such logging did not go anywhere. However it is best to 
+  use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
+  ``run.log`` files for the test that generatered it. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

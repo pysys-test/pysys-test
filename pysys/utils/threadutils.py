@@ -29,6 +29,36 @@ from pysys.internal.initlogging import pysysLogHandler
 
 __all__ = ['BackgroundThread']
 
+def createThreadInitializer(owner):
+	"""
+	Creates a no-args initializer function that should be called at the start of a new thread created outside the PySys 
+	framework to configure logging and thread name for the specified test/runner owner. 
+	
+	This function is needed because if a new thread is created without PySys helper methods (such as 
+	`pysys.basetest.BaseTest.startBackgroundThread`) then logging from that thread will not go to the test's run.log 
+	output file which can make debugging quite difficult. 
+	
+	.. versionadded:: 2.2
+	
+	"""
+	loghandlers = pysysLogHandler.getLogHandlersForCurrentThread()
+	assert loghandlers, loghandlers
+
+	def initializer():
+			# inherit log handlers from parent, whatever they are
+			pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
+			
+			thisthread = threading.current_thread()
+			
+			# try to avoid 
+			log = logging.getLogger('pysys.thread')
+			
+			if not thisthread.name.startswith(str(owner)):
+				thisthread.name = str(owner)+':'+thisthread.name
+			log.debug('Initialized PySys background thread: %s'%thisthread.name)
+	
+	return initializer
+
 class BackgroundThread(object):
 	"""
 	PySys wrapper for a background thread that can receive requests to 
@@ -47,11 +77,9 @@ class BackgroundThread(object):
 	def __init__(self, owner, name, target, kwargsForTarget):
 		assert name, 'Thread name must always be specified'
 
-		self.log = logging.getLogger('pysys.thread.%s'%name) # name without the owner prefix
+		self.log = logging.getLogger('pysys.thread') # do not put name/test into this, as loggers aren't GC'd so don't want to create an unbounded number
 		self.name = name
 		self.owner = owner # a BaseTest
-		self.__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
-		assert self.__parentLogHandlers, self.__parentLogHandlers
 		self.__target = target
 		self.stopping = threading.Event()
 		self.joinTimeoutSecs = TIMEOUTS['WaitForProcessStop']
@@ -69,6 +97,8 @@ class BackgroundThread(object):
 		self.__outcomeReported = False
 		self.__kbdrInterrupt = None
 		self.log.info('Starting background thread %s'%self)
+		
+		self.initializer = createThreadInitializer(owner)
 	
 	def __repr__(self): return 'BackgroundThread[%s]'%self.thread.name
 	def __str__(self): return self.name # without owner identifier
@@ -82,8 +112,7 @@ class BackgroundThread(object):
 	
 	def __run(self, **kwargs):
 		try:
-			# inherit log handlers from parent, whatever they are
-			pysysLogHandler.setLogHandlersForCurrentThread(self.__parentLogHandlers)
+			self.initializer()
 			self.log.debug('%r starting'%self)
 			self.__target(**kwargs)
 			self.log.debug('%r completed successfully'%self)
@@ -92,7 +121,7 @@ class BackgroundThread(object):
 				self.log.info('Background thread %s raised an exception while being stopped (ignoring) - %s: %s'%(self, ex.__class__.__name__, ex))
 				return
 			# this is probably the only place we can really get and show the stack trace
-			self.log.exception('Background thread %s failed - '%self)
+			self.log.exception('Background thread %s.%s failed - '%(self.owner, self))
 			
 			# set this so we can report the BLOCKED outcome
 			self.exception = ex

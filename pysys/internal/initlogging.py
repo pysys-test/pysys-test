@@ -93,10 +93,13 @@ class _UnicodeSafeStreamWrapper(object):
 		stream.flush()
 		stream.close()
 
+_unregisteredThreadLogHandler = logging.StreamHandler(sys.stdout)
+_unregisteredThreadLogHandler.setFormatter(logging.Formatter('<PySys logger for unregistered thread> %(asctime)s [%(threadName)s] at "%(pathname)s":%(lineno)d %(levelname)-5s %(message)s')) # formatter to use for any debug/error messages, just until we load the project file
+
 class DelegatingPerThreadLogHandler(logging.Handler):
 	"""A log handler that delegates emits to a list of handlers, 
 	set on a per-thread basis. If no handlers are setup for this 
-	thread nothing is emitted.
+	thread the _unregisteredThreadLogHandler is used.
 	
 	Note that calling close() on this handler does not call close 
 	on any of the delegated handlers (since they may 
@@ -112,11 +115,13 @@ class DelegatingPerThreadLogHandler(logging.Handler):
 		self.__threadLocals.emitFunctions = [(h.level, h.emit) for h in handlers] if handlers else None
 
 	def getLogHandlersForCurrentThread(self):
-		return getattr(self.__threadLocals, 'handlers', None) or []
+		return getattr(self.__threadLocals, 'handlers', []) or []
 	
 	def emit(self, record):
 		functions = getattr(self.__threadLocals, 'emitFunctions', None) 
-		if functions is not None: 
+		if functions is None:
+			_unregisteredThreadLogHandler.emit(record)
+		else: 
 			for (hdlrlevel, emitFunction) in functions:
 				# handlers can have different levels, so need to replicate the checking that callHandlers performs
 				if record.levelno >= hdlrlevel:

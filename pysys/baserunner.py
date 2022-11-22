@@ -202,6 +202,7 @@ class BaseRunner(ProcessUser):
 		self.purge = purge
 		self.cycle = self.cycles = cycle
 		self.threads = threads
+		self._initThreadPoolMaxWorkers(self.runner.threads)
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
 		self.xargs = xargs

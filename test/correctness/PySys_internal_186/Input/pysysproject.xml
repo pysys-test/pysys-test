@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+</pysysproject>

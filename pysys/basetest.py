@@ -51,6 +51,9 @@ class BaseTest(ProcessUser):
 	
 	def __init__ (self, descriptor, outsubdir, runner):
 		ProcessUser.__init__(self)
+		self.runner = runner
+		self._initThreadPoolMaxWorkers(self.runner.threads)
+
 		self.descriptor = descriptor
 		self.input = os.path.join(descriptor.testDir, 
 			(
@@ -60,7 +63,6 @@ class BaseTest(ProcessUser):
 
 		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir).rstrip('/\\.')
 		self.reference = os.path.join(descriptor.testDir, descriptor.reference).rstrip('/\\.')
-		self.runner = runner
 
 		self.disablePerformanceReporting = False
 
@@ -253,7 +255,9 @@ class BaseTest(ProcessUser):
 		"""
 		Start a new background thread that will invoke the specified `target` 
 		function. 
-		
+
+		See also `createThreadPoolExecutor`. 
+
 		The target function will be invoked with the specified keyword 
 		arguments, preceded by the special keyword arguments `stopping` and `log`. 
 		The `stopping` argument is a Python C{threading.Event} instance that 
@@ -281,8 +285,8 @@ class BaseTest(ProcessUser):
 					t.stop() # requests thread to stop but doesn't wait for it to stop
 					t.join()
 		
-		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome}, 
-		C{startProcess} and the reading of fields like ``self.output`` that don't 
+		Note that ``BaseTest``` is not thread-safe (apart from ``addOutcome``, 
+		``startProcess`` and the reading of fields like ``self.output`` that don't 
 		change) so if you need to use its fields or methods from 
 		background threads, be sure to add your own locking to the foreground 
 		and background threads in your test, including any custom cleanup 
@@ -290,9 +294,9 @@ class BaseTest(ProcessUser):
 		
 		The BaseTest will stop and join all running background threads at the 
 		beginning of cleanup. If a thread doesn't stop within the expected 
-		timeout period a L{constants.TIMEDOUT} outcome will be appended. 
+		timeout period a `constants.TIMEDOUT` outcome will be appended. 
 		If a thread's ``target`` function raises an Exception then a 
-		L{constants.BLOCKED} outcome will be appended during cleanup or 
+		`constants.BLOCKED` outcome will be appended during cleanup or 
 		when it is joined. 
 		
 		:param name: A name for this thread that concisely describes its purpose. 
