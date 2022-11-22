@@ -403,12 +403,20 @@ e.g.
 
 def decideWorkerThreads(threads: str):
 	N_CPUS = pysys.utils.threadutils._initUsableCPUCount()
+
+	# Following the example of Python's ThreadPoolExecutor, put an upper bound on the number of CPUs PySys will use 
+	# to avoid taking over wide machines pointlessly, given the GIL will limit how much can really be used
+	maxThreads = Project.getInstance().getProperty('pysysMaxWorkerThreads', 32)
 	
 	if threads.lower().startswith('x'):
 		threads = max(1, int(float(threads[1:])*N_CPUS))
+		if threads>maxThreads: threads = maxThreads
 	else:
 		threads = int(threads)
-		if threads <= 0: threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
+		if threads <= 0: # = auto mode
+			threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
+			if threads>maxThreads: threads = maxThreads
+	
 	return threads
 
 
