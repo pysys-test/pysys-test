@@ -333,6 +333,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				expandedtests.extend(modedescriptors[t.id])
 		tests = expandedtests
 	
+	# de dup
+	testsDeDup = {t.id:t for t in tests}
+	if len(testsDeDup) < len(tests): tests = list(testsDeDup.values())
+	
 	# combine execution order hints from descriptors with global project configuration; 
 	# we only need to do this if there are any executionOrderHints defined (may be pure group hints not for modes) 
 	# or if there are any tests with multiple modes (since then the secondary hint mode delta applies)
