@@ -11,8 +11,8 @@ class PySysTest(BaseTest):
 
 		sampledir = self.project.testRootDir+'/../samples'
 		
-		pythonVersionForCI = "3.10"
-		pythonVersionForMin = "3.6"
+		pythonVersionForCI = "3.11"
+		pythonVersionForMin = "3.7"
 		
 		pysysVersion = pysys.__version__
 		if 'dev' in pysysVersion: pysysVersion = pysysVersion[:pysysVersion.find('.dev')]

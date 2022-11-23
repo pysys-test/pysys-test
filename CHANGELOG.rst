@@ -18,6 +18,8 @@ Version 2.2 is under development.
 
 New features:
 
+- Added support for Python 3.11, and removed support for Python 3.6 (which is now end of life). 
+
 - Changed imports in the default new testcase templates to allow Python IDEs to correctly locate the PySys BaseTest class. 
   This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests, 
   change ``import pysys`` to ``import pysys.basetest, pysys.mappers``, and make sure references to `pysys.basetest.BaseTest` 
