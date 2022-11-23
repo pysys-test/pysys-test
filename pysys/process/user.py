@@ -2415,11 +2415,11 @@ class ProcessUser(object):
 		:param int maxWorkers: Overrides the maximum number of worker threads that can be created by this pool. 
 			Only override this if needed. The default maxWorkers is configured in ``self.threadPoolMaxWorkers`` and is 
 			currently set at 6 since a higher number might overload a machine (or Python, due to the GIL) if pools are used by
-			 many/all of the PySys workers/tests running in parallel. The default may change in future. 
+			many/all of the PySys workers/tests running in parallel. The default may change in future. 
 
 			If overriding this value, use a small number of workers for Python-based logic that will hold the Python 
 			Global Interpreter Lock, or a larger/more scalable number of workers for heavily I/O-bound operations with little Python logic. 
-
+		
 		:return: A ``concurrent.futures.ThreadPoolExecutor`` instance.
 
 		"""
