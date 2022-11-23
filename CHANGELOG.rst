@@ -63,6 +63,9 @@ New features:
   use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
   ``run.log`` files for the test that generatered it. 
 
+- Added `pysys.utils.threadutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
+  are available in the machine. 
+
 - Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
   to provide a default upper limit on the number of workers. 
   

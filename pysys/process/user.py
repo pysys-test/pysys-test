@@ -150,11 +150,11 @@ class ProcessUser(object):
 		self.threadPoolMaxWorkers = None # real initialization happens in _initThreadPoolMaxWorkers after runner __init__ has been called, unless a value is overridden here
 	
 	def _initThreadPoolMaxWorkers(self, pysysThreads):
-		if self.threadPoolMaxWorkers is not None: return
-		if pysysThreads <= 1: 
-			# In case we're running single-threaded we can't piggy-back off the overall pysys logic, so instead duplicate what Python's own thread pool executor does
-			pysysThreads = min(32, os.cpu_count()+4) 
-		self.threadPoolMaxWorkers = max(5, pysysThreads) # at least 5, otherwise there's no point - again, similar to the Python thread pool algorithm
+		# In theory allow this to be influenced by pysysThreads, but for now we pick a single value since regardless of the number of pysys threads 
+		# a smaller number of threads make the pooling useless for I/O bound operations like HTTP requests (the main use case) and 
+		# a larger (or more machine-scalable) number could cause an explosive overload to the machine or Python GIL if many/all of the PySys workers/tests 
+		# each had their own pool
+		return 6
 
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
@@ -2413,12 +2413,12 @@ class ProcessUser(object):
 		.. versionadded:: 2.2
 
 		:param int maxWorkers: Overrides the maximum number of worker threads that can be created by this pool. 
-			Only override this if needed. The default maxWorkers is configured in ``self.threadPoolMaxWorkers`` and currently 
-			matches the number of PySys worker threads, except in single-threaded or low-parallism runs where it uses a value 
-			based on number of CPUs similar to the Python default (with an upper limit to avoid hitting the GIL bottlenecks on 
-			very wide machines and a lower limit to ensure at least some parallelism). Use a small number of workers for 
-			Python-based logic that will hold the Python Global Interpreter Lock, or a larger/more scalable number of workers 
-			for heavily I/O-bound logic. 
+			Only override this if needed. The default maxWorkers is configured in ``self.threadPoolMaxWorkers`` and is 
+			currently set at 6 since a higher number might overload a machine (or Python, due to the GIL) if pools are used by
+			 many/all of the PySys workers/tests running in parallel. The default may change in future. 
+
+			If overriding this value, use a small number of workers for Python-based logic that will hold the Python 
+			Global Interpreter Lock, or a larger/more scalable number of workers for heavily I/O-bound operations with little Python logic. 
 
 		:return: A ``concurrent.futures.ThreadPoolExecutor`` instance.
 

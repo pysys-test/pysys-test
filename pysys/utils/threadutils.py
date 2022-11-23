@@ -34,7 +34,9 @@ USABLE_CPU_COUNT: int = None
 The number of CPUs that are usable from this PySys process. 
 
 This may be less than the total number of CPUs due to restrictions from the operating system 
-such as the process affinity mask or cgroups. 
+such as the process affinity mask. 
+
+Currently this does not include cgroups restrictions but that may change in future. 
 
 .. versionadded:: 2.2
 """
