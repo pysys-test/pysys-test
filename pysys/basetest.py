@@ -579,7 +579,7 @@ class BaseTest(ProcessUser):
 		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
 			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated 
 			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
-			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  
+			containing the local variables of the calling code and any preceding named parameters.  
 
 		:param \*positional_arguments: (deprecated) Unnamed positional arguments will be 
 			substituted into the condition string using the old ``%`` format string mechanism, before it is evaluated. 
@@ -1038,7 +1038,7 @@ class BaseTest(ProcessUser):
 		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
 			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated 
 			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
-			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  
+			containing the local variables of the calling code and any preceding named parameters.  
 		
 		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
 

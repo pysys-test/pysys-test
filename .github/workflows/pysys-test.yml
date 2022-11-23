@@ -42,9 +42,9 @@ jobs:
             os: macos-latest
             python-version: "3.7"
 
-          - test-run-id: win-py3.6
+          - test-run-id: win-py3.7
             os: windows-latest
-            python-version: "3.6"
+            python-version: "3.7"
 
           - test-run-id: win-py3.11
             os: windows-latest
