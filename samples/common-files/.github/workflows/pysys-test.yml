@@ -41,7 +41,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pysys==2.2
 
-          pip install coverage==6.2.0
+          pip install coverage
 
       - name: Test with PySys
         working-directory: test

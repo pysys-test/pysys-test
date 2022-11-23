@@ -76,10 +76,9 @@ jobs:
       # Install Python and dependencies
       - name: Configure Python dependency requirements
         run: |
-          echo setuptools      > setup-python-package-requirements.txt
+          echo setuptools       > setup-python-package-requirements.txt
           echo wheel           >> setup-python-package-requirements.txt
-          # Pinning to 6.2 due to 6.3 hanging on SIGTERM under Linux and Python 3.10 (GH-1310)
-          echo coverage==6.2.0 >> setup-python-package-requirements.txt
+          echo coverage        >> setup-python-package-requirements.txt
       - uses: actions/setup-python@v4
         with:
           python-version: ${{matrix.python-version}}
