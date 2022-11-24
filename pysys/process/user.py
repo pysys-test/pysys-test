@@ -26,6 +26,7 @@ import threading
 import shutil
 import contextlib
 import importlib
+import concurrent.futures
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -37,6 +38,7 @@ from pysys.process.helper import ProcessImpl
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
+import pysys.utils.threadutils
 import pysys.utils.safeeval
 from pysys.mappers import applyMappers
 
@@ -142,8 +144,18 @@ class ProcessUser(object):
 		"""
 		
 		# variables affecting a specific method (documented there rather than above)
+
 		self.logFileContentsDefaultExcludes = []
-		
+
+		self.threadPoolMaxWorkers = None # real initialization happens in _initThreadPoolMaxWorkers after runner __init__ has been called, unless a value is overridden here
+	
+	def _initThreadPoolMaxWorkers(self, pysysThreads):
+		# In theory allow this to be influenced by pysysThreads, but for now we pick a single value since regardless of the number of pysys threads 
+		# a smaller number of threads make the pooling useless for I/O bound operations like HTTP requests (the main use case) and 
+		# a larger (or more machine-scalable) number could cause an explosive overload to the machine or Python GIL if many/all of the PySys workers/tests 
+		# each had their own pool
+		return 6
+
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
 		which can be used for the `startProcess` ``stdouterr`` parameter. 
@@ -237,7 +249,7 @@ class ProcessUser(object):
 		
 		If PySys was run with the argument ``-XcodeCoverage`` or ``-XpythonCoverage`` then 
 		`startPython` will add the necessary arguments to enable generation of 
-		code coverage. Note that this requried the coverage.py library to be 
+		code coverage. Note that this required the coverage.py library to be 
 		installed. If a project property called `pythonCoverageArgs` exists 
 		then its value will be added as (space-delimited) arguments to the 
 		coverage tool. 
@@ -2368,4 +2380,62 @@ class ProcessUser(object):
 			return src
 			
 		return dest
+	
+	def createThreadPoolExecutor(self, maxWorkers=None) -> concurrent.futures.ThreadPoolExecutor:
+		"""
+		Create a PySys-friendly instance of Python's ThreadPoolExecutor, configured with support for PySys loggers,  
+		cleanup, and a recommended default number of workers. 
+
+		During cleanup, the thread pool is shutdown, with any unstarted futures cancelled (requires Python 3.9+), and a wait 
+		until all in-progress futures have completed.
 		
+		This is useful for tests that need to perform many latency-bound operations such as making HTTP requests. 
+		Do not use it for starting lots of processes in parallel and waiting for them, since that is more easily achieved 
+		using `waitForBackgroundProcesses()`. 
+		
+		If you use ``submit`` (rather than ``map``), then any exceptions during the submitted job will not be logged anywhere 
+		unless you you wait for the submitted job (or add an exception handler). 
+		Note that this class is not thread-safe (apart from ``addOutcome``, ``startProcess`` and the reading of fields 
+		like ``self.output`` that don't change) so if you need to use its fields or methods from background threads, 
+		be sure to add your own locking to the foreground and background threads in your test, including any custom cleanup 
+		functions. 
+
+		Example usage::
+		
+			tp = self.createThreadPoolExecutor()
+			results = tp.map(items, makeHTTPRequest)
+
+			# Or for more complex use cases:
+			submittedFutures = []
+			submittedFutures.append(tp.submit(...))
+			concurrent.futures.wait(submittedFutures)
+
+		.. versionadded:: 2.2
+
+		:param int maxWorkers: Overrides the maximum number of worker threads that can be created by this pool. 
+			Only override this if needed. The default maxWorkers is configured in ``self.threadPoolMaxWorkers`` and is 
+			currently set at 6 since a higher number might overload a machine (or Python, due to the GIL) if pools are used by
+			many/all of the PySys workers/tests running in parallel. The default may change in future. 
+
+			If overriding this value, use a small number of workers for Python-based logic that will hold the Python 
+			Global Interpreter Lock, or a larger/more scalable number of workers for heavily I/O-bound operations with little Python logic. 
+		
+		:return: A ``concurrent.futures.ThreadPoolExecutor`` instance.
+
+		"""
+		if not maxWorkers: maxWorkers = self.threadPoolMaxWorkers
+
+		log.info('Created thread pool with %s workers', maxWorkers) # be explicit, since number of workers could affect test race conditions
+		pool = concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers, initializer=pysys.utils.threadutils.createThreadInitializer(self))
+		def cleanupThreadPool():
+			log.info('Shutting down thread pool')
+
+			starttime = time.time()
+			if sys.version_info[:2] >= (3, 9):
+				pool.shutdown(wait=True, cancel_futures=True)
+			else:
+				pool.shutdown(wait=True)
+			(log.info if time.time()-starttime>5 else log.debug)('Completed shutdown of thread pool after %0.1f seconds', time.time()-starttime)
+
+		self.addCleanupFunction(cleanupThreadPool)
+		return pool

@@ -124,6 +124,13 @@
 	to encourage a limit of 120 characters for the test title (rather than the default of 80), 
 	-->
 	<property name="pysystestTemplateLineLengthGuide" value="${eval: 120 * '-' }"/>
+	
+	<!-- 
+	Override the default upper limit on the number of PySys worker threads used by threads=auto. Due to the 
+	Python Global Interpreter Lock, allowing a worker per CPU on very wide servers is typically pointless or 
+	even counter-productive. 
+	-->
+	<property name="pysysMaxWorkerThreads" value="30"/>
 
 	<!-- 
 	Configuring plugins

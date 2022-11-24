@@ -27,6 +27,7 @@ waitForSignal
 logFileContentsDefaultExcludes
 getExprFromFile
 pysys
+threadPoolMaxWorkers
 		""".strip().split('\n')
 
 		def filter_member(m):

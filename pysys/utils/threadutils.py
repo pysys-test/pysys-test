@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains the L{BackgroundThread} class.
+Contains the `BackgroundThread` class and other utilities for working with threads.
 """
 
 import sys, os
@@ -27,7 +27,72 @@ import traceback
 from pysys.constants import *
 from pysys.internal.initlogging import pysysLogHandler
 
-__all__ = ['BackgroundThread']
+__all__ = ['BackgroundThread', 'createThreadInitializer', 'USABLE_CPU_COUNT']
+
+USABLE_CPU_COUNT: int = None
+"""
+The number of CPUs that are usable from this PySys process. 
+
+This may be less than the total number of CPUs due to restrictions from the operating system 
+such as the process affinity mask. 
+
+Currently this does not include cgroups restrictions but that may change in future. 
+
+.. versionadded:: 2.2
+"""
+
+def _initUsableCPUCount():
+	""" Internal, do not use. 
+
+	Called after importing BaseRunner (not when this module is imported) so that it's possible to monkey-patch 
+	it in user code (e.g. when the custom runner is imported) if required e.g. for a new platform. 
+
+	:meta private: Not public API
+	"""
+	global USABLE_CPU_COUNT
+	assert USABLE_CPU_COUNT == None # only set this once
+
+	log = logging.getLogger('pysys.initUsableCPUCount')
+
+	try:
+		cpus = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
+	except Exception: # no always available, e.g. on Windows
+		cpus = os.cpu_count()
+	assert cpus, cpus
+	log.debug('Usable CPU count for process = %d', cpus)
+
+	USABLE_CPU_COUNT = cpus
+	return cpus
+
+def createThreadInitializer(owner):
+	"""
+	Creates a no-args initializer function that should be called at the start of a new thread created outside the PySys 
+	framework to configure logging and thread name for the specified test/runner owner. 
+	
+	This function is needed because if a new thread is created without PySys helper methods (such as 
+	`pysys.basetest.BaseTest.startBackgroundThread`) then logging from that thread will not go to the test's run.log 
+	output file which can make debugging quite difficult. 
+	
+	.. versionadded:: 2.2
+	
+	"""
+	loghandlers = pysysLogHandler.getLogHandlersForCurrentThread()
+	assert loghandlers, loghandlers
+
+	def initializer():
+			# inherit log handlers from parent, whatever they are
+			pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
+			
+			thisthread = threading.current_thread()
+			
+			# try to avoid 
+			log = logging.getLogger('pysys.thread')
+			
+			if not thisthread.name.startswith(str(owner)):
+				thisthread.name = str(owner)+':'+thisthread.name
+			log.debug('Initialized PySys background thread: %s'%thisthread.name)
+	
+	return initializer
 
 class BackgroundThread(object):
 	"""
@@ -47,11 +112,9 @@ class BackgroundThread(object):
 	def __init__(self, owner, name, target, kwargsForTarget):
 		assert name, 'Thread name must always be specified'
 
-		self.log = logging.getLogger('pysys.thread.%s'%name) # name without the owner prefix
+		self.log = logging.getLogger('pysys.thread') # do not put name/test into this, as loggers aren't GC'd so don't want to create an unbounded number
 		self.name = name
 		self.owner = owner # a BaseTest
-		self.__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
-		assert self.__parentLogHandlers, self.__parentLogHandlers
 		self.__target = target
 		self.stopping = threading.Event()
 		self.joinTimeoutSecs = TIMEOUTS['WaitForProcessStop']
@@ -69,6 +132,8 @@ class BackgroundThread(object):
 		self.__outcomeReported = False
 		self.__kbdrInterrupt = None
 		self.log.info('Starting background thread %s'%self)
+		
+		self.initializer = createThreadInitializer(owner)
 	
 	def __repr__(self): return 'BackgroundThread[%s]'%self.thread.name
 	def __str__(self): return self.name # without owner identifier
@@ -82,8 +147,7 @@ class BackgroundThread(object):
 	
 	def __run(self, **kwargs):
 		try:
-			# inherit log handlers from parent, whatever they are
-			pysysLogHandler.setLogHandlersForCurrentThread(self.__parentLogHandlers)
+			self.initializer()
 			self.log.debug('%r starting'%self)
 			self.__target(**kwargs)
 			self.log.debug('%r completed successfully'%self)
@@ -92,7 +156,7 @@ class BackgroundThread(object):
 				self.log.info('Background thread %s raised an exception while being stopped (ignoring) - %s: %s'%(self, ex.__class__.__name__, ex))
 				return
 			# this is probably the only place we can really get and show the stack trace
-			self.log.exception('Background thread %s failed - '%self)
+			self.log.exception('Background thread %s.%s failed - '%(self.owner, self))
 			
 			# set this so we can report the BLOCKED outcome
 			self.exception = ex

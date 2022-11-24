@@ -40,7 +40,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-output/Success/run.log', expr=r'Test final outcome:.*PASSED')
 		self.log.info('')
 		
-		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'ERROR .*Background thread FunctionThread failed')
+		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'ERROR .*Background thread JoinCleanupException.FunctionThread failed')
 		self.assertOrderedGrep('pysys-output/JoinCleanupException/run.log', exprList=[
 			r'Traceback \(most recent call last\)', 
 			r'Exception: Simulated exception from background thread',
@@ -51,7 +51,7 @@ class PySysTest(BaseTest):
 		self.log.info('')
 		
 		self.assertOrderedGrep('pysys-output/JoinExecuteException/run.log', exprList=[
-			r'ERROR .*Background thread FunctionThread failed',
+			r'ERROR .*Background thread JoinExecuteException.FunctionThread failed',
 			r'Traceback \(most recent call last\)', 
 			r'Exception: Simulated exception from background thread',
 			])

@@ -202,6 +202,7 @@ class BaseRunner(ProcessUser):
 		self.purge = purge
 		self.cycle = self.cycles = cycle
 		self.threads = threads
+		self._initThreadPoolMaxWorkers(self.runner.threads)
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
 		self.xargs = xargs
@@ -223,9 +224,11 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 
 		if len(descriptors)*cycle == 1: self.threads = 1
-		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion} and encoding {encoding}\n'.format(
+		log.info('Running {numDescriptors:,} tests with {threads} test threads{cpus} using PySys {pysysVersion} in Python {pythonVersion} and encoding {encoding}\n'.format(
 			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
-			sys.version_info[0:3], encoding=PREFERRED_ENCODING))
+			sys.version_info[0:3], encoding=PREFERRED_ENCODING, 
+			cpus=' (OS CPUs=%d)'%os.cpu_count() if os.cpu_count() > self.threads else '', # if using fewer threads than CPUs, make it explicit
+			))
 		self.writers = []
 		summarywriters = []
 		progresswriters = []

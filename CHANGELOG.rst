@@ -56,6 +56,28 @@ New features:
   Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
   classes your test inherits from. 
 
+- Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
+  slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
+  in order to provide correct logging, cleanup, and a more useful default maximum number of worker threads. 
+
+- Added a fallback mechanism for writing log messages from unregistered threads (not created with a PySys 
+  thread pool or background thread) to stdout. Previously such logging did not go anywhere. However it is best to 
+  use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
+  ``run.log`` files for the test that generatered it. 
+
+- Added `pysys.utils.threadutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
+  are available in the machine. 
+
+- Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
+  to provide a default upper limit on the number of workers. 
+  
+  This follows the example of Python's ThreadPoolExecutor class which also caps the number of workers at a value of 32, to avoid 
+  taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the 
+  Python Global Interpreter Lock. 
+  The standard PySys maximum of 32 can be overridden on a per-project basis by setting the project property ``pysysMaxWorkerThreads``. 
+  The default number of threads can also be further lowered for specific machines or users by setting the ``PYSYS_DEFAULT_THREADS`` 
+  environment variable. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

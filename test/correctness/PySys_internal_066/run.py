@@ -29,3 +29,4 @@ class PySysTest(BaseTest):
 		self.assertGrep('customclass'+'_pysys.out', expr=r'CUSTOM_STDOUT_PREFIX \d\d:.*Sample log message')
 		self.assertGrep('customclass_output/PySys_NestedTestcase/run.log', expr=r'CUSTOM_RUNLOG_PREFIX \d\d\d\d-\d\d.*Sample log message')
 
+		self.assertGrep('customformat'+'_pysys.out', r'^<PySys logger for unregistered thread> .* \[MyThread\] at ".*run.py":[0-9]+ *INFO *This log message is from an unregistered background thread')

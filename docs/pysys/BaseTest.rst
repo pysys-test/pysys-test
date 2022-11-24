@@ -238,6 +238,7 @@ Miscellaneous
 	compareVersions
 	logValueDiff
 	disableLogging
+	createThreadPoolExecutor
 	startBackgroundThread
 	pythonDocTest
 	startManualTester
