@@ -48,6 +48,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.process import Process
 
+PYSYS_DISABLE_PROCESS_GROUP_CLEANUP = os.getenv('PYSYS_DISABLE_PROCESS_GROUP_CLEANUP','').lower()=='true' # undocumented option for disabling this when executed within another framework
 
 class ProcessImpl(Process):
 	"""Unix process wrapper for process execution and management. 
@@ -127,7 +128,8 @@ class ProcessImpl(Process):
 
 				if self.pid == 0: # pragma: no cover
 					# create a new process group (same id as this pid) containing this new process, which we can use to kill grandchildren
-					os.setpgrp()
+					if not PYSYS_DISABLE_PROCESS_GROUP_CLEANUP:
+						os.setpgrp()
 				
 					# change working directory of the child process
 					os.chdir(self.workingDir)
