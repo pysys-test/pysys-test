@@ -1324,7 +1324,9 @@ class ProcessUser(object):
 				processes, self.processList = self.processList, []
 			for process in processes:
 				try:
-					if process.running(): process.stop()
+					if process.running(): 
+						log.debug("Stopping process during cleanup: %r", process)
+						process.stop()
 				except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
 					log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 					exceptions.append('Failed to stop process %s: %s'%(process, e))
