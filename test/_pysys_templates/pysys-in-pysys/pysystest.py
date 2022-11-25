@@ -5,7 +5,9 @@ import os, sys, math, shutil, glob
 import pysys.basetest, pysys.mappers
 from pysys.constants import *
 
-class PySysTest(pysys.basetest.BaseTest):
+from pysysinternalhelpers import PySysTestHelper
+
+class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 
 	def execute(self):
 

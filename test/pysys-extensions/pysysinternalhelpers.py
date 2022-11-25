@@ -2,11 +2,12 @@ import os, sys
 import warnings
 
 import pysys
+import pysys.process.user
 from pysys.constants import IS_WINDOWS, FAILED
 from pysys.utils.filecopy import filecopy
 from pysys.config.project import createProjectConfig
 
-def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, defaultproject=False, expectedExitStatus='==0', **kwargs):
+def runPySys(processowner: pysys.process.user.ProcessUser, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, defaultproject=False, expectedExitStatus='==0', **kwargs):
 	"""
 	Executes pysys from within pysys. Used only by internal pysys testcases. 
 	"""
@@ -70,7 +71,7 @@ class PySysTestPlugin:
 	
 	def pysys(self, stdouterr, *args, **kwargs):
 		""" See `runPySys` for details. """
-		runPySys(self.testObj, stdouterr, *args, **kwargs)
+		return runPySys(self.testObj, stdouterr, *args, **kwargs)
 
 class PySysTestHelper:
 	def __init__(self, *args, **kwargs):
