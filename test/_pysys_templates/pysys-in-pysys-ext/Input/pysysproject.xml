@@ -1,5 +1,8 @@
 <?xml version="1.0" standalone="yes"?>
 <pysysproject>
+	<property name="myproperty" value="value"/>
+
+	<pythonpath value="${root}/extrapath"/>
 
 	<pysysdirconfig>
 		<input-dir>.</input-dir>
@@ -10,6 +13,7 @@
 		
 		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
 		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 		
 	</default-file-encodings>	
 	
