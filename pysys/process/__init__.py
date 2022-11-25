@@ -71,6 +71,7 @@ class Process(object):
 		returned by the process is correct, for example '==0'.
 
 	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
+	:ivar ProcessUser ~.owner: The owner object that is running this process. 
 	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
 		or None if it has not yet completed. 
 	:ivar dict[str,obj] ~.info: A mutable dictionary of user-supplied information that was passed into startProcess, 
@@ -78,7 +79,7 @@ class Process(object):
 	"""
 
 	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, 
-		expectedExitStatus=None, info={}):
+		expectedExitStatus=None, info={}, owner=None):
 		
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.info = info
@@ -93,6 +94,7 @@ class Process(object):
 		self.state = state
 		self.timeout = timeout
 		self.expectedExitStatus = expectedExitStatus
+		self.owner = owner
 
 		# 'publicly' available data attributes set on execution
 		self.pid = None
@@ -257,11 +259,14 @@ class Process(object):
 		assert timeout > 0, 'timeout must always be specified'
 		startTime = time.time()
 		log.debug("Waiting up to %d secs for process %r", timeout, self)
+
+		pollWait = time.sleep if self.owner is None else self.owner.pollWait
+
 		while self.running():
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				raise ProcessTimeout('Waiting for completion of %r timed out after %d seconds'%(self, int(timeout)))
-			time.sleep(0.05)
+			pollWait(0.05)
 		
 
 
@@ -277,6 +282,9 @@ class Process(object):
 		if self.workingDir and not os.path.isdir(self.workingDir):
 			raise Exception('Cannot start process %s as workingDir "%s" does not exist'% (self, self.workingDir))
 		
+		# unless we're performing some cleanup logic, don't permit new processes to begin after we've been told to shutdown
+		if self.owner is not None and self.owner.isInterruptTerminationInProgress is True and self.owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+
 		if self.state == FOREGROUND:
 			self.startBackgroundProcess()
 			self.wait(self.timeout)
