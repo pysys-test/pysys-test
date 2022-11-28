@@ -35,6 +35,7 @@ import multiprocessing
 from io import StringIO
 import queue
 import random
+import signal
 
 import pysys
 from pysys.constants import *
@@ -359,6 +360,15 @@ class BaseRunner(ProcessUser):
 
 		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
+		def interruptHandler(a, b):
+			sys.stderr.write('SIGNAL!\n')
+			sys.stderr.flush()
+			self.log.info("INTERRUPTED: %r, %r", a, b)
+			self.handleKbrdInt(False)
+		signal.signal(signal.SIGINT, interruptHandler)
+		signal.signal(signal.SIGTERM, interruptHandler)
+		#signal.signal(signal.CTRL_C_EVENT, interruptHandler)
+
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
 		suitable for diagnostic purposes and display to the test author. 
