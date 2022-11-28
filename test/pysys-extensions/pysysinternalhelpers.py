@@ -1,8 +1,7 @@
 import os, sys
 import warnings
 
-import pysys
-import pysys.process.user
+import pysys, pysys.process, pysys.process.user
 from pysys.constants import IS_WINDOWS, FAILED
 from pysys.utils.filecopy import filecopy
 from pysys.config.project import createProjectConfig
@@ -69,7 +68,7 @@ class PySysTestPlugin:
 	def setup(self, testObj): # only called it loaded via test-plugin mechanism
 		self.testObj = testObj
 	
-	def pysys(self, stdouterr, *args, **kwargs):
+	def pysys(self, stdouterr, *args, **kwargs) -> pysys.process.Process:
 		""" See `runPySys` for details. """
 		return runPySys(self.testObj, stdouterr, *args, **kwargs)
 
