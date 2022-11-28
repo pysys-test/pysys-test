@@ -173,6 +173,7 @@ class Process(object):
 		:param int signal: The integer signal to send to the process, e.g. ``process.signal(signal.SIGTERM)``.
 		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to signal the process
 		"""
+		log.info('Sending signal %s to process %s', signal, self)
 		try:
 			os.kill(self.pid, signal)
 		except Exception:
