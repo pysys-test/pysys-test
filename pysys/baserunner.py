@@ -52,6 +52,8 @@ import pysys.utils.allocport
 
 global_lock = threading.Lock() # internal, do not use
 
+log = logging.getLogger('pysys.runner')
+
 class BaseRunner(ProcessUser):
 	"""A single instance of the runner class is responsible for orchestrating 
 	concurrent execution of tests, and managing setup and cleanup of 
@@ -188,6 +190,7 @@ class BaseRunner(ProcessUser):
 		pysys.utils.allocport.initializePortPool()
 
 		ProcessUser.__init__(self)
+		self.log = log
 		self.runner = self
 
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
@@ -643,6 +646,8 @@ class BaseRunner(ProcessUser):
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: 
 			threadPool = ThreadPool(self.threads, requests_queue=self._testScheduler)
+
+		log.debug('Starting test execution') # since we don't get immediate feedback in multi-threaded mode, indicate we've completed the runner setup phase
 
 		# loop through each cycle
 		
