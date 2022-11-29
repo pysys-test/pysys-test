@@ -243,7 +243,8 @@ class Process(object):
 		:return: True if the process is currently running, False if not. 
 		
 		"""
-		return self.setExitStatus() is None
+		# check for pid=None in case start() got interrupted
+		return self.pid is not None and self.setExitStatus() is None
 
 	def wait(self, timeout):
 		"""Wait for a process to complete execution, raising an exception on timeout.
