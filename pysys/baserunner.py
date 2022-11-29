@@ -376,8 +376,9 @@ class BaseRunner(ProcessUser):
 			# Setting this should be enough to terminate ASAP. 
 			ProcessUser.isInterruptTerminationInProgress = True
 
-		signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
-		#signal.signal(signal.SIGTERM, interruptHandler)
+		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
+			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
+			signal.signal(signal.SIGTERM, interruptHandler)
 
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -684,6 +685,8 @@ class BaseRunner(ProcessUser):
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 							threadPool.putRequest(request)
 						else:
+							if ProcessUser.isInterruptTerminationInProgress: raise KeyboardInterrupt()
+
 							if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([])
 							try:
 								singleThreadedResult = container() # run test
