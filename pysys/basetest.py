@@ -1239,7 +1239,7 @@ class BaseTest(ProcessUser):
 			if outcome == PASSED: 
 				if contains: log.debug('Grep on file %s successfully matched expression %s with line: %s', 
 					file, quotestring(expr), quotestring(result.string))
-				msg = self._concatAssertMessages(assertMessage, 'Grep on file %s' % file)
+				msg = 'Grep on file %s' % file
 			else:
 			
 				if contains:
