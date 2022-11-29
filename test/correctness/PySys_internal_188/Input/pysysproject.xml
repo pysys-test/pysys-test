@@ -13,5 +13,12 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 		
 	</default-file-encodings>	
-	
+
+	<writers>
+		<writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+			<property name="destDir" value="__coverage_python.${outDirName}"/>
+			<!-- <property name="pythonCoverageArgs" value="..."/> -->
+		</writer>
+	</writers>
+
 </pysysproject>

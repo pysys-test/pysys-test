@@ -727,7 +727,10 @@ class BaseRunner(ProcessUser):
 						log.error("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						sys.stderr.write('Caught exception performing performance reporter cleanup: %s\n'%traceback.format_exc()) # useful to have it on stderr too, esp during development
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
-			
+
+			# We COULD in future set isCleanupInProgress=True here if we want to make it possible for writers (e.gt. code coverage) 
+			# to start child processes even during an interrupt termination, but for now it seems best not to
+
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:
 				for writer in self.writers:
@@ -737,6 +740,10 @@ class BaseRunner(ProcessUser):
 						log.warning("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						# might stop results being completely displayed to user
 						fatalerrors.append('Writer %s failed during cleanup: %s'%(repr(writer), ex))
+					except KeyboardInterrupt as ex: 
+						# explicitly handle this and avoid stack trace, since it's common for code coverage to execute child processes, which will not be possible during interruption
+						log.warning("Writer %s failed during cleanup due to interruption", writer)
+						self.handleKbrdInt()
 				del self.writers[:]
 		
 			try:
