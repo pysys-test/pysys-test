@@ -13,6 +13,7 @@ class PySysTest(BaseTest):
 	
 	def execute(self):
 		p = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
+		self.waitForFile('timeout.out') # make sure it's actually started, else we end up signally ourselves
 
 		self.signalProcess(p, signal.SIGTERM)
 
