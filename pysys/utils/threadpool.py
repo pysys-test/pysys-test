@@ -30,6 +30,7 @@ import sys, time, threading, traceback
 import queue as Queue
 
 from pysys import log
+from pysys.process.user import ProcessUser
 
 # exceptions
 class NoResultsPending(Exception):
@@ -84,14 +85,14 @@ class WorkerThread(threading.Thread):
 	def run(self):
 		"""Start running the worker thread."""
 		while True:
-			if self._dismissed.is_set():
+			if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
 				break
 			try:
 				request = self._requests_queue.get(True, self._poll_timeout)
 			except Queue.Empty:
 				continue
 			else:
-				if self._dismissed.is_set():
+				if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
 					self._requests_queue.put(request)
 					break
 				try:
@@ -235,12 +236,14 @@ class ThreadPool(object):
 		
 		"""
 		while True:
+			if ProcessUser.isInterruptTerminationInProgress is True: raise KeyboardInterrupt
+
 			if not self.workRequests:
 				raise NoResultsPending
 			elif block and not self.workers:
 				raise NoWorkersAvailable
 			try:
-				request, name, result = self._results_queue.get(block=block)
+				request, name, result = self._results_queue.get(block=block, timeout=2) # timeout allows us to check for interruption periodically
 				if request.exception and request.exc_callback:
 					request.exc_callback(name, result)
 				if request.callback and not \
@@ -248,7 +251,9 @@ class ThreadPool(object):
 					request.callback(name, result)
 				del self.workRequests[request.requestID]
 			except Queue.Empty:
-				break
+				if self._results_queue.empty(): 
+					break
+				else: pass # could be a timeout, in which case we want to check for interruption then go back to blocking
 
 
 	def wait(self):

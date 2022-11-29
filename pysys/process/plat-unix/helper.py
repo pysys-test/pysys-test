@@ -239,7 +239,8 @@ class ProcessImpl(Process):
 			
 			try:
 				self.wait(timeout=timeout)
-			except Exception as ex: # pragma: no cover
+			except BaseException as ex: # pragma: no cover
+				# catch baseexception as we need to do this killing even for stuff like KeyboardInterrupt and SystemExit
 				# if it times out on SIGTERM, do our best to SIGKILL it anyway to avoid leaking processes, but still report as an error
 				if sig != signal.SIGKILL:
 					log.warning('Failed to SIGTERM process %r, will now SIGKILL the process group before re-raising the exception', self)
