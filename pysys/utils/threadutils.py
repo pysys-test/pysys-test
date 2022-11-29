@@ -24,8 +24,12 @@ import threading
 import logging
 import time
 import traceback
+import math
+from pathlib import Path
+
 from pysys.constants import *
 from pysys.internal.initlogging import pysysLogHandler
+from pysys.utils.filegrep import getmatches
 
 __all__ = ['BackgroundThread', 'createThreadInitializer', 'USABLE_CPU_COUNT']
 
@@ -34,9 +38,7 @@ USABLE_CPU_COUNT: int = None
 The number of CPUs that are usable from this PySys process. 
 
 This may be less than the total number of CPUs due to restrictions from the operating system 
-such as the process affinity mask. 
-
-Currently this does not include cgroups restrictions but that may change in future. 
+such as the process affinity mask and container cgroups (cpu.cfs_quota_us or cpu.shares) limits. 
 
 .. versionadded:: 2.2
 """
@@ -59,6 +61,28 @@ def _initUsableCPUCount():
 	except Exception: # no always available, e.g. on Windows
 		cpus = os.cpu_count()
 	assert cpus, cpus
+
+	if (not IS_WINDOWS) and os.getenv('PYSYS_IGNORE_CGROUPS','').lower()!='true' and os.path.exists('/proc/self/cgroup'):
+		def readIfExists(f): return int( ( 
+			Path(f).read_text().strip() if os.path.exists(f) else '') or '0' )
+		try:
+			cfs_quota_us  = readIfExists('/sys/fs/cgroup/cpu/cpu.cfs_quota_us')
+			cfs_period_us = readIfExists('/sys/fs/cgroup/cpu/cpu.cfs_period_us')
+			shares        = readIfExists('/sys/fs/cgroup/cpu/cpu.shares')
+			cgroupsLimits = []
+			if cfs_quota_us>0 and cfs_period_us>0: 
+				cgroupsLimits.append(float(cfs_quota_us) / float(cfs_period_us))
+			PER_CPU_SHARES = 1024 # Just a guess as we do not know the total across all processes, but in many container envs this is the total
+			if shares>0 and shares!=PER_CPU_SHARES: # typical implementations of this algorithm treat a value equal to PER_CPU_SHARES as meaning cpushares aren't limited
+				cgroupsLimits.append(float(shares) / PER_CPU_SHARES)
+				
+			cgroupsLimits.append(cpus) # don't ever use more than the total CPUs in the machine so add that to the list of limits
+			log.debug('Read cgroups configuration from /sys/fs/cgroup/cpu/: cpu.cfs_quota_us/cfs_period_us=%s/%s, cpu.shares=%s; limiting to min of: %s CPUs', 
+				cfs_quota_us or '?', cfs_period_us or '?', shares or '?', cgroupsLimits)
+			cpus = max(1, math.ceil(min(cgroupsLimits))) # use whatever limit is lowest, but don't go below 1
+		except Exception as ex:
+			log.info('Failed to read cgroups information: %r', ex)
+
 	log.debug('Usable CPU count for process = %d', cpus)
 
 	USABLE_CPU_COUNT = cpus
@@ -248,3 +272,4 @@ class BackgroundThread(object):
 					self, self.exception.__class__.__name__, self.exception), abortOnError=abortOnError)
 		elif timetaken >10: # alert user only if it took a long time
 			self.log.info('Joined background thread %s in %0.1f seconds', self, timetaken)
+
