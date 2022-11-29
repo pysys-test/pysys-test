@@ -369,9 +369,7 @@ class BaseRunner(ProcessUser):
 			sys.stderr.flush()
 			self.log.critical('PySys received termination request (signal %s)', sig)
 
-			if ProcessUser.isInterruptTerminationInProgress is True:
-				self.log.critical('PySys received a termination request while already terminating - will now terminate immediately now without executing remaining process/test cleanup')
-				sys.exit(100)
+			# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
 			
 			# Setting this should be enough to terminate ASAP. 
 			ProcessUser.isInterruptTerminationInProgress = True
