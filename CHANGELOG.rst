@@ -56,6 +56,17 @@ New features:
   Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
   classes your test inherits from. 
 
+- Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
+  are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
+  the new global flag `pysys.process.user.ProcessUser.isInterruptTerminationInProgress` which informs all tests they should 
+  complete as quickly as possible - but in an orderly way to allow for essential cleanup. The built-in PySys methods that perform 
+  waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions 
+  like ``time.sleep`` it is recommended to change to using the `BaseTest.pollWait` method instead, which checks this flag and 
+  raises a ``KeyboardInterrupt`` to abort the test. To ensure a rapid exit, starting new processes is disabled once termination 
+  has begun. Once the cleanup phase of a test or runner beings, the restrictions are removed since it may be necessary to 
+  run processes to perform cleanup (e.g. to terminate containers etc). The previous PySys behaviour of prompting interactively 
+  once Ctrl+C is sent has been removed. 
+
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
   slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
   in order to provide correct logging, cleanup, and a more useful default maximum number of worker threads. 
