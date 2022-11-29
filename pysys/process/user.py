@@ -513,6 +513,11 @@ class ProcessUser(object):
 			(log.warning if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds%s'%(process, timeout, handleErrorAndGetOutcomeSuffix(process)), printReason=False, abortOnError=abortOnError)
+		except BaseException: 
+			# if we don't do this then we can't cleanup foreground processes interrupted by serious failures like KeyboardInterrupt
+			with self.lock:
+				self.processList.append(process)
+			raise
 		else:
 			with self.lock:
 				self.processList.append(process)
@@ -816,9 +821,8 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		try:
-			log.info("Waiting up to %d secs for process %r", timeout, process)
 			t = time.time()
-			process.wait(timeout)
+			process.wait(timeout) # this will log if it takes more than a few seconds
 			if (time.time()-t > 10) or process.exitStatus != 0:
 				log.info("Process %s terminated after %d secs with exit status %d", process, time.time()-t, process.exitStatus)
 				
@@ -851,17 +855,22 @@ class ProcessUser(object):
 		requested, for example as a result of a keyboard interrupt or signal. 
 		
 		:param float secs: The time to sleep for, typically a few hundred milliseconds. Do not use this method for 
-			really long waits. 
+			really long waits. Cannot be negative. 
 		"""
-		if secs > 5: self.log.debug('pollWait %s secs', secs)
-		while secs > 0: 
-			# Perform an early abort if we're terminating, but not once we enter cleanup code for each test since that 
-			# may need to execute processes
-			if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+		# This implementation is designed to be fast for the common case as it's executed frequently on multiple threads
 
-			thissleep = max(secs, 2) 
-			time.sleep(thissleep) # break into smaller chunks in case case someone polls for a long time
-			secs -= thissleep
+		if secs > 2: # special (and rare) case: break longer sleeps into smaller chunks in case case someone polls for a long time
+			MAX_SLEEP = 2
+			self.log.debug('pollWait %s secs', secs)
+			while secs > MAX_SLEEP: 
+				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				time.sleep(MAX_SLEEP) 
+				secs -= MAX_SLEEP
+		
+		time.sleep(secs) 
+		# Perform an early abort if we're terminating, but not once we enter cleanup code for each test since that 
+		# may need to execute processes
+		if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 
 	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 

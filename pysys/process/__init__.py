@@ -248,6 +248,8 @@ class Process(object):
 	def wait(self, timeout):
 		"""Wait for a process to complete execution, raising an exception on timeout.
 		
+		Logs and info message if the process takes more than a few seconds to complete. 
+
 		This method provides basic functionality but does not check the exit status or log any messages; 
 		see `pysys.basetest.BaseTest.waitProcess` for a wrapper that adds additional functionality. 
 		
@@ -263,11 +265,16 @@ class Process(object):
 
 		pollWait = time.sleep if self.owner is None else self.owner.pollWait
 
+		doneLongWaitLogging = False
+
 		while self.running():
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				raise ProcessTimeout('Waiting for completion of %r timed out after %d seconds'%(self, int(timeout)))
 			pollWait(0.05)
+			if doneLongWaitLogging is False and time.time()-startTime>4:
+				log.info("Waiting up to %d secs for process %r", timeout, self) # probably would be confusing to adjust this timeout based on time already waited
+				doneLongWaitLogging = True
 		
 
 
