@@ -13,6 +13,8 @@ class PySysTest(BaseTest):
 	
 	def execute(self):
 		p = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
+		
+		self.waitForGrep('timeout.out', 'Process stdout output', process=p)
 
 		self.signalProcess(p, signal.SIGTERM)
 

@@ -49,12 +49,15 @@ class BaseTest(ProcessUser):
 	around use of its fields and methods, including any cleanup functions. 
 	"""
 	
-	def __init__ (self, descriptor, outsubdir, runner):
+	def __init__ (self, descriptor, outsubdir: str, runner):
 		ProcessUser.__init__(self)
-		self.runner = runner
+		import pysys.baserunner # just needed for the type hints
+		import pysys.config.descriptor # just needed for the type hints
+
+		self.runner: pysys.baserunner.BaseRunner = runner
 		self._initThreadPoolMaxWorkers(self.runner.threads)
 
-		self.descriptor = descriptor
+		self.descriptor: pysys.config.descriptor.TestDescriptor = descriptor
 		self.input = os.path.join(descriptor.testDir, 
 			(
 				'Input' if os.path.exists(os.path.join(descriptor.testDir, 'Input')) else '.'
@@ -66,7 +69,7 @@ class BaseTest(ProcessUser):
 
 		self.disablePerformanceReporting = False
 
-		self.mode = descriptor.mode
+		self.mode = self.descriptor.mode
 		# NB: we don't set self.mode.params as keyword arguments since it'd be easy to overwrite a class/instance 
 		# variable unintentionally with unpredictable results; accessing explicitly with self.mode is fine 
 		self.setKeywordArgs(self.descriptor.userData)
@@ -1239,7 +1242,7 @@ class BaseTest(ProcessUser):
 			if outcome == PASSED: 
 				if contains: log.debug('Grep on file %s successfully matched expression %s with line: %s', 
 					file, quotestring(expr), quotestring(result.string))
-				msg = self._concatAssertMessages(assertMessage, 'Grep on file %s' % file)
+				msg = 'Grep on file %s' % file
 			else:
 			
 				if contains:

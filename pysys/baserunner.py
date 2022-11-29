@@ -35,6 +35,7 @@ import multiprocessing
 from io import StringIO
 import queue
 import random
+import signal
 
 import pysys
 from pysys.constants import *
@@ -50,6 +51,8 @@ from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWrit
 import pysys.utils.allocport
 
 global_lock = threading.Lock() # internal, do not use
+
+log = logging.getLogger('pysys.runner')
 
 class BaseRunner(ProcessUser):
 	"""A single instance of the runner class is responsible for orchestrating 
@@ -187,6 +190,7 @@ class BaseRunner(ProcessUser):
 		pysys.utils.allocport.initializePortPool()
 
 		ProcessUser.__init__(self)
+		self.log = log
 		self.runner = self
 
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
@@ -359,6 +363,21 @@ class BaseRunner(ProcessUser):
 
 		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
+		def interruptHandler(sig, frame):
+			sys.stdout.flush()
+			sys.stderr.write('PySys received termination request (signal %s)\n'%sig)
+			sys.stderr.flush()
+			self.log.critical('PySys received termination request (signal %s)', sig)
+
+			# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
+			
+			# Setting this should be enough to terminate ASAP. 
+			ProcessUser.isInterruptTerminationInProgress = True
+
+		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
+			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
+			signal.signal(signal.SIGTERM, interruptHandler)
+
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
 		suitable for diagnostic purposes and display to the test author. 
@@ -627,6 +646,8 @@ class BaseRunner(ProcessUser):
 		if self.threads > 1: 
 			threadPool = ThreadPool(self.threads, requests_queue=self._testScheduler)
 
+		log.debug('Starting test execution') # since we don't get immediate feedback in multi-threaded mode, indicate we've completed the runner setup phase
+
 		# loop through each cycle
 		
 		fatalerrors = []
@@ -662,6 +683,8 @@ class BaseRunner(ProcessUser):
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 							threadPool.putRequest(request)
 						else:
+							if ProcessUser.isInterruptTerminationInProgress: raise KeyboardInterrupt()
+
 							if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([])
 							try:
 								singleThreadedResult = container() # run test
@@ -669,23 +692,22 @@ class BaseRunner(ProcessUser):
 								if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
 				except KeyboardInterrupt:
-					sys.stderr.write("Keyboard interrupt detected... \n")
 					self.handleKbrdInt()
+					# Don't raise this, better to continue
 				
 				if not concurrentcycles:
 					if self.threads > 1: 
 						try:
 							threadPool.wait()
 						except KeyboardInterrupt:
-							sys.stderr.write("Keyboard interrupt detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup... \n")
-							threadPool.dismissWorkers(self.threads, True)
-							self.handleKbrdInt(prompt=False)
+							self.log.critical("Termination request detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup...")
+							threadPool.dismissWorkers(self.threads, do_join=True)
+							self.handleKbrdInt()
 		
 					# call the hook for end of cycle if one has been provided
 					try:
 						self.cycleComplete()
 					except KeyboardInterrupt:
-						sys.stderr.write("Keyboard interrupt detected while running cycleComplete... \n")
 						self.handleKbrdInt()
 					except:
 						log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
@@ -697,11 +719,11 @@ class BaseRunner(ProcessUser):
 					# this is the method that invokes containerCallback and containerExceptionCallback
 					threadPool.wait()
 				except KeyboardInterrupt:
-					log.info("test interrupt from keyboard - joining threads ... ")
-					threadPool.dismissWorkers(self.threads, True)
-					self.handleKbrdInt(prompt=False)
+					self.handleKbrdInt()
+					self.log.critical("Termination request detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup...")
+					threadPool.dismissWorkers(self.threads, do_join=True)
 				else:
-					threadPool.dismissWorkers(self.threads, True)
+					threadPool.dismissWorkers(self.threads, do_join=True)
 
 			# perform clean on the performance reporters - before the writers, in case the writers want to do something 
 			# with the perf output
@@ -711,7 +733,10 @@ class BaseRunner(ProcessUser):
 						log.error("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						sys.stderr.write('Caught exception performing performance reporter cleanup: %s\n'%traceback.format_exc()) # useful to have it on stderr too, esp during development
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
-			
+
+			# We COULD in future set isCleanupInProgress=True here if we want to make it possible for writers (e.gt. code coverage) 
+			# to start child processes even during an interrupt termination, but for now it seems best not to
+
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:
 				for writer in self.writers:
@@ -721,6 +746,10 @@ class BaseRunner(ProcessUser):
 						log.warning("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						# might stop results being completely displayed to user
 						fatalerrors.append('Writer %s failed during cleanup: %s'%(repr(writer), ex))
+					except KeyboardInterrupt as ex: 
+						# explicitly handle this and avoid stack trace, since it's common for code coverage to execute child processes, which will not be possible during interruption
+						log.warning("Writer %s failed during cleanup due to interruption", writer)
+						self.handleKbrdInt()
 				del self.writers[:]
 		
 			try:
@@ -736,6 +765,10 @@ class BaseRunner(ProcessUser):
 			except Exception as ex:
 				log.error("Caught %s performing runner cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
+
+			if ProcessUser.isInterruptTerminationInProgress:
+				# Log this as the last/almost last thing, to avoid misleading summary of non-failures from writers
+				log.warning('PySys terminated early due to interruption')
 
 		pysys.utils.allocport.logPortAllocationStats()
 
@@ -805,7 +838,6 @@ class BaseRunner(ProcessUser):
 			testDurationSecs=container.testTime,
 			runLogOutput=container.testFileHandlerStdoutBuffer.getvalue())
 		
-		# prompt for continuation on control-C
 		if container.kbrdInt == True: self.handleKbrdInt()
 		
 		# call the hook for end of test execution
@@ -993,50 +1025,13 @@ class BaseRunner(ProcessUser):
 
 
 	def handleKbrdInt(self, prompt=True): # pragma: no cover (can't auto-test keyboard interrupt handling)
-		"""Handle a ``Ctrl+C`` keyboard exception caught during running of a set of testcases.
+		""" Deprecated - for internal use only. 
 		
 		"""
-		if self.__remainingTests <= 0 or os.getenv('PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT', 'false').lower()=='true' or not os.isatty(0):
-			prompt = False
-		
-		def finish():
-			self.log.info('Performing runner cleanup after keyboard interrupt')
-			
-			try:
-				# perform cleanup on the test writers - this also takes care of logging summary results
-				# this is a stipped down
-				with self.__resultWritingLock:
-					for writer in self.writers:
-						try: 
-							writer.cleanup()
-						except Exception as ex: 
-							log.warning("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
-					del self.writers[:]
-				
-				try:
-					self.cycleComplete()
-					self.cleanup()
-				except Exception: 
-					log.error("Caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
-			except KeyboardInterrupt:
-				log.warning("Keyboard interrupted detected during cleanup; will exit immediately")
-			sys.exit(100) # keyboard interrupt
+		if ProcessUser.isInterruptTerminationInProgress is False: # in case signal handler wasn't called/wasn't called yet
+			self.log.critical('PySys received termination request (keyboard interrupt)')
 
-		try:
-			if not prompt:
-				sys.stderr.write("\nKeyboard interrupt detected, exiting ... \n")
-				finish()
-
-			while 1:
-				sys.stderr.write("\nKeyboard interrupt detected, continue running remaining tests? [yes|no] ... ")
-				line = sys.stdin.readline().strip()
-				if line == "y" or line == "yes":
-					self.log.info('Keyboard interrupt detected; will try to continue running remaining tests')
-					return
-				elif line == "n" or line == "no":
-					finish()
-		except KeyboardInterrupt:
-			self.handleKbrdInt(prompt=False) # don't prompt the second time
+		ProcessUser.isInterruptTerminationInProgress = True
 
 	def logTestHeader(self, descriptor, cycle, **kwargs):
 		"""
@@ -1115,7 +1110,7 @@ class TestContainer(object):
 		"""
 		self.descriptor = descriptor
 		self.cycle = cycle
-		self.runner = runner
+		self.runner: BaseRunner = runner
 		self.outsubdir = ""
 		self.testObj = None
 		self.testStart = None
@@ -1204,8 +1199,8 @@ class TestContainer(object):
 				if initialOutputFiles and not self.runner.validateOnly:
 					log.warning('Some directories from a previous run could not be deleted from the output directory before starting this test: %s', ', '.join(initialOutputFiles))
 			except KeyboardInterrupt:
-				self.kbrdInt = True
-			
+				self.runner.handleKbrdInt()
+				raise
 			except Exception:
 				exc_info.append(sys.exc_info())
 				
@@ -1254,8 +1249,8 @@ class TestContainer(object):
 
 		
 				except KeyboardInterrupt:
-					self.kbrdInt = True
-				
+					self.runner.handleKbrdInt()	
+					raise		
 				except Exception:
 					exc_info.append(sys.exc_info())
 				
@@ -1288,8 +1283,7 @@ class TestContainer(object):
 						log.error("Caught %s while setting up test %s: %s", info[0].__name__, self.descriptor.id, info[1], exc_info=info)
 						
 				elif self.kbrdInt:
-					log.warning("test interrupt from keyboard")
-					self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+					raise KeyboardInterrupt()
 			
 				else:
 					try:
@@ -1316,11 +1310,13 @@ class TestContainer(object):
 			
 			except KeyboardInterrupt:
 				self.kbrdInt = True
-				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+				self.runner.handleKbrdInt()
 
 			except Exception:
 				log.warning("%s occurred while running test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
+
+			if self.kbrdInt: self.testObj.addOutcome(BLOCKED, 'Test interrupted by termination request', abortOnError=False)
 
 			# call the cleanup method to tear down the test
 			try:
@@ -1329,7 +1325,8 @@ class TestContainer(object):
 			
 			except KeyboardInterrupt:
 				self.kbrdInt = True
-				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+				self.runner.handleKbrdInt()
+				self.testObj.addOutcome(BLOCKED, 'Test interrupted by termination request during cleanup', abortOnError=False)
 			except UserError as ex: # will already have been logged with stack trace
 				self.testObj.addOutcome(BLOCKED, str(ex), abortOnError=False)
 			except Exception as ex:

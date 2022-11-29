@@ -28,6 +28,7 @@ logFileContentsDefaultExcludes
 getExprFromFile
 pysys
 threadPoolMaxWorkers
+isInterruptTerminationInProgress
 		""".strip().split('\n')
 
 		def filter_member(m):
@@ -62,7 +63,7 @@ threadPoolMaxWorkers
 				if m: attr.add(m.group(2))
 				m = re.search('- ``self.([a-zA-Z0-9_]+)`` ', l) # this is how we doc ivar's currently
 				if m: attr.add(m.group(1))
-		self.write_text('basetest.doc.txt', '\n'.join(sorted(attr))+'\n\n'+'\n'.join(sorted(members)))
+		self.write_text('basetest.doc.txt', '\n'.join(sorted(a for a in attr if a!='isInterruptTerminationInProgress'))+'\n\n'+'\n'.join(sorted(members)))
 		
 	def validate(self):
 		self.assertGrep('basetest.doc.txt', expr='.') # check it's not empty

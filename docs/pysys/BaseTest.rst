@@ -108,6 +108,12 @@ can be accessed via instance attributes on ``self``:
   For example you might dynamically set this to True when a test is using options such as profiling or code coverage 
   that would make the results meaningless. 
 
+- ``self.isInterruptTerminationInProgress`` *(bool)*: Check this while performing long-running operations to 
+  ensure your test exits quickly and does not hang if PySys is interrupted (or use `BaseTest.pollWait`). 
+
+- ``self.isCleanupInProgress`` *(bool)*: Check this for advanced cases where you need different behaviour if 
+  the current test/runner is performing its post-execution cleanup phase. 
+
 Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
 There is also a field for each test plugin listed in the project configuration. Plugins provide additional 

@@ -102,11 +102,18 @@ class ProcessUser(object):
 		The built-in Python code coverage functionality in L{startPython} checks this 
 		flag. It is recommended that any other languages supporting code coverage 
 		also check the self.disableCoverage flag. 
-	
+
+	:ivar bool ~.isCleanupInProgress: Set to True after the cleanup phase for this object begins. 
+
 	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 	
 	"""
-	
+
+	isInterruptTerminationInProgress = False
+	""" This static field is set to True if this entire process is in the process of terminating 
+		early due to an interrupt from the keyboard or a signal. 
+	"""
+
 	def __init__(self):
 		self.log = log
 		"""The logger instance that should be used to log from this class. """
@@ -143,6 +150,8 @@ class ProcessUser(object):
 		from access by background threads, as needed. 
 		"""
 		
+		self.isCleanupInProgress = False
+
 		# variables affecting a specific method (documented there rather than above)
 
 		self.logFileContentsDefaultExcludes = []
@@ -459,7 +468,7 @@ class ProcessUser(object):
 		# pass everything as a named parameter, which makes life easier for custom factory methods
 		process = processFactory(command=command, arguments=arguments, environs=environs, workingDir=workingDir, 
 			state=state, timeout=timeout, stdout=stdout, stderr=stderr, 
-			displayName=displayName, expectedExitStatus=expectedExitStatus, info=info)
+			displayName=displayName, expectedExitStatus=expectedExitStatus, info=info, owner=self)
 		
 		def handleErrorAndGetOutcomeSuffix(process):
 			if onError: 
@@ -504,6 +513,11 @@ class ProcessUser(object):
 			(log.warning if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds%s'%(process, timeout, handleErrorAndGetOutcomeSuffix(process)), printReason=False, abortOnError=abortOnError)
+		except BaseException: 
+			# if we don't do this then we can't cleanup foreground processes interrupted by serious failures like KeyboardInterrupt
+			with self.lock:
+				self.processList.append(process)
+			raise
 		else:
 			with self.lock:
 				self.processList.append(process)
@@ -807,9 +821,8 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		try:
-			log.info("Waiting up to %d secs for process %r", timeout, process)
 			t = time.time()
-			process.wait(timeout)
+			process.wait(timeout) # this will log if it takes more than a few seconds
 			if (time.time()-t > 10) or process.exitStatus != 0:
 				log.info("Process %s terminated after %d secs with exit status %d", process, time.time()-t, process.exitStatus)
 				
@@ -839,13 +852,25 @@ class ProcessUser(object):
 		log anything. 
 		
 		Use this method instead of ``time.sleep`` as it provides PySys the chance to abort test execution early when 
-		requested. 
+		requested, for example as a result of a keyboard interrupt or signal. 
 		
 		:param float secs: The time to sleep for, typically a few hundred milliseconds. Do not use this method for 
-			really long waits. 
+			really long waits. Cannot be negative. 
 		"""
-		if secs > 5: self.log.debug('pollWait %s secs', secs)
-		time.sleep(secs) # no-op if secs == 0
+		# This implementation is designed to be fast for the common case as it's executed frequently on multiple threads
+
+		if secs > 2: # special (and rare) case: break longer sleeps into smaller chunks in case case someone polls for a long time
+			MAX_SLEEP = 2
+			self.log.debug('pollWait %s secs', secs)
+			while secs > MAX_SLEEP: 
+				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				time.sleep(MAX_SLEEP) 
+				secs -= MAX_SLEEP
+		
+		time.sleep(secs) 
+		# Perform an early abort if we're terminating, but not once we enter cleanup code for each test since that 
+		# may need to execute processes
+		if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 
 	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 
@@ -1307,6 +1332,8 @@ class ProcessUser(object):
 			# although we don't yet state this method is thread-safe, make it 
 			# as thread-safe as possible by using swap operations
 			with self.lock:
+				self.isCleanupInProgress = True # lock probably not required for this assignment but might as well
+
 				cleanupfunctions, self.__cleanupFunctions = self.__cleanupFunctions, []
 			if cleanupfunctions:
 				log.info('')
@@ -1324,7 +1351,9 @@ class ProcessUser(object):
 				processes, self.processList = self.processList, []
 			for process in processes:
 				try:
-					if process.running(): process.stop()
+					if process.running(): 
+						log.debug("Stopping process during cleanup: %r", process)
+						process.stop()
 				except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
 					log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 					exceptions.append('Failed to stop process %s: %s'%(process, e))
