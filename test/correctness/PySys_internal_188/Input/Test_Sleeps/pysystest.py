@@ -16,6 +16,9 @@ class PySysTest(pysys.basetest.BaseTest):
 			self.log.info('Completed mycleanup function')
 
 		self.addCleanupFunction(mycleanup)
+
+		self.runner.addCleanupFunction(lambda: self.log.info('Called runner cleanup function'))
+
 		self.wait(120)
 		
 	def validate(self):

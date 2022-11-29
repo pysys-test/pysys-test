@@ -45,13 +45,11 @@ class NoWorkersAvailable(Exception):
 
 # internal module helper functions
 def _handle_thread_exception(request, exc_info):
-	"""Default exception handler callback function.
-
-	This just prints the exception info via ``traceback.print_exception``.
+	"""Called when WorkRequest raises an exception
 
 	"""
 	traceback.print_exception(*exc_info)
-
+	log.exception('Test worker error for %s: '%request)
 
 
 class WorkerThread(threading.Thread):
@@ -64,7 +62,7 @@ class WorkerThread(threading.Thread):
 	
 	"""
   
-	def __init__(self, requests_queue, results_queue, poll_timeout=5, **kwds):
+	def __init__(self, requests_queue, results_queue, poll_timeout=5, pool=None, **kwds):
 		"""Class constructor.
 		
 		:param requests_queue: Reference to the threadpool's request queue
@@ -80,28 +78,32 @@ class WorkerThread(threading.Thread):
 		self._results_queue = results_queue
 		self._poll_timeout = poll_timeout
 		self._dismissed = threading.Event()
+		self.pool = pool
 		self.start()
 
 	def run(self):
 		"""Start running the worker thread."""
-		while True:
-			if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
-				break
-			try:
-				request = self._requests_queue.get(True, self._poll_timeout)
-			except Queue.Empty:
-				continue
-			else:
+		try:
+			while True:
 				if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
-					self._requests_queue.put(request)
 					break
 				try:
-					result = request.callable(*request.args, **request.kwds)
-					self._results_queue.put((request, self.name, result))
-				except:
-					request.exception = True
-					self._results_queue.put((request, self.name, sys.exc_info()))
-			time.sleep(0.1)
+					request = self._requests_queue.get(True, self._poll_timeout)
+				except Queue.Empty:
+					continue
+				else:
+					if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
+						self._requests_queue.put(request)
+						break
+					try:
+						result = request.callable(*request.args, **request.kwds)
+						self._results_queue.put((request, self.name, result))
+					except:
+						request.exception = True
+						self._results_queue.put((request, self.name, sys.exc_info()))
+				time.sleep(0.1)
+		finally:
+			self.pool.onWorkerTerminated()
 					
 	def dismiss(self):
 		"""Stop running of the worker thread."""
@@ -163,8 +165,16 @@ class ThreadPool(object):
 		self.workers = []
 		self.dismissedWorkers = []
 		self.workRequests = {}
+
+		self.workersRemaining = num_workers # can read this atomically without any lock due to GIL
+		self.__lock = threading.Lock()
+
 		self.createWorkers(num_workers, poll_timeout)
 
+	def onWorkerTerminated(self):
+		if ProcessUser.isInterruptTerminationInProgress is True: log.debug("PySys worker thread terminated after isInterruptTerminationInProgress")
+		with self.__lock:
+			self.workersRemaining -= 1
 
 	def createWorkers(self, num_workers, poll_timeout=5):
 		"""Create additional threads on the workers stack.
@@ -175,7 +185,7 @@ class ThreadPool(object):
 		"""
 		for i in range(num_workers):
 			self.workers.append(WorkerThread(self._requests_queue,
-				self._results_queue, poll_timeout=poll_timeout))
+				self._results_queue, poll_timeout=poll_timeout, pool=self))
 
 
 	def dismissWorkers(self, num_workers, do_join=False):
@@ -236,11 +246,9 @@ class ThreadPool(object):
 		
 		"""
 		while True:
-			if ProcessUser.isInterruptTerminationInProgress is True: raise KeyboardInterrupt
-
 			if not self.workRequests:
 				raise NoResultsPending
-			elif block and not self.workers:
+			elif block and (self.workersRemaining==0 or not self.workers):
 				raise NoWorkersAvailable
 			try:
 				request, name, result = self._results_queue.get(block=block, timeout=2) # timeout allows us to check for interruption periodically
@@ -264,5 +272,7 @@ class ThreadPool(object):
 			try:
 				self.poll(True)
 			except NoResultsPending:
+				break
+			except NoWorkersAvailable:
 				break
 
