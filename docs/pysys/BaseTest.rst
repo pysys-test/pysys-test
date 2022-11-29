@@ -109,7 +109,7 @@ can be accessed via instance attributes on ``self``:
   that would make the results meaningless. 
 
 - ``self.isInterruptTerminationInProgress`` *(bool)*: Check this while performing long-running operations to 
-  ensure your test exits quickly does not hang if PySys is interrupted (or use `BaseTest.pollWait`). 
+  ensure your test exits quickly and does not hang if PySys is interrupted (or use `BaseTest.pollWait`). 
 
 - ``self.isCleanupInProgress`` *(bool)*: Check this for advanced cases where you need different behaviour if 
   the current test/runner is performing its post-execution cleanup phase. 
