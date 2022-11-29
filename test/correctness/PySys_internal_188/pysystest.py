@@ -24,6 +24,7 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		if IS_WINDOWS: self.skipTest("Cannot test signal interruption on Windows")
 
 		pysys = self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--threads=2', '-vdebug', '-XcodeCoverage'], workingDir=self.input, state=BACKGROUND)
+		self.waitForGrep('pysys-run.out', 'Starting test execution', process=pysys) # MUST wait till we've completed the startup phase before interrupting else we can mess up the coverage initialization
 		self.waitForGrep('myoutdir/Test_ForegroundProcess/sleeper.out', 'Sleeping', process=pysys)
 		self.waitForGrep('myoutdir/Test_Sleeps/run.log', 'Waiting for', process=pysys)
 
@@ -43,7 +44,7 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		# Check we report results for both tests
 		self.assertGrep('pysys-run.out', 'BLOCKED: Test_ForegroundProcess')
 		self.assertGrep('pysys-run.out', 'BLOCKED: Test_Sleeps')
-
+		self.assertGrep('pysys-run.out', 'TERMINATED EARLY; 1 TESTS DID NOT START')
 
 		self.assertPathExists('myoutdir/Test_ZZZ_NeverExecuted', exists=False) # should not even start this one
 		self.assertGrep('pysys-run.out', 'Test_ZZZ_NeverExecuted', contains=False)

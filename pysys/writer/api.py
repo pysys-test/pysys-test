@@ -96,6 +96,7 @@ from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.exceptions import UserError
+import pysys.process.user
 
 log = logging.getLogger('pysys.writer')
 
@@ -475,9 +476,13 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 				for outcome, tests in self.results[cycle].items():
 					if outcome.isFailure(): fails = fails + len(tests)
 			if fails == 0:
-				log("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
+				log("  THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
 			else:
 				logForOutcome(lambda outcome: outcome.isFailure())
+
+			if pysys.process.user.ProcessUser.isInterruptTerminationInProgress:
+				didNotStart = self.numTests-sum(self.outcomes.values())
+				log("  TERMINATED EARLY%s"%('; %d TESTS DID NOT START'%didNotStart if didNotStart else ''), extra=ColorLogFormatter.tag(LOG_FAILURES))
 			log('')
 
 		if showTestIdList:
