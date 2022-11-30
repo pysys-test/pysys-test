@@ -996,6 +996,13 @@ class BaseTest(ProcessUser):
 			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
 				"0.0 <= float(value) <= 60.0")
 
+		Even when your validation on the extracted value is itself to be performed with another regular expression, 
+		using this method to separate out the extraction and validation stages (as in the following example) is clearer 
+		and produces more easily debuggable messages than combining both into a single `assertGrep`::
+
+			self.assertThatGrep('myserver.log', r'Successfully authenticated user ".*" in ([^ ]+) seconds', 
+				"re.match(validationRegex, value)", validationRegex=r"[0-9]+\.[0-9]$")
+
 		This method is implemented using `grep` and `assertThat`, so see those methods for more detailed 
 		information on the parameters. 
 
@@ -1067,10 +1074,10 @@ class BaseTest(ProcessUser):
 		r"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
 		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
-		use `assertThatGrep` instead of this function, as assertThatGrep can produce better messages on failure, and 
+		use `assertThatGrep` instead of this function, as assertThatGrep indicates the intention more clearly, 
+		produces better messages on failure, and 
 		also allows for more powerful matching using a full Python expression 
-		(e.g. numeric range checks, pre-processing strings to normalize case, etc). If you need to extract a string for 
-		further processing without updating the test outcome, consider using `grep` instead. 
+		(e.g. numeric range checks, pre-processing strings to normalize case, 
 
 		The assertGrep method is good for checking in a log to confirm that something happened, or to check that 
 		there are no error messages. 
@@ -1125,6 +1132,9 @@ class BaseTest(ProcessUser):
 		through re.escape::
 		
 			self.assertGrep('myserver.log', re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)'))
+
+		If you need to extract a string for further processing without performing an assertion and 
+		updating the test outcome, see the using `grep` instead. 
 
 		.. versionchanged:: 1.5.1
 			The return value and reFlags were added in 1.5.1.
