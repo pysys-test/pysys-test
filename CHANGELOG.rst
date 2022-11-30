@@ -89,6 +89,9 @@ New features:
   The default number of threads can also be further lowered for specific machines or users by setting the ``PYSYS_DEFAULT_THREADS`` 
   environment variable. 
 
+- Added `pysys.mappers.IncludeMatches` for including just substrings matching a regular expression 
+  when doing a file copy or diff.   
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

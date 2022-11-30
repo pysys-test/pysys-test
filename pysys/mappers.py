@@ -22,10 +22,11 @@ and `pysys.basetest.BaseTest.assertGrep`.
 This package contains several pre-defined mappers:
 
 .. autosummary::
-	RegexReplace
-	IncludeLinesBetween
+	IncludeMatches
 	IncludeLinesMatching
+	IncludeLinesBetween
 	ExcludeLinesMatching
+	RegexReplace
 	JoinLines
 	JoinLines.PythonTraceback
 	JoinLines.JavaStackTrace
@@ -57,15 +58,19 @@ log = logging.getLogger('pysys.mappers')
 
 class RegexReplace(object):
 	"""
-	Mapper that transforms lines by replacing all character sequences matching the specified regular expression. 
+	Mapper that substitutes all character sequences matching the specified regular expression with something different. 
 	
 	For example::
 	
 		self.copy('myfile.txt', 'myfile-processed.txt', mappers=[RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')])
 	
+	This mapper returns all lines whether or not any substitutions occur. To return only the parts of lines that match 
+	a regular expression, use `IncludeMatches` instead.
+
+	
 	:param str|compiled_regex regex: The regular expression to search for. 
 	:param str replacement: The string to replace it with. This can contain backslash references to groups in the 
-		regex; see ``re.sub()`` in the Python documentation for more information. 
+		regex such as ``\\1`` for the first ``(...)`` group (see ``re.sub()`` in the Python documentation for more information). 
 
 
 	>>> RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')('Test string x=2020-07-15T19:22:34+00:00.')
@@ -461,20 +466,58 @@ def SortLines(key=None):
 				yield l
 		return mapperGenerator
 
-class IncludeLinesMatching(object):
+class IncludeMatches(object):
 	"""
-	Mapper that filters lines by including only lines matching the specified regular expression. 
+	Mapper that returns only text matching the specified regular expression.
 	
 	:param str|compiled_regex regex: The regular expression to match (this is a match not a search, so 
 		use ``.*`` at the beginning if you want to allow extra characters at the start of the line).  
-		Multiple expressions can be combined using ``(expr1|expr2)`` syntax. 
+		Multiple expressions can be combined (efficiently) using ``(expr1|expr2)`` syntax. 
+	
+	:param str repl: By default this mapper returns the entire match, but instead set this to a replacement 
+		string such as ``\\1 \\2`` to return only the specified ``(...)`` groups from the match (see the Python MatchObject 
+		``expand`` method). 
+	
+	>>> IncludeMatches('F..')('Foo bar\\n')
+	'Foo\\n'
 
+	>>> IncludeMatches('F..')('Foo bar')
+	'Foo'
+
+	>>> IncludeMatches('.*(oo) *(.*)', repl='\\\\1-\\\\2')('Foo bar\\n')
+	'oo-bar\\n'
+
+	.. versionadded:: 2.2
+	"""
+	
+	def __init__(self, regex, repl=None):
+		self.__str = 'IncludeMatches(%s%s)'%(regex, f', repl={repl}' if repl else '')
+		self.regex = re.compile(regex) if isstring(regex) else regex
+		self.repl=repl
+
+	def __call__(self, line):
+		m = self.regex.match(line)
+		if m is None: return None
+		return _preserveNewlines(line, m.group(0) if self.repl is None else m.expand(self.repl))
+
+	def __repr__(self): return self.__str
+
+class IncludeLinesMatching(object):
+	"""
+	Mapper that filters lines by returning only lines matching the specified regular expression.
+	
+	To return only the matching parts of the lines, use `IncludeMatches` instead.
+	
+	:param str|compiled_regex regex: The regular expression to match (this is a match not a search, so 
+		use ``.*`` at the beginning if you want to allow extra characters at the start of the line).  
+		Multiple expressions can be combined (efficiently) using ``(expr1|expr2)`` syntax. 
+	
 	>>> IncludeLinesMatching('Foo.*')('Foo bar\\n')
 	'Foo bar\\n'
 
 	>>> IncludeLinesMatching('bar.*')('Foo bar\\n') is None
 	True
-
+	
 	"""
 	
 	def __init__(self, regex):
@@ -578,4 +621,8 @@ def applyMappers(iterator, mappers):
 				
 				yield l
 
-	
+def _preserveNewlines(orig, newstring):
+	# for now ignore \r's
+	if newstring.endswith('\n'): return newstring # nothing to do
+	if orig.endswith('\n'): return newstring+'\n'
+	return newstring
