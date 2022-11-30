@@ -1082,25 +1082,25 @@ class BaseTest(ProcessUser):
 
 		For example::
 		
-			self.assertGrep('myserver.log', expr=r' ERROR .*', contains=False)
+			self.assertGrep('myserver.log', r' ERROR .*', contains=False)
 
 			# If error messages may be accompanied by stack traces you can use a mapper to join them into the same line 
 			# so if your test fails, the outcome reason includes all the information. This also allows ignoring errors 
 			# based on the stack trace:
-			self.assertGrep('myserver.log', expr=r' (ERROR|FATAL) .*', contains=False, 
+			self.assertGrep('myserver.log', r' (ERROR|FATAL) .*', contains=False, 
 				mappers=[pysys.mappers.JoinLines.JavaStackTrace()], 	
 				ignores=['Caused by: java.lang.RuntimeError: My expected exception'])
 			
 			# In Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
-			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
+			self.assertGrep('myserver.log', f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
 			
 			# If you need to use \ characters use a raw r'...' string to avoid the need for Python \ escaping in 
 			# addition to regex escaping. Square brackets are often the clearest way to escape regular expression 
 			# characters such as \ . and ()
-			self.assertGrep('myserver.log', expr=r'c:[\]Foo[\]bar[.]txt')
+			self.assertGrep('myserver.log', r'c:[\]Foo[\]bar[.]txt')
 			
 			# The IncludeLinesBetween mapper is very useful if you want to grep within a subset of the lines:
-			self.assertGrep('myserver.log', expr=r'MyClass', mappers=[
+			self.assertGrep('myserver.log', r'MyClass', mappers=[
 				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
 			])
 		
@@ -1124,7 +1124,7 @@ class BaseTest(ProcessUser):
 		substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
 		through re.escape::
 		
-			self.assertGrep('myserver.log', expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)'))
+			self.assertGrep('myserver.log', re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)'))
 
 		.. versionchanged:: 1.5.1
 			The return value and reFlags were added in 1.5.1.

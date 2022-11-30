@@ -1102,10 +1102,10 @@ class ProcessUser(object):
 		
 		Example::
 		
-			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', encoding='utf-8',
+			self.waitForGrep('myprocess.log', 'INFO .*Started successfully', encoding='utf-8',
 				process=myprocess, errorExpr=[' (ERROR|FATAL) ', 'Failed to start'])
 			
-			self.waitForGrep('myoutput.log', expr='My message', encoding='utf-8',
+			self.waitForGrep('myoutput.log', 'My message', encoding='utf-8',
 				process=myprocess, errorIf=lambda: self.grepOrNone('myprocess.err', ' ERROR .*'))
 			
 		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, 
@@ -1118,7 +1118,7 @@ class ProcessUser(object):
 		example::
 
 			self.assertThat('username == expected', expected='myuser',
-				**self.waitForGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+				**self.waitForGrep('myserver.log', r'Successfully authenticated user "(?P<username>[^"]*)"'))
 
 		.. versionadded:: 1.5.1
 
