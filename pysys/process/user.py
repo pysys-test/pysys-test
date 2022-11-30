@@ -1625,7 +1625,7 @@ class ProcessUser(object):
 		return self.getExprFromFile(path=path, expr=expr, returnAll=False, returnNoneIfMissing=False, 
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
-	def grepOrNone(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
+	def grepOrNone(self, path, expr, encoding=None, reFlags=0, mappers=[], mustExist=True, **kwargs):
 		r"""Returns the first occurrence of a regular expression in the specified file, or None if not found. 
 
 		See also `grep` and `grepAll` for error-on-missing and return-all behaviour. 
@@ -1669,6 +1669,9 @@ class ProcessUser(object):
 			
 			Added in PySys 1.6.0.
 
+		:param bool mustExist: Set this to False to tolerate the file not existing and treat a missing file like an empty file. 
+			Added in PySys 2.2.
+
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
@@ -1680,9 +1683,9 @@ class ProcessUser(object):
 			a dict[str,str] is returned where the keys are the groupNames. 
 		"""
 		return self.getExprFromFile(path=path, expr=expr, returnAll=False, returnNoneIfMissing=True, 
-			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+			encoding=encoding, reFlags=reFlags, mappers=mappers, mustExist=mustExist, **kwargs)
 
-	def grepAll(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
+	def grepAll(self, path, expr, encoding=None, reFlags=0, mappers=[], mustExist=True, **kwargs):
 		r"""Returns a list of all the occurrences of a regular expression in the specified file. 
 
 		See also `grep` and `grepOrNone` for return-first-only behaviour. 
@@ -1719,6 +1722,9 @@ class ProcessUser(object):
 			
 			Added in PySys 1.6.0.
 
+		:param bool mustExist: Set this to False to tolerate the file not existing and treat a missing file like an empty file. 
+			Added in PySys 2.2.
+
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
@@ -1729,9 +1735,9 @@ class ProcessUser(object):
 			``(?P<groupName>...)`` named groups each item is a dict[str,str] where the keys are the groupNames. 
 		"""
 		return self.getExprFromFile(path=path, expr=expr, returnAll=True, returnNoneIfMissing=False, 
-			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+			encoding=encoding, reFlags=reFlags, mappers=mappers, mustExist=mustExist, **kwargs)
 
-	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0, mappers=[]):
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, mustExist=True, encoding=None, reFlags=0, mappers=[]):
 		r""" Searches for a regular expression in the specified file, and returns it. 
 		
 		Use of this function is discouraged - consider using `grep` / `grepOrNone` / `grepAll` instead. 
@@ -1776,6 +1782,7 @@ class ProcessUser(object):
 		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.
 		:param bool returnNoneIfMissing: True to return None instead of raising an exception
 			if the regex is not found in the file (not needed when returnAll is used). 
+		:param bool mustExist: Set to False to tolerate the file not existing and treat a missing file like an empty file. 
 			
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
@@ -1810,23 +1817,26 @@ class ProcessUser(object):
 		
 		assert not os.path.isdir(path), 'Cannot grep directory: %s'%path
 
-		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
-			matches = []
-			for l in applyMappers(f, mappers):
-			
-				match = compiled.search(l)
-				if not match: continue
-				if namedGroupsMode:
-					val = match.groupdict()
-				elif match.groups():
-					val = match.group(*groups)
-				else:
-					val = match.group(0)
-					
-				if returnAll: 
-					matches.append(val)
-				else: 
-					return val
+		matches = []
+		if mustExist is False and not os.path.exists(path):
+			pass
+		else: 
+			with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
+				for l in applyMappers(f, mappers):
+				
+					match = compiled.search(l)
+					if not match: continue
+					if namedGroupsMode:
+						val = match.groupdict()
+					elif match.groups():
+						val = match.group(*groups)
+					else:
+						val = match.group(0)
+						
+					if returnAll: 
+						matches.append(val)
+					else: 
+						return val
 
 		if returnAll: return matches
 		if returnNoneIfMissing: return None

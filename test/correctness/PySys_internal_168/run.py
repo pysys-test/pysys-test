@@ -35,6 +35,12 @@ class PySysTest(BaseTest):
 			actual__eval="self.grepAll('test.txt', '[0-9] with e.pression')",
 			expected=["1 with expression", "2 with expression"])
 
+		self.assertThat('actual == expected', 
+			actual__eval="self.grepAll('missing.txt', '[0-9] with e.pression', mustExist=False)",
+			expected=[])
+		self.assertThat('actual is None', 
+			actual__eval="self.grepOrNone('missing.txt', '[0-9] with e.pression', mustExist=False)")
+
 	
 	def validate(self):
 		pass

@@ -90,7 +90,10 @@ New features:
   environment variable. 
 
 - Added `pysys.mappers.IncludeMatches` for including just substrings matching a regular expression 
-  when doing a file copy or diff.   
+  when doing a file copy or diff. 
+
+- Added ``mustExist`` option to `BaseTest.grepOrNone` and `BaseTest.grepAll` to allow treating files not existing the same as if they 
+  did not contain the matching expression.   
 
 Fixes:
 
