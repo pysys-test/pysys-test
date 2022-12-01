@@ -77,12 +77,14 @@ New features:
   ``run.log`` files for the test that generatered it. 
 
 - Added `pysys.utils.threadutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
-  are available in the machine. 
+  are available in the machine. This implementation attempts to use cgroups data (``cpu.cfs_quota/period_us`` and ``cpu.shares``) 
+  if present (in a container environment). 
 
 - Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
   to provide a default upper limit on the number of workers. 
   
-  This follows the example of Python's ThreadPoolExecutor class which also caps the number of workers at a value of 32, to avoid 
+  This is based on the `pysys.utils.threadutils.USABLE_CPU_COUNT` value, but also follows the example of Python's 
+  ThreadPoolExecutor class in capping the number of workers at a value of 32, to avoid 
   taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the 
   Python Global Interpreter Lock. 
   The standard PySys maximum of 32 can be overridden on a per-project basis by setting the project property ``pysysMaxWorkerThreads``. 
