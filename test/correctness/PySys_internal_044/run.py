@@ -6,6 +6,7 @@ class PySysTest(BaseTest):
 		pass
 
 	def validate(self):
+		self.reasons = []
 		# straight diff
 		self.copy(self.input+'/file1.txt', 'file1.txt')
 		self.assertDiff(file1='file1.txt')
@@ -43,9 +44,15 @@ class PySysTest(BaseTest):
 		self.assertGrep('run.log', expr=r'File comparison between file1.txt and Reference[/\\]file1.txt ... passed')
 		self.assertGrep('file2.txt.diff', expr='--- Reference.ref_file.txt')
 		self.assertGrep('file2.txt.diff', expr=r'\+\+\+ Output.+file2.txt')
+		
+		self.assertThat('expected in outcomeReasons', 
+			outcomeReasons=sorted(self.reasons),
+			expected=r'File comparison between file1.txt and Reference/file1_with_whitespace.txt: "+The moorcock springs on whirring wings among the blooming heather," "-   The moorcock springs on whirring wings among the blooming heather," "+Waiving grain wide over the plain delights the weary farmer," ...')
+			
 
 	def checkForFailedOutcome(self):
-		self.log.info('(expected failed outcome)')
+		self.log.info('(expected failed outcome) Failure outcome: "%s"'%self.getOutcomeReason())
+		self.reasons.append(self.getOutcomeReason().replace('Reference\\', 'Reference/')) # platform normalization
 		outcome = self.outcome.pop()
 		if outcome == FAILED: self.addOutcome(PASSED)
 		else: self.addOutcome(FAILED, 'did not get expected failure', abortOnError=True)

@@ -961,6 +961,21 @@ class BaseTest(ProcessUser):
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			return False
 		else:
+			# if it failed try to summarize in the outcome reason if possible 
+			if (not result) and os.path.exists(unifiedDiffOutput):
+				summaryDiffLines = []
+				with open(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1)) as f:
+					for l in f:
+						if len(summaryDiffLines) > 50: break
+						if l.startswith(('-', '+')) and not l.startswith(('+++', '---')): summaryDiffLines.append(l.strip())
+				if summaryDiffLines:
+					summaryDiffLines.sort(key=lambda l: (l[1:].lstrip(), l)) # this typically interleaves -s and +s
+					msg = f'{msg}: {quotestring(summaryDiffLines[0])}'
+					for l in summaryDiffLines[1:]:
+						if len(msg)+len(l) > 300: 
+							msg += ' ...'
+							break
+						else: msg += f' {quotestring(l)}'
 			msg = self._concatAssertMessages(assertMessage, msg, short=result)
 		
 			result = PASSED if result else FAILED

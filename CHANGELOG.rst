@@ -101,6 +101,8 @@ New features:
   If reading from a file that has long lines, consider adding the new `pysys.mappers.TruncateLongLines` to the mappers list to shorten them. 
   The ``waitForGrep`` method now logs warnings if dangerously long lines are detected (as defined by ``self.grepWarnIfLineLongerThan``). 
 
+- Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
