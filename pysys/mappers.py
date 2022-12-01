@@ -32,6 +32,7 @@ This package contains several pre-defined mappers:
 	JoinLines.JavaStackTrace
 	JoinLines.AntBuildFailure
 	SortLines
+	TruncateLongLines
 	applyMappers
 
 In addition to the above, you can create custom mappers, which are usually callables (functions, lambdas, or classes 
@@ -552,6 +553,41 @@ class ExcludeLinesMatching(object):
 
 	def __call__(self, line):
 		return None if self.regex.match(line) is not None else line
+
+	def __repr__(self): return self.__str
+
+class TruncateLongLines(object):
+	"""
+	Mapper that truncates any excessively long lines, to avoid regular expression matching taking 
+	an unreasonable amount of time. 
+
+	Occasionally log files can contain lines with a large dump of debugging data, which typically 
+	don't need to be checked when grepping the logs but unfortunately can cause debilitating slowness 
+	in Python since some regular expressions take an extremely long time to evaluate against long 
+	strings. This mapper can be added to avoid this problem by truncating log lines to a reasonable length.  
+
+	:param int maxLineLength: The maximum number of characters per line.  
+
+	>>> TruncateLongLines() ('Short line\\n')
+	'Short line\\n'
+
+	>>> TruncateLongLines(13) ('Long line AAAAAAAAAAA\\n')
+	'Long line AAA <truncated by PySys>\\n'
+
+	>>> len(TruncateLongLines() ('a'*20000) ) < 10000+30
+	True
+	
+	.. versionadded:: 2.2
+	"""
+	
+	def __init__(self, maxLineLength=5*1000):
+		self.__str = 'TruncateLongLines(%s)'%(maxLineLength)
+		self.maxLineLength = maxLineLength
+
+	def __call__(self, line):
+		if len(line) > self.maxLineLength:
+			return _preserveNewlines(line, line[:self.maxLineLength]+' <truncated by PySys>')
+		return line
 
 	def __repr__(self): return self.__str
 

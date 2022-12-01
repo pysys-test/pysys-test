@@ -95,6 +95,12 @@ New features:
 - Added ``mustExist`` option to `BaseTest.grepOrNone` and `BaseTest.grepAll` to allow treating files not existing the same as if they 
   did not contain the matching expression.   
 
+- Improved `BaseTest.waitForGrep` robustness when the file being checked is big or contains long lines, by checking for timeout during 
+  each pass through the file not just at the end, and logging a warning if excessively large lines are found (given that evaluating 
+  regular expressions on lines with 10,000s of characters can sometimes take a very long time).  
+  If reading from a file that has long lines, consider adding the new `pysys.mappers.TruncateLongLines` to the mappers list to shorten them. 
+  The ``waitForGrep`` method now logs warnings if dangerously long lines are detected (as defined by ``self.grepWarnIfLineLongerThan``). 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

@@ -157,7 +157,9 @@ class ProcessUser(object):
 		self.logFileContentsDefaultExcludes = []
 
 		self.threadPoolMaxWorkers = None # real initialization happens in _initThreadPoolMaxWorkers after runner __init__ has been called, unless a value is overridden here
-	
+
+		self.grepWarnIfLineLongerThan = 10000
+
 	def _initThreadPoolMaxWorkers(self, pysysThreads):
 		# In theory allow this to be influenced by pysysThreads, but for now we pick a single value since regardless of the number of pysys threads 
 		# a smaller number of threads make the pooling useless for I/O bound operations like HTTP requests (the main use case) and 
@@ -1120,6 +1122,13 @@ class ProcessUser(object):
 			self.assertThat('username == expected', expected='myuser',
 				**self.waitForGrep('myserver.log', r'Successfully authenticated user "(?P<username>[^"]*)"'))
 
+		If the file is large or contains long lines, it can take a long time for the regular expressions to be 
+		evaluated over each line. It is important to avoid the possibility that data is written to the file faster 
+		than Python can read it, which would lead to the PySys process running very slowly and likely a timeout. 
+		To help detect this situation, this method will log warnings if dangerously long lines are detected. If needed 
+		the threshold for these can be configured by setting the ``self.grepWarnIfLineLongerThan`` field. 
+		If reading from a file that has long lines, consider adding `pysys.mappers.TruncateLongLines` to the mappers list. 
+
 		.. versionadded:: 1.5.1
 
 		:param str file: The path of the file to be searched. Usually this is a name/path relative to the 
@@ -1233,35 +1242,56 @@ class ProcessUser(object):
 		compiled = re.compile(expr, flags=reFlags)
 		namedGroupsMode = compiled.groupindex and condition.replace(' ','')=='>=1'
 
-		timetaken = time.time()
-		while 1:
-			if pathexists(f):
-				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers)
+		starttime = time.time()
+		lineno = [0] # use an array to hold the line counter so we can update this value inside the function
+		def watchdogMapper(line):		
+			linelen=len(line)
+			if linelen > 5000 and linelen>self.grepWarnIfLineLongerThan:
+				self.log.warning('   very long line of %s characters detected in %s during waitForGrep; be careful as some regular expressions take a very long time to run on long input strings: %s ...', 
+					linelen, file, line[:1000])
+				self.grepWarnIfLineLongerThan *= 3 # increase exponentially (for this test)
 
-				if pysys.utils.safeeval.safeEval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
-					timetaken = time.time()-timetaken
-					# Old-style/non-verbose behaviour is to log only after complete, 
-					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
-					# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
-					if verboseWaitForSignal:
-						(loginfo if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
-					else:
-						# We use the phrase "grep signal" to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal
-						loginfo("Wait for grep signal in %s completed successfully", file)
-					break
-				
-				if errorExpr:
-					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers) # add .* to capture entire err msg for a better outcome reason
-						if errmatches:
-							err = errmatches[0].group(0).strip()
-							msg = '%s found while %s'%(quotestring(err), msg[0].lower()+msg[1:])
-							# always report outcome for this case; additionally abort if requested to
-							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
-							return {} if namedGroupsMode else matches
-				
-			currentTime = time.time()
-			if currentTime > startTime + timeout:
+			lineno[0] += 1
+			if lineno[0] % 10000 == 0:
+				# periodically check for interruption or timeout; not too often or we might slow down the normal case
+				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				if time.time()-starttime > timeout:
+					self.log.debug('waitForGrep watchdog signalled timeout after handling %s lines', lineno[0]) 
+					raise TimeoutError("Timed out during waitForGrep watchdog")
+
+			return line
+		mappers = mappers+[watchdogMapper] # putting the watchdog later allows custom mappers that remove long lines if desired 
+
+		while 1:
+			try:
+				if pathexists(f):
+					matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers)
+
+					if pysys.utils.safeeval.safeEval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
+						timetaken = time.time()-starttime
+						# Old-style/non-verbose behaviour is to log only after complete, 
+						# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
+						# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
+						if verboseWaitForSignal:
+							(loginfo if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
+						else:
+							# We use the phrase "grep signal" to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal
+							loginfo("Wait for grep signal in %s completed successfully", file)
+						break
+					
+					if errorExpr:
+						for err in errorExpr:
+							errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers) # add .* to capture entire err msg for a better outcome reason
+							if errmatches:
+								err = errmatches[0].group(0).strip()
+								msg = '%s found while %s'%(quotestring(err), msg[0].lower()+msg[1:])
+								# always report outcome for this case; additionally abort if requested to
+								self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
+								return {} if namedGroupsMode else matches
+				# end of if exists
+				if time.time() > startTime + timeout: raise TimeoutError()
+
+			except TimeoutError: # may come from the above check outside the loop, or from the check every 10k lines within the watchdog
 				msg = "%s timed out after %d secs, %s"%(msg, timeout, 
 					("with %d matches"%len(matches)) if pathexists(f) else 'file does not exist')
 				
@@ -1270,7 +1300,7 @@ class ProcessUser(object):
 				else:
 					log.warning(msg, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 				break
-			
+
 			if errorIf is not None:
 				errmsg = errorIf()
 				if errmsg:

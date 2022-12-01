@@ -29,6 +29,7 @@ getExprFromFile
 pysys
 threadPoolMaxWorkers
 isInterruptTerminationInProgress
+grepWarnIfLineLongerThan
 		""".strip().split('\n')
 
 		def filter_member(m):
