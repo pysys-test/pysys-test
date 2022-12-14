@@ -144,6 +144,8 @@ class Process(object):
 		# private
 		self._outQueue = None
 
+		self._pollWait = time.sleep if self.owner is None else self.owner.pollWait
+
 
 	def __str__(self): return self.displayName
 	def __repr__(self): return '%s (pid %s)'%(self.displayName, self.pid)
@@ -264,20 +266,20 @@ class Process(object):
 		startTime = time.time()
 		log.debug("Waiting up to %d secs for process %r", timeout, self)
 
-		pollWait = time.sleep if self.owner is None else self.owner.pollWait
-
 		doneLongWaitLogging = False
 
 		while self.running():
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				raise ProcessTimeout('Waiting for completion of %r timed out after %d seconds'%(self, int(timeout)))
-			pollWait(0.05)
+			self._pollWaitUnlessProcessTerminated()
 			if doneLongWaitLogging is False and time.time()-startTime>4:
 				log.info("Waiting up to %d secs for process %r", timeout, self) # probably would be confusing to adjust this timeout based on time already waited
 				doneLongWaitLogging = True
 		
-
+	def _pollWaitUnlessProcessTerminated(self):
+		# Performs a short wait, but if the OS support it (e.g. Windows), abort waiting if the process is terminated
+		self._pollWait(0.05)
 
 	def start(self):
 		"""Start a process using the runtime parameters set at instantiation.
