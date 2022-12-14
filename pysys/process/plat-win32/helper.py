@@ -22,7 +22,7 @@
 
 import string, os.path, time, logging, sys, threading, platform
 
-import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, win32job
+import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, win32job, win32event
 
 import queue as Queue
 
@@ -344,5 +344,14 @@ class ProcessImpl(Process):
 			self.wait(timeout=timeout)
 		except Exception as ex: # pragma: no cover
 			raise ProcessError("Error stopping process: %s"%ex)
+
+
+	def _pollWaitUnlessProcessTerminated(self):
+		# While waiting for process to terminate, Windows gives us a way to block for completion without polling, so we 
+		# can use a larger timeout to avoid wasting time in the Python GIL (but not so large as to stop us from checking for abort
+		if self.__hProcess and win32event.WaitForSingleObject(self.__hProcess, 800) in [win32event.WAIT_OBJECT_0, win32event.WAIT_TIMEOUT]: 
+			if self.owner and self.owner.isInterruptTerminationInProgress is True and self.owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+			return
+		self._pollWait() # fallback to a sleep to avoid spinning if an unexpected return code is returned
 
 ProcessWrapper = ProcessImpl # old name for compatibility
