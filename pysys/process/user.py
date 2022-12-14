@@ -43,7 +43,7 @@ import pysys.utils.safeeval
 from pysys.mappers import applyMappers
 
 if IS_WINDOWS:
-	import win32api, win32con
+	import win32api, win32con, win32event
 else:
 	import fcntl
 
@@ -110,8 +110,20 @@ class ProcessUser(object):
 	"""
 
 	isInterruptTerminationInProgress = False
-	""" This static field is set to True if this entire process is in the process of terminating 
+	""" This static boolean field is set to True if this entire process is in the process of terminating 
 		early due to an interrupt from the keyboard or a signal. 
+
+		.. versionadded:: 2.2
+	"""
+
+	isInterruptTerminationInProgressEvent = win32event.CreateEvent(None, True, False, None) if IS_WINDOWS else None
+	""" A Windows (pywin32) event that will be set/signalled when PySys is requested to terminate, or 
+	``None`` if not supported on this platform. 
+
+	Use this with the pywin32 function ``win32event.WaitForMultipleObjects`` to perform waits 
+	that are aborted if a termination request happens. 
+
+	.. versionadded:: 2.2
 	"""
 
 	def __init__(self):
@@ -166,6 +178,20 @@ class ProcessUser(object):
 		# a larger (or more machine-scalable) number could cause an explosive overload to the machine or Python GIL if many/all of the PySys workers/tests 
 		# each had their own pool
 		return 6
+		
+	@staticmethod
+	def _setInterruptTerminationInProgress():
+		# undocumented static method for signalling to all ProcessUser objects that PySys is terminating. 
+		if ProcessUser.isInterruptTerminationInProgress is True: return
+
+		try:
+			if ProcessUser.isInterruptTerminationInProgressEvent:
+				win32event.SetEvent(ProcessUser.isInterruptTerminationInProgressEvent)
+					
+		except Exception as ex:
+			log.warning('Failed to signal isInterruptTerminationInProgress event during termination: %r', ex)
+		finally:
+			ProcessUser.isInterruptTerminationInProgress = True
 
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
@@ -2508,3 +2534,4 @@ class ProcessUser(object):
 
 		self.addCleanupFunction(cleanupThreadPool)
 		return pool
+

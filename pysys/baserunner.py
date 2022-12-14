@@ -372,7 +372,7 @@ class BaseRunner(ProcessUser):
 			# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
 			
 			# Setting this should be enough to terminate ASAP. 
-			ProcessUser.isInterruptTerminationInProgress = True
+			ProcessUser._setInterruptTerminationInProgress()
 
 		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
 			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
@@ -1031,7 +1031,7 @@ class BaseRunner(ProcessUser):
 		if ProcessUser.isInterruptTerminationInProgress is False: # in case signal handler wasn't called/wasn't called yet
 			self.log.critical('PySys received termination request (keyboard interrupt)')
 
-		ProcessUser.isInterruptTerminationInProgress = True
+		ProcessUser._setInterruptTerminationInProgress()
 
 	def logTestHeader(self, descriptor, cycle, **kwargs):
 		"""

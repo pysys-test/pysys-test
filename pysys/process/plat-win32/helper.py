@@ -349,9 +349,23 @@ class ProcessImpl(Process):
 	def _pollWaitUnlessProcessTerminated(self):
 		# While waiting for process to terminate, Windows gives us a way to block for completion without polling, so we 
 		# can use a larger timeout to avoid wasting time in the Python GIL (but not so large as to stop us from checking for abort
-		if self.__hProcess and win32event.WaitForSingleObject(self.__hProcess, 800) in [win32event.WAIT_OBJECT_0, win32event.WAIT_TIMEOUT]: 
-			if self.owner and self.owner.isInterruptTerminationInProgress is True and self.owner.isCleanupInProgress is False: raise KeyboardInterrupt()
-			return
+
+		__hProcess = self.__hProcess # read it atomically
+
+		if __hProcess:
+			owner = self.owner
+			waitobjects = [__hProcess]
+			if owner and (owner.isCleanupInProgress is False) and owner.isInterruptTerminationInProgressEvent: 
+				waitobjects.append(owner.isInterruptTerminationInProgressEvent)
+
+			# In theory we could increase this timeout to further reduce contention on the Python GIL but 
+			# not doing so yet since in single-threaded mode the interrupt signal is not delivered while the 
+			# main thread is busy in the WaitForMultipleObjects call so need to keep this slow to allow responsive Ctrl+C for now
+			pollTimeoutMillis = 1000
+			if win32event.WaitForMultipleObjects(waitobjects, False, pollTimeoutMillis) != win32event.WAIT_FAILED:
+				if owner and owner.isInterruptTerminationInProgress is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+				return
+		
 		self._pollWait() # fallback to a sleep to avoid spinning if an unexpected return code is returned
 
 ProcessWrapper = ProcessImpl # old name for compatibility
