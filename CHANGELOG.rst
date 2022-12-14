@@ -62,10 +62,15 @@ New features:
   complete as quickly as possible - but in an orderly way to allow for essential cleanup. The built-in PySys methods that perform 
   waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions 
   like ``time.sleep`` it is recommended to change to using the `BaseTest.pollWait` method instead, which checks this flag and 
-  raises a ``KeyboardInterrupt`` to abort the test. To ensure a rapid exit, starting new processes is disabled once termination 
+  raises a ``KeyboardInterrupt`` to abort the test. 
+
+  To ensure a rapid exit, starting new processes is disabled once termination 
   has begun. Once the cleanup phase of a test or runner beings, the restrictions are removed since it may be necessary to 
   run processes to perform cleanup (e.g. to terminate containers etc). The previous PySys behaviour of prompting interactively 
   once Ctrl+C is sent has been removed. 
+
+  On Windows in addition to the boolean flag there is an event `pysys.process.user.ProcessUser.isInterruptTerminationInProgressEvent` 
+  that can be waited on in combination with other Windows objects to abort if a termination request happens. 
 
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
   slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
