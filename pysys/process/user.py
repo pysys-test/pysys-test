@@ -126,6 +126,16 @@ class ProcessUser(object):
 	.. versionadded:: 2.2
 	"""
 
+	isInterruptTerminationInProgressHandle = None
+	""" A file handle that will have bytes available for reading when PySys is requested to terminate, or 
+	``None`` if not supported on this platform. Not available on Windows. 
+
+	Use this with ``select`` to perform waits that are aborted if a termination request happens. 
+	Do not under any circumstances actually read from this handle. 
+
+	.. versionadded:: 2.2
+	"""
+
 	def __init__(self):
 		self.log = log
 		"""The logger instance that should be used to log from this class. """
@@ -184,14 +194,17 @@ class ProcessUser(object):
 		# undocumented static method for signalling to all ProcessUser objects that PySys is terminating. 
 		if ProcessUser.isInterruptTerminationInProgress is True: return
 
+		# Set this boolean before waking up
+		ProcessUser.isInterruptTerminationInProgress = True
+
 		try:
 			if ProcessUser.isInterruptTerminationInProgressEvent:
 				win32event.SetEvent(ProcessUser.isInterruptTerminationInProgressEvent)
+			if ProcessUser.isInterruptTerminationInProgressHandle:
+				os.write(ProcessUser._isInterruptTerminationInProgressWriteHandle, b'isTerminated')
 					
 		except Exception as ex:
-			log.warning('Failed to signal isInterruptTerminationInProgress event during termination: %r', ex)
-		finally:
-			ProcessUser.isInterruptTerminationInProgress = True
+			log.warning('Failed to signal isInterruptTerminationInProgress event/handle during termination: %r', ex)
 
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
@@ -2535,3 +2548,5 @@ class ProcessUser(object):
 		self.addCleanupFunction(cleanupThreadPool)
 		return pool
 
+if not IS_WINDOWS:
+	ProcessUser.isInterruptTerminationInProgressHandle, ProcessUser._isInterruptTerminationInProgressWriteHandle = os.pipe()

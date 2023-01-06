@@ -115,6 +115,10 @@ can be accessed via instance attributes on ``self``:
   ``isInterruptTerminationInProgress`` changes to True, for use with ``win32event.WaitForMultipleObjects``. 
   Only available on Windows. 
 
+- ``self.isInterruptTerminationInProgressHandle`` *(int)*: A linux file handle that receives a write when 
+  ``isInterruptTerminationInProgress`` changes to True, for use with ``select.select``. 
+  Only available on Linux. You should never read or write this handle, it is provided only for use with ``select``. 
+
 - ``self.isCleanupInProgress`` *(bool)*: Check this for advanced cases where you need different behaviour if 
   the current test/runner is performing its post-execution cleanup phase. 
 

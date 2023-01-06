@@ -30,6 +30,7 @@ pysys
 threadPoolMaxWorkers
 isInterruptTerminationInProgress
 isInterruptTerminationInProgressEvent
+isInterruptTerminationInProgressHandle
 grepWarnIfLineLongerThan
 		""".strip().split('\n')
 

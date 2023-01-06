@@ -69,8 +69,9 @@ New features:
   run processes to perform cleanup (e.g. to terminate containers etc). The previous PySys behaviour of prompting interactively 
   once Ctrl+C is sent has been removed. 
 
-  On Windows in addition to the boolean flag there is an event `pysys.process.user.ProcessUser.isInterruptTerminationInProgressEvent` 
-  that can be waited on in combination with other Windows objects to abort if a termination request happens. 
+  For advanced users, in addition to the boolean flag, there is an event on Windows `pysys.process.user.ProcessUser.isInterruptTerminationInProgressEvent` 
+  and a file handle on Linux `pysys.process.user.ProcessUser.isInterruptTerminationInProgressHandle` 
+  that can be waited on in combination with other Windows objects or Unix file handles to abort if a termination request happens. 
 
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
   slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
@@ -110,7 +111,8 @@ New features:
 
 - Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
 
-- Improved performance of waiting for processes on Windows (by blocking with WaitForSingleObject instead of sleep polling).
+- Improved performance of waiting for processes (on Windows by blocking with WaitForSingleObject instead of sleep polling, 
+  and on Linux if kernel version is 5.3+ and Python=3.9 using pidfd_open).
 
 Fixes:
 

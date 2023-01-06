@@ -40,6 +40,7 @@ correct modules based on their current operation system.
 """
 
 import signal, time, copy, errno, threading, sys
+import select
 import queue as Queue
 
 from pysys import log
@@ -106,6 +107,7 @@ class ProcessImpl(Process):
 
 		# private instance variables
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
+		self.pidfd = None
 
 	def _writeStdin(self, data):
 		with self.__lock:
@@ -159,6 +161,13 @@ class ProcessImpl(Process):
 					# and start a thread to write to the write end
 					os.close(stdin_r)
 					self.__stdin = stdin_w
+
+					try:
+						if hasattr(os, 'pidfd_open'): # only in Python 3.9+ and Linux kernel 5.3+ (e.g. RHEL9)
+							self.pidfd = os.pidfd_open(self.pid)
+							if self.pidfd == -1: self.pidfd = None
+					except Exception as ex:
+						log.debug('Failed to call os.pidfd_open: %r', ex)
 			except Exception as ex:
 				if self.pid == 0: 
 					sys.stderr.write('Failed with: %s\n'%ex)
@@ -168,6 +177,27 @@ class ProcessImpl(Process):
 		if not self.running() and self.exitStatus == os.EX_OSERR:
 			raise ProcessError("Error creating process %s" % (self.command))
 
+
+	def _pollWaitUnlessProcessTerminated(self):
+		# While waiting for process to terminate, modern Linux kernels (5.3+) give us a way to block for completion without polling, so we 
+		# can use a larger timeout to avoid wasting time in the Python GIL (but not so large as to stop us from checking for abort
+		owner = self.owner
+		if self.pidfd and owner.isInterruptTerminationInProgressHandle:
+			if owner and owner.isInterruptTerminationInProgress is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+
+			waitobjects = [ owner.isInterruptTerminationInProgressHandle, self.pidfd]
+
+			pollTimeoutMillis = 3000
+			if select.select(waitobjects, [], [], pollTimeoutMillis/1000.0)[0]: # if objects were signalled or got anything other than timeout/block, something was signalled so we won't be doing this again
+				with self.__lock:
+					# this is a fail-safe to ensure we do not spin calling select if some unexpected error occurred OR if we've been interrupt-terminated but are executing cleanup
+					if self.pidfd: os.close(self.pidfd)
+					self.pidfd = None
+
+			if owner and owner.isInterruptTerminationInProgress is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+			return
+		
+		self._pollWait(0.05) # fallback to a fixed sleep to avoid spinning if an unexpected return code is returned
 
 	def setExitStatus(self):
 		"""Tests whether the process has terminated yet, and updates and returns the exit status if it has. 
@@ -200,6 +230,9 @@ class ProcessImpl(Process):
 					try: os.close(self.__stdin)
 					except Exception: pass # just being conservative, should never happen
 					self.__stdin = None # MUST not close this more than once
+				if self.pidfd: 
+					os.close(self.pidfd)
+					self.pidfd = None
 
 			
 			return self.exitStatus
@@ -255,3 +288,5 @@ class ProcessImpl(Process):
 			raise ProcessError("Error stopping process %r due to %s: %s"%(self, type(ex).__name__, ex))
 
 ProcessWrapper = ProcessImpl # old name for compatibility
+
+log.debug("OS and python supports pidfd_open: %s", hasattr(os, 'pidfd_open'))
