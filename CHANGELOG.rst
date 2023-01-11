@@ -39,7 +39,7 @@ New features:
   is that the helper class you inherit from contain only a single field holding an instance that encapsulates all the functionality 
   to avoid name clashes. 
   
-  In the getting started sample there is a ```MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
+  In the getting started sample there is a ``MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
   which all of the real functionality is encapsulated and exposed to individual tests for reuse. To use it all you need to do 
   is inherit the helper in any tests that need it::
 
@@ -83,8 +83,8 @@ New features:
   ``run.log`` files for the test that generatered it. 
 
 - Added `pysys.utils.threadutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
-  are available in the machine. This implementation attempts to use cgroups data (``cpu.cfs_quota/period_us`` and ``cpu.shares``) 
-  if present (in a container environment). 
+  are available in the machine. This implementation attempts to use cgroups v1 data (``cpu.cfs_quota/period_us`` - but not``cpu.shares``) 
+  if present (in a container environment). The current implementation assumes cgroups is available at ``/proc/self/cgroup``. 
 
 - Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
   to provide a default upper limit on the number of workers. 
