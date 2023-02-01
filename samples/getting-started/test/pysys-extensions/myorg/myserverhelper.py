@@ -15,11 +15,12 @@ class MyServerHelper:
 		class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
 	
 	"""
-	HELPER_MIXIN_FIELD_NAME = 'myserver' # Informs PySys that this class should add a field of this name to the test class
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs) # MUST start by calling super implementations
 		self.myserver = MyServerHelper.MyServerHelperImpl(self)
 		""" Provides access to a set of helper methods for configuring and starting MyServer instances. """
+		
+	HELPER_MIXIN_FIELD_NAME = 'myserver' # Best practice is to set this field to inform PySys that this class adds a field of this name to the base test class
 	# NB: Do NOT add ANY extra methods/fields to the helper itself - all functionality must be safely encapsulated within the nested Impl class. 
 
 	class MyServerHelperImpl(object):

@@ -120,9 +120,9 @@ in the tests that need them using inheritance (via the "mix-in" pattern). A key 
 is that the helper classes themselves contain only a single field holding an instance that encapsulates all the 
 real functionality - this avoid name clashes between different helpers, and with the PySys BaseTest class itself. 
 
-In the getting started sample there is a ``MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
-which all of the real functionality is encapsulated and exposed to individual tests for reuse. To use it all you need to do 
-is inherit the helper in any tests that need it::
+The best way to add one is to copy from the **getting-started** sample where there is a ``MyServerHelper`` mix-in class 
+that provides a field called ``self.myserver`` through which all of the real functionality is encapsulated and exposed 
+to individual tests for reuse. To use it in a test all you need to do is inherit the helper in any tests that need it::
 
     from myorg.myserverhelper import MyServerHelper
     class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
