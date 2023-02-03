@@ -115,11 +115,11 @@ def _initUsableCPUCount():
 			shares        = int(readIfExists(v1dir, 'cpu.shares') or '0') # just for information
 			cgroupsLimits = []
 			if cfs_quota_us>0 and cfs_period_us>0: 
-				cgroupsLimits.append(float(cfs_quota_us) / float(cfs_period_us))
+				cgroupsLimits.append(float(cfs_quota_us) / float(cfs_period_us)) # quota is per CPU, i.e. quota>period if multiple CPUs permitted
 
 			cpuMax = readIfExists(v2dir, 'cpu.max').split(' ')
 			if len(cpuMax)==2 and cpuMax[0].lower()!='max':
-				cgroupsLimits.append(float(cpuMax[0]) / float(cpuMax[1]))
+				cgroupsLimits.append(float(cpuMax[0]) / float(cpuMax[1])) # seems to work the same as the v1 quota and period
 			
 			# do NOT use cpu.shares as it's not possible to do reliably (e.g. cf https://bugs.openjdk.org/browse/JDK-8281181)
 				
