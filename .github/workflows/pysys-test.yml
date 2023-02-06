@@ -92,6 +92,11 @@ jobs:
         if: matrix.doc-and-deploy
         shell: bash
         run: |
+             cat /proc/self/cgroup
+             ls -l /sys/fs/cgroup
+             echo xxx
+             cat /sys/fs/cgroup/*
+             echo xxx
              mkdir dist
 
              # Install to-dos (for line endings)
