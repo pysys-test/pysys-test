@@ -143,12 +143,6 @@ jobs:
           pysys.py --help
 
           python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
-          cat /proc/self/cgroup
-          ls -l /sys/fs/cgroup
-          echo xxx
-          cat /sys/fs/cgroup/* || true
-          echo xxx
-
 
       - name: Upload Python code coverage 
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # 2022-11 https://github.com/codecov/codecov-action/releases/tag/v3.1.1
