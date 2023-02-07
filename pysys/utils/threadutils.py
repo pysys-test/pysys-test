@@ -57,7 +57,7 @@ def _getCGroupDir(cgroupsv1Controller='cpu,cpuacct'):
 	
 	mountRoot = os.getenv('PYSYS_CGROUPS_ROOT_MOUNT', '/sys/fs/cgroup') # Would be more correct to look this up from /proc/self/mountinfo, but probably not necessary as almost everyone has it mounted in the standard location
 	if not os.path.exists(mountRoot):
-		cgroupslog.debug('No Cgroup root is mounted at %s', mountRoot)
+		cgroupslog.debug('No cgroup root is mounted at %s', mountRoot)
 		return None
 	
 	d = mountRoot
