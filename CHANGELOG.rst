@@ -83,8 +83,8 @@ New features:
   ``run.log`` files for the test that generatered it. 
 
 - Added `pysys.utils.threadutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
-  are available in the machine. This implementation attempts to use cgroups v1 data (``cpu.cfs_quota/period_us`` - but not``cpu.shares``) 
-  if present (in a container environment). The current implementation assumes cgroups is available at ``/proc/self/cgroup``. 
+  are available in the machine. This implementation attempts to use cgroups v1 or v2 configuration (``cpu.cfs_quota/period_us`` or ``cpu.max`` - 
+  but not ``cpu.shares``) if present. The current implementation assumes cgroups is mounted at ``/sys/fs/cgroup``. 
 
 - Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
   to provide a default upper limit on the number of workers. 
