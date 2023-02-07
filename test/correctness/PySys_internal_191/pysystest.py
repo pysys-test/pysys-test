@@ -37,5 +37,5 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		else:
 			self.assertGrep('pysys-run.out', 'DEBUG +Read cgroups configuration: .*using dirs .*v2=/sys/fs/cgroup.*')
 			self.assertThatGrep('pysys-run.out', 'DEBUG +Read cgroups configuration: .*v2 (cpu.max=?)', "re.match(validationRegex, value)", 
-		       validationRegex=r"cpu.max=(?|max/[0-9]+|[0-9]+/[0-9]+)")
+		       validationRegex=r"cpu.max=([?]|max/[0-9]+|[0-9]+/[0-9]+)")
 		
