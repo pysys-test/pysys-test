@@ -142,7 +142,7 @@ jobs:
 
           pysys.py --help
 
-          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main -vDEBUG
+          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
           cat /proc/self/cgroup
           ls -l /sys/fs/cgroup
           echo xxx
