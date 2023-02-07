@@ -6,7 +6,7 @@
 	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, ${hostname}. -->
 	
 	<!-- Property identifying the home directory of the application build being tested. -->
-	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/../bin" pathMustExist="true"/>
+	<property name="appHome" path="${env.PYSYS_APP_HOME}" default="${testRootDir}/../bin" pathMustExist="true"/>
 
 	<!-- User-defined properties (use lowerCamelCase for property names) -->
 	

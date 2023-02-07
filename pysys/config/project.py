@@ -146,7 +146,7 @@ class _XMLProjectParser(object):
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandProperties(
-						propertyNode.getAttribute("value")
+						propertyNode.getAttribute("value") or propertyNode.getAttribute("path")
 						or '\n'.join(n.data for n in propertyNode.childNodes 
 							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data), 
 					default=propertyNode, name=name)
@@ -158,11 +158,13 @@ class _XMLProjectParser(object):
 						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
 					value = os.path.normpath(value) # since we know it's a path, make it a nice one
+				elif propertyNode.getAttribute("path"):
+					value = os.path.normpath(value)
 
 				self.properties[name] = value
 				log.debug('Setting project property %s="%s"', name, value)
 
-				permittedAttributes = {'name', 'value', 'default', 'pathMustExist'}
+				permittedAttributes = {'name', 'value', 'path', 'default', 'pathMustExist'}
 			else:
 				raise UserError('Found <property> with no name= or file=')
 			

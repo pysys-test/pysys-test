@@ -46,6 +46,8 @@
 		
 		The ``pathMustExist=true`` attribute can be used to stop the project loading if the property specifies a  
 		path that does not exist.
+		
+		Use ``path=`` instead of ``value=`` if the value is a path, to automatically normalize ``/`` and ``.`` characters.
 	-->
 	
 	<!-- Property identifying the home directory of the application build being tested. 
@@ -55,7 +57,7 @@
 	
 	Tests can be run against a different directory by setting the environment variable PYSYS_APP_HOME. 
 	-->
-	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
+	<property name="appHome" path="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
 
 	<!-- This is an example of putting connection credentials into a project property, which can be overridden 
 	using an environment variable if desired. -->
