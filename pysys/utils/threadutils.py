@@ -31,6 +31,7 @@ from pathlib import Path
 from pysys.constants import *
 from pysys.internal.initlogging import pysysLogHandler
 from pysys.utils.filegrep import getmatches
+import pysys.utils.osutils
 
 __all__ = ['BackgroundThread', 'createThreadInitializer', 'USABLE_CPU_COUNT']
 
@@ -43,42 +44,6 @@ such as the process affinity mask and container cgroups (``cpu.cfs_quota_us``) l
 
 .. versionadded:: 2.2
 """
-
-
-def _getCGroupDir(cgroupsv1Controller='cpu,cpuacct'):
-	""" Internal, do not use. 
-	
-	Get the directory for the cgroups the current process belongs to (for either a specific v1 controller, or the unified v2 hierarchy). 
-
-	
-	:param str: If using cgroupsv1 (or v1+v2 hybrid), this is the controller name. If None, assumes cgroups v2 (unified).
-	"""
-	cgroupslog = logging.getLogger('pysys.cgroups')
-	
-	mountRoot = os.getenv('PYSYS_CGROUPS_ROOT_MOUNT', '/sys/fs/cgroup') # Would be more correct to look this up from /proc/self/mountinfo, but probably not necessary as almost everyone has it mounted in the standard location
-	if not os.path.exists(mountRoot):
-		cgroupslog.debug('No cgroup root is mounted at %s', mountRoot)
-		return None
-	
-	d = mountRoot
-	if cgroupsv1Controller: 
-		d = d+'/'+cgroupsv1Controller
-	elif not os.path.exists(mountRoot+'/cgroup.controllers'):
-		return None # can't be cgroups v2 if there is no controllers file
-	
-	m = re.search(r'\d+:%s:(.*)'%('' if not cgroupsv1Controller else "([^:]+,)?"+cgroupsv1Controller+"(,[^:]+)?"), 
-			      	Path('/proc/self/cgroup').read_text())
-	if not m: return None # return and log nothing if the relevant cgroup
-	cgroup_path = m.groups()[-1].rstrip('/') # if it's "/" convert to ""
-	
-	if os.path.exists(d+cgroup_path): 
-		d = d+cgroup_path
-		cgroupslog.debug('Reading Cgroup data from "%s" as given by /proc/self/cgroup file', d)
-	else:
-		# seems to often not exist in docker containers, as it's a path in the docker host that the container can't see
-		cgroupslog.debug('Reading Cgroup data from root dir "%s" since the path "%s" given by /proc/self/cgroup file was not found under the root dir', d, cgroup_path)
-
-	return d
 
 def _initUsableCPUCount():
 	""" Internal, do not use. 
@@ -103,31 +68,27 @@ def _initUsableCPUCount():
 		# if https://github.com/python/cpython/issues/80235 is implemented we can defer to Python to calculate this
 	
 		cgroupslog = logging.getLogger('pysys.cgroups')
+		cgroups = pysys.utils.osutils.Cgroups()
 
-		v1dir = _getCGroupDir(cgroupsv1Controller='cpu')
-		v2dir = _getCGroupDir(cgroupsv1Controller=None)
-
-		def readIfExists(dirname, filename): 
-			return ( Path(dirname+'/'+filename).read_text().strip() if ( dirname and os.path.exists(dirname+'/'+filename)) else '') 
 		try:
-			cfs_quota_us  = int(readIfExists(v1dir, 'cpu.cfs_quota_us') or '0')
-			cfs_period_us = int(readIfExists(v1dir, 'cpu.cfs_period_us') or '0')
-			shares        = int(readIfExists(v1dir, 'cpu.shares') or '0') # just for information
+			cfs_quota_us  = int(cgroups.readFile('cpu.cfs_quota_us', v1Controller='cpu') or '0')
+			cfs_period_us = int(cgroups.readFile('cpu.cfs_period_us', v1Controller='cpu') or '0')
+			shares        = int(cgroups.readFile('cpu.shares', v1Controller='cpu') or '0') # just for information
 			cgroupsLimits = []
 			if cfs_quota_us>0 and cfs_period_us>0: 
 				cgroupsLimits.append(float(cfs_quota_us) / float(cfs_period_us)) # quota is per CPU, i.e. quota>period if multiple CPUs permitted
 
-			cpuMax = readIfExists(v2dir, 'cpu.max').split(' ')
+			cpuMax = cgroups.readFile('cpu.max', v1Controller=None).split(' ')
 			if len(cpuMax)==2 and cpuMax[0].lower()!='max':
 				cgroupsLimits.append(float(cpuMax[0]) / float(cpuMax[1])) # seems to work the same as the v1 quota and period
 			
 			# do NOT use cpu.shares as it's not possible to do reliably (e.g. cf https://bugs.openjdk.org/browse/JDK-8281181)
 				
 			cgroupsLimits.append(cpus) # don't ever use more than the total CPUs in the machine so add that to the list of limits
-			cgroupslog.debug('Read cgroups configuration: v1 cpu.cfs_quota_us/cfs_period_us=%s/%s (ignored: cpu.shares=%s), v2 cpu.max=%s; limiting to min of: %s CPUs; using dirs v1=%s and v2=%s', 
+			cgroupslog.debug('Read cgroups configuration: v1 cpu.cfs_quota_us/cfs_period_us=%s/%s (ignored: cpu.shares=%s), v2 cpu.max=%s; limiting to min of: %s CPUs', 
 				cfs_quota_us or '?', cfs_period_us or '?', shares or '?', 
 				'/'.join(cpuMax) or '?', 
-				cgroupsLimits, v1dir, v2dir)
+				cgroupsLimits)
 			reducedCPUs = max(1, math.ceil(min(cgroupsLimits))) # use whatever limit is lowest, but don't go below 1
 			if reducedCPUs<cpus:
 				cgroupslog.info('Reduced usable CPU count from %s to %s due to Cgroups configuration', cpus, reducedCPUs)
