@@ -140,11 +140,12 @@ class CgroupConfig:
 		
 		if os.path.exists(d+cgroup_path): 
 			d = d+cgroup_path
-			self._debuglog('Reading cgroup configuration for controller "%s" from "%s" as given by /proc/self/cgroup file', cgroupsv1Controller, d)
+			self._debuglog('Reading cgroup configuration for %s controller from "%s" as given by /proc/self/cgroup file', 
+		  		cgroupsv1Controller or '<cgroup v2>', d)
 		else:
 			# seems to often not exist in docker containers, as it's a path in the docker host that the container can't see
-			self._debuglog('Reading cgroup configuration for controller "%s" from root dir "%s" since the path "%s" given by /proc/self/cgroup file was not found under the root dir',
-		 	 	cgroupsv1Controller or '(cgroup v2)',  d, cgroup_path)
+			self._debuglog('Reading cgroup configuration for %s controller from root dir "%s" since the path "%s" given by /proc/self/cgroup file was not found under the root dir',
+		 	 	cgroupsv1Controller or '<cgroup v2>',  d, cgroup_path)
 		
 		return d
 

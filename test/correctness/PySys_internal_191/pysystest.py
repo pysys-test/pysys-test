@@ -31,11 +31,11 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		v = 2 if os.path.exists('/sys/fs/cgroup/cgroup.controllers') else 1
 		self.log.info('Testing for cgroups version: %s'%v)
 		if v == 1:
-			self.assertGrep('pysys-run.out', 'DEBUG +Reading cgroup configuration for controller "cpu" from "/sys/fs/cgroup/.*cpu')
+			self.assertGrep('pysys-run.out', 'DEBUG +Reading cgroup configuration for cpu controller from "/sys/fs/cgroup/.*cpu')
 			self.assertThatGrep('pysys-run.out', 'DEBUG +Read cgroups configuration: v1 cpu.cfs_quota_us/cfs_period_us=([^ ]+)', "re.match(validationRegex, value)", 
 		       validationRegex=r'(-1|[0-9]+)/[0-9]+')
 		else:
-			self.assertGrep('pysys-run.out', 'DEBUG +Reading cgroup configuration for controller "(cgroup v2)" from "/sys/fs/cgroup.*')
+			self.assertGrep('pysys-run.out', 'DEBUG +Reading cgroup configuration for <cgroup v2> controller from "/sys/fs/cgroup.*')
 			self.assertThatGrep('pysys-run.out', 'DEBUG +Read cgroups configuration: .*v2 (cpu.max=.+);', "re.match(validationRegex, value)", 
 		       validationRegex=r"cpu.max=([?]|max/[0-9]+|[0-9]+/[0-9]+)")
 		
