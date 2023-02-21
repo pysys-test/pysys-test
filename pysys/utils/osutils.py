@@ -17,6 +17,9 @@
 
 """
 Contains operating system helper utilities such as the `Cgroups` class. 
+
+:meta private: This API is not yet stable enough for general use, and may change at any time. 
+
 """
 
 import sys, os
@@ -37,6 +40,9 @@ class Cgroups:
 	
 	This is a minimal implementation, and assumes the  mount point is "/sys/fs/cgroup". Consider using a dedicated 
 	library if you need something more advanced. 
+	
+	:meta private: This API is not yet stable enough for general use, and may change at any time. 
+
 	"""
 	def __init__(self, mountRoot=None):
 		self.pid = 'self'
