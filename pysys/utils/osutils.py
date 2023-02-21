@@ -67,17 +67,17 @@ class Cgroups:
 		
 		with open('/proc/'+self.pid+'/cgroup') as f: # should always exist
 			# Get the PATH from a matching HIERARCHY:CONTROLLER_LIST:PATH line, where CONTROLLER_LIST is a comma-separated list
-			m = re.search(r'\d+:%s:(.*)'%('' if not cgroupsv1Controller else "([^:]+,)?"+cgroupsv1Controller+"(,[^:]+)?"), 
-									f.readline())
+			m = re.search(r'\d+:%s:(.*)'%('' if not cgroupsv1Controller else "([^:]+,)?"+cgroupsv1Controller+"(,[^:]+)?"), f.read())
 		if not m: return None # return and log nothing if the relevant cgroup
 		cgroup_path = m.groups()[-1].rstrip('/') # if it's "/" convert to ""
 		
 		if os.path.exists(d+cgroup_path): 
 			d = d+cgroup_path
-			self._debuglog('Reading cgroup configuration from "%s" as given by /proc/self/cgroup file', d)
+			self._debuglog('Reading cgroup configuration for controller "%s" from "%s" as given by /proc/self/cgroup file', cgroupsv1Controller, d)
 		else:
 			# seems to often not exist in docker containers, as it's a path in the docker host that the container can't see
-			self._debuglog('Reading cgroup configuration from root dir "%s" since the path "%s" given by /proc/self/cgroup file was not found under the root dir', d, cgroup_path)
+			self._debuglog('Reading cgroup configuration for controller "%s" from root dir "%s" since the path "%s" given by /proc/self/cgroup file was not found under the root dir',
+		 	 	cgroupsv1Controller or '(cgroup v2)',  d, cgroup_path)
 		
 		return d
 
