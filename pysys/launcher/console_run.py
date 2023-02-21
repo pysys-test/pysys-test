@@ -34,7 +34,7 @@ from pysys.launcher import createDescriptors
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
 from pysys.config.project import Project
-import pysys.utils.threadutils
+import pysys.utils.osutils
 
 class ConsoleLaunchHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -402,7 +402,7 @@ e.g.
 		return self.record, self.purge, self.cycle, None, self.threads, self.outsubdir, descriptors, self.userOptions
 
 def decideWorkerThreads(threads: str):
-	N_CPUS = pysys.utils.threadutils._initUsableCPUCount()
+	N_CPUS = pysys.utils.osutils._initUsableCPUCount() # may be fractional
 
 	# Following the example of Python's ThreadPoolExecutor, put an upper bound on the number of CPUs PySys will use 
 	# to avoid taking over wide machines pointlessly, given the GIL will limit how much can really be used

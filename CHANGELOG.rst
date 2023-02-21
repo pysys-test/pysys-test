@@ -82,14 +82,14 @@ New features:
   use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
   ``run.log`` files for the test that generatered it. 
 
-- Added `pysys.utils.threadutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
+- Added `pysys.utils.osutils.USABLE_CPU_COUNT` to provide the number of CPUs that are usable by PySys which may be less than 
   are available in the machine. This implementation attempts to use cgroups v1 or v2 configuration (``cpu.cfs_quota/period_us`` or ``cpu.max`` - 
   but not ``cpu.shares``) if present. The current implementation assumes cgroups is mounted at ``/sys/fs/cgroup``. 
 
 - Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
   to provide a default upper limit on the number of workers. 
   
-  This is based on the `pysys.utils.threadutils.USABLE_CPU_COUNT` value, but also follows the example of Python's 
+  This is based on the `pysys.utils.osutils.USABLE_CPU_COUNT` value, but also follows the example of Python's 
   ThreadPoolExecutor class in capping the number of workers at a value of 32, to avoid 
   taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the 
   Python Global Interpreter Lock. 
