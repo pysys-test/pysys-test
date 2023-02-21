@@ -16,9 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains operating system helper utilities such as the `Cgroups` class. 
-
-:meta private: This API is not yet stable enough for general use, and may change at any time. 
+Contains operating system helper utilities such as the ``USABLE_CPU_COUNT`` constant. 
 
 """
 
@@ -32,9 +30,78 @@ import logging
 
 from pysys.constants import *
 
-__all__ = ['CGroups']
+__all__ = ['USABLE_CPU_COUNT']
 
-class Cgroups:
+USABLE_CPU_COUNT: float = None
+"""
+The number of CPUs that are usable from this PySys process, as a floating point number. 
+
+This may be less than the total number of CPUs due to restrictions from the operating system 
+such as the process affinity mask and container cgroup (``cpu.cfs_quota_us`` / ``cpu.max``) limits. 
+
+.. versionadded:: 2.2
+"""
+
+def _initUsableCPUCount():
+	""" Internal, do not use. 
+
+	Called after importing BaseRunner (not when this module is imported) so that it's possible to monkey-patch 
+	it in user code (e.g. when the custom runner is imported) if required e.g. for a new platform. 
+
+	:meta private: Not public API
+	"""
+	global USABLE_CPU_COUNT
+	assert USABLE_CPU_COUNT == None # only set this once
+
+	log = logging.getLogger('pysys.initUsableCPUCount')
+
+	try:
+		cpus = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
+	except Exception: # no always available, e.g. on Windows
+		cpus = os.cpu_count()
+	assert cpus, cpus
+
+	if (not IS_WINDOWS) and os.getenv('PYSYS_IGNORE_CGROUPS','').lower()!='true' and os.path.exists('/proc/self/cgroup'): 
+		# if https://github.com/python/cpython/issues/80235 is implemented we can defer to Python to calculate this
+	
+		cgroupslog = logging.getLogger('pysys.cgroups')
+		cgroups = CgroupConfig()
+
+		try:
+			cfs_quota_us  = int(cgroups.readFile('cpu.cfs_quota_us', v1Controller='cpu') or '0')
+			cfs_period_us = int(cgroups.readFile('cpu.cfs_period_us', v1Controller='cpu') or '0')
+			shares        = int(cgroups.readFile('cpu.shares', v1Controller='cpu') or '0') # just for information
+			cgroupsLimits = []
+			if cfs_quota_us>0 and cfs_period_us>0: 
+				cgroupsLimits.append(float(cfs_quota_us) / float(cfs_period_us)) # quota is per CPU, i.e. quota>period if multiple CPUs permitted
+
+			cpuMax = cgroups.readFile('cpu.max', v1Controller=None).split(' ')
+			if len(cpuMax)==2 and cpuMax[0].lower()!='max':
+				cgroupsLimits.append(float(cpuMax[0]) / float(cpuMax[1])) # seems to work the same as the v1 quota and period
+			
+			# do NOT use cpu.shares as it's not possible to do reliably (e.g. cf https://bugs.openjdk.org/browse/JDK-8281181)
+				
+			cgroupsLimits.append(cpus) # don't ever use more than the total CPUs in the machine so add that to the list of limits
+			cgroupslog.debug('Read cgroups configuration: v1 cpu.cfs_quota_us/cfs_period_us=%s/%s (ignored: cpu.shares=%s), v2 cpu.max=%s; limiting to min of: %s CPUs', 
+				cfs_quota_us or '?', cfs_period_us or '?', shares or '?', 
+				'/'.join(cpuMax) or '?', 
+				cgroupsLimits)
+			reducedCPUs = min(cgroupsLimits) # use whatever limit is lowest
+			if reducedCPUs<=0: reducedCPUs = 1 # should not happen, just a failsafe in case of weird cgroup config
+			if reducedCPUs<cpus:
+				cgroupslog.info('Reduced usable CPU count from %s to %s due to Cgroups configuration', cpus, reducedCPUs)
+			cpus = reducedCPUs
+		except Exception as ex:
+			cgroupslog.info('Failed to read cgroups configuration to determine available CPUs: %r', ex) # 
+			cgroupslog.debug('Failed to read cgroups information due to:', exc_info=True)
+
+	log.debug('Usable CPU count for process = %d', cpus)
+
+	USABLE_CPU_COUNT = cpus
+	return cpus
+
+
+class CgroupConfig:
 	"""
 	Helper class for reading cgroups configuration for the current process, supporting both cgroups v1 and v2. 
 	
