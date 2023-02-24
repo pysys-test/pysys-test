@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Assertions - check assertGrep</title>    
+    <title>Assertions - check assertGrep and assertThatGrep</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>

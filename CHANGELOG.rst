@@ -126,6 +126,14 @@ Fixes:
 - Improved command line generation on Windows to better handle corner cases such as embedded backslashes or
   double-quotes, and trailing backslashes.
 
+Minor behaviour changes:
+
+- Fixed `pysys.basetest.assertThatGrep` to strip trailing newlines from the matched part of the line in the rare cases where 
+  the regular expression unintentionally captures newline characters (e.g. ``[^xyz]``). If you have tests that rely on 
+  this behaviour it is recommended to fix them, but if that is impractical set the project property 
+  ``pysysLegacyAssertThatGrepNewLineBehaviour`` to true to retain the previous behaviour. This preeprty may be removed in a future 
+  major release. 
+
 -----------------
 What's new in 2.1
 -----------------

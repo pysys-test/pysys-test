@@ -118,6 +118,9 @@ class PySysTest(BaseTest):
 				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
 			])
 
+		# Check final newlines aren't captured by assertThatGrep, but trailing spaces are
+		self.assertThatGrep(self.input+'/file.txt', r'Waiving grain wide over the plain delights the weary ([^x]*)', 
+		      expected='farmer, ')
 		
 	def checkForFailedOutcome(self):
 		outcome = self.outcome.pop()

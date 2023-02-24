@@ -1078,8 +1078,15 @@ class BaseTest(ProcessUser):
 		"""
 		def grep(file, expr):
 			e = self.grep(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
+			
+			if isinstance(e, str) and not self.project.getProperty('pysysLegacyAssertThatGrepNewLineBehaviour', False): 
+				# while not a problem for most regexes, it's certainly possible to create a regex that captures the newline 
+				# character and then to get surprised, 
+				e = e.rstrip('\n\r')
+			
 			# in case it has named parameters
-			if isinstance(e, dict) and len(e)==1: return next(iter(e.values()))
+			elif isinstance(e, dict) and len(e)==1: return next(iter(e.values()))
+			
 			return e
 		return self.assertThat(conditionstring, value__eval='grep(%r, %r)'%(file, grepRegex), 
 			**kwargsForAssertThat)
