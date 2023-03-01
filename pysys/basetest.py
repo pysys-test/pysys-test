@@ -352,9 +352,9 @@ class BaseTest(ProcessUser):
 			t.start()
 		
 			if state == FOREGROUND:
-				startTime = time.time()
+				startTime = time.monotonic()
 				while self.manualTester.running() == 1:
-					currentTime = time.time()
+					currentTime = time.monotonic()
 					if currentTime > startTime + timeout:
 						self.addOutcome(TIMEDOUT, 'Manual tester timed out')
 						self.manualTester.stop()
@@ -382,9 +382,9 @@ class BaseTest(ProcessUser):
 		
 		"""
 		if self.manualTester and self.manualTester.running():
-			startTime = time.time()
+			startTime = time.monotonic()
 			while self.manualTester.running() == 1:
-				currentTime = time.time()
+				currentTime = time.monotonic()
 				if currentTime > startTime + timeout:
 					self.addOutcome(TIMEDOUT, 'Timed out waiting for manual tester')
 					self.manualTester.stop()

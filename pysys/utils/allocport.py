@@ -256,9 +256,9 @@ __totalAllocatedPorts = 0
 def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
 	# nb: expose socket type and protocol number here but not higher up the stack just in case someone needs them, but 
 	# not very likely
-	t = time.time()
+	t = time.monotonic()
 	haslogged = False
-	while time.time()-t < TIMEOUTS['WaitForAvailableTCPPort']:
+	while time.monotonic()-t < TIMEOUTS['WaitForAvailableTCPPort']:
 		
 		# in case we've allocated all the available ports, loop 
 		# until another test terminates and free up some ports
@@ -281,7 +281,7 @@ def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET,
 			time.sleep(0.5) # avoid spinning
 		else:
 			if haslogged:
-				_log.info('   successfully allocated TCP port %d after %0.1fs', port, time.time()-t)
+				_log.info('   successfully allocated TCP port %d after %0.1fs', port, time.monotonic()-t)
 			global __totalAllocatedPorts, __peakAllocatedPorts
 			__totalAllocatedPorts += 1 # sufficiently thread-safe for statistics reporting due to GIL (minor errors tolerated)
 			__peakAllocatedPorts = max(__peakAllocatedPorts, __totalServerPorts-len(tcpServerPortPool))

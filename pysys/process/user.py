@@ -504,7 +504,7 @@ class ProcessUser(object):
 		if not environs: # a truly empty env isn't really usable, so populate it with a minimal default environment instead
 			environs = self.getDefaultEnvirons(command=command)
 		
-		startTime = time.time()
+		startTime = time.monotonic()
 		
 		# pass everything as a named parameter, which makes life easier for custom factory methods
 		process = processFactory(command=command, arguments=arguments, environs=environs, workingDir=workingDir, 
@@ -531,7 +531,7 @@ class ProcessUser(object):
 				logmethod = log.info if correctExitStatus else log.warning
 				if quiet: logmethod = log.debug
 				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
-					", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 10 else "")
+					", duration %d secs" % (time.monotonic()-startTime) if (int(time.monotonic()-startTime)) > 10 else "")
 				
 				if not ignoreExitStatus and not correctExitStatus:
 					if not stderr and not quiet: log.warning('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
@@ -862,14 +862,14 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		try:
-			t = time.time()
+			t = time.monotonic()
 			process.wait(timeout) # this will log if it takes more than a few seconds
-			if (time.time()-t > 10) or process.exitStatus != 0:
-				log.info("Process %s terminated after %d secs with exit status %d", process, time.time()-t, process.exitStatus)
+			if (time.monotonic()-t > 10) or process.exitStatus != 0:
+				log.info("Process %s terminated after %d secs with exit status %d", process, time.monotonic()-t, process.exitStatus)
 				
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warning("Ignoring timeout waiting for process %r after %d secs (as abortOnError=False)", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+				log.warning("Ignoring timeout waiting for process %r after %d secs (as abortOnError=False)", process, time.monotonic() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
 
@@ -940,14 +940,14 @@ class ProcessUser(object):
 		"""
 
 		assert timeout>0, 'timeout must be specified'
-		starttime = time.time()
+		starttime = time.monotonic()
 		includes = includes or self.processList
 		
 		running = [p for p in includes if p.state==BACKGROUND and p.running() and p not in excludes]
 		self.log.info('Waiting up to %d secs for %d background process(es) to complete', timeout, len(running))
 		for p in running:
 			try:
-				thistimeout = starttime+timeout-time.time()
+				thistimeout = starttime+timeout-time.monotonic()
 				if thistimeout <= 0: # we've run out of time
 					raise ProcessTimeout('waitForBackgroundProcesses timed out')
 				if p.running(): 
@@ -970,7 +970,7 @@ class ProcessUser(object):
 					failures.append('%s returned exit status %s (expected %s)'%(process, process.exitStatus, process.expectedExitStatus))
 			if failures:
 				self.addOutcome(BLOCKED, ('%d processes failed: '%len(failures) if len(failures)>1 else 'Process ')+'; '.join(failures), abortOnError=abortOnError)
-		(self.log.info if (time.time()-starttime>10) else self.log.debug)('All processes completed, after waiting %d secs'%(time.time()-starttime))
+		(self.log.info if (time.monotonic()-starttime>10) else self.log.debug)('All processes completed, after waiting %d secs'%(time.monotonic()-starttime))
 
 	def writeProcess(self, process, data, addNewLine=True):
 		"""Write binary data to the stdin of a process.
@@ -1026,7 +1026,7 @@ class ProcessUser(object):
 
 		s = None
 		try:
-			startTime = time.time()
+			startTime = time.monotonic()
 			while True:
 				if s is None:
 					with process_lock:
@@ -1045,8 +1045,8 @@ class ProcessUser(object):
 					s.shutdown(socket.SHUT_RDWR)
 					
 					log.debug("Wait for socket creation completed successfully")
-					if time.time()-startTime>10:
-						log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
+					if time.monotonic()-startTime>10:
+						log.info("Wait for socket creation completed after %d secs", time.monotonic()-startTime)
 					return True
 				except socket.error as ex:
 					if process and not process.running():
@@ -1058,9 +1058,9 @@ class ProcessUser(object):
 						return False
 
 					if timeout:
-						currentTime = time.time()
+						currentTime = time.monotonic()
 						if currentTime > startTime + timeout:
-							msg = "Timed out waiting for creation of socket after %d secs: %s"%(time.time()-startTime, ex)
+							msg = "Timed out waiting for creation of socket after %d secs: %s"%(time.monotonic()-startTime, ex)
 							if abortOnError:
 								self.abort(TIMEDOUT, msg, self.__callRecord())
 							else:
@@ -1096,13 +1096,13 @@ class ProcessUser(object):
 		
 		log.debug("Performing wait for file creation: %s", f)
 		
-		startTime = time.time()
+		startTime = time.monotonic()
 		while True:
 			if timeout:
-				currentTime = time.time()
+				currentTime = time.monotonic()
 				if currentTime > startTime + timeout:
 
-					msg = "Timed out waiting for creation of file %s after %d secs" % (file, time.time()-startTime)
+					msg = "Timed out waiting for creation of file %s after %d secs" % (file, time.monotonic()-startTime)
 					if abortOnError:
 						self.abort(TIMEDOUT, msg, self.__callRecord())
 					else:
@@ -1256,7 +1256,6 @@ class ProcessUser(object):
 		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		
 		matches = []
-		startTime = time.time()
 		msg = "Waiting for {expr} {condition}in {file}".format(
 			expr=quotestring(expr), # performs escaping of embedded quotes, newlines, etc
 			condition=condition.strip()+' ' if condition!='>=1' else '', # only include if non-default
@@ -1281,7 +1280,7 @@ class ProcessUser(object):
 		compiled = re.compile(expr, flags=reFlags)
 		namedGroupsMode = compiled.groupindex and condition.replace(' ','')=='>=1'
 
-		starttime = time.time()
+		starttime = time.monotonic()
 		lineno = [0] # use an array to hold the line counter so we can update this value inside the function
 		def watchdogMapper(line):		
 			linelen=len(line)
@@ -1294,7 +1293,7 @@ class ProcessUser(object):
 			if lineno[0] % 10000 == 0:
 				# periodically check for interruption or timeout; not too often or we might slow down the normal case
 				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
-				if time.time()-starttime > timeout:
+				if time.monotonic()-starttime > timeout:
 					self.log.debug('waitForGrep watchdog signalled timeout after handling %s lines', lineno[0]) 
 					raise TimeoutError("Timed out during waitForGrep watchdog")
 
@@ -1307,7 +1306,7 @@ class ProcessUser(object):
 					matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers)
 
 					if pysys.utils.safeeval.safeEval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
-						timetaken = time.time()-starttime
+						timetaken = time.monotonic()-starttime
 						# Old-style/non-verbose behaviour is to log only after complete, 
 						# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
 						# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
@@ -1328,7 +1327,7 @@ class ProcessUser(object):
 								self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
 								return {} if namedGroupsMode else matches
 				# end of if exists
-				if time.time() > startTime + timeout: raise TimeoutError()
+				if time.monotonic() > starttime + timeout: raise TimeoutError()
 
 			except TimeoutError: # may come from the above check outside the loop, or from the check every 10k lines within the watchdog
 				msg = "%s timed out after %d secs, %s"%(msg, timeout, 
@@ -2538,12 +2537,12 @@ class ProcessUser(object):
 		def cleanupThreadPool():
 			log.info('Shutting down thread pool')
 
-			starttime = time.time()
+			starttime = time.monotonic()
 			if sys.version_info[:2] >= (3, 9):
 				pool.shutdown(wait=True, cancel_futures=True)
 			else:
 				pool.shutdown(wait=True)
-			(log.info if time.time()-starttime>5 else log.debug)('Completed shutdown of thread pool after %0.1f seconds', time.time()-starttime)
+			(log.info if time.monotonic()-starttime>5 else log.debug)('Completed shutdown of thread pool after %0.1f seconds', time.monotonic()-starttime)
 
 		self.addCleanupFunction(cleanupThreadPool)
 		return pool

@@ -188,19 +188,19 @@ class BackgroundThread(object):
 		if self.thread.is_alive() or (not outcomereported):
 			# only log it the first time
 			self.log.info('Joining background thread %s'%self)
-		starttime = time.time()
+		starttime = time.monotonic()
 		
 		# don't call thread.join for the entire time, since on windows that 
 		# leaves no opportunity to detect keyboard interrupts
 		if self.__kbdrInterrupt: raise self.__kbdrInterrupt # avoid repeatedly joining same thread
-		while self.thread.is_alive() and time.time()-starttime < timeout:
+		while self.thread.is_alive() and time.monotonic()-starttime < timeout:
 			try:
 				self.thread.join(1)
 			except KeyboardInterrupt as ex: # pragma: no cover
 				self.__kbdrInterrupt = ex
 				raise
 		
-		timetaken = time.time()-starttime
+		timetaken = time.monotonic()-starttime
 		
 		if self.thread.is_alive():
 		

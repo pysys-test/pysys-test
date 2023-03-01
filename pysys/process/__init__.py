@@ -263,17 +263,17 @@ class Process(object):
 		
 		"""
 		assert timeout > 0, 'timeout must always be specified'
-		startTime = time.time()
+		startTime = time.monotonic()
 		log.debug("Waiting up to %d secs for process %r", timeout, self)
 
 		doneLongWaitLogging = False
 
 		while self.running():
-			currentTime = time.time()
+			currentTime = time.monotonic()
 			if currentTime > startTime + timeout:
 				raise ProcessTimeout('Waiting for completion of %r timed out after %d seconds'%(self, int(timeout)))
 			self._pollWaitUnlessProcessTerminated()
-			if doneLongWaitLogging is False and time.time()-startTime>4:
+			if doneLongWaitLogging is False and time.monotonic()-startTime>4:
 				log.info("Waiting up to %d secs for process %r", timeout, self) # probably would be confusing to adjust this timeout based on time already waited
 				doneLongWaitLogging = True
 		
