@@ -56,7 +56,7 @@ New features:
   Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
   classes your test inherits from. 
 
-- Added `BaseTest.assertThatGrepOfGrep()` to simplify the common case of extracting a value using a grep 
+- Added `BaseTest.assertGrepOfGrep()` to simplify the common case of extracting a value using a grep 
   expression and then checks that value using another regular expression. This is a small wrapper method around 
   `BaseTest.assertThatGrep()`. This approach is superior to putting both extraction and validation into 
   a single `BaseTest.assertGrep()` regular expression due to improved messages on failure which make 

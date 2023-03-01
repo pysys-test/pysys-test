@@ -146,8 +146,8 @@ Assertions and outcomes
 
 .. autosummary::
 	assertThatGrep
-	assertThatGrepOfGrep
 	assertGrep
+	assertGrepOfGrep
 	assertLineCount
 	assertDiff
 	assertThat

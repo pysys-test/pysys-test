@@ -996,14 +996,14 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
-	def assertThatGrepOfGrep(self, file, grepRegex, expectedRegex, encoding=None, reFlags=0, mappers=[], **kwargs):
+	def assertGrepOfGrep(self, file, grepRegex, expectedRegex, encoding=None, reFlags=0, mappers=[], **kwargs):
 		"""Perform a validation by using a regular expression "(...)" group to extract the first matching value from a text file 
 		and then use a second regex to validate that the extracted value is as expected. 
 
 		Using this method to separate out the extraction and validation stages is clearer 
 		and produces more easily debuggable messages than combining both into a single `assertGrep`. For example::
 
-			self.assertThatGrepOfGrep('myserver.log', r'Successfully authenticated user .*in ([^ ]+) seconds', r'[0-9.]+$')
+			self.assertGrepOfGrep('myserver.log', r'Successfully authenticated user .*in ([^ ]+) seconds', r'[0-9.]+$')
 		
 		This is equivalent to L{assertThatGrep} with a conditionstring of 're.match(expectedRegex, value)'. For details on 
 		the command line arguments, see that method. 
@@ -1034,12 +1034,12 @@ class BaseTest(ProcessUser):
 
 		When your validation on the extracted value is itself to be performed with another regular expression, 
 		separating out the extraction and validation stages is still clearer and produces more easily debuggable messages than 
-		combining both into a single `assertGrep`. You can use the `assertThatGrepOfGrep` method to save 
+		combining both into a single `assertGrep`. You can use the `assertGrepOfGrep` method to save 
 		having to enter ``conditionstring="re.match(expectedRegex, value)"``::
 
-			self.assertThatGrepOfGrep('myserver.log', r'Successfully authenticated user ".*" in ([^ ]+) seconds', r'[0-9.]+$')
+			self.assertGrepOfGrep('myserver.log', r'Successfully authenticated user ".*" in ([^ ]+) seconds', r'[0-9.]+$')
 			
-		See also the `assertThatGrepOfGrep` method which is an alias for the above. 
+		See also the `assertGrepOfGrep` method which is an alias for the above. 
 
 		This method is implemented using `grep` and `assertThat`, so see those methods for more detailed 
 		information on the parameters. 
@@ -1122,7 +1122,7 @@ class BaseTest(ProcessUser):
 		there are no error messages. 
 		
 		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
-		use `assertThatGrep` or `assertThatGrepOfGrep` instead of this function, as these methods indicate the intention 
+		use `assertThatGrep` or `assertGrepOfGrep` instead of this function, as these methods indicate the intention 
 		more clearly, produce better messages on failure, and in the case of `assertThatGrep` 
 		also allow for more powerful matching using a full Python expression 
 		(e.g. numeric range checks, pre-processing strings to normalize case or path separators, etc). 
