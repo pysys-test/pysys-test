@@ -145,6 +145,7 @@ class PySysTest(BaseTest):
 		self.assertThatGrep('myprocess-2.log', 'Server started in ([0-9.]+) seconds', 'float(value) < expected', expected=60.0)
 		self.write_text('myserver.log', 'Successfully authenticated user "Ben" in 20.3 seconds')
 		self.assertGrepOfGrep('myserver.log', r'Successfully authenticated user .*in ([^ ]+) seconds', r'[0-9.]+$')
+		self.assertGrepOfGrep('myserver.log', r'Successfully authenticated user "(.*)"', r'be.', reFlags=re.IGNORECASE)
 
 		########
 

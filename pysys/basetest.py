@@ -1014,8 +1014,8 @@ class BaseTest(ProcessUser):
 		.. versionadded:: 2.2
 		"""
 
-		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value)', expectedRegex=expectedRegex, 
-			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value%s)'%(', flags='+str(reFlags) if reFlags!=0 else ''), 
+			expectedRegex=expectedRegex, encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
 		r"""Perform a validation by using a regular expression to extract the first matching value from a text file and then check 
