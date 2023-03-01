@@ -1019,11 +1019,11 @@ class BaseTest(ProcessUser):
 
 	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
 		r"""Perform a validation by using a regular expression to extract the first matching value from a text file and then check 
-		the extracted value is correct using an `assertThat` conditionstring.
+		the extracted string value is correct using an `assertThat` conditionstring.
 
 		For example::
 		
-			# This is the typical case - "value" is assigned to the first (...) regex group, and keyword parameters 
+			# This is the typical case - the string "value" is assigned to the first (...) regex group, and keyword parameters 
 			# (e.g. "expected=") are used to validate that the "value" is correct
 			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
 				"value == expected", expected='myuser')
