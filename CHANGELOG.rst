@@ -56,6 +56,12 @@ New features:
   Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
   classes your test inherits from. 
 
+- Added `BaseTest.assertThatGrepOfGrep()` to simplify the common case of extracting a value using a grep 
+  expression and then checks that value using another regular expression. This is a small wrapper method around 
+  `BaseTest.assertThatGrep()`. This approach is superior to putting both extraction and validation into 
+  a single `BaseTest.assertGrep()` regular expression due to improved messages on failure which make 
+  tests easier to write and debug. 
+  
 - Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
   are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
   the new global flag `pysys.process.user.ProcessUser.isInterruptTerminationInProgress` which informs all tests they should 
@@ -1515,7 +1521,7 @@ Assertion and waitForGrep improvements:
      Assert that (actual == expected) with actual (myDataStructure['item3'][-1].getId()) ='baZaar', expected='baz' ... failed
           actual: 'baZaar'
         expected: 'baz'
-                    ^
+                     ^
 
   Note that when two named parameters are provided and the condition string is a simple equality 
   comparison (``==`` or ``is``), additional lines are logged when the assertion fails to show at what point the 

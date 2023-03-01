@@ -74,7 +74,7 @@ class PySysTest(BaseTest):
 		# now check the first message was correct; the rest will be caught with the diff
 
 		self.assertThat('reasonFailedEvalAssert.startswith(expected)', reasonFailedEvalAssert=reasonFailedEvalAssert, 
-			expected="Assert that (actual == expected) with ")
+			expected="Assert that {actual == expected} with ")
 
 		# for the list/dict cases
 		if sys.version_info[0:2] >= (3, 6): # ancient versions don't keep a deterministic order for kwargs, so diff might 
@@ -130,7 +130,7 @@ class PySysTest(BaseTest):
 
 		self.assertThat("actual == expected", actual__eval="myDataStructure['item1'][-1].getId()", expected="foo")
 		self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].getId()", expected="bar")
-		#self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz") # this would fail
+		self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz", failureOutcome=PASSED) # this fails, so hack it with failureOutcome
 				
 		self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='bar')
 		self.assertThat('len(actual) == 1', actual__eval="myDataStructure['item2']")
@@ -140,9 +140,16 @@ class PySysTest(BaseTest):
 		if sys.version_info[0:2] >= (3, 6):
 			self.assertThat('actual == expected', item__eval="myDataStructure['item1']", actual__eval="item[-1].getId()", expected='foo', needsPython36=True)
 
+		######## assertThatGrep[OfGrep]
+		self.log.info('--- assertThatGrep')
+		self.assertThatGrep('myprocess-2.log', 'Server started in ([0-9.]+) seconds', 'float(value) < expected', expected=60.0)
+		self.write_text('myserver.log', 'Successfully authenticated user "Ben" in 20.3 seconds')
+		self.assertThatGrepOfGrep('myserver.log', r'Successfully authenticated user .*in ([^ ]+) seconds', r'[0-9.]+$')
+
 		########
 
 		# extra cases
+		self.log.info('--- extra cases')
 		
 		# string escaping
 		msg = 'Foo"\'\nbar'

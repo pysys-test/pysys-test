@@ -556,9 +556,9 @@ class BaseTest(ProcessUser):
 			self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz")
 
 			# Produces self-describing log messages like this:
-			#  Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foo', expected='foo' ... passed
-			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='bar', expected='bar' ... passed
-			#  Assert that (actual == expected) with actual (myDataStructure['item3'][-1].getId()) ='baZaar', expected='baz' ... failed
+			# Assert that {actual == expected} with actual{=myDataStructure['item1'][-1].getId()} ="foo" expected="foo" ... passed
+			# Assert that {actual == expected} with actual{=myDataStructure['item2'][-1].getId()} ="bar" expected="bar" ... passed
+			# Assert that {actual == expected} with actual{=myDataStructure['item3'][-1].getId()} ="baZaar" expected="baz" ... failed [run.py:123]
 			#       actual: 'baZaar'
 			#     expected: 'baz'
 			#                 ^
@@ -580,7 +580,7 @@ class BaseTest(ProcessUser):
 			It's best to put expected values into a separate named parameter (rather than using literals inside the 
 			conditionstring), since this will produce more informative messages if there is a failure. 
 			
-			Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
+			Do not be tempted to use a Python f-string here, as that would deprive this method of the 
 			opportunity to provide a self-describing message and outcome reason. 
 		
 		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
@@ -616,9 +616,10 @@ class BaseTest(ProcessUser):
 		
 		EVAL_SUFFIX = '__eval'
 		for k,v in kwargs.items():
+			evalsuffix = ''
 			if k.endswith(EVAL_SUFFIX):
 				k = k[:-len(EVAL_SUFFIX)] # strip the suffix
-				displayvalues.append(u'%s (%s) '%(k, v))
+				evalsuffix = '{=%s} '%v
 				try:
 					# evaluate in the namespace of the parent (which includes basetest)
 					namespace = dict(inspect.currentframe().f_back.f_locals)
@@ -628,14 +629,13 @@ class BaseTest(ProcessUser):
 				except pysys.utils.safeeval.SafeEvalException as ex:
 					self.addOutcome(BLOCKED, str(ex), abortOnError=abortOnError)
 					return False
-			else:
-				displayvalues.append(k)
 				
 			if '__' in k: raise Exception('Please do not use __ in any for keywords, this is reserved for future use')
 
 			# use quotestring which uses repr() for escaping only if we need it; other data structures are best using normal str()
 			
-			displayvalues[-1]+= (u'=%s'%quotestring(v) if isstring(v) else (u'=%s'%(v,)))
+			# probably best to put the evalsuffix early in the string so that similar assertions has the same prefix in the run.log
+			displayvalues.append(u'%s%s=%s'%(k, evalsuffix, quotestring(v) if isstring(v) else (u'%s'%(v,))))
 			namedvalues[k] = v
 
 		if positional_arguments: # yucky old-style mechanism
@@ -645,17 +645,17 @@ class BaseTest(ProcessUser):
 				self.addOutcome(BLOCKED, 'Failed to substitute unnamed/positional arguments into %r using %% operator; this feature is deprecated, please use named arguments instead, e.g. assertThat("...", expected=..., actual=...)'%conditionstring, abortOnError=abortOnError)
 				return False
 		
-		displayvalues = ' with '+', '.join(displayvalues) if displayvalues else ''
+		displayvalues = ' with '+' '.join(displayvalues) if displayvalues else ''
 		try:
 			namespace = dict(namedvalues)
 			namespace['self'] = self
-			result = bool(pysys.utils.safeeval.safeEval(conditionstring, extraNamespace=namespace, errorMessage='Failed to evaluate (%s)%s - {error}'%(conditionstring, displayvalues)))
+			result = bool(pysys.utils.safeeval.safeEval(conditionstring, extraNamespace=namespace, errorMessage='Failed to evaluate {%s}%s - {error}'%(conditionstring, displayvalues)))
 
 		except pysys.utils.safeeval.SafeEvalException as ex:
 			self.addOutcome(BLOCKED, str(ex), abortOnError=abortOnError)
 			return False
 		
-		assertMessage = self._concatAssertMessages(assertMessage, 'Assert that (%s)%s'%(conditionstring, displayvalues), short=result)
+		assertMessage = self._concatAssertMessages(assertMessage, 'Assert that {%s}%s'%(conditionstring, displayvalues), short=result)
 		
 		if result:
 			self.addOutcome(PASSED, assertMessage)
@@ -996,6 +996,27 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
+	def assertThatGrepOfGrep(self, file, grepRegex, expectedRegex, encoding=None, reFlags=0, mappers=[], **kwargs):
+		"""Perform a validation by using a regular expression "(...)" group to extract the first matching value from a text file 
+		and then use a second regex to validate that the extracted value is as expected. 
+
+		Using this method to separate out the extraction and validation stages is clearer 
+		and produces more easily debuggable messages than combining both into a single `assertGrep`. For example::
+
+			self.assertThatGrepOfGrep('myserver.log', r'Successfully authenticated user .*in ([^ ]+) seconds', r'[0-9.]+$')
+		
+		This is equivalent to L{assertThatGrep} with a conditionstring of 're.match(expectedRegex, value)'. For details on 
+		the command line arguments, see that method. 
+
+		Regular expressions aren't the solution for every problem, and for cases where you need to match a literal 
+		or check a value is within a range, use L{assertThatGrep} instead. 
+
+		.. versionadded:: 2.2
+		"""
+
+		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value)', expectedRegex=expectedRegex, 
+			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+
 	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
 		r"""Perform a validation by using a regular expression to extract the first matching value from a text file and then check 
 		the extracted value is correct using an `assertThat` conditionstring.
@@ -1011,12 +1032,14 @@ class BaseTest(ProcessUser):
 			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
 				"0.0 <= float(value) <= 60.0")
 
-		Even when your validation on the extracted value is itself to be performed with another regular expression, 
-		using this method to separate out the extraction and validation stages (as in the following example) is clearer 
-		and produces more easily debuggable messages than combining both into a single `assertGrep`::
+		When your validation on the extracted value is itself to be performed with another regular expression, 
+		separating out the extraction and validation stages is still clearer and produces more easily debuggable messages than 
+		combining both into a single `assertGrep`. You can use the `assertThatGrepOfGrep` method to save 
+		having to enter ``conditionstring="re.match(expectedRegex, value)"``::
 
-			self.assertThatGrep('myserver.log', r'Successfully authenticated user ".*" in ([^ ]+) seconds', 
-				"re.match(validationRegex, value)", validationRegex=r"[0-9]+\.[0-9]$")
+			self.assertThatGrepOfGrep('myserver.log', r'Successfully authenticated user ".*" in ([^ ]+) seconds', r'[0-9.]+$')
+			
+		See also the `assertThatGrepOfGrep` method which is an alias for the above. 
 
 		This method is implemented using `grep` and `assertThat`, so see those methods for more detailed 
 		information on the parameters. 
@@ -1095,15 +1118,16 @@ class BaseTest(ProcessUser):
 			abortOnError=False, assertMessage=None, reFlags=0, mappers=[], expr='', filedir=None):
 		r"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
-		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
-		use `assertThatGrep` instead of this function, as assertThatGrep indicates the intention more clearly, 
-		produces better messages on failure, and 
-		also allows for more powerful matching using a full Python expression 
-		(e.g. numeric range checks, pre-processing strings to normalize case, 
-
 		The assertGrep method is good for checking in a log to confirm that something happened, or to check that 
 		there are no error messages. 
-		When contains=True it adds a `PASSED <pysys.constants.PASSED>` outcome if found or a 
+		
+		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
+		use `assertThatGrep` or `assertThatGrepOfGrep` instead of this function, as these methods indicate the intention 
+		more clearly, produce better messages on failure, and in the case of `assertThatGrep` 
+		also allow for more powerful matching using a full Python expression 
+		(e.g. numeric range checks, pre-processing strings to normalize case or path separators, etc). 
+	
+		When contains=True this method adds a `PASSED <pysys.constants.PASSED>` outcome if found or a 
 		`FAILED <pysys.constants.FAILED>` outcome if not found (except when where are named groups in the expression 
 		in which case `BLOCKED <pysys.constants.BLOCKED>` is used to indicate that the return value is not valid).
 		When contains=False this is inverted so a `PASSED <pysys.constants.PASSED>` outcome is added if not found 
@@ -1121,6 +1145,7 @@ class BaseTest(ProcessUser):
 				ignores=['Caused by: java.lang.RuntimeError: My expected exception'])
 			
 			# In Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
+			# (but assertThatGrep is a better choice here)
 			self.assertGrep('myserver.log', f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
 			
 			# If you need to use \ characters use a raw r'...' string to avoid the need for Python \ escaping in 

@@ -2,7 +2,7 @@
 <pysystest type="auto">
   
   <description> 
-    <title>Assertions - assertThat keyword arguments (new-style)</title>    
+    <title>Assertions - assertThat keyword arguments (new-style), assertThatGrep/assertThatGrepOfGrep</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
