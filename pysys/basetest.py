@@ -1014,7 +1014,7 @@ class BaseTest(ProcessUser):
 		.. versionadded:: 2.2
 		"""
 
-		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value%s)'%(', flags='+str(reFlags) if reFlags!=0 else ''), 
+		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value%s)'%(', flags='+str(int(reFlags)) if reFlags else ''), 
 			expectedRegex=expectedRegex, encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):

@@ -30,7 +30,7 @@ Assert that {len(actual) == 1} with actual{=myDataStructure['item2']} =[MyClass(
 Assert that {actual == expected} with item{=myDataStructure['item1']} =[MyClass(foo)] actual{=item[-1].getId()} ="foo" expected="foo" needsPython36=True ... passed
 Assert that {float(value) < expected} with value{=grep('myprocess-2.log', 'Server started in ([0-9.]+) seconds')} ="20.3" expected=60.0 ... passed
 Assert that {re.match(expectedRegex, value)} with value{=grep('myserver.log', 'Successfully authenticated user .*in ([^ ]+) seconds')} ="20.3" expectedRegex="[0-9.]+$" ... passed
-Assert that {re.match(expectedRegex, value, flags=re.IGNORECASE)} with value{=grep('myserver.log', 'Successfully authenticated user "(.*)"')} ="Ben" expectedRegex="be." ... passed
+Assert that {re.match(expectedRegex, value, flags=2)} with value{=grep('myserver.log', 'Successfully authenticated user "(.*)"')} ="Ben" expectedRegex="be." ... passed
 Assert that {actualErrorMessage == "Foo\"\'\nbar"} with actualErrorMessage='Foo"\'\nbar' ... passed
 Assert that {actualFileSize > 0} with actualFileSize{=os.path.getsize(self.output+'/file1.dat')} =3 ... passed
 Assert that {actualFileSize > 0} with actualFileSize{=os.path.getsize(self.output+'/file2.dat')} =3 ... passed
