@@ -103,7 +103,10 @@ class PySysTest(MyServerHelper, pysys.basetest.BaseTest):
 		self.myserver.checkLog('my_server1.out')
 		self.myserver.checkLog('my_server2.out')
 
+		# Extract some text from the log files and validate that it matches our expectations
 		self.assertThatGrep('my_server_invalid_port.out', r' ERROR +(.*)', "value == expected", 
 			expected="Server failed: Invalid port number specified: -1")
 		self.assertThatGrep('my_server_invalid_loglevel.out', r' ERROR +(.*)', "'FOOBAR' in value")
-	
+		
+		self.assertGrepOfGrep('my_server1.out', r'Started MyServer v(.*) on port', r'[0-9]+\.[0-9]+\.[0-9]+')
+		
