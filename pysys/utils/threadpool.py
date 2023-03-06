@@ -185,7 +185,7 @@ class ThreadPool(object):
 		"""
 		for i in range(num_workers):
 			self.workers.append(WorkerThread(self._requests_queue,
-				self._results_queue, poll_timeout=poll_timeout, pool=self))
+				self._results_queue, poll_timeout=poll_timeout, pool=self, name='PySysWorker-%02d'%(i+1)))
 
 
 	def dismissWorkers(self, num_workers, do_join=False):
