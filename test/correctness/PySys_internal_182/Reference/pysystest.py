@@ -2,8 +2,7 @@ __pysys_title__   = r""" My foobar tool - Argument parsing success and error cas
 #                        ================================================================================
 
 __pysys_purpose__ = r""" This is a good place for a fuller description of what is in and 
-	out of scope for this particular testcase.
-	"""
+	out of scope for this particular testcase. """
 
 __pysys_authors__ = "userid1, userid2, Joe Bloggs"
 __pysys_created__ = "1999-12-31"

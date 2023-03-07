@@ -142,12 +142,13 @@ def xmlToPy(xmlpath):
 	
 	py =  f'__pysys_title__   = r""" {d.pop("title", "")} """\n'
 	py += f'#                        {LINE_LENGTH_GUIDE}\n\n'
-	py += f'__pysys_purpose__ = r""" {cleanIndentation(d.pop("purpose", ""))}\n\t"""\n\n'
+	py += f'__pysys_purpose__ = r""" {cleanIndentation(d.pop("purpose", ""))} """\n\n'
 	
 	value = d.pop('id-prefix', None)
 	if value: f'__pysys_id_prefix__ = "{value}"\n'
-	
-	py += f'__pysys_authors__ = "{d.pop("authors","")}"\n'
+
+	value = d.pop('authors', None)
+	if value: py += f'__pysys_authors__ = "{value}"\n'
 	value = d.pop("created", None)
 	if value: py += f'__pysys_created__ = "{value}"\n\n'
 	
@@ -200,86 +201,88 @@ def upgradeMain(args):
 	args = [x for x in args if not x.startswith('-')]
 	dryrun = '--dry-run' in options
 	
-	if (options and not dryrun) or len(args) != 2: 
+	if (options and not dryrun) or len(args) < 3: 
 		print('Unknown options or missing arguments'%options)
 		print('')
-		print('Automatically upgrade pysystest.xml+run.py all tests under the current directory to pysystest.py')
+		print('Automatically upgrade pysystest.xml+run.py all tests under the specified directories to pysystest.py')
 		print('Usage:')
-		print('pysystestxml_upgrader.py [--dry-run] "DELETE CMD" "RENAME CMD"')
+		print('pysystestxml_upgrader.py [--dry-run] "DELETE CMD" "RENAME CMD" DIR1 [DIR2]...')
 		print('')
 		print('For example:')
-		print('   pysystestxml_upgrader.py "rm" "mv"')
-		print('   pysystestxml_upgrader.py "del" "move"')
-		print('   pysystestxml_upgrader.py "svn rm" "svn mv"')
-		print('   pysystestxml_upgrader.py "git rm" "git mv"')
+		print('   pysystestxml_upgrader.py "rm" "mv" .')
+		print('   pysystestxml_upgrader.py "del" "move" .')
+		print('   pysystestxml_upgrader.py "svn rm" "svn mv" .')
+		print('   pysystestxml_upgrader.py "git rm" "git mv" .')
 		print('')
-		print('Be sure to avoid having uncommitted changes in your working cooy before running this script.')
+		print('Be sure to avoid having uncommitted changes in your working copy before running this script.')
 		print('This script uses tabs not spaces for indentation; fix up afterwards if you prefer spaces.')
 		return 1
 
-	deleter, renamer = args
-	print(f'dry-run = {dryrun}, delete="{deleter}", rename="{renamer}"')
+	deleter, renamer = args[0], args[1]
+	paths = [os.path.normpath(x) for x in args[2:]]
+	print(f'dry-run = {dryrun}, delete="{deleter}", rename="{renamer}", paths={paths}')
 	
 	count = 0
 	errors = []
 	allcomments = {}
-	for (dirpath, dirnames, filenames) in os.walk('.'):
-		dirnames.sort() # do this in a deterministic order
-		if not ('pysystest.xml' in filenames and 'run.py' in filenames): continue
-		print('Upgrading: %s'%dirpath)
-		assert 'pysystest.py' not in filenames, dirpath
-		
-		with open(f'{dirpath+os.sep}run.py', 'rb') as f:
-			runpy = f.read()
-		
-		xmlpath = os.path.normpath(f'{dirpath+os.sep}pysystest.xml')
-		pysystestpath = xmlpath[:-4]+'.py'
-		try:
-			pydescriptor, comments = xmlToPy(xmlpath)
-		except Exception as ex:
-			traceback.print_exc()
-			errors.append(f'Failed to extract descriptor from {xmlpath} - {ex}')
-			continue
-		
-		for c in comments:
-			allcomments[c] = allcomments.get(c, 0)+1
-		
-		runpyencoding = None
-		try:
-			pydescriptor.encode('ascii')
-		except Exception as ex:
-			runpyencoding = re.search(r"[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)".encode('ascii'), runpy)
-			if runpyencoding: runpyencoding = runpyencoding.group(1)
-			runpyencoding = (runpyencoding or b'').decode('ascii').upper()
-			if runpyencoding != 'UTF-8':
-				try:
-					runpy.decode('ascii')
-				except:
-					pass
-				else:
-					runpyencoding = 'ASCII'
-				allwarnings.append(f'Non-ASCII characters found in descriptor will be added as UTF-8 to pysystest.py which uses encoding={runpyencoding or "unknown"}; this may need fixing up manually: {pysystestpath}')
+	for p in paths:
+		for (dirpath, dirnames, filenames) in os.walk(p):
+			dirnames.sort() # do this in a deterministic order
+			if not ('pysystest.xml' in filenames and 'run.py' in filenames): continue
+			print('-------- Upgrading: %s'%dirpath)
+			assert 'pysystest.py' not in filenames, dirpath
+			
+			with open(f'{dirpath+os.sep}run.py', 'rb') as f:
+				runpy = f.read()
+			
+			xmlpath = os.path.normpath(f'{dirpath+os.sep}pysystest.xml')
+			pysystestpath = xmlpath[:-4]+'.py'
+			try:
+				pydescriptor, comments = xmlToPy(xmlpath)
+			except Exception as ex:
+				traceback.print_exc()
+				errors.append(f'Failed to extract descriptor from {xmlpath} - {ex}')
+				continue
+			
+			for c in comments:
+				allcomments[c] = allcomments.get(c, 0)+1
+			
+			runpyencoding = None
+			try:
+				pydescriptor.encode('ascii')
+			except Exception as ex:
+				runpyencoding = re.search(r"[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)".encode('ascii'), runpy)
+				if runpyencoding: runpyencoding = runpyencoding.group(1)
+				runpyencoding = (runpyencoding or b'').decode('ascii').upper()
+				if runpyencoding != 'UTF-8':
+					try:
+						runpy.decode('ascii')
+					except:
+						pass
+					else:
+						runpyencoding = 'ASCII'
+					allwarnings.append(f'Non-ASCII characters found in descriptor will be added as UTF-8 to pysystest.py which uses encoding={runpyencoding or "unknown"}; this may need fixing up manually: {pysystestpath}')
 
-		if dryrun: print(pydescriptor.replace('\t', '<tab>'))
+			if dryrun: print(pydescriptor.replace('\t', '<tab>'))
 
-		if not dryrun: 
-			if os.system(f'{renamer} {dirpath+os.sep}run.py {dirpath+os.sep}pysystest.py') != 0: 
-				errors.append(f'Failed to rename run.py to {pysystestpath}, aborting')
-				break
+			if not dryrun: 
+				if os.system(f'{renamer} {dirpath+os.sep}run.py {dirpath+os.sep}pysystest.py') != 0: 
+					errors.append(f'Failed to rename run.py to {pysystestpath}, aborting')
+					break
 
-			with open(pysystestpath, 'wb') as f:
-				f.write(pydescriptor.replace('\n', os.linesep).encode(runpyencoding or 'UTF-8'))
-				f.write(runpy)
+				with open(pysystestpath, 'wb') as f:
+					f.write(pydescriptor.replace('\n', os.linesep).encode(runpyencoding or 'UTF-8'))
+					f.write(runpy)
 
-			if os.system(f'{deleter} {xmlpath}') != 0: 
-				errors.append(f'Failed to delete {xmlpath}, aborting')
-				break
-		sys.stdout.flush()
-		
-		count += 1
+				if os.system(f'{deleter} {xmlpath}') != 0: 
+					errors.append(f'Failed to delete {xmlpath}, aborting')
+					break
+			sys.stdout.flush()
+			
+			count += 1
 	
 	with open('pysys_upgrader.log', 'w') as log:
-		log.write(f'\nSuccessfully upgraded {count} tests under {os.getcwd()}\n')
+		log.write(f'\nSuccessfully upgraded {count} tests under: {" ".join(paths)}\n')
 
 		if allcomments:
 			log.write(f'\n{len(allcomments)} unique comments found (more frequent last)\n')

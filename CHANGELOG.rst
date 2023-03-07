@@ -141,6 +141,8 @@ Minor behaviour changes:
   this behaviour it is recommended to fix them, but if that is impractical set the project property 
   ``pysysLegacyAssertThatGrepNewLineBehaviour`` to true to retain the previous behaviour. This preeprty may be removed in a future 
   major release. 
+- Improved pysystestxml_upgrader.py sample to accept one or more directory arguments instead of upgrading the current 
+  working directory. 
 
 -----------------
 What's new in 2.1

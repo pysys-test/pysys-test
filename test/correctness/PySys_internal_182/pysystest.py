@@ -19,7 +19,8 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.copy(self.input+'/pysysproject.xml', self.output+'/xmldemo/')
 		self.startPython([self.project.testRootDir+'/../samples/cookbook/util_scripts/pysystestxml_upgrader.py', 
 			"del" if IS_WINDOWS else "rm", 
-			"move" if IS_WINDOWS else "mv"], workingDir=self.output+'/xmldemo')
+			"move" if IS_WINDOWS else "mv", 
+			'.'], workingDir=self.output+'/xmldemo')
 		self.pysys.pysys('pysys-print', ['print'], workingDir=self.output+'/xmldemo')
 		
 	def validate(self):
