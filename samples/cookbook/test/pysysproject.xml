@@ -398,16 +398,16 @@
 	-->
 	<pysysdirconfig>
 	
-			<!-- Recommended to specify this for new projects - input files are stored in the testDir alongside pysystest.py -->
-			<input-dir>.</input-dir> 
+		<!-- Recommended to specify this for new projects - input files are stored in the testDir alongside pysystest.py -->
+		<input-dir>.</input-dir> 
 
-			<!-- The default for PySys projects created before 2.0 -->
-			<!-- <input-dir>Input</input-dir> -->
-			
-			<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
-				without the need to update or potentially create bugs in existing tests
-			-->
-			<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
+		<!-- The default for PySys projects created before 2.0 -->
+		<!-- <input-dir>Input</input-dir> -->
+		
+		<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
+			without the need to update or potentially create bugs in existing tests
+		-->
+		<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
 	
 		<!-- Could optionally override the default directory names for reference and output too. The following are the 
 			default values and do not need to be specified explicitly. 
