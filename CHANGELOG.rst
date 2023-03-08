@@ -126,6 +126,12 @@ New features:
 - Added ``--dir`` (``-D``) and ``--title`` (``-T``) options to ``pysys print`` to allow listing the directories - and optionally also the titles - for each 
   matching test (without the far more verbose output of ``--full``). To print both titles and directories, use ``pysys print -TD``. 
 
+- Added project property ``pysysLogAbsolutePaths`` which can be set to a true/false value to control whether absolute paths will be logged 
+  for assertion failure locations and in the summary of failed test directories, rather than the usual paths relative to current directory. 
+  By default this is false unless the ``PYSYS_LOG_ABSOLUTE_PATHS`` environment variable is set or PySys detects it is being executed inside 
+  an IDE. Currently only Visual Studio Code is supported automatically, though you can check for the environment variables of other 
+  IDEs using a project property like ``value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"``.
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

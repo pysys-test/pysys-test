@@ -135,6 +135,17 @@
 	<property name="pysysMaxWorkerThreads" value="30"/>
 
 	<!-- 
+	Override this to change the default behaviour for when PySys will log absolute rather than current dir relative 
+	paths in situations such as failure outcomes and test outcome summary. 
+
+	It is often more useful to get absolute paths when running tests within an IDE that supports clicking on failures 
+	to jump to them. If the ``PYSYS_LOG_ABSOLUTE_PATHS`` environment variable is set it will override any value set 
+	using the project property. 
+	-->
+	<property name="pysysLogAbsolutePaths" value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"/>
+
+
+	<!-- 
 	Configuring plugins
 	~~~~~~~~~~~~~~~~~~~
 	

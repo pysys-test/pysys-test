@@ -34,6 +34,9 @@
 
 	<property name="pythonScriptsDir" value="${testRootDir}/test-tools/python-scripts" pathMustExist="false"/>
 
+	<!-- Set this to false so that our own tests don't fail when run within VSCode -->
+	<property name="pysysLogAbsolutePaths" value="false"/>
+
 	<!-- 
 	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
 	BaseTest or BaseRunner classes, or customer test output writers. 

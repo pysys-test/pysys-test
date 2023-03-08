@@ -180,6 +180,12 @@ class _XMLProjectParser(object):
 						# not an error, to allow for adding new ones in future pysys versions, but worth warning about
 						log.warning('Unknown <property> attribute "%s" in project configuration'%attName)
 
+
+		# default is to support IDEs like VSCode
+		self.properties.setdefault('pysysLogAbsolutePaths', str( os.getenv('TERM_PROGRAM','')=='vscode' ) )
+		# always allow local env var override regardless of project property
+		if os.getenv('PYSYS_LOG_ABSOLUTE_PATHS'): self.properties['pysysLogAbsolutePaths'] = os.getenv('PYSYS_LOG_ABSOLUTE_PATHS','').lower()=='true'
+
 		return self.properties
 
 

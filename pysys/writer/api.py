@@ -96,6 +96,7 @@ from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.exceptions import UserError
+import pysys.config.project
 import pysys.process.user
 
 log = logging.getLogger('pysys.writer')
@@ -313,12 +314,14 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 	"""Configures whether the summary includes the reason for each failure."""
 	
 	showOutputDir = True
-	"""Configures whether the summary includes the (relative) path to the output directory for each failure. """
+	"""Configures whether the summary includes the path to the output directory for each failure. 
+	This is relative to the current working directory unless project property ``pysysLogAbsolutePaths`` is True."""
 
 	showTestDir = True
-	"""Configures whether the summary includes the (relative) path to the test directory for each failure, 
+	"""Configures whether the summary includes the path to the test directory for each failure, 
 	unless the output dir is displayed and the test dir is a parent of it. 
-	This is useful if you run tests with an absolute --outdir. """
+	This is useful if you run tests with an absolute --outdir. 
+	This path is logged relative to the current working directory unless project property ``pysysLogAbsolutePaths`` is True."""
 
 	showTestTitle = False
 	"""Configures whether the summary includes the test title for each failure. """
@@ -431,6 +434,9 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			log('')
 
 		def logForOutcome(decider):
+			mayberelpath = os.path.relpath
+			if pysys.config.project.Project.getInstance().getProperty('pysysLogAbsolutePaths', False): mayberelpath = lambda p:p
+
 			for cycle in self.results:
 				cyclestr = ''
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
@@ -448,8 +454,8 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
 							
 						try:
-							outputdir = os.path.normpath(os.path.relpath(fromLongPathSafe(outputdir)))+os.sep
-							testDir = os.path.normpath(os.path.relpath(fromLongPathSafe(testDir)))+os.sep
+							outputdir = os.path.normpath(mayberelpath(fromLongPathSafe(outputdir)))+os.sep
+							testDir = os.path.normpath(mayberelpath(fromLongPathSafe(testDir)))+os.sep
 						except Exception as ex: # relpath can fail if on different Windows drives
 							logging.getLogger('pysys.writer').debug('Failed to generate relative paths for "%s" and "%s": %s', outputdir, testDir, ex)
 							

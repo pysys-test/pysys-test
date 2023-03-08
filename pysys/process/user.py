@@ -1511,8 +1511,12 @@ class ProcessUser(object):
 
 			if outcomeReason and printReason:
 				if outcome.isFailure():
+					def maybebasename(p):
+						if self.project.getProperty('pysysLogAbsolutePaths', False): return p
+						return os.path.basename(p)
+
 					log.warning(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
-						u'%s:%s'%(os.path.basename(loc[0]), loc[1]) for loc in map(parseLocation,callRecord)) if callRecord!=None else u'',
+						u'%s:%s'%(maybebasename(loc[0]), loc[1]) for loc in map(parseLocation,callRecord)) if callRecord!=None else u'',
 							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
 					log.info(u'%s ... %s', outcomeReason, str(outcome).lower(), extra=BaseLogFormatter.tag(str(outcome).lower(),1))
