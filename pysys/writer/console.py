@@ -187,7 +187,7 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 	enableIfEnvironmentVariable = "PYSYS_CONSOLE_FAILURE_ANNOTATIONS"
 	"""
 	The environment variable used to control whether it is enabled. If it is set to any value other than ``true`` then 
-	its value will be used to determine fhe format (see above). 
+	its value will be used to determine the format (see above). 
 	
 	This writer will be enabled if the specified environment variable is set (either to any empty string or to any 
 	value other than "false"). 
