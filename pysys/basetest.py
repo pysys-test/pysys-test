@@ -1013,6 +1013,7 @@ class BaseTest(ProcessUser):
 
 		.. versionadded:: 2.2
 		"""
+		assert 'contains' not in kwargs, 'The contains= argument is not supported by this method'
 
 		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value%s)'%(', flags='+str(int(reFlags)) if reFlags else ''), 
 			expectedRegex=expectedRegex, encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
