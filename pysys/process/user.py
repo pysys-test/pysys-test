@@ -1459,7 +1459,7 @@ class ProcessUser(object):
 			False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
 			operations that involve waiting. 
 		
-		:param list[str] callRecord: An array of strings of the form path:lineno indicating the call stack that lead 
+		:param list[str] callRecord: An array of strings of the form absolutepath:lineno indicating the call stack that lead 
 			to this outcome. This will be appended to the log output for better test triage.
 		
 		:param bool override: Remove any existing test outcomes when adding this one, ensuring 
@@ -1504,7 +1504,7 @@ class ProcessUser(object):
 						locations = [loc for loc in locations if loc[0].lower().startswith(self.descriptor.testDir.lower()) ]
 						if len(locations) == 0: locations = [parseLocation(loc) for loc in callRecord]
 					loc = locations[0]
-					self.__outcomeLocation = (os.path.normpath(fromLongPathSafe(loc[0])), loc[1])
+					self.__outcomeLocation = (os.path.normpath(os.path.join(self.descriptor.testDir, fromLongPathSafe(loc[0]))), loc[1])
 			if outcome.isFailure() and abortOnError:
 				if callRecord==None: callRecord = self.__callRecord()
 				self.abort(outcome, outcomeReason, callRecord)
