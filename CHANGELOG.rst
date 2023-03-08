@@ -123,6 +123,9 @@ New features:
 - Added project property attribute ``path=`` as an alternative to ``value=`` for properties containing a path, which 
   should be normalized to remove any ``/../`` path components. 
 
+- Added ``--dir`` (``-D``) and ``--title`` (``-T``) options to ``pysys print`` to allow listing the directories - and optionally also the titles - for each 
+  matching test (without the far more verbose output of ``--full``). To print both titles and directories, use ``pysys print -TD``. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

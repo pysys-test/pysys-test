@@ -41,6 +41,7 @@ class ConsolePrintHelper(object):
 		self.requirements = False
 		self.json = False
 		self.modefilter = [] # select based on mode
+		self.printOnly = []
 		self.type = None
 		self.trace = None
 		self.includes = []
@@ -49,8 +50,8 @@ class ConsolePrintHelper(object):
 		self.name = name
 		self.sort = None
 		self.grep = None
-		self.optionString = 'hfgdrm:a:t:i:e:s:G:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
+		self.optionString = 'hfgdrm:a:t:i:e:s:G:DT'
+		self.optionList = ["help","full","groups","modes","requirements","dir", "title", "mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
 		
 
 	def printUsage(self):
@@ -63,12 +64,16 @@ class ConsolePrintHelper(object):
 		print("       -h | --help                 print this message")
 		print("")
 		print("    output options:")
-		print("       -f | --full                 print full information")
-		print("       -g | --groups               print test groups defined")
-		print("       -d | --modes                print test modes defined")
-		print("       -r | --requirements         print test requirements covered")
-		print("       -s | --sort   STRING        sort by: title, id, executionOrderHint")
+		print("       -f | --full                 print full information for each test (multi-line)")
 		print("            --json                 print full information as JSON")
+		print("       -D | --dir                  print the absolute path for each test directory")
+		print("       -T | --title                print the test id and title for each test")
+		print("")
+		print("       -g | --groups               print all test groups")
+		print("       -d | --modes                print all modes")
+		print("       -r | --requirements         print all test requirements")
+		print("")
+		print("       -s | --sort   STRING        sort by: title, id, executionOrderHint")
 		print("")
 		print("    selection/filtering options:")
 		print("       -G | --grep      STRING     print only tests whose title or id contains the specified regex")
@@ -76,7 +81,7 @@ class ConsolePrintHelper(object):
 		print("       -m | --mode      STRING     print only tests that run in the specified mode(s)")
 		print("                                   (use ! for excludes e.g. -m MyMode1,MyMode2,Other.* or -m !MyMode3)")
 		print("       -a | --type      STRING     print only tests of supplied type (auto or manual, default all)")
-		print("       -t | --trace     STRING     print only tests which cover requirement id ") 
+		print("       -t | --trace     STRING     print only tests which cover specified requirement tracing id ") 
 		print("       -i | --include   STRING     print only tests in included group (can be specified multiple times)")
 		print("       -e | --exclude   STRING     do not print tests in excluded group (can be specified multiple times)")
 		print("")
@@ -90,8 +95,10 @@ class ConsolePrintHelper(object):
 		print("       test1:   - from testcase with id test1 onwards")
 		print("       id1:id2  - all tests between tests with ids test1 and test2")
 		print("")
-		print("   e.g. ")
+		print("   e.g. To print full information about tests with specified include/exclude groups and range:")
 		print("       %s -i group1 -e group2 --full test1:test3" % _PYSYS_SCRIPT_NAME)
+		print("   e.g. To print titles and directories for tests in a particular group:")
+		print("       %s -TD -i group1 " % _PYSYS_SCRIPT_NAME)
 		print("")
 		sys.exit()
 
@@ -109,6 +116,12 @@ class ConsolePrintHelper(object):
 
 			elif option in ("-f", "--full"):
 				self.full = True
+				
+			elif option in ('-D', '--dir'):
+				self.printOnly.append('dir')
+
+			elif option in ('-T', '--title'):
+				self.printOnly.append('title')
 				
 			elif option in ("-g", "--groups"):
 				self.groups = True
@@ -220,11 +233,14 @@ class ConsolePrintHelper(object):
 			
 			for descriptor in descriptors:
 				padding = " " * (maxsize - len(descriptor.id))
-				if not self.full:
-					print("%s%s| %s" % (descriptor.id, padding, descriptor.title))
-				else:
+				if self.full:
 					print("="*80)
 					print(descriptor)
+				else:
+					if not self.printOnly or 'title' in self.printOnly:
+						print("%s%s| %s" % (descriptor.id, padding, descriptor.title))
+					if 'dir' in self.printOnly:
+						print("%s%s" % ('   ' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
 
 def printTest(args):
 	try:
