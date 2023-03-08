@@ -167,7 +167,7 @@ rootLogger = logging.getLogger(
 
 log = rootLogger
 
-stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stderr if len(sys.argv)>=1 and sys.argv[1]=='print' else sys.stdout, writebytes=False))
+stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stderr if len(sys.argv)>=2 and sys.argv[1]=='print' else sys.stdout, writebytes=False))
 """The handler that sends pysys.* log output from to the console, 
 including buffered output from completed tests when running in parallel.
 
