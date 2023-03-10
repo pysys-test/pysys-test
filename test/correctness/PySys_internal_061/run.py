@@ -21,9 +21,9 @@ class PySysTest(BaseTest):
 		
 		del self.outcome[:]
 		self.log.info('---')
-		self.assertGrep('run.log.proc', expr=r'Assertion.*failed \[run.py:9\]')
-		self.assertGrep('run.log.proc', expr=r'Assertion.*failed \[run.py:14,run.py:10\]')
-		self.assertGrep('run.log.proc', expr=r'Assertion.*failed \[run.py:14,run.py:17\]')
+		self.assertGrep('run.log.proc', expr=r'Assertion.*failed \[.*run.py:9\]')
+		self.assertGrep('run.log.proc', expr=r'Assertion.*failed \[.*run.py:14,.*run.py:10\]')
+		self.assertGrep('run.log.proc', expr=r'Assertion.*failed \[.*run.py:14,.*run.py:17\]')
 		
 		self.assertThat('outcomeLocation[1] == expected', outcomeLocation=loc, expected='9')
 		self.assertThat('outcomeLocation[0].endswith(os.sep+"run.py")', outcomeLocation=loc)

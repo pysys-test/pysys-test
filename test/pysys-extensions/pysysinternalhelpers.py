@@ -39,6 +39,8 @@ def runPySys(processowner: pysys.process.user.ProcessUser, stdouterr, args, igno
 	environs.setdefault("PYTHONWARNINGS", "error")
 	environs.setdefault("PYTHONDONTWRITEBYTECODE", "true")
 
+	environs.setdefault('TERM_PROGRAM', '') # not vscode, to avoid changing our test behaviour
+
 	if defaultproject:
 		createProjectConfig(os.path.join(processowner.output, kwargs.get('workingDir', '.')))
 	
