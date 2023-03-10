@@ -659,7 +659,7 @@ class _XMLDescriptorParser(object):
 				for m in re.finditer(
 						(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
 							+'|'.join([
-								'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
+								'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse|None))', # number/boolean/None literal, would be a shame for it to have to be quoted
 								'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
 								'"(?P<value3>[^"]*)"',
 							])
