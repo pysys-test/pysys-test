@@ -1,0 +1,5 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<set-default-maker-template name="tmpl3"/>
+
+</pysysdirconfig>

@@ -205,14 +205,6 @@
 	</test-plugin>
 
 
-
-	<!-- 
-	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
-	`pysys.launcher.console_make.DefaultTestMaker` class in order to customize details such as the automatic 
-	validation of new test ids. 
-	-->
-	<maker classname="myorg.mymaker.MyTestMaker"/>
-
 	<!--
 	Writers
 	~~~~~~~
@@ -403,8 +395,8 @@
 	~~~~~~~~~~~~~~~~~~~~~~~~
 	
 	A project file can contain a ``pysysdirconfig`` element to configure directory-level defaults that will apply to 
-	all test descriptors. See the :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml` documentation for more information about the available options, 
-	including how to customize how new tests are created using maker templates. 
+	all test descriptors. See the :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml` documentation for more 
+	information about the available options, including how to customize how new tests are created using maker templates. 
 	
 	-->
 	<pysysdirconfig>
@@ -425,7 +417,18 @@
 		-->
 		<output-dir>Output</output-dir>
 		<reference-dir>Reference</reference-dir>
+		
+		<maker-template name="my-project-test" description="a test template that can be used anywhere in this project" 
+			copy="${pysysTemplatesDir}/default-test/*" />
+
 	</pysysdirconfig>
+
+	<!-- 
+	For advanced cases, use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
+	`pysys.launcher.console_make.DefaultTestMaker` class in order to customize details such as the automatic 
+	validation of new test ids. 
+	-->
+	<maker classname="myorg.mymaker.MyTestMaker"/>
 
 	<!--
 	PySys run.log and console formatters

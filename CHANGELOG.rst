@@ -132,6 +132,13 @@ New features:
   an IDE. Currently only Visual Studio Code is supported automatically, though you can check for the environment variables of other 
   IDEs using a project property like ``value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"``.
 
+- Added a ``pysysdirconfig`` option for setting the default ``pysys make`` template to one already defined at project level or 
+  in a parent ``pysysdirconfig``::
+
+    <set-default-maker-template name="my-test"/>
+
+  See :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml`.
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

@@ -85,6 +85,7 @@ class DefaultTestMaker(object):
 		DEFAULT_DESCRIPTOR = _XMLDescriptorParser.DEFAULT_DESCRIPTOR
 		
 		def expandAndValidateTemplate(t, defaults):
+			if 'set-default-maker-template' in t: return t # it's special
 			source = t.get('source', '<unknown source>')
 			if defaults is None: defaults = DEFAULT_DESCRIPTOR
 
@@ -143,6 +144,12 @@ class DefaultTestMaker(object):
 					if not any(tmpl['name'] == deftmpl['name'] for tmpl in newtemplates):
 						newtemplates.append(deftmpl) 
 				templates = newtemplates
+
+		# if we have a designated default, move it to the start of the list
+		deftmpl =   [t for t in templates if t['name']=='set-default-maker-template']
+		if deftmpl:
+			deftmpl = deftmpl[0]['set-default-maker-template']
+			templates = [t for t in templates if t['name']==deftmpl]+[t for t in templates if t['name'] not in (deftmpl, 'set-default-maker-template')]
 
 		log.debug('Loaded templates: \n%s', json.dumps(templates, indent='  '))
 		return templates

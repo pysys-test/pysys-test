@@ -45,7 +45,7 @@ creating new tests.
 
 The ``pysys make`` command line comes with a ``pysys-default-test`` template for creating a simple PySys test, you can 
 add your own by adding ``<maker-template>`` elements to ``pysysdirconfig.xml`` in any directory under your project, 
-or to a ``<pysysdirconfig>`` element in your ``pysysproject.xml`` file. Here are a couple of examples (taken from 
+or to a ``<pysysdirconfig>`` element in your ``pysysproject.xml`` file. Here are a few examples (taken from 
 the cookbook sample)::
 
 	<pysysdirconfig>
@@ -75,7 +75,7 @@ values (this means your template will automatically benefit from any future chan
 The ``_pysys_templates`` directory should contain a file named ``.pysysignore`` file (which avoids the template being 
 loaded as a real test). 
 
-other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
+Other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
 ``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
 using ``${pysysTemplatesDir}/default-test/*``, or copying from a path relative to the XML file where the template is 
 defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
@@ -85,7 +85,12 @@ a ``pysysdirconfig.xml`` file.
 
 When creating tests using ``pysys make``, by default the first template (from the most specific ``pysysdirconfig.xml``) 
 is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
-templates for the current directory using ``--help``. 
+templates for the current directory using ``--help``. You can also customize which is the default template for a 
+given directory by naming a template defined at a higher level (for example in the project) like this::
+
+	<pysysdirconfig>
+		<set-default-maker-template name="my-inherited-test-template"/>
+	</pysysdirconfig>
 
 It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
 The main reason to do that is to provide a `pysys.launcher.console_make.DefaultTestMaker.validateTestId` method 

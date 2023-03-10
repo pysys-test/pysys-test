@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<maker-template name="tmpl5" description="something from dir2"/>
+	<set-default-maker-template name="tmpl4"/>
+
+</pysysdirconfig>

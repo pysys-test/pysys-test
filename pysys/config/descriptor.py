@@ -800,7 +800,12 @@ class _XMLDescriptorParser(object):
 				t['replace'].append( (r1, r2) )
 			templates.append(t)
 
+		for e in self.root.getElementsByTagName('set-default-maker-template'):
+			# for ease of processing, set the name to a fixed sentinel value so that the normal template handling logic can apply and the latest one will always override it
+			templates.append({'name':'set-default-maker-template', 'set-default-maker-template': e.getAttribute('name')})
+
 		# NB: we don't combine with defaults here, that happens in the make launcher
+
 
 		return templates
 

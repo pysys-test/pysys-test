@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<pysysdirconfig>
+		<set-default-maker-template name="tmpl2"/>
+		<maker-template name="tmpl1" description="root template"/>
+		<maker-template name="tmpl2" description="root template"/>
+		<maker-template name="tmpl3" description="root template"/>
+		<maker-template name="tmpl4" description="root template"/>
+
+	</pysysdirconfig>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+</pysysproject>
