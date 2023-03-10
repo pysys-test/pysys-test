@@ -44,7 +44,7 @@ def quoteString(s):
 	r = repr(s)
 	if not isinstance(s, str): return r
 	
-	if '\\' in r.replace('\\\\',''): # if it contains escape sequences like \n to \" we'd better just use repr so it's unambiguous
+	if '\\' in r.replace('\\\\','') or '"' in s: # permit windows path sep single \ in str, but if repr contains escape sequences like \n or \" (or quotes) we'd better just use repr so it's unambiguous
 		return r
 	
 	# repr uses single quotes, so using double quotes is a good way to make it distinguishable 

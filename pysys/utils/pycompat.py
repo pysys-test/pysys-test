@@ -44,6 +44,8 @@ def isstring(s):
 	"""
 	return isinstance(s, str)
 
+from pysys.utils.misc import quoteString as __quotestring # for pre-2.0 compatibility
+
 def quotestring(s):
 	""" Adds double quotation marks around the specified character or byte string, 
 	and additional escaping only if needed to make the meaning clear, but trying to 
@@ -55,20 +57,7 @@ def quotestring(s):
 	Deprecated - use `pysys.utils.misc.quoteString` instead. 
 	
 	"""
-	# this function exists primarily to provide the same quoting behaviour 
-	# for str/unicode in Python 2 and str in Python 3, but avoiding 
-	# the confusing "b'valuehere'" representation that "%s" would 
-	# produce for python 3 bytes objects
-	r = repr(s)
-	if not isstring(s): return r
-	
-	if '\\' in r.replace('\\\\',''): # if it contains escape sequences like \n to \" we'd better just use repr so it's unambiguous
-		return r
-	
-	# repr uses single quotes, so using double quotes is a good way to make it distinguishable 
-	# (the other option would be using r'...' since essentially this is like a Python raw string
-
-	return '"%s"'%s
+	return __quotestring(s)
 	
 def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	"""
@@ -135,4 +124,3 @@ class makeReadOnlyDict(dict):
 		def __copy__(self): return dict(self)
 		def __deepcopy__(self, memo): return copy.deepcopy(dict(self))
 
-from pysys.utils.misc import quoteString as quotestring # for pre-2.0 compatibility
