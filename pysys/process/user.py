@@ -1515,7 +1515,7 @@ class ProcessUser(object):
 						if self.project.getProperty('pysysLogAbsolutePaths', False): return p
 						return os.path.basename(p)
 
-					log.warning(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
+					log.warning(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%', '.join(
 						u'%s:%s'%(maybebasename(loc[0]), loc[1]) for loc in map(parseLocation,callRecord)) if callRecord!=None else u'',
 							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
