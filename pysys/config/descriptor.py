@@ -28,6 +28,7 @@ import copy
 import locale
 import inspect
 import importlib
+import time
 
 import pysys
 from pysys.constants import *
@@ -598,6 +599,9 @@ class _XMLDescriptorParser(object):
 	__PYTHON_PYSYS_DUNDER_EXPR = b'\n__pysys_' if os.linesep.endswith('\n') else b'\r__pysys_'
 	__DISABLE_PYTHON_DESCRIPTOR_PARSING = os.getenv('PYSYS_DISABLE_PYTHON_DESCRIPTOR_PARSING','').lower()=='true' # undocumented, just for testing 
 
+	parseTimeXML = 0.0
+	parseTimePython = 0.0
+
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None, fileContents=None):
 		assert project
 		self.file = xmlfile
@@ -619,6 +623,7 @@ class _XMLDescriptorParser(object):
 			assert xmlRootElement.tagName == 'pysysdirconfig', xmlRootElement.tagName
 			return
 		
+		starttime = time.monotonic()
 		if istest and not xmlfile.endswith('.xml'):
 			if fileContents is None:
 				# Open in binary mode since we don't know the encoding - we'll rely on the XML header and/or Python header to tell us if it's anything unusual
@@ -700,6 +705,10 @@ class _XMLDescriptorParser(object):
 				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, self.file))
 			else:
 				self.root = self.doc.getElementsByTagName(roottag)[0]
+		if xmlfile.endswith('.xml'):
+			_XMLDescriptorParser.parseTimeXML += time.monotonic()-starttime
+		else:
+			_XMLDescriptorParser.parseTimePython += time.monotonic()-starttime
 
 	@staticmethod
 	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None, **kwargs):

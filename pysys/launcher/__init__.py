@@ -23,6 +23,7 @@ from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
+import time
 
 from pysys.constants import *
 from pysys.exceptions import UserError
@@ -41,9 +42,19 @@ def loadDescriptors(dir=None):
 	:raises UserError: Raised if no testcases can be found.
 	
 	"""
+
 	if dir is None: dir = os.getcwd()
 	loader = Project.getInstance().descriptorLoaderClass(Project.getInstance())
-	return loader.loadDescriptors(dir)
+
+	duration = time.monotonic()
+	result = loader.loadDescriptors(dir)
+	duration = time.monotonic()-duration
+
+	from pysys.config.descriptor import _XMLDescriptorParser
+	if duration > 3: # log when it takes a long time (factor of 10 variability observed on Windows - anti-virus may be involved)
+		logging.getLogger('pysys.config.descriptor').info('Loading %d descriptors took %0.1fs for XML parsing, %0.1fs for Python/non-XML descriptor parsing, total %0.1fs', 
+			len(result), _XMLDescriptorParser.parseTimeXML, _XMLDescriptorParser.parseTimePython, duration)
+	return result
 
 TEST_ID_CHARS = r'-_.\w' # internal API, subject to change at any time, do not use
 MODE_CHARS = TEST_ID_CHARS+'~=' # internal API, subject to change at any time, do not use
