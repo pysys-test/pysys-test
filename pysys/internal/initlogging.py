@@ -48,6 +48,8 @@ class _UnicodeSafeStreamWrapper(object):
 		self.__requestedEncoding = encoding
 		self.updateUnderlyingStream(underlying)
 	
+	def getUnderlyingStream(self): return self.stream
+
 	def updateUnderlyingStream(self, underlying):
 		assert underlying != self # avoid infinite loops
 		self.stream = underlying
@@ -188,4 +190,3 @@ stdoutHandler.setFormatter(logging.Formatter('%(levelname)s %(message)s')) # for
 rootLogger.setLevel(logging.INFO) # The default root logger log level 
 rootLogger.addHandler(pysysLogHandler)
 pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler]) # main thread is by default the only one that writes to stdout
-

@@ -213,7 +213,8 @@ class ColorLogFormatter(BaseLogFormatter):
 			with ColorLogFormatter.__STDOUT_LOCK:
 				stdoutbak = sys.stdout
 				try:
-					sys.stdout = sys.__stdout__
+					# (nb for pysys print the underlying stream might in fact be stderr, so this is dicey but does seem to work)
+					sys.stdout = stdoutHandler.stream.getUnderlyingStream() 
 					self.initColoringLibrary()
 				finally:
 					updatedstdout = sys.stdout
