@@ -628,6 +628,13 @@ class BaseRunner(ProcessUser):
 		self._initialEnviron = os.environ.copy()
 		self._initialCwd = os.getcwd()
 
+		# Logging this here jsut once allows us to skip re-logging these every time we start a process
+		processlogger = logging.getLogger('pysys.process.defaultenv')
+		debuginfo = []
+		for e in sorted(self._initialEnviron.keys()): # matches the logic in process __init__
+			debuginfo.append("  environment  : %s=%s"%( e, self._initialEnviron[e]) )
+		processlogger.debug('Default environment variables for this process: \n%s\n', '\n'.join(debuginfo))
+
 		# call the hook to setup the test output writers
 		self.__remainingTests = self.cycle * len(self.descriptors)
 		for writer in list(self.writers):

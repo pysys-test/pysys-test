@@ -139,6 +139,8 @@ New features:
 
   See :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml`.
 
+- Change the debug format when starting a process to only show environment variables whose values differ from the default environment. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

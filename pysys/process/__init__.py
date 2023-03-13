@@ -126,8 +126,12 @@ class Process(object):
 		debuginfo.append("  stderr       : %s"% stderr)
 		keys=list(self.environs.keys())
 		keys.sort()
+		defaultenv = []
 		for e in keys: 
 			value = self.environs[e]
+			if value == os.environ.get(e, None): # having all the default env vars repeated for every process makes it hard to see what's what
+				defaultenv.append(e)
+				continue
 			debuginfo.append("  environment  : %s=%s"%( e, value) )
 			if 'PATH' in e.upper() and e.upper() not in ['PATHEXT']:
 				# it's worth paths/classpaths/pythonpaths as they're often long and quite hard to spot differences otherwise
@@ -136,7 +140,7 @@ class Process(object):
 					for i, pathelement in enumerate(pathelements):
 						#                         : ABC=def
 						debuginfo.append("                   #%-2d %s"%( i+1, pathelement))
-				
+		if defaultenv: debuginfo.append("  environment  : +inherited default environment variables: %s"%( ', '.join(defaultenv)) )
 		if info: debuginfo.append("  info         : %s"% info)
 
 		log.debug("Process parameters for %s\n%s", self, '\n'.join(d for d in debuginfo))
