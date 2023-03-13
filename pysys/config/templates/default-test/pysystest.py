@@ -2,7 +2,6 @@ __pysys_title__   = r""" Category TODO - Test title (short, specific and sortabl
 #                        @@LINE_LENGTH_GUIDE@@
 __pysys_purpose__ = r""" """ 
 	
-__pysys_authors__ = "@@USERNAME@@"
 __pysys_created__ = "@@DATE@@"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 

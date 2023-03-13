@@ -6,7 +6,6 @@ __pysys_purpose__ = r""" To measure the throughout and a sample of the latencies
 	This also shows how to report performance statistics from a PySys test for throughput and latency.
 	"""
 
-__pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
 __pysys_modes__   = lambda helper: helper.createModeCombinations(

@@ -6,7 +6,6 @@ __pysys_purpose__ = r""" To demonstrate error messages for unsuccessful startup 
 	This also shows how modes can be used to cover different test scenarios from the same PySysTest class. 
 	"""
 
-__pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
 __pysys_groups__  = "myServerStartup"

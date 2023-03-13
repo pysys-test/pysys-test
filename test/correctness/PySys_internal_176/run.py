@@ -41,11 +41,9 @@ class PySysTest(BaseTest):
 		self.assertThatGrep('NewTest_PerfTest/pysystest.py', '(.*)pass', expected=2*4*' ') # converted spaces to tabs
 
 		# check that the new test got our standard descriptor
-		self.assertThatGrep('NewTest_Default/pysystest.py', '__pysys_authors__ *= "([^"]+)"', expected='pysystestuser')
 		self.assertThatGrep('NewTest_Default/pysystest.py', '     +(---+)$', 'len(value) == expected', expected=120) # customized with project property
 
 		# check the legacy one works ok too
-		self.assertThatGrep('NewTest_XML/pysystest.xml', 'authors="([^"]+)"', expected='pysystestuser')
 		self.assertThatGrep('NewTest_XML/pysystest.xml', 'created="([^"]+)"', 're.match(expected, value)', expected=r'\d\d\d\d-\d\d-\d\d')
 		self.assertGrep('NewTest_XML/run.py', 'PySysTest')
 		

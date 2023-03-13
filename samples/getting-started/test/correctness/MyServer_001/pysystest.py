@@ -6,7 +6,6 @@ __pysys_purpose__ = r""" To demonstrate that MyServer can startup and response t
 	This also shows off some of the basic system testing capabilities of PySys itself.
 	"""
 
-__pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
 __pysys_groups__  = "myServerBasicSanity"

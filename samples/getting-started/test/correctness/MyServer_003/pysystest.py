@@ -6,7 +6,6 @@ __pysys_purpose__ = r""" To verify that responses from MyServer are correct on t
 	This also shows some of the different approaches to validation in PySys, using various styles of assertion.
 	"""
 
-__pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 __pysys_groups__  = "myServerSensorValues"
 #__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"

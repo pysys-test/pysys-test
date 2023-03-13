@@ -7,7 +7,6 @@ __pysys_purpose__ = r""" To demonstrate successful and unsuccessful startup of M
 	helper to allow the logic for starting the server to be reused across multiple tests.
 	"""
 
-__pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
 __pysys_groups__  = "myServerStartup"

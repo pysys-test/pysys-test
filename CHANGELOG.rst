@@ -159,6 +159,8 @@ Minor behaviour changes:
   major release. 
 - Improved pysystestxml_upgrader.py sample to accept one or more directory arguments instead of upgrading the current 
   working directory. 
+- Removed the ``authors`` field from the default ``pysys make`` template. If you find it useful feel free to add it to your 
+  own per-project maker template. 
 
 -----------------
 What's new in 2.1

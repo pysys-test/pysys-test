@@ -2,7 +2,7 @@
 Test id:           MyNewTest
 Test directory:    MyNewTest
 Test title:        Category <todo> - Test title (short, specific and sortable!) goes here <todo>
-Test created:      <date waz here>; authors: pysystestuser
+Test created:      <date waz here>; authors: 
 Test groups:       <none>
 Test modes:        <none>
 Test order hint:   0.0
@@ -13,7 +13,7 @@ Test id:           MyNewTestUncommented
 Test directory:    MyNewTestUncommented
 Test skip reason:  Skipped until Bug-1234 is fixed
 Test title:        Category TODO - Test title (short, specific and sortable!) goes here TODO
-Test created:      <date waz here>; authors: pysystestuser
+Test created:      <date waz here>; authors: 
 Test groups:       myGroup, disableCoverage, performance
 Test modes:        
  --> MyMode_MyParameterizedSubtestModeA {myModeParam=123} [PRIMARY]
