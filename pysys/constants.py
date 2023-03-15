@@ -52,7 +52,8 @@ if re.search('win32', sys.platform):
 	``LD_LIBRARY_PATH`` on Linux or ``PATH`` on Windows. Use ``os.pathsep`` for joining the paths together. 
 	
 	For example::
-		environ={ LIBRARY_PATH_ENV_VAR: os.path.join([os.getenv(LIBRARY_PATH_ENV_VAR,''), mynewpath]) }
+	
+		environs={ LIBRARY_PATH_ENV_VAR: os.path.join([os.getenv(LIBRARY_PATH_ENV_VAR,''), mynewpath]) }
 	"""
 	
 	SITE_PACKAGES_DIR =  os.path.join(sys.prefix, "Lib", "site-packages")
