@@ -18,6 +18,7 @@
 		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
 			<property name="destDir" value="__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
+			<property name="format" value="tar.gz"/>
 		</writer>
 		
 		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">

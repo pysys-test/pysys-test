@@ -2,7 +2,7 @@ import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.utils.perfreporter import CSVPerformanceFile
-import os, sys, math, shutil, zipfile, glob
+import os, sys, math, shutil, zipfile, glob, tarfile
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -61,6 +61,27 @@ class PySysTest(BaseTest):
 		)
 		self.assertThat('0.002*1024*1024-1000 < zipBytes < 0.002*1024*1024+200', zipBytes=os.path.getsize(glob.glob(archivedir+'/*.zip')[0]))
 		self.log.info('')
+
+		##########
+		archivedir = self.output+'/testroot/__pysys_output_archives_tar.gz'
+		self.log.info('--- Checking %s', os.path.basename(archivedir))
+		shutil.unpack_archive(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*'))[0], extract_dir=self.output+'/extracted-tar.gz')
+		self.assertThat('members == expected', members=sorted(os.listdir(self.output+'/extracted-tar.gz')), expected=sorted([
+			'__pysys_skipped_archive_files.txt', 'a', 'f1.txt', 'f3.txt', 'run.log', u'unicode_filename_\xa3.txt']), archive=os.path.basename(archivedir))
+		self.assertGrep(self.output+'/extracted-tar.gz/__pysys_skipped_archive_files.txt', 'test_output.*cycle.*f2.txt')
+		self.log.info('')
+
+		##########
+		archivedir = self.output+'/testroot/__pysys_output_archives_tar.xz'
+		self.log.info('--- Checking %s', os.path.basename(archivedir))
+		shutil.unpack_archive(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*'))[0], extract_dir=self.output+'/extracted-tar.xz')
+		self.assertThat('members == expected', members=sorted(os.listdir(self.output+'/extracted-tar.xz')), expected=sorted([
+			'__pysys_skipped_archive_files.txt', 'a', 'f1.txt', 'f3.txt', 'run.log', u'unicode_filename_\xa3.txt']), archive=os.path.basename(archivedir))
+		self.assertGrep(self.output+'/extracted-tar.xz/__pysys_skipped_archive_files.txt', 'test_output.*cycle.*f2.txt')
+		self.log.info('')
+
+
+
 
 		##########
 		archivedir = self.output+'/testroot/__pysys_output_archives.test_output' # contains the output dir name

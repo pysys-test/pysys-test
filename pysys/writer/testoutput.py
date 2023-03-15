@@ -29,9 +29,11 @@ __all__ = [
 
 import time, stat, logging, sys, io
 import zipfile
+import tarfile
 import locale
 import shutil
 import shlex
+import hashlib
 
 from pysys.constants import *
 from pysys.writer.api import *
@@ -43,12 +45,15 @@ from pysys.exceptions import UserError
 log = logging.getLogger('pysys.writer')
 
 class TestOutputArchiveWriter(BaseRecordResultsWriter):
-	"""Writer that creates zip archives of each failed test's output directory, 
+	"""Writer that creates zip of tar.gz/xz archives of each failed test's output directory, 
 	producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
 	
 	This writer is enabled when running with ``--record``. If using this writer in conjunction with a CI writer that 
 	publishes the generated archives, be sure to include this writer first in the list of writers in your project 
 	configuration. 
+
+	Note that the zip file format typically generates much larger files than tar.xz (and tar.gz) so use the latter format 
+	where possible. 
 
 	Publishes artifacts with category name "TestOutputArchive" and the directory (unless there are no archives) 
 	as "TestOutputArchiveDir" for any enabled `pysys.writer.api.ArtifactPublisher` writers. 
@@ -67,6 +72,14 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	Project ``${...}`` properties can be used in the path. 
 	"""
 	
+	format = "zip"
+	"""
+	The archive type. Supported types are ``zip``, ``tar.gz`` and ``tar.xz``. The latter are often significantly smaller than zip 
+	files due to cross-file compression. 
+
+	.. versionadded:: 2.2
+	"""
+
 	maxTotalSizeMB = 1024.0
 	"""
 	The (approximate) limit on the total size of all archives.
@@ -74,7 +87,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	
 	maxArchiveSizeMB = 200.0
 	"""
-	The (approximate) limit on the size each individual test archive.
+	The (approximate) limit on the size each individual test ``zip`` file, or of the total uncompressed size of the files if making a ``tar.*`` file. 
 	"""
 	
 	maxArchives = 50
@@ -129,7 +142,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		# avoid double-expanding (which could mess up ${$} escapes), but if using default value we need to expand it
 		if self.destDir == TestOutputArchiveWriter.destDir: self.destDir = runner.project.expandProperties(self.destDir)
 		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.output+'/..', self.destDir)))
-		if os.path.exists(self.destDir) and all(f.endswith(('.txt', '.zip')) for f in os.listdir(self.destDir)):
+		if os.path.exists(self.destDir) and all(f.endswith(('.txt', '.zip', '.tar.gz', '.tar.xz')) for f in os.listdir(self.destDir)):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
 
 		self.fileExcludesRegex = re.compile(self.fileExcludesRegex) if self.fileExcludesRegex else None
@@ -151,7 +164,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 	def cleanup(self, **kwargs):
 		if self.archiveAtEndOfRun:
-			for _, id, outputDir in sorted(self.queuedInstructions): # sort by hash of testId so make order deterministic
+			for _, id, outputDir in sorted(self.queuedInstructions): # sort by hash of testId so make order deterministic but also give a varied distribution of ids
 				self._archiveTestOutputDir(id, outputDir)
 		
 		if self.skippedTests:
@@ -185,7 +198,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		id = ('%s.cycle%03d'%(testObj.descriptor.id, testObj.testCycle)) if testObj.testCycle else testObj.descriptor.id
 		
 		if self.archiveAtEndOfRun:
-			self.queuedInstructions.append([hash(id), id, testObj.output])
+			self.queuedInstructions.append([ hashlib.sha1(id.encode('utf-8')).hexdigest(), id, testObj.output]) # need a stable hash (not "hash()") to get a varied but deterministic set of ids
 		else:
 			self._archiveTestOutputDir(id, testObj.output)
 	
@@ -196,8 +209,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		:return: (str path, filehandle) The path will include an appropriate extension for this archive type. 
 		  The filehandle must have the same API as Python's ZipFile class. 
 		"""
-		path = self.destDir+os.sep+('%s.%s.zip'%(id, self.runner.project.properties['outDirName']))
-		return path, zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
+		path = self.destDir+os.sep+('%s.%s.%s'%(id, self.runner.project.properties['outDirName'], self.format))
+		if self.format == 'zip':
+			return path, zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
+		assert self.format.startswith('tar.'), 'Supported formats are: zip, tar.gz, tar.xz not "%s"'%self.format
+		return path, tarfile.open(path, 'w:'+self.format.split('.')[1])
 
 	def _archiveTestOutputDir(self, id, outputDir, **kwargs):
 		"""
@@ -239,8 +255,8 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 				for base, dirs, files in os.walk(outputDir):
 					# Just the files, don't bother with the directories for now
-					
 					files.sort(key=lambda fn: [fn!='run.log', fn] ) # be deterministic, and put run.log first
+					dirs.sort()
 					
 					for f in files:
 						fn = os.path.join(base, f)
@@ -264,7 +280,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 						
 						try:
 							if fileSize > bytesRemaining:
-								if triedTmpZipFile: # to save effort, don't keep trying once we're close - from now on only attempt small files
+								if triedTmpZipFile or self.format!='zip': # to save effort, don't keep trying once we're close - from now on only attempt small files; also not possible if making a tar
 									skippedFiles.append(fn)
 									continue
 								triedTmpZipFile = True
@@ -286,18 +302,29 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 									
 							# Here's where we actually add it to the real archive
 							memberName = fn[rootlen:].replace('\\','/')
-							myzip.write(fn, memberName)
+							if self.format == 'zip':
+								myzip.write(fn, memberName)
+							else:
+								myzip.add(fn, memberName)
 						except Exception as ex: # might happen due to file locking or similar
 							log.warning('Failed to add output file "%s" to archive: %s', fn, ex)
 							skippedFiles.append(fn)
 							continue
 						filesInZip += 1
-						bytesRemaining -= myzip.getinfo(memberName).compress_size
+						if self.format == 'zip':
+							bytesRemaining -= myzip.getinfo(memberName).compress_size
+						else:
+							bytesRemaining -= myzip.getmember(memberName).size # no way to get compressed size unfortunately
 				
 				if skippedFiles and fileIncludesRegex is None: # keep the archive clean if there's an explicit include
 					skippedFilesStr = os.linesep.join([fromLongPathSafe(f) for f in skippedFiles])
 					skippedFilesStr = skippedFilesStr.encode('utf-8')
-					myzip.writestr('__pysys_skipped_archive_files.txt', skippedFilesStr)
+					if self.format == 'zip':
+						myzip.writestr('__pysys_skipped_archive_files.txt', skippedFilesStr)
+					else:
+						tarinfo = tarfile.TarInfo('__pysys_skipped_archive_files.txt')
+						tarinfo.size = len(skippedFilesStr)
+						myzip.addfile(tarinfo, fileobj=io.BytesIO(skippedFilesStr))
 	
 			if filesInZip == 0:
 				# don't leave empty zips around

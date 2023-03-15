@@ -24,6 +24,21 @@
 			<property name="maxTotalSizeMB" value="0.010"/> <!-- 10kB -->
 			<property name="maxArchives" value="1000"/>
 			<property name="fileIncludesRegex" value=".+NestedTestcase.*(f2.txt|f1.txt)"/>
+			<property name="format" value="zip"/>
+		</writer>
+
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives_tar.gz"/>
+			<property name="format" value="tar.gz"/>
+			<property name="maxTotalSizeMB" value="0.010"/> <!-- 10kB -->
+			<property name="fileExcludesRegex" value=".+NestedTestcase.*(f2.txt)"/>
+		</writer>
+
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives_tar.xz"/>
+			<property name="format" value="tar.xz"/>
+			<property name="maxTotalSizeMB" value="0.010"/> <!-- 10kB -->
+			<property name="fileExcludesRegex" value=".+NestedTestcase.*(f2.txt)"/>
 		</writer>
 
 		<!-- Should create no archives -->

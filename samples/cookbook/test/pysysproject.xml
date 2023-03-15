@@ -230,6 +230,7 @@
 			<property name="maxArchives" value="50"/>
 			<property name="archiveAtEndOfRun" value="true"/>
 			<property name="includeNonFailureOutcomes" value="REQUIRES INSPECTION, NOT VERIFIED"/>
+			<property name="format" value="tar.gz"/>
 		</writer>
 
 		<!-- This writer is useful for collecting output files (e.g. logs, graphs, etc) from all tests into a 

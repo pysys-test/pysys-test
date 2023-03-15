@@ -141,6 +141,11 @@ New features:
 
 - Change the debug format when starting a process to only show environment variables whose values differ from the default environment. 
 
+- Added support for ``.tar.gz`` and ``.tar.xz`` to  `pysys.writer.testoutput.TestOutputArchiveWriter` which are both smaller 
+  in many cases than``.zip`` files. See the new ``format`` option to control this. 
+
+
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
