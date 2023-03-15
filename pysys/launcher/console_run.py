@@ -59,7 +59,7 @@ class ConsoleLaunchHelper(object):
 		self.sort = None
 		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:s:'
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=",
-			"mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=', 
+			"mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'vo', 'progress', 'printLogs=', 'grep=', 
 			'ci', 'sort=', 
 			]
 
@@ -117,7 +117,7 @@ Execution options
                                  --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES -XcodeCoverage
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
                    CAT=LEVEL   set the verbosity for a PySys/Python logging category e.g. -vassertions=, -vprocess=
-   -y, --validateOnly          test the validate() method without re-running execute()
+   -y, --validateOnly, --vo    test the validate() method without re-running execute()
    -h, --help                  print this message
  
    -Xkey[=value]               set user-defined override attributes to be set on the testcase and runner instances. The 
@@ -345,7 +345,7 @@ e.g.
 				
 				self.userOptions[key] = value
 			
-			elif option in ("-y", "--validateOnly"):
+			elif option in ("-y", "--validateOnly", "--vo"):
 				self.userOptions['validateOnly'] = True
 
 			elif option in ("-G", "--grep"):
