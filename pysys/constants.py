@@ -45,7 +45,16 @@ if re.search('win32', sys.platform):
 	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
 	LD_LIBRARY_PATH = ''
 	DYLD_LIBRARY_PATH = ''
+	
 	LIBRARY_PATH_ENV_VAR = 'PATH'
+	"""
+	The name of the environment variable listing dynamic library paths on this operating system, for example 
+	``LD_LIBRARY_PATH`` on Linux or ``PATH`` on Windows. Use ``os.pathsep`` for joining the paths together. 
+	
+	For example::
+		environ={ LIBRARY_PATH_ENV_VAR: os.path.join([os.getenv(LIBRARY_PATH_ENV_VAR,''), mynewpath]) }
+	"""
+	
 	SITE_PACKAGES_DIR =  os.path.join(sys.prefix, "Lib", "site-packages")
 	
 elif re.search('sunos', sys.platform): # pragma: no cover
