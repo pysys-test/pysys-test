@@ -877,10 +877,13 @@ class _XMLDescriptorParser(object):
 		# PySys 1.6.1 gave an error if <description> was missing, but a default if <title> was missing, and permitted empty string. So don't be too picky. 
 
 		result = self.kvDict.pop('title', None) or self.getElementTextOrDefault('title', optionalParents=['description'])
-		if not result and self.istest: result = self.getID() # falling back to the ID is better than nothing
+		if result is None and self.istest: result = self.getID() # falling back to the ID is better than nothing
 		
 		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip().rstrip('.')
 		if '  ' in result: result = re.sub('  +', ' ', result)
+
+		if len(result)==0 and self.istest: result = self.getID() # falling back to the ID is better than nothing
+
 		return result
 				
 	def getPurpose(self):
