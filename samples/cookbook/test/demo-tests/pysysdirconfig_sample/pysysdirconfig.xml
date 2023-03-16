@@ -52,7 +52,7 @@
 	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
 	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
 	
-	See :ref:`pysys/UserGuide:Customizing pysys make` for more on how to create templates. 
+	See :ref:`pysys/UserGuide:Create new test templates for pysys make` for more on how to create templates. 
 
 	-->
 	<maker-template name="perf-test" description="a performance test including configuration for my fictional performance tool" 
