@@ -26,37 +26,47 @@ def prepareDocBuild():
 	def readtmpl(path):
 		with codecs.open(ROOT_DIR+'/'+path, 'r', 'ascii') as f:
 			return f.read().replace('\r', '')
+
+
+	def xmlToRST(xml):
+			out = ''
+			
+			inXML = False
+			proj = xml
+
+			for item in re.split(r'^([ \t]*<!--.*?-->[^\n]*\n)', proj, flags=re.MULTILINE | re.DOTALL):
+				if not item.strip(): continue
+			
+				if '<!--' in item and ('~~' in item or '`' in item):
+					item = item.strip()[4:-3]
+					if inXML: out += '\n'
+					inXML = False
+					
+					# insert the comment contents not as quoted XML but as rst source, so links and headings work
+					out += inspect.cleandoc(item)+'\n'
+					continue
+
+				if not inXML: 
+					out += '\n.. code-block:: xml'
+					if not item.startswith('\n'): out += '\n'
+					out += '\n  '
+				
+				inXML=True
+				out += '\n  '.join(item.split('\n'))
+			return out
+			
 	with codecs.open(ROOT_DIR+'/docs/pysys/TestDescriptors.rst', 'w', 'ascii') as rstout:
 		rstout.write(readtmpl('docs/pysys/TestDescriptors.rst.tmpl')\
 			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/test/demo-tests/PySysTestXMLDescriptorSample/pysystest.xml').split('\n')))\
 			.replace('@PYSYSTESTPYTHON@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/test/demo-tests/PySysTestPythonDescriptorSample/pysystest.py').split('\n')))\
-			.replace('@PYSYSDIRCONFIGXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/test/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml').split('\n'))))
+			.replace('@PYSYSDIRCONFIGXML@', xmlToRST(readtmpl('samples/cookbook/test/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml')))
+			)
+
 
 	with codecs.open(ROOT_DIR+'/docs/pysys/ProjectConfiguration.rst', 'w', 'ascii') as rstout:
-		rstout.write(readtmpl('docs/pysys/ProjectConfiguration.rst.tmpl'))
-		
-		inXML = False
-		proj = readtmpl('samples/cookbook/test/pysysproject.xml')
+			rstout.write(readtmpl('docs/pysys/ProjectConfiguration.rst.tmpl'))
+			rstout.write(xmlToRST(readtmpl('samples/cookbook/test/pysysproject.xml')))
 
-		for item in re.split(r'^([ \t]*<!--.*?-->[^\n]*\n)', proj, flags=re.MULTILINE | re.DOTALL):
-			if not item.strip(): continue
-		
-			if '<!--' in item and ('~~' in item or '`' in item):
-				item = item.strip()[4:-3]
-				if inXML: rstout.write('\n')
-				inXML = False
-				
-				# insert the comment contents not as quoted XML but as rst source, so links and headings work
-				rstout.write(inspect.cleandoc(item)+'\n')
-				continue
-
-			if not inXML: 
-				rstout.write('\n.. code-block:: xml')
-				if not item.startswith('\n'): rstout.write('\n')
-				rstout.write('\n  ')
-			
-			inXML=True
-			rstout.write('\n  '.join(item.split('\n')))
 
 if __name__ == '__main__':
 	prepareDocBuild()

@@ -6,12 +6,18 @@
 	(and the pysysdirconfig element from pysysproject.xml if present). 
 	-->
 
-	<!-- Specify a prefix to be added to the id of all tests under this directory.
+	<!--
+	Prefix
+	~~~~~~
+	Specify a prefix to be added to the id of all tests under this directory.
 	This is in addition to any defined by individual tests. 
 	-->
 	<id-prefix>MyServer.Performance.</id-prefix>
 	
-	<!-- Specify the templates that can be used by "pysys make" when creating new tests. You may wish to provide 
+	<!-- 
+	Maker templates
+	~~~~~~~~~~~~~~~
+	Specify the templates that can be used by "pysys make" when creating new tests. You may wish to provide 
 	project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage 
 	test creators to follow best practices (rather than just copying from a random test which may not be a good example). 
 	
@@ -28,7 +34,7 @@
 	    when running "pysys make -h". 
 	  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
 	    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
-	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/test/*".
+	    project properties. To use files from the default PySys template use ``${pysysTemplatesDir}/test/*``.
 	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file
 	    (with a ``.pysysignore`` file to stop them being treated as test cases), 
 	    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
@@ -40,14 +46,14 @@
 	    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``, ``@{DEFAULT_DESCRIPTOR}``. 
 	    If no replace elements are explicitly provided, the following default replacements are used:
 	    
-	      @@DATE@@ -> @{DATE} (the current date)
-	      @@USERNAME@@ -> @{USERNAME} (the currently logged in user)
-	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
-	      @@DEFAULT_DESCRIPTOR@@ -> @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the 
-	               standard PySys default test template, after which you can add your customized Python test class)
-	      @@LINE_LENGTH_GUIDE@@ -> @{LINE_LENGTH_GUIDE} (80 underline characters to indicate to the user when they are 
-	               exceeding the recommended maximum length for a test title; this string can be customized for different 
-	               lengths etc using the pysystestTemplateLineLengthGuide project property)
+	    - ``@@DATE@@`` -> ``@{DATE}`` (the current date)
+	    - ``@@USERNAME@@`` -> ``@{USERNAME}`` (the currently logged in user)
+	    - ``@@DIR_NAME@@`` -> ``@{DIR_NAME}`` (the basename of the directory being created, typically the test id)
+	    - ``@@DEFAULT_DESCRIPTOR@@`` -> ``@{DEFAULT_DESCRIPTOR}`` (the __pysys_title__ and other descriptor lines from the 
+	      standard PySys default test template, after which you can add your customized Python test class)
+	    - ``@@LINE_LENGTH_GUIDE@@`` -> ``@{LINE_LENGTH_GUIDE}`` (80 underline characters to indicate to the user when they are 
+	      exceeding the recommended maximum length for a test title; this string can be customized for different 
+	      lengths etc using the pysystestTemplateLineLengthGuide project property)
 	
 	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
 	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
@@ -76,7 +82,10 @@
 
 	<set-default-maker-template name="my-test"/>
 
-	<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
+	<!-- 
+	Groups
+	~~~~~~
+	Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
 	for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
 	These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
 	
@@ -85,13 +94,16 @@
 	-->
 	<groups inherit="true" groups="performance, disableCoverage"/>
 
-	<!-- Specify the list of modes tests under this directory can be run in. 
+	<!-- 
+	Modes
+	~~~~~
+	Specify the list of modes tests under this directory can be run in. 
 	
 	Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an ``_`` underscore, 
 	e.g. ``CompressionGZip_AuthNone``.
 	
 	Test modes are configured with a Python lambda that returns a list of modes, using a single parameter which is 
-	an instance of ``pysys.config.descriptor.TestModesConfigHelper`` providing access to the inherited modes (and other 
+	an instance of `pysys.config.descriptor.TestModesConfigHelper` providing access to the inherited modes (and other 
 	useful functions/fields). Each mode in the returned list is defined by a dictionary containing parameters to be set 
 	on the test object and/or a ``mode`` name. If the mode name is not explicitly provided, a default mode name is 
 	generated by concatenating the parameter values with ``_`` (with a ``paramName=`` prefix for any numeric/boolean 
@@ -140,17 +152,28 @@
 		</modes>
 	-->
 
-	<!-- Specify as a floating point number an indicator of when to run the tests under 
+	<!-- 
+	Execution order
+	~~~~~~~~~~~~~~~
+	Specify as a floating point number an indicator of when to run the tests under 
 	this directory, relative to other tests/directories with a higher or lower hint. 
 	Empty string hint="" means inherit. The default priority is 0.0 so set the hint to a higher 
 	value to execute tests later, or a negative value to execute tests earlier. 
 	-->
 	<execution-order hint="+100.0"/>
 
-	<!-- Comment/uncomment this to mark all tests under this directory as skipped. -->
+	<!-- 
+	Skip
+	~~~~
+	Comment/uncomment this to mark all tests under this directory as skipped. 
+	-->
 	<skipped reason="These tests are skipped until Bug-1234 is fixed"/>
 	
-	<!-- By convention the test class uses the ``pysystest.py` module if present or else module="run.py" located 
+	<!-- 
+	Advanced
+	~~~~~~~~
+	
+	By convention the test class uses the ``pysystest.py`` module if present or else module="run.py" located 
 	in the test directory, but it is possible to use a different path (even an absolute path). If you want to use 
 	a single Python class for lots of tests rather, omit the module= attribute and make sure it's available 
 	on the project's <pythonpath> . 
