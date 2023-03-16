@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains operating system helper utilities such as the ``USABLE_CPU_COUNT`` constant. 
+Contains operating system helper utilities such as the `getUsableCPUCount` function. 
 
 """
 
@@ -30,17 +30,23 @@ import logging
 
 from pysys.constants import *
 
-__all__ = ['USABLE_CPU_COUNT']
+__all__ = ['getUsableCPUCount']
 
-USABLE_CPU_COUNT: float = None
-"""
-The number of CPUs that are usable from this PySys process, as a floating point number. 
 
-This may be less than the total number of CPUs due to restrictions from the operating system 
-such as the process affinity mask and container cgroup (``cpu.cfs_quota_us`` / ``cpu.max``) limits. 
+__USABLE_CPU_COUNT = None
 
-.. versionadded:: 2.2
-"""
+def getUsableCPUCount() -> float:
+	"""
+	The number of CPUs that are usable from this PySys process, as a floating point number. 
+
+	This may be less than the total number of CPUs due to restrictions from the operating system 
+	such as the process affinity mask and container cgroup (``cpu.cfs_quota_us`` / ``cpu.max``) limits. 
+
+	.. versionadded:: 2.2
+	"""
+	if __USABLE_CPU_COUNT: return __USABLE_CPU_COUNT
+	return _initUsableCPUCount()
+	
 
 def _initUsableCPUCount():
 	""" Internal, do not use. 
@@ -50,10 +56,11 @@ def _initUsableCPUCount():
 
 	:meta private: Not public API
 	"""
-	global USABLE_CPU_COUNT
-	assert USABLE_CPU_COUNT == None # only set this once
-
 	log = logging.getLogger('pysys.initUsableCPUCount')
+
+	global __USABLE_CPU_COUNT
+	if __USABLE_CPU_COUNT:
+		log.debug('Calling _initUsableCPUCount when it was previously called and returned %s', __USABLE_CPU_COUNT)
 
 	try:
 		cpus = len(os.sched_getaffinity(0)) # as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()
@@ -97,7 +104,7 @@ def _initUsableCPUCount():
 
 	log.debug('Usable CPU count for process = %d', cpus)
 
-	USABLE_CPU_COUNT = cpus
+	__USABLE_CPU_COUNT = cpus
 	return cpus
 
 
