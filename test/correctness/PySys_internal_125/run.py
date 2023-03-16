@@ -174,6 +174,8 @@ class PySysTest(BaseTest):
 			pysys.mappers.RegexReplace(r'\[[^\]]*run.py:[0-9]+', '[run.py:XX'),
 
 			])
+	
+		self.logValueDiff('"a b"', "a b c\"def\"gh\\ni", stringsAlreadyEscaped=True) # no validation, just check it doesn't crash
 
 	def validate(self):
 		replace = []

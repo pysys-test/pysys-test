@@ -678,7 +678,7 @@ class BaseTest(ProcessUser):
 
 			return False
 	
-	def logValueDiff(self, actual=None, expected=None, logFunction=None, **namedvalues):
+	def logValueDiff(self, actual=None, expected=None, logFunction=None, stringsAlreadyEscaped=False, **namedvalues):
 		"""Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by `assertThat`). 
 		
 		Special handling is provided for common types such as strings, lists and dicts (note that this isn't intended 
@@ -688,6 +688,10 @@ class BaseTest(ProcessUser):
 			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. 
 		:param obj expected: The baseline/expected value from which a diff will be computed to the actual value. 
 			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. 
+		
+		:param bool stringsAlreadyEscaped: Usually any str values will be quoted and escaped (possibly using ``repr()``), however in cases 
+			where you want to compare values which have already been converted to strings using your own quoting rules this 
+			option can be used to avoid doubling up on the quotes and escaping. 
 			
 		:param function logFunction: By default each line is logged at INFO level using ``log.info()``, but an alternative 
 			log function with the same signature can be provided if desired. 
@@ -734,7 +738,9 @@ class BaseTest(ProcessUser):
 			v1 = u'%s'%(v1,)
 			v2 = u'%s'%(v2,)
 
-			if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
+			if stringsAlreadyEscaped:
+				pass
+			elif isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
 					('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
 					('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
 				v1 = quotestring(namedvalues[namesInUse[0]])
