@@ -2,6 +2,8 @@
 <pysysproject>
 	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
 
+	<property name="os_myThirdPartyLibraryVersion" value="1.234"/>
+
 	<default-file-encodings>
 		<default-file-encoding pattern="run.log" encoding="utf-8"/>
 		

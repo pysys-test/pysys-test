@@ -118,9 +118,9 @@ __pysys_skipped_reason__   = "This test is skipped until Bug-1234 is fixed"
 # value to execute tests later, or a negative value to execute tests earlier.
 
 # By convention the test class uses module="run.py" located in the test directory, but
-# it is possible to use a different path (even an absolute path). If you want to use a single
-# Python class for lots of tests rather, omit the module= attribute and make sure it's available
-# on the project's <pythonpath> .
+# it is possible to use a different path (even an absolute path). If you want to use
+# a single Python class for lots of tests, omit the module= attribute, ensure the class has at least one level of
+# Python package, and make sure it's available on the project's <pythonpath> .
 
 # You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute
 # paths if needed). These can also be specified using the older names <output/input/reference> with a path= attribute.
@@ -128,8 +128,11 @@ __pysys_skipped_reason__   = "This test is skipped until Bug-1234 is fixed"
 # The ability to add user-defined data to the test descriptor is mostly useful when using a
 # shared Python class for lots of tests.
 # 
-# Project properties (but not other user-data values) can be specified using ${...}, but only if the Python code
-# that's reading the user-data explicitly expands the properties (it's not automatic).
+# Project properties (but not other user-data values) can be substituted into the value using ${...},
+# and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables).
+# 
+# If a static field of the same name exists on the test class, it will be overridden with the associated user-data
+# value, with some basic type coersion to match the default value of the static field where possible.
 
 # For long values such as paths the value can be specified in a text (or CDATA) node, and if the
 # value is to be converted to a list, newline and/or comma can be used as delimiters.

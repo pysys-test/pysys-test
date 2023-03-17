@@ -107,8 +107,8 @@ class TestDescriptor(object):
 		it's a normal testcase. 
 	
 	:ivar dict[str,obj] ~.userData: A Python dictionary that can be used for storing user-defined data 
-		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements, e.g. 
-		``<data><user-data name="key" value="val ${projectProperty}"</user-data></data>``.
+		in the descriptor. In a pysystest.py, this can be populated by a ``__pysys_user_data__`` dictionary, e.g. 
+		``__pysys_user_data__ = {"key": "val ${projectProperty}"}`` or ``__pysys_user_data.key__ = "val"``.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
@@ -750,7 +750,12 @@ class _XMLDescriptorParser(object):
 		cls, pymodule = self.getClassDetails()
 		
 		if pymodule is None and self.istest: # default setting means auto-detect (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
-			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
+			if self.file.endswith('.py'):
+				pymodule = os.path.basename(self.file)
+			elif cls and '.' in cls: # if the Python class is X.Y it's probably got a package name and therefore PYTHONPATH (could be a nested class inside a run.py but pretty unlikely)
+				pymodule = 'PYTHONPATH'
+			else:
+				pymodule = DEFAULT_MODULE # else run.py
 		
 		
 		
@@ -767,7 +772,7 @@ class _XMLDescriptorParser(object):
 										self.getExecutionOrderHint(), 
 										skippedReason=self.getSkippedReason(), 
 										testDir=self.dirname,
-										userData=self.getUserData(),
+										userData={k:self.project.expandProperties(v) for k,v in self.getUserData().items()},
 										authors=[x.strip() for x in 
 											(self.kvDict.pop('authors', None) or (self.root.getAttribute('authors') if self.root else '') 
 											).split(',') if x.strip()],
@@ -1116,6 +1121,11 @@ class _XMLDescriptorParser(object):
 		if isinstance(newitems, str): 
 				newitems = pysys.utils.safeeval.safeEval(newitems.strip(), 
 						extraNamespace={}, emptyNamespace=True)
+				
+		for k in [k for k in self.kvDict if k.startswith('user_data_')]:
+			newitems[k[k.find('data_')+5:]] = self.kvDict.pop(k)
+		for k in [k for k in self.kvDict if k.startswith('user_data.')]: # TODO???
+			newitems[k[k.find('.')+1:]] = self.kvDict.pop(k)
 
 		if not newitems:
 			data = self.getSingleElement('data')

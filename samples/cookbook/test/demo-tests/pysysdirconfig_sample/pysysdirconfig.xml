@@ -175,8 +175,8 @@
 	
 	By convention the test class uses the ``pysystest.py`` module if present or else module="run.py" located 
 	in the test directory, but it is possible to use a different path (even an absolute path). If you want to use 
-	a single Python class for lots of tests rather, omit the module= attribute and make sure it's available 
-	on the project's <pythonpath> . 
+	a single Python class for lots of tests, omit the module= attribute, ensure the class has at least one level of 
+	Python package, and make sure it's available on the project's <pythonpath> . 
 	-->
 	<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
 
@@ -193,6 +193,9 @@
 		
 		Project properties (but not other user-data values) can be substituted into the value using ${...}, 
 		and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables). 
+
+		If a static field of the same name exists on the test class, it will be overridden with the associated user-data 
+		value, with some basic type coersion to match the default value of the static field where possible. 
 		-->
 		<user-data name="myTestDescriptorData" value="foobar"/>
 		

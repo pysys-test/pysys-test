@@ -263,7 +263,7 @@ class ProcessUser(object):
 		runTest.py launch executable.
 		
 		If an existing attribute is present on this test class (typically a 
-		static class variable) and it has a type of bool, int or float, then 
+		static class variable) and it has a type of bool, int, float or list, then 
 		any -X options will be automatically converted from string to that type. 
 		This facilitates providing default values for parameters such as 
 		iteration count or timeouts as static class variables with the 

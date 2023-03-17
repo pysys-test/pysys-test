@@ -114,8 +114,9 @@ __pysys_parameterized_test_modes__ = {
 __pysys_execution_order_hint__ = +100.0
 	
 # By default the test class uses this pysystest.py module, but it is possible to use a different path for the test 
-# (even an absolute path). If you want to use a single Python class for lots of tests, set the module 
-# to the special string "PYTHONPATH" and make sure it's available on the project's <pythonpath>. 
+# (even an absolute path). If you want to use a single Python class for lots of tests, use a class with at least one 
+# Python package in it (or set the module to the special string "PYTHONPATH"), and make sure it's available on the
+# project's <pythonpath>. 
 __pysys_python_class__     = "PySysTest"
 __pysys_python_module__    = "${testRootDir}/pysys-extensions/MySharedTestClass.py" # or "PYTHONPATH"
 
@@ -134,10 +135,14 @@ __pysys_user_data__        = {
 	
 		'myTestDescriptorData': 'foobar', 
 
+        # If a static field of the same name exists on the test class, it will be overridden with the associated user-data
+        # value, with some basic type coersion to match the default value of the static field where possible.
+
 		# For long values such as paths if the value is to be converted to a list, newline and/or comma can be used as 
-		# delimiters, however it is up to the Python code that's processing the user data to handle. 
-		# Similarly, you can use project property syntax (e.g. ${propName} or ${eval: xxx}) if the code that reads 
-		# the user data expands them (but this does not happen automatically). 
+		# delimiters and will be automatically converted.
+		
+		# You can use project property syntax (e.g. ${propName} or ${eval: xxx}) and these will be expanded 
+		# automatically. 
 		'myTestDescriptorPath': '''
 			foo/foo-${os_myThirdPartyLibraryVersion}
 			foo/bar, foo/baz
@@ -145,6 +150,9 @@ __pysys_user_data__        = {
 			foo/bosh
 		'''
 	}
+# You can also specify items for the user data dictionary with separate items as follows. For non-Python pysystest.* files 
+# you can optionally use dot syntax instead of underscore e.g. "__pysys_user_data.myOtherUserData__".
+__pysys_user_data_myOtherUserData__ = "foo/foo-${os_myThirdPartyLibraryVersion}, foo/bar, foo/baz"
 
 # It is also possible to provide the descriptor values using XML embedded in this file as follows. Note that parsing 
 # XML is relatively slow, so add this value only if you have a good reason. 

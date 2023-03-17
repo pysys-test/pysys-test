@@ -139,6 +139,16 @@ New features:
 
   See :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml`.
 
+- Enhanced how user-provided userData in test descriptors is processed, to include automatic substitution of ``${...}`` project properties, 
+  and to support specifying user data keys independently using ``_`` or ``.`` syntax as an alternative to providing an entire dictionary, 
+  for example::
+
+	__pysys_user_data.myDataKey1__ = "a, ${PROJECT_PROP}, b"
+	__pysys_user_data_myDataKey2__ = 12345
+
+- Improved test descriptor loading for shared Python test classes so that it is no longer necessary to set ``__pysys_python_module__ = "PYTHONPATH"`` when 
+  setting a ``__pysys_python_class__`` that contains at least one dot character, for example ``mypackage.MyTestClass``.
+
 - Change the debug format when starting a process to only show environment variables whose values differ from the default environment. 
 
 - Added support for ``.tar.gz`` and ``.tar.xz`` to  `pysys.writer.testoutput.TestOutputArchiveWriter` which are both smaller 
@@ -168,6 +178,11 @@ Minor behaviour changes:
   working directory. 
 - Removed the ``authors`` field from the default ``pysys make`` template. If you find it useful feel free to add it to your 
   own per-project maker template. 
+- User-provided userData in test descriptors is now subject to automatic substitution of ``${...}`` project properties. 
+  Such properties can be escaped using ``${$}`` if needed. 
+- Test descriptor loading now assumes modules as on the PYTHONPATH rather than in a ``run.py`` file if the module is not explicitly specified 
+  and ``__pysys_python_class__`` contains at least one dot character, for example ``mypackage.MyTestClass``.
+
 
 -----------------
 What's new in 2.1
@@ -1687,8 +1702,8 @@ Advanced pysystest.xml additions:
   and each named value will be set as a variable on the `BaseTest` class. If a static (non-instance) variable of the same name 
   exists on the test class at construction then the ``<user-data>`` will override it, but its type will be coerced 
   automatically to an int/float/bool to match the type of the variable. A ``pysys.py run -Xname=value`` argument can be 
-  specified to provide a temporary override for any items in the test's user data. Note that there is no 
-  automatic substituting of ``${...}`` properties in user data values. 
+  specified to provide a temporary override for any items in the test's user data. 
+  (from v2.2 onwards there is also automatic substituting of ``${...}`` properties in user data values). 
   
 Bug fixes:
 
