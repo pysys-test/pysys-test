@@ -117,6 +117,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	
 	for d in descriptors:
 		if IS_WINDOWS: assert '/' not in d.output, f'Invalid descriptor output dir for {d.id}: {d.output}' # custom descriptor loaders should not insert unix separators into windows output dirs - causes all kinds of problems when toLongPathSafe is used later
+		assert '..' not in d.output, f'Invalid descriptor output dir for {d.id}: {d.output}' # custom descriptor loaders should not insert relative paths
 
 		if not d.modes:
 			# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
