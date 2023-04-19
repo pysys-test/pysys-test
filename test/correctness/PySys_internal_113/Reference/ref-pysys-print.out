@@ -1,3 +1,4 @@
-MyTest                      | My funky test
-dirprefix_MyCustomTest_002  | My ace test
-dirprefix_PySys_cor_001     | Test
+dirprefix_MyCustomTest_002_FromSrcDir  | My ace test, actually located in source directory
+MyTest                                 | My funky test
+dirprefix_MyCustomTest_002             | My ace test
+dirprefix_PySys_cor_001                | Test

@@ -3,6 +3,7 @@ from pysys.basetest import BaseTest
 from pysys.baserunner import BaseRunner
 from pysys.config.descriptor import DescriptorLoader, TestDescriptor
 from pysys.constants import PASSED
+from pysys.utils.fileutils import toLongPathSafe
 
 class MyTestClass(BaseTest):
 	def execute(self):
@@ -17,7 +18,7 @@ class CustomDescriptorLoader(DescriptorLoader):
 	
 		if 'ace_descriptor.json' in files:
 			descriptors.append(TestDescriptor(
-				file=dir+'/ace_descriptor.json', 
+				file=dir+'/ace_descriptor.json',
 				id=idprefix+os.path.basename(dir), 
 				title=u"My ace test",
 				groups=[u'ace-tests'], 
@@ -25,6 +26,18 @@ class CustomDescriptorLoader(DescriptorLoader):
 				classname="MyTestClass",
 				module=os.path.abspath(__file__.split('.')[0])
 				))
+
+			# also test what it looks like to do a lookaside and find tests in another directory e.g. under the source tree
+			descriptors.append(TestDescriptor(
+				file=toLongPathSafe(self.project.testRootDir+'/../someSrcLocation'), # use long path safe just to make sure this works
+				output=toLongPathSafe(dir+'/Output/'+idprefix+os.path.basename(dir)), # use long path safe just to make sure this works
+				id=idprefix+os.path.basename(dir)+'_FromSrcDir', 
+				title=u"My ace test, actually located in source directory",
+				classname="MyTestClass",
+				modes=[u'MyModeForSrcFile'],
+				module=os.path.abspath(__file__.split('.')[0])
+				))
+
 			return True # don't look for PySys tests under this tree
 		
 		# ... alternatively	... this is an example of some descriptors that 

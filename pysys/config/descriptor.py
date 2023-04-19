@@ -162,8 +162,9 @@ class TestDescriptor(object):
 		elif module.endswith('.py') or module == 'PYTHONPATH': self.module = module
 		else: self.module = module+'.py'
 		
+		
 		self.input = input
-		self.output = output
+		self.output = fromLongPathSafe(output) # just in case descriptors were loaded dynamically and contain absolute \\?\ paths on windows
 		self.reference = reference
 
 		self.traceability = traceability
