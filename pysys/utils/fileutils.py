@@ -86,10 +86,6 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 def fromLongPathSafe(path):
 	r"""
 	Strip off ``\\?\`` prefixes added by L{toLongPathSafe}. 
-	
-	Note that this function does not convert unicode strings back to byte 
-	strings, so if you want a complete reversal of toLongPathSafe you will 
-	additionally have to call C{result.encode(PREFERRED_ENCODING)}.
 	"""
 	if not path: return path
 	if not path.startswith('\\\\?\\'): return path
