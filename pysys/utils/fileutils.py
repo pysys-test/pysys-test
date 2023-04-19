@@ -43,11 +43,11 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	letters so they are always upper case regardless of OS version and current 
 	working directory. 
 	
-	:param str path: A path. Must not be a relative path. Can be None/empty. Can 
+	:param str path: An absolute (not relative) path. Can be None/empty. Can 
 		contain ".." sequences. Note that no normalization of ".." 
-		sequences and slashes is performed if the OS starts with ``\\?\`` already 
+		sequences and slashes is performed if the path starts with ``\\?\`` already 
 		or is non-Windows so if in doubt run the path through ``os.path.normpath`` 
-		before calling this method on it (``\\?\`` paths with incorrect slashes or .. sequences 
+		before calling this method on it (``\\?\`` paths with incorrect slashes and ``..`` sequences 
 		are not permitted by Windows). 
 	
 	:param bool onlyIfNeeded: Set to True to only adds the long path support if this 
@@ -56,8 +56,8 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 		returned string. 
 	
 	:return: The passed-in path, possibly with a ``\\?\`` prefix added, 
-		forward slashes converted to backslashes on Windows, and converted to 
-		a unicode string. Trailing slashes may be removed. 
+		forward slashes converted to backslashes on Windows, and drive letter capitalized. 
+		Trailing slashes may be removed. 
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
