@@ -54,7 +54,7 @@ __pysys_user_data__        = r"""
 		'myTestDescriptorData': 'foobar', 
 
 		'myTestDescriptorPath': '''
-			foo/foo-${os_myThirdPartyLibraryVersion}
+			foo/foo-${startDate}
 			foo/bar, foo/baz
 
 			foo/bosh
