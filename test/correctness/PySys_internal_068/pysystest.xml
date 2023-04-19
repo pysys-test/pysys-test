@@ -6,6 +6,8 @@
     <purpose><![CDATA[
 Checks for basic correctness when all writers are enabled, and multiple cycles are executed. 
 Includes testing that I18N characters are handled correctly. 
+
+Also checks the (currently undocumented) ability to report unplanned/dynamic test results. 
 ]]>
     </purpose>
   </description>

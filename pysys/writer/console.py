@@ -93,11 +93,14 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		log = logging.getLogger('pysys.resultsprogress')
 		
 		id = self.testToDisplay(testObj, cycle)
-		self.inprogress.remove(id)
+		if id in self.inprogress:
+			self.inprogress.remove(id)
+		else:
+			self.numTests += 1 # it's an unplanned/dynamic test
 		
 		outcome = testObj.getOutcome()
 		self.outcomes[outcome] += 1
-		
+		 
 		executed = sum(self.outcomes.values())
 		
 		if outcome.isFailure():

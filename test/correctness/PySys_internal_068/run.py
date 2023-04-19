@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 # Part of this test: for pre-1.6.0 compatibility check this works for classes defined in subpackages
 from pysys.writer import *
 assert PythonCoverageWriter
@@ -12,8 +10,8 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, math, shutil, glob, locale
 
-# contains a non-ascii £ character that is different in utf-8 vs latin-1
-TEST_STR = u'Hello £ world' 
+# contains a non-ascii pound character that is different in utf-8 vs latin-1
+TEST_STR = u'Hello \u00a3 world' 
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -100,7 +98,7 @@ class PySysTest(BaseTest):
 
 		# check these appear only once in log lines (i.e. starting with a digit; excludes repetitions from CI providers)
 		self.assertLineCount('pysys.out', expr='[0-9].*Total test duration:', condition='==1')
-		self.assertLineCount('pysys.out', expr='[0-9].*Failure outcomes: .*2 TIMED OUT, 2 FAILED', condition='==1')
+		self.assertLineCount('pysys.out', expr='[0-9].*Failure outcomes: .*2 TIMED OUT, 3 FAILED', condition='==1')
 		self.assertLineCount('pysys.out', expr='[0-9].*Success outcomes: .*2 PASSED', condition='==1')
 		self.assertGrep('pysys.out', expr=' +[(]title: .*Nested testcase fail.*[)]')
 
@@ -163,6 +161,7 @@ class PySysTest(BaseTest):
 		self.assertThat('testDir == expected', testDir=next(x for x in js['results'] if x['testId']=='NestedFail')['testDir'], expected='test/NestedFail')
 		self.assertThat('hasTitle', hasTitle__eval="js['results'][0]['title']")
 		self.assertThat('testIds == expected', testIds=sorted(t['testId'] for t in js['results']), expected=[
+			'MyDynamicUnplannedTest',
 			# NB: does NOT include passed, since we didn't list that one
-			'NestedFail', 'NestedFail', 'NestedNotVerified', 'NestedNotVerified', 'NestedSkipped', 'NestedSkipped', 'NestedTimedout', 'NestedTimedout'
+			'NestedFail', 'NestedFail', 'NestedNotVerified', 'NestedNotVerified', 'NestedSkipped', 'NestedSkipped', 'NestedTimedout', 'NestedTimedout',
 		])

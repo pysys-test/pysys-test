@@ -178,12 +178,12 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 			'outcomeReason': testObj.getOutcomeReason(),
 			'startTime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime( kwargs.get('testStart', time.time()) )),
 			'durationSecs': kwargs.get("testTime", -1),
-			'testDir': testDir.replace('\\', '/'),
-			'testFile': testObj.descriptor._getTestFile().replace('\\','/'),
+			'testDir': fromLongPathSafe(testDir).replace('\\', '/'),
+			'testFile': fromLongPathSafe(testObj.descriptor._getTestFile()).replace('\\','/'),
 		}
 		if self.cycles > 1:
 			data['cycle'] = kwargs["cycle"]+1
-		if testObj.descriptor.output != 'Output': data['outputDir'] = testObj.descriptor.output.replace('\\', '/')
+		if testObj.descriptor.output != 'Output': data['outputDir'] = fromLongPathSafe(testObj.descriptor.output).replace('\\', '/')
 		
 		if self.includeTitle: data['title'] = testObj.descriptor.title
 		
