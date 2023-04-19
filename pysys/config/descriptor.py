@@ -1288,13 +1288,13 @@ class DescriptorLoader(object):
 			self.__descriptorLoaderPlugins.append(plugin)
 
 	def loadDescriptors(self, dir, **kwargs):
-		"""Find all descriptors located under the specified directory, and 
+		"""Find all descriptors located under the specified directory (including its children), and 
 		return them as a list.
 		
 		Subclasses may change the returned descriptors and/or add additional 
 		instances of their own to the list after calling the super implementation::
 		
-		  descriptors = super(CustomDescriptorLoader, self).loadDescriptors(dir, **kwargs)
+		  descriptors = super().loadDescriptors(dir, **kwargs)
 		  ...
 		  return descriptors
 		
