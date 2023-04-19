@@ -985,14 +985,14 @@ class _XMLDescriptorParser(object):
 	def getModes(self):
 		text = self.kvDict.pop('modes', None)
 		modesNode = None
-		if not text: 
+		if text is None or text=='': # nb: do NOT handle [] the same as empty string since that's a common pitfall
 			modesNode = self.getSingleElement('modes', optionalParents=['classification'])
 			if modesNode:
 				text = self.getText(modesNode)
 			else: # if we have neither kvText text nor mode
 				return self._addParameterizedTestModes(self.defaults.modes) # by default we inherit
 
-		if not text: 
+		if text is None or text=='': 
 			# pre-2.0 XML approach
 			result = {}
 			for node in modesNode.getElementsByTagName('mode'):
@@ -1018,7 +1018,7 @@ class _XMLDescriptorParser(object):
 			if isinstance(modesLambda, str): # kvDict may contain non-string values direct from Python
 				# use an empty namespace since if we were parsing this as real python, all import statements would be appearing later
 				modesLambda = pysys.utils.safeeval.safeEval(text.strip(), extraNamespace={}, emptyNamespace=True)
-			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
+			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: [...]) but got %r'%modesLambda
 			helper = TestModesConfigHelper(
 				# note that inheritedModes param dicts may be mutated (so good thing we'd creating a new dict here for the default modes)
 				inheritedModes=[{**mode.params, **{'mode':mode, 'isPrimary':mode.isPrimary}} for mode in self.defaults.modes], 
