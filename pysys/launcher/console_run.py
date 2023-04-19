@@ -442,4 +442,6 @@ def runTest(args):
 	except Exception as e:
 		sys.stderr.write('\nPYSYS FATAL ERROR: %s\n' % e)
 		if not isinstance(e, UserError): traceback.print_exc()
-		sys.exit(10)
+		sys.exit({
+			'The supplied options did not result in the selection of any tests':9, # special error code for specific things users might treat differently
+			}.get(str(e), 10)) # by default return 10

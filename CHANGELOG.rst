@@ -182,7 +182,8 @@ Minor behaviour changes:
   Such properties can be escaped using ``${$}`` if needed. 
 - Test descriptor loading now assumes modules as on the PYTHONPATH rather than in a ``run.py`` file if the module is not explicitly specified 
   and ``__pysys_python_class__`` contains at least one dot character, for example ``mypackage.MyTestClass``.
-
+- The process exit status returned by ``pysys run`` if no tests were found matching the specified options is now ``9`` 
+  (instead of the default fatal error code of ``10`` as in previous versions). 
 
 -----------------
 What's new in 2.1
