@@ -36,6 +36,7 @@ from io import StringIO
 import queue
 import random
 import signal
+import faulthandler
 
 import pysys
 from pysys.constants import *
@@ -370,9 +371,15 @@ class BaseRunner(ProcessUser):
 			self.log.critical('PySys received termination request (signal %s)', sig)
 
 			# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
-			
-			# Setting this should be enough to terminate ASAP. 
-			ProcessUser._setInterruptTerminationInProgress()
+
+			try:
+				if ProcessUser.isInterruptTerminationInProgress:
+					faulthandler.dump_traceback()
+				else:
+					faulthandler.dump_traceback_later(5, repeat=True) # dump traceback every 5 seconds, in case it's hanging for some reason
+			finally:
+				# Setting this should be enough to terminate ASAP. 
+				ProcessUser._setInterruptTerminationInProgress()
 
 		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
 			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
