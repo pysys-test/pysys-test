@@ -34,7 +34,7 @@ from pysys.constants import *
 from pysys import __version__
 from importlib import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
-from pysys.utils.fileutils import mkdir, loadProperties
+from pysys.utils.fileutils import mkdir, loadProperties, toLongPathSafe
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
 
@@ -45,7 +45,7 @@ class _XMLProjectParser(object):
 	:meta private: Not public API. 
 	"""
 	def __init__(self, dirname, file, outdir):
-		self.dirname = dirname
+		self.dirname = toLongPathSafe(dirname, onlyIfNeeded=True) # main reason for this is to capitalize (normalize) drive letter on windows to match other toLongPathSafe invocations
 		self.xmlfile = os.path.join(dirname, file)
 		log.debug('Loading project file: %s', self.xmlfile)
 		self.environment = 'env'
