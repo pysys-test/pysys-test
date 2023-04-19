@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<pysysdirconfig>
+		<input-dir>.</input-dir>
+	</pysysdirconfig>
+
+	<property name="PROJECT_PROP" value="resolved_project_prop,second_thing"/>
+	<path value="." relative="true" />
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+</pysysproject>
