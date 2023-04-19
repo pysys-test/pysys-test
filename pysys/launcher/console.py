@@ -73,6 +73,9 @@ def main(args):
 			sys.stdout.write(f'   with Python libs in {os.path.dirname(stat.__file__)}\n')
 			for k in sorted(os.environ.keys()):
 				if k.startswith(('PYTHON', 'PYSYS_')): sys.stdout.write(f'   env {k} = "{os.environ[k]}"\n')
+			sys.stdout.write('\nProject properties:\n')
+			for k,v in Project.findAndLoadProject().properties.items():
+				sys.stdout.write(f'   {k} = {v}\n')
 		else:
 			sys.stderr.write(f'ERROR: Unknown command "{mode}"\n')
 			sys.stderr.flush()
