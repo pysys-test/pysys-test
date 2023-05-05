@@ -41,6 +41,7 @@ from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdout
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.utils.pycompat import openfile
 from pysys.exceptions import UserError
+from pysys.utils.safeeval import safeEval
 
 log = logging.getLogger('pysys.writer')
 
@@ -373,7 +374,33 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 	
 	Project ``${...}`` properties can be used in the path. 
 	"""
+
+	includeTestIf = ''
+	"""
+	A Python lambda that will be evaluated at the end of a test to determine whether output from a given test should be collected. 
+
+	For example code coverage collectors built on this class can include only unit tests or only tests that run in 
+	pull requests/CI (to ensure a stable baseline for coverage comparisons). This is useful if you wish to have multiple coverage writers 
+	to generate separate coverage reports for all correctness/integration tests versus seeing the coverage achieved in your 
+	unit tests (or a small set of smoke tests used in pull requests). 
+
+	Note that this option only disables the collection/aggregation it does not do anything to actually disable the generation of the files, 
+	so do not use it for excluding performance/soak/reliability tests from code coverage. For that purpose set the 
+	``disableCoverage`` group on the relevant tests (possibly using ``pysysdirconfig.xml`` at the directory level) or the set 
+	``self.disableCoverage = True`` on the test object, which will prevent any coverage-related slowdown in the test execution. 
+
+	For example::
+
+		<property name="includeTestIf">lambda testObj: 
+			'unitTest' in testObj.descriptor.groups
+			or testObj.project.getProperty('IS_LOCAL_DEVELOPER_TEST_RUN',False)
+		</property>
 	
+	The expression is evaluated using the `pysys.utils.safeeval.safeEval` function. 
+
+	.. versionadded:: 2.2
+	"""
+
 	fileIncludesRegex = u'' # executed against the path relative to the test root dir e.g. (pattern1|pattern2)
 	"""
 	A regular expression indicating the test output paths that will be collected. This can be used to 
@@ -460,6 +487,9 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 		self.collectedFileCount = 0
 
 	def visitTestOutputFile(self, testObj, path, **kwargs):
+		if self.includeTestIf and self.includeTestIf.strip() and not safeEval('(%s)'%self.includeTestIf)(testObj):
+			return False
+
 		# strip off test root dir prefix for the regex comparison
 		cmppath = fromLongPathSafe(path)
 		if cmppath.startswith(self.runner.project.testRootDir):

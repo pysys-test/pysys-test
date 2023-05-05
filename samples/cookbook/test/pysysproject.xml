@@ -302,10 +302,22 @@
 			<property name="file" value="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv"/>
 		</writer>
 		
-		<!-- Write a code coverage report for .py files; enabled by -XcodeCoverage. -->
+		<!-- Write a code coverage report for .py files. Coverage is enabled by -XcodeCoverage. -->
 		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
 			<property name="destDir" value="__coverage_python.${outDirName}"/>
 			<property name="destArchive" value="coverage_python.${outDirName}.zip"/>
+			<property name="pythonCoverageArgs" value=""/>
+		</writer>
+
+		<!-- Write a second code coverage report limited to output from a small subset of tests 
+			(such as unit tests, or tests that executed in pull requests). 
+		-->
+		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
+			<property name="includeTestIf">lambda testObj: 
+				'unitTest' in testObj.descriptor.groups
+				or testObj.project.getProperty('IS_LOCAL_DEVELOPER_TEST_RUN',False)
+			</property>
+			<property name="destDir" value="__coverage_python_unit_tests.${outDirName}"/>
 			<property name="pythonCoverageArgs" value=""/>
 		</writer>
 

@@ -421,8 +421,9 @@ Running performance tests
 When running performance tests from an automated job, it is important to ensure that you do not have multiple 
 tests executing at once since this will usually invalidate the results. It is therefore best to run your performance 
 tests in a separate ``pysys run`` invocation to your correctness testing, which does benefit from multi-threaded 
-execution. You should also disable code coverage in a performance run to avoid artificially slowing your components 
-down. So a typical automated performance run would need to modify the usual ``--ci`` default into something like::
+execution. You should ensure code coverage is disabled in a performance run to avoid artificially slowing your components 
+down by ensuring the ``disableCoverage`` group is set on all performance tests (but the command line flag can be used 
+too just to be safe). So a typical automated performance run would need to modify the usual ``--ci`` default into something like::
 
 	cd performance/
 	pysys run --ci --threads=1 -XcodeCoverage=false
@@ -827,3 +828,16 @@ If you wish to produce coverage reports using any other language, this is easy t
   coverage data there from the directory PySys collected it into, so there is a permanent record of 
   any changes in coverage over time. The artifact publishing capability of 
   `pysys.writer.testoutput.CollectTestOutputWriter` will help with that. 
+
+- If you want to compare code coverage between branches/commits you will need to ensure the same set of tests is 
+  running for both comparison points. So if you have a full test run and a smaller set of unit or smoke tests that 
+  execute in pull requests it may be useful to generate two reports - one which includes all tests (for manual 
+  reviewing) and another that includes just the tests executed in the unit tests or in pull requests, for automated 
+  comparisons and quality gates. 
+  This can be achieved by adding an additional coverage writer that will ignore the generated coverage files 
+  from the non-unit/smoke tests::
+  
+  		<property name="includeTestIf">lambda testObj: 
+			'unitTest' in testObj.descriptor.groups
+			or testObj.project.getProperty('IS_LOCAL_DEVELOPER_TEST_RUN',False)
+		</property>

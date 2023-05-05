@@ -1,4 +1,5 @@
 __coverage_python.pysys-run-tests/
+__coverage_python_unit_tests.pysys-run-tests/
 __pysys_collect_perf_graphs.pysys-run-tests/
 __pysys_junit_xml/
 __pysys_myresults.pysys-run-tests.json

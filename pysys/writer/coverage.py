@@ -47,14 +47,14 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	``destArchive`` property (see `CollectTestOutputWriter`), and published as "PythonCoverageArchive". 
 
 	Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ 
-	added to the project if the ``pythonCoverageDirA`` project property is set and none is explicitly configured; but 
+	added to the project if the ``pythonCoverageDir`` project property is set and none is explicitly configured; but 
 	the automatic addition is deprecated so you should explicity add this writer to your project if you need it. 
 
 	.. versionadded:: 1.6.0
 
 	The following properties can be set in the project configuration for this writer (and see also 
 	`pysys.writer.testoutput.CollectTestOutputWriter` for inherited properties such as ``destArchive`` which produces 
-	a .zip of the destDir):		
+	a .zip of the destDir and ``includeTestIf`` for limiting collection to only unit/smoke tests):		
 	"""
 
 	# override CollectTestOutputWriter property values

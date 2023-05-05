@@ -6,7 +6,7 @@ __pysys_purpose__ = r"""
 __pysys_authors__ = "pysysuser"
 __pysys_created__ = "1999-12-31"
 
-__pysys_groups__  = "pyunit"
+__pysys_groups__  = "pyunit, unitTest"
 
 import pysys
 from pysys.unit.pyunit import PyUnitTest

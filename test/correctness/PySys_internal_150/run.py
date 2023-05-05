@@ -37,6 +37,8 @@ class PySysTest(BaseTest):
 	def validate(self):	
 		outdir = self.output+'/pysys-run-tests'
 		
+		self.assertGrep('pysys-run-tests.err', 'ERROR', contains=False) # for FATAL ERRORs
+
 		# Check we got the expected outcomes and outcome reasons
 		self.write_text('non-passes.txt', '\n'.join(sorted(["{r[testId]} = {r[outcome]}: {r[outcomeReason]}".format(r=r) for r in
 			pysys.utils.fileutils.loadJSON(outdir+'/__pysys_myresults.pysys-run-tests.json')['results']
@@ -70,3 +72,8 @@ class PySysTest(BaseTest):
 			with open(glob.glob(outdir+'/__pysys_performance/*/*.json')[0]) as f:
 				json.load(f)
 		
+		# Check the code coverage include filter worked
+		self.assertGrep(outdir+'/__coverage_python.pysys-run-tests/python-coverage-combine.out', 'PyUnitTest')
+		self.assertGrep(outdir+'/__coverage_python.pysys-run-tests/python-coverage-combine.out', 'Outcome_FailedAssertions')
+		self.assertGrep(outdir+'/__coverage_python_unit_tests.pysys-run-tests/python-coverage-combine.out', 'PyUnitTest')
+		self.assertGrep(outdir+'/__coverage_python_unit_tests.pysys-run-tests/python-coverage-combine.out', 'Outcome_FailedAssertions', contains=False)

@@ -154,7 +154,11 @@ New features:
 - Added support for ``.tar.gz`` and ``.tar.xz`` to  `pysys.writer.testoutput.TestOutputArchiveWriter` which are both smaller 
   in many cases than``.zip`` files. See the new ``format`` option to control this. 
 
-
+- Added ``includeTestIf`` option to `pysys.writer.coverage.PythonCoverageWriter` and `pysys.writer.testoutput.CollectTestOutputWriter` 
+  which allows creating multiple coverage writers that collect data from different subsets of your tests, for example to separate out 
+  a full report from all tests from a smaller report from just the unit tests or smoke tests. However note this is not intended to solve 
+  the problem of disabling coverage generation for performance/robustness tests - for that you should set the ``disableCoverage`` group 
+  on the relevant tests or test directories. 
 
 Fixes:
 
