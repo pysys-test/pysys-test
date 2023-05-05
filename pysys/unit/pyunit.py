@@ -103,7 +103,8 @@ if __name__ == '__main__': # pragma: no cover (undocumented, little used executa
 		# Use globals dictionary for locals as well because we
 		# want to treat this like it is being run in a global
 		# (file scope) context)
-		exec(compile(openfile(testFile).read(), testFile, 'exec'), globals, globals)
+		with openfile(testFile) as f:
+			exec(compile(f.read(), testFile, 'exec'), globals, globals)
 		testClasses = []
 		for k, v in list(globals.items()):
 			if isinstance(v, type(unittest.TestCase)):
