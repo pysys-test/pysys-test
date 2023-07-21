@@ -1204,7 +1204,7 @@ class BaseTest(ProcessUser):
 			If you wish to do something with the text inside the match you can use the ``re`` named 
 			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.
 			
-			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
+			For contains=False matches, you should end the expr with `.**` if you wish to include just the 
 			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
 			then the entire matching line will be included in the outcome failure reason. 
 		
