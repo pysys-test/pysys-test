@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<property name="extraProperty2" value="${mainProperty} and mymainvalue"/>
+
+	<project-help>
+		EXTRA project help
+	</project-help>
+
+</pysysproject>

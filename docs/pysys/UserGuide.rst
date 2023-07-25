@@ -681,6 +681,11 @@ directories (ignored by version control) from the testcase directories (checked 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
 its constructor, see :doc:`/pysys/ProjectConfiguration`. 
 
+(Occasionally some user may wish to add their own custom writer that is not defined in the main ``pysysproject.xml`` file, 
+and this can be achieved by putting the additional configuration into a user-specific XML file and setting its path in 
+the environment variable ``PYSYS_PROJECT_APPEND``). 
+
+
 Configuring and overriding test options
 ---------------------------------------
 PySys provides two mechanisms for specifying options such as credentials, 

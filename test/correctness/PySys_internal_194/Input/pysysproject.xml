@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<property name="mainProperty" value="mymainvalue"/>
+
+	<project-help>
+		MAIN project help
+	</project-help>
+
+	<pysysdirconfig>
+		<input-dir>.</input-dir>
+	</pysysdirconfig>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+</pysysproject>

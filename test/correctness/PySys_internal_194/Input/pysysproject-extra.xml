@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<property name="extraProperty" value="${mainProperty} and mymainvalue"/>
+
+	<pythonpath value="${root}/extrapath"/>
+	<writers>
+		<writer module="mypkg.custom" classname="CustomWriter"/>
+	</writers>
+	
+</pysysproject>

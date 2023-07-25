@@ -93,6 +93,17 @@ class _XMLProjectParser(object):
 				raise Exception("No <pysysproject> element supplied in project file")
 			else:
 				self.root = self.doc.getElementsByTagName('pysysproject')[0]
+		
+		extraProjectXMLs = os.getenv('PYSYS_PROJECT_APPEND', '')
+		if extraProjectXMLs:
+			for extraXMLFile in extraProjectXMLs.split(','):
+				extraXMLFile = extraXMLFile.strip()
+				log.info('Loading additional project file: %s', extraXMLFile)
+				extra = xml.dom.minidom.parse(extraXMLFile).getElementsByTagName('pysysproject')
+				assert extra, 'Cannot find <pysysproject> in %s'%extraXMLFile
+
+				for extraNode in list(extra[0].childNodes):
+					self.root.appendChild(extraNode)
 
 		self.__pathProperties = set() # set set of properties which are known to contain a path
 

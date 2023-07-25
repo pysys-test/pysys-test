@@ -160,6 +160,10 @@ New features:
   the problem of disabling coverage generation for performance/robustness tests - for that you should set the ``disableCoverage`` group 
   on the relevant tests or test directories. 
 
+- Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
+  the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
+  modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
