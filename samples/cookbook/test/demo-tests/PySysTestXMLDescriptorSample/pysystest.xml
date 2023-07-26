@@ -69,6 +69,8 @@
 
 	A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
 	
+	The specified Python code is invoked using `pysys.utils.safeeval.safeEval`.
+	
 	-->
 	<modes>
 		lambda helper: [
