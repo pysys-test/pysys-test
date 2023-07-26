@@ -181,6 +181,13 @@ class ProcessUser(object):
 		self.threadPoolMaxWorkers = None # real initialization happens in _initThreadPoolMaxWorkers after runner __init__ has been called, unless a value is overridden here
 
 		self.grepWarnIfLineLongerThan = 10000
+		self.grepTruncateIfLineLongerThan = 0
+		"""
+		Set this to a number of characters to automatically truncate long lines during `waitForGrep` (after all mappers have completed) to the specified length. 
+		This prevents warnings or slow regular expression in large/long log files. 
+		
+		.. versionadded:: 2.2
+		"""
 
 	def _initThreadPoolMaxWorkers(self, pysysThreads):
 		# In theory allow this to be influenced by pysysThreads, but for now we pick a single value since regardless of the number of pysys threads 
@@ -1283,11 +1290,16 @@ class ProcessUser(object):
 		starttime = time.monotonic()
 		lineno = [0] # use an array to hold the line counter so we can update this value inside the function
 		def watchdogMapper(line):		
-			linelen=len(line)
-			if linelen > 5000 and linelen>self.grepWarnIfLineLongerThan:
-				self.log.warning('   very long line of %s characters detected in %s during waitForGrep; be careful as some regular expressions take a very long time to run on long input strings: %s ...', 
-					linelen, file, line[:1000])
-				self.grepWarnIfLineLongerThan *= 3 # increase exponentially (for this test)
+			linelen=len(line)-1# minus one for the (likely) newline, to make the numbers round
+			if linelen > 5000:
+				if self.grepTruncateIfLineLongerThan > 0 and linelen > self.grepTruncateIfLineLongerThan:
+					line = line[:self.grepTruncateIfLineLongerThan]+'\n'
+					linelen = len(line)-1
+
+				if linelen > self.grepWarnIfLineLongerThan:
+					self.log.warning('   very long line of %s characters detected in %s during waitForGrep; be careful as some regular expressions take a very long time to run on long input strings: %s ...', 
+						linelen, file, line[:1000])
+					self.grepWarnIfLineLongerThan *= 5 # increase exponentially (for this test)
 
 			lineno[0] += 1
 			if lineno[0] % 10000 == 0:

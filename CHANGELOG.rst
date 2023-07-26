@@ -112,7 +112,8 @@ New features:
 - Improved `BaseTest.waitForGrep` robustness when the file being checked is big or contains long lines, by checking for timeout during 
   each pass through the file not just at the end, and logging a warning if excessively large lines are found (given that evaluating 
   regular expressions on lines with 10,000s of characters can sometimes take a very long time).  
-  If reading from a file that has long lines, consider adding the new `pysys.mappers.TruncateLongLines` to the mappers list to shorten them. 
+  If reading from a file that has long lines, consider adding the new `pysys.mappers.TruncateLongLines` to the mappers list to shorten them, 
+  or setting the new ``self.grepTruncateIfLineLongerThan`` BaseTest field.  
   The ``waitForGrep`` method now logs warnings if dangerously long lines are detected (as defined by ``self.grepWarnIfLineLongerThan``). 
 
 - Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
