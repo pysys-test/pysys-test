@@ -1074,12 +1074,6 @@ class BaseRunner(ProcessUser):
 			if badchars: log.warning('Unsupported characters "%s" found in test mode "%s" - please use just alphanumeric characters, dot, underscore and equals for modes', 
 				''.join(set(c for c in badchars)), descriptor.mode)
 
-		testDir = descriptor.testDir
-		if testDir.lower().startswith(os.getcwd().lower()):
-			testDir = testDir[len(os.getcwd())+1:]
-			if '/' in testDir or '\\' in testDir: # only print if we're running from a higher level directory
-				self.log.info('Dir:   %s',  os.path.dirname(testDir)+os.sep, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-
 		title = descriptor.title.replace('\n','').strip()
 		if title:
 			title = textwrap.wrap(title, wrap) if wrap>0 else [title]
@@ -1089,6 +1083,10 @@ class BaseRunner(ProcessUser):
 		
 		if self.cycle > 1: # only log if this runner is doing multiple cycles
 			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		
+		# It's really helpful to have the full absolute path available for jumping to it in an IDE, e.g. when fixing a test that's hanging
+		self.log.info('Dir:   %s', os.path.normpath(descriptor.testDir), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+
 		log.debug('Execution order hint: %s', descriptor.executionOrderHint)
 		log.info(62*"=")
 	

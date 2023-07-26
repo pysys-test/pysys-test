@@ -164,6 +164,10 @@ New features:
   the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
   modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
 
+- Changed the ``Dir:`` printed in the header at the start of each test's output to always appear, and to give the full absolute 
+  path of the test directory (not just its parent). This is helpful for quickly navigating between tests when running inside 
+  an IDE. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
