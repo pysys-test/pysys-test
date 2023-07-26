@@ -114,7 +114,7 @@ class TestDescriptor(object):
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
 		'authors', 'created', \
-		'skippedReason', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', 
+		'skippedReason', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', '_descriptorLoaderPlugins',
 
 	def __init__(self, file, id, 
 		type="auto", state="runnable", title=u'', purpose=u'', groups=[], modes=[], 
@@ -123,15 +123,20 @@ class TestDescriptor(object):
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
 		authors=[], created=None,
 		testDir=None, 
-		isDirConfig=False, userData=None):
-		if skippedReason: state = 'skipped'
-		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
+		isDirConfig=False, userData=None
+		):
+
 		self.isDirConfig = isDirConfig
-		self.file = file
 		if not isDirConfig:
 			assert file, [file, id]
 			self.testDir = fromLongPathSafe(testDir or os.path.dirname(file))
-		self.id = id
+
+		self.file = file
+		self.setId(id)
+
+		if skippedReason: state = 'skipped'
+		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
+
 		self.type = type
 		self.state = state
 		self.title = title
@@ -171,19 +176,33 @@ class TestDescriptor(object):
 		self.executionOrderHint = executionOrderHint
 		self.skippedReason = skippedReason
 		
-		self.idWithoutMode = self.id
-		
-		# for internal use only (we cache this to speed up sorting based on path), 
-		# and only for tests not dir configs; 
-		# convert to lowercase to ensure a canonical sort order on case insensitive OSes; 
-		# add id to be sure they're unique (e.g. including mode)
-		if self.file: self._defaultSortKey = self.file.lower()+'/'+self.id
-		
 		# NB: self.mode is set after construction and 
 		# cloning for each supported mode 
 		
 		self.userData = collections.OrderedDict() if userData is None else userData
 	
+	def setId(self, id):
+		"""
+		Change the id of this descriptor. 
+
+		This can be used by `DescriptorLoader` or a loader plugin to modify the id of a descriptor just after it has been parsed. 
+
+		Use this insteaad of assigning directly to the id field. 
+
+		:return: Returns ``self`` to allow fluent usage. 
+		"""
+		self.id = id
+		self.idWithoutMode = self.id
+
+		# for internal use only (we cache this to speed up sorting based on path), 
+		# and only for tests not dir configs; 
+		# convert to lowercase to ensure a canonical sort order on case insensitive OSes; 
+		# add id to be sure they're unique (e.g. including mode)
+		if self.file: self._defaultSortKey = self.file.lower()+'/'+self.id
+
+		return self
+
+
 	def _getTestFile(self):
 		# undocumented API currently
 		# Gets the file containing the test logic - typically a .py file, but could be some other format e.g. .java (but not XML)
@@ -784,10 +803,23 @@ class _XMLDescriptorParser(object):
 			raise UserError(f'Unknown {self.KV_PATTERN % "KEY"} key(s) in test descriptor "{self.file}": {", ".join(self.kvDict.keys())}')
 		
 		if not self.istest:
-			# _makeTestTemplates is not an official/public part of the descriptor spec, so don't have it in the constructor signature
+			# not an official/public part of the descriptor spec, so don't have it in the constructor signature
 			t._makeTestTemplates = self._parseTestMakerTemplates()
+			t._descriptorLoaderPlugins = getattr(self.defaults, '_descriptorLoaderPlugins', [])+self._parseDescriptorLoaderPlugins()
 		
 		return t
+
+	def _parseDescriptorLoaderPlugins(self):# not public API, do not use
+		plugins = []
+		for node in self.root.getElementsByTagName('descriptor-loader-plugin'):
+			from pysys.config.project import _XMLProjectParser
+			cls, optionsDict = _XMLProjectParser._parseClassAndConfigDictImpl(self.__expandPropertiesImplFromProject, node, defaultClass=None)
+			pluginKey = (cls, tuple(optionsDict.items())) # hashable
+			plugins.append( (pluginKey, cls, optionsDict) )
+		return plugins
+	def __expandPropertiesImplFromProject(self, value, default, name=None): # hack to allow us to use _parseClassAndConfigDict from here - simulates api of _XMLProjectParser
+		# setting default=None means we can't use <property default="...">" attributes here, but that's a price worth paying at least for now
+		return self.project.expandProperties(value)
 
 	def _parseTestMakerTemplates(self): # not public API, do not use
 		templates = []
@@ -1279,15 +1311,9 @@ class DescriptorLoader(object):
 		# Import these since they _could_ be needed when parsing pysystest.py descriptors
 		import pysys.baserunner
 		import pysys.basetest
-		
-		self.__descriptorLoaderPlugins = []
-		for (pluginCls, pluginProperties) in project._descriptorLoaderPlugins:
-			plugin = pluginCls()
-			plugin.project = project
-			pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
-			plugin.setup(project)
-			self.__descriptorLoaderPlugins.append(plugin)
 
+		self.__descriptorPluginCache = {}
+		
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory (including its children), and 
 		return them as a list.
@@ -1365,7 +1391,7 @@ class DescriptorLoader(object):
 
 			# load any descriptors between the project dir up to (but not including) the dir we'll be walking
 			searchdirsuffix = dir[len(projectroot)+1:].split(os.sep) if len(dir)>len(projectroot) else []
-			currentconfig = None
+			currentconfig = project._defaultDirConfig or _XMLDescriptorParser.DEFAULT_DESCRIPTOR
 			for i in range(len(searchdirsuffix)): # up to but not including dir
 				if i == 0:
 					currentdir = projectroot
@@ -1396,12 +1422,14 @@ class DescriptorLoader(object):
 						return
 					files.append(fname)
 
-				parentconfig = None
 				if dirconfigs is not None:
 					parentconfig = dirconfigs[fastdirname(root)]
+					assert parentconfig
 					if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
 						parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
 						log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
+				else:
+					parentconfig = project._defaultDirConfig or _XMLDescriptorParser.DEFAULT_DESCRIPTOR
 
 				# allow subclasses to modify descriptors list and/or avoid processing 
 				# subdirectories
@@ -1475,8 +1503,19 @@ class DescriptorLoader(object):
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		
 		# default implementation just delegates to any plugins
-		for p in self.__descriptorLoaderPlugins:
-			if p.addDescriptorsFromDirectory(dir=dir, subdirs=subdirs, files=files, parentDirDefaults=parentDirDefaults, descriptors=descriptors, **kwargs):
+		for (key, pluginCls, pluginProperties) in getattr(parentDirDefaults, '_descriptorLoaderPlugins', []):
+			
+			plugin = self.__descriptorPluginCache.get(key, None)
+			if plugin is None:
+				plugin = pluginCls()
+				plugin.project = self.project
+				plugin.descriptorLoader = self
+				pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
+				plugin.setup(project=self.project)
+
+				self.__descriptorPluginCache[key] = plugin
+
+			if plugin.addDescriptorsFromDirectory(dir=dir, subdirs=subdirs, files=files, parentDirDefaults=parentDirDefaults, descriptors=descriptors, **kwargs):
 				return True
 		
 		return False

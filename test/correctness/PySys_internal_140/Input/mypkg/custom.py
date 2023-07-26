@@ -4,13 +4,14 @@ from pysys.basetest import BaseTest
 from pysys.baserunner import BaseRunner
 from pysys.config.descriptor import DescriptorLoader, TestDescriptor
 from pysys.constants import PASSED
+import logging
 
 class MyTestClass(BaseTest):
 	def execute(self):
 		self.log.info('This is a custom test using: %s'%self.descriptor.file)
 		self.addOutcome(PASSED)
 
-class CustomDescriptorLoader(object):
+class CustomDescriptorLoaderPlugin(object):
 
 	myJSONFilename = 'foo.json'
 	"""
@@ -18,9 +19,15 @@ class CustomDescriptorLoader(object):
 	"""
 
 	def setup(self, project, **kwargs):
+		logging.getLogger('custom').info('CustomDescriptorLoaderPlugin constructor with myJSONFilename=%s', self.myJSONFilename)
 		assert self.myJSONFilename != 'foo.json', 'ensure plugin property has been set'
 
+		assert self.descriptorLoader, 'should have been set'
+		assert self.project, 'should have been set'
+
 	def addDescriptorsFromDirectory(self, dir, subdirs, files, parentDirDefaults, descriptors, **kwargs):
+		logging.getLogger('custom').info('CustomDescriptorLoaderPlugin addDescriptorsFromDirectory: %s', dir)
+
 		# can merge in defaults from parent dir if desired
 		idprefix = '' if parentDirDefaults is None else parentDirDefaults.id
 	
@@ -40,12 +47,14 @@ class CustomDescriptorLoader(object):
 		# can exist alongside PySys tests
 		for f in files:
 			if f.endswith('.funky'):
-				descriptors.append(TestDescriptor(
+				d = TestDescriptor(
 					file=dir+'/'+f, 
 					id=idprefix+f.split('.')[0], # get the test id from the filename 
 					title=u"My funky test",
 					groups=[u'funky-tests'], 
 					classname="MyTestClass",
 					module=__file__.split('.')[0]
-					))
+					)
+				d.setId(d.id+'.suffix')
+				descriptors.append(d)
 		return False # continue to look for PySys tests

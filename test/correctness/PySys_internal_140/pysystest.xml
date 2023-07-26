@@ -2,10 +2,12 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Test Loading - custom descriptor-loader-plugin (experimental/unsupported) to create custom tests</title>    
+    <title>Test Loading - custom descriptor-loader-plugin to create custom tests</title>    
     <purpose><![CDATA[
 Check a possible end-user use case - dynamically creating new descriptors 
 for non-PySys tests e.g JUnit. 
+
+Currently this is undocumented functionality. 
 ]]>
     </purpose>
   </description>

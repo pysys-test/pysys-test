@@ -23,3 +23,5 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-run.out', expr='Id *: *dirprefix_MyCustomTest_002~MyMode1')
 		self.assertGrep('pysys-run.out', expr='Id *: *dirprefix_MyCustomTest_002~MyMode2')
 		self.assertGrep('pysys-run.out', expr='Id *: *dirprefix_PySys_cor_001')
+
+		self.assertLineCount('pysys-run.out', 'CustomDescriptorLoaderPlugin constructor', condition='==2') # check we re-used config instead of recreating plugin instances

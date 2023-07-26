@@ -357,11 +357,9 @@ class _XMLProjectParser(object):
 		return plugins
 
 	def getDescriptorLoaderPlugins(self):
-		plugins = []
 		for node in self.root.getElementsByTagName('descriptor-loader-plugin'):
-			cls, optionsDict = self._parseClassAndConfigDict(node, None)
-			plugins.append( (cls, optionsDict) )
-		return plugins
+			if node.parentNode == self.root:
+				raise UserError('<descriptor-loader-plugin> is no longer supported at the project level - please move it to <pysysdirconfig> instead')
 
 	def getMakerDetails(self):
 		nodes = self.root.getElementsByTagName('maker')
@@ -478,9 +476,15 @@ class _XMLProjectParser(object):
 		f.write(self.doc.toxml())
 		f.close()
 
+	def _parseClassAndConfigDict(self, node, defaultClass, **kwargs):
+		""" See `_parseClassAndConfigDictImpl` """
+		return self._parseClassAndConfigDictImpl(self.expandProperties, node, defaultClass, **kwargs)
 
-	def _parseClassAndConfigDict(self, node, defaultClass, returnClassAsName=False):
+	@staticmethod
+	def _parseClassAndConfigDictImpl(expandPropertiesImpl, node, defaultClass, returnClassAsName=False):
 		"""Parses a dictionary of arbitrary options and a python class out of the specified XML node.
+
+		This is a static method as it is used internally from DescriptorLoader. 
 
 		The node may optionally contain classname and module (if not specified as a separate attribute,
 		module will be extracted from the first part of classname); any other attributes will be returned in
@@ -495,12 +499,12 @@ class _XMLProjectParser(object):
 			for att in range(node.attributes.length):
 				name = node.attributes.item(att).name.strip()
 				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
-				optionsDict[name] = self.expandProperties(node.attributes.item(att).value, default=None, name=name)
+				optionsDict[name] = expandPropertiesImpl(node.attributes.item(att).value, default=None, name=name)
 			for tag in node.getElementsByTagName('property'):
 				name = tag.getAttribute('name')
 				assert name
 				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
-				optionsDict[name] = self.expandProperties(
+				optionsDict[name] = expandPropertiesImpl(
 					tag.getAttribute("value") or '\n'.join(n.data for n in tag.childNodes 
 							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data),
 					default=tag, name=name)
@@ -616,7 +620,7 @@ class Project(object):
 		self.writers = parser.getWriterDetails()
 		self.testPlugins = parser.getTestPlugins()
 		self.runnerPlugins = parser.getRunnerPlugins()
-		self._descriptorLoaderPlugins = parser.getDescriptorLoaderPlugins()
+		parser.getDescriptorLoaderPlugins() # just to check there are none
 
 		self.perfReporterConfig = parser.getPerformanceReporterDetails()
 		

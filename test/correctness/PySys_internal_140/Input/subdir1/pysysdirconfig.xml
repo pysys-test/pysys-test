@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysysdirconfig>
   <id-prefix>dirprefix_</id-prefix>
+
+  <descriptor-loader-plugin classname="mypkg.custom.CustomDescriptorLoaderPlugin">
+    <property name="myJSONFilename" value="ace_descriptor.json"/>
+  </descriptor-loader-plugin>
+	
 </pysysdirconfig>

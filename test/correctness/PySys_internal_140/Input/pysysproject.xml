@@ -10,8 +10,10 @@
 
 	<path value="." relative="true" />
 
-	<descriptor-loader-plugin classname="mypkg.custom.CustomDescriptorLoader">
-		<property name="myJSONFilename" value="ace_descriptor.json"/>
-	</descriptor-loader-plugin>
+	<pysysdirconfig>
+		<descriptor-loader-plugin classname="mypkg.custom.CustomDescriptorLoaderPlugin">
+			<property name="myJSONFilename" value="UNUSED-project-plugin-json.json"/>
+		</descriptor-loader-plugin>
+	</pysysdirconfig>
 	
 </pysysproject>
