@@ -104,6 +104,8 @@ __pysys_skipped_reason__   = "This test is skipped until Bug-1234 is fixed"
 # define in that second argument are executed in each of the inherited modes (if any).
 # 
 # A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
+# 
+# The specified Python code is invoked using `pysys.utils.safeeval.safeEval`.
 
 # NB: Older (pre-2.0) PySys projects used a more basic and limited syntax for specifying modes:
 # 
