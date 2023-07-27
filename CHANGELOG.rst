@@ -169,6 +169,10 @@ New features:
   path of the test directory (not just its parent). This is helpful for quickly navigating between tests when running inside 
   an IDE. 
 
+- Added `pysys.baserunner.BaseRunner.getInProgressTests` for getting a list of the tests that are currently executing across 
+  all worker threads. If you suspect a test failure could be related to other tests executing at the same time, logging 
+  this list could be helpful for debugging the problem. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

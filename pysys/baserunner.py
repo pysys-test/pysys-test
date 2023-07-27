@@ -690,7 +690,7 @@ class BaseRunner(ProcessUser):
 					if self.__randomlyShuffleTests: # must re-shuffle within each cycle to be useful for perf testing etc
 						descriptors = list(descriptors)
 						random.shuffle(descriptors)
-						
+					
 					for descriptor in descriptors:
 						container = TestContainer(descriptor, cycle, self)
 						if self.threads > 1:
@@ -705,6 +705,8 @@ class BaseRunner(ProcessUser):
 							finally:
 								if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
+
+
 				except KeyboardInterrupt:
 					self.handleKbrdInt()
 					# Don't raise this, better to continue
@@ -1026,6 +1028,23 @@ class BaseRunner(ProcessUser):
 		for a in self.__artifactWriters:
 			a.publishArtifact(path, category)
 
+	def getInProgressTests(self):
+		"""
+		Get a list of the test objects that are currently executing.  
+
+		This method can be called from any thread, and it is safe to access ``testObj.descriptor`` and to call 
+		``str()`` on the test object. However unless otherwise stated, avoid accessing other fields/methods of the test object 
+		since most are not designed to be safely used by other threads. 
+		The objects returned by this method will always have been fully constructed, but ``setup`` may not yet have been called, 
+		and if the test is finishing, ``cleanup`` may or may not have been called or be underway. 
+
+		.. versionadded:: 2.2
+
+		:return: A list of `pysys.basetest.BaseTest` test objects, sorted based on their string representation. 
+		"""
+		return sorted(list(TestContainer._inProgressTests), key=lambda o: str(o))
+
+
 	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.
 		
@@ -1111,6 +1130,13 @@ class TestContainer(object):
 	"""
 
 	__purgedOutputDirs = set() # static field
+
+	_inProgressTests = set()
+	"""
+	A constantly changing set of the testObjs currently executing. 
+
+	This can be accessed from any thread. 
+	"""
 	
 	def __init__ (self, descriptor, cycle, runner):
 		"""Create an instance of the TestContainer class.
@@ -1133,7 +1159,7 @@ class TestContainer(object):
 		self.testFileHandlerStdoutBuffer = StringIO() # unicode characters written to the output for this testcase
 		self.kbrdInt = False
 
-	def __str__(self): return self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1))
+	def __repr__(self): return 'container<%s>'% (self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1)))
 	
 	@staticmethod
 	def __onDeleteOutputDirError(function, path, excinfo):
@@ -1259,6 +1285,7 @@ class TestContainer(object):
 						else:
 							setattr(self.testObj, pluginAlias, plugin)
 
+
 		
 				except KeyboardInterrupt:
 					self.runner.handleKbrdInt()	
@@ -1273,6 +1300,13 @@ class TestContainer(object):
 					
 				# can't set this in constructor without breaking compatibility, but set it asap after construction
 				del BaseTest._currentTestCycle
+
+				TestContainer._inProgressTests.add(self.testObj) # doesn't technically need the global lock but might as well do it here for added protection
+
+				# Check for test run abort here - to reduce/avoid races where it gets started just after we get an interruption and iterate over the in-progress list
+				if ProcessUser.isInterruptTerminationInProgress: raise KeyboardInterrupt()
+
+			# drop the global_lock here
 
 			for writer in self.runner.writers:
 				try: 
@@ -1385,6 +1419,11 @@ class TestContainer(object):
 
 		finally:
 			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
+
+			try:
+				TestContainer._inProgressTests.remove(self.testObj)
+			except KeyError:
+				pass # means we didn't add it to the set yet, or it's None - not a problem
 
 		# return a reference to self
 		return self

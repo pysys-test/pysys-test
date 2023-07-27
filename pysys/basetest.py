@@ -94,7 +94,9 @@ class BaseTest(ProcessUser):
 		change without notice. 
 		"""
 		return ('%s.cycle%03d'%(self.descriptor.id, self.testCycle)) if self. testCycle else self.descriptor.id
-			
+	def __repr__(self): # same is useful in repr, since that's what we get when stringifying a list of objects
+		return self.__str__()
+
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
 	def setup(self):

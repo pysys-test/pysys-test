@@ -78,10 +78,11 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		for o in OUTCOMES: self.outcomes[o] = 0
 		self._recentFailureReasons = []
 		self.threads = threads
-		self.inprogress = set() # this is thread-safe for add/remove
+		self.__plannedTests = set() # this is thread-safe for add/remove
 
 	def processTestStarting(self, testObj, cycle=-1, **kwargs):
-		self.inprogress.add(self.testToDisplay(testObj, cycle))
+		# we could replace this with a more efficient approach to detecting unplanned tests at some point
+		self.__plannedTests.add(self.testToDisplay(testObj, cycle))
 
 	def testToDisplay(self, testObj, cycle):
 		id = testObj.descriptor.id
@@ -93,8 +94,8 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		log = logging.getLogger('pysys.resultsprogress')
 		
 		id = self.testToDisplay(testObj, cycle)
-		if id in self.inprogress:
-			self.inprogress.remove(id)
+		if id in self.__plannedTests:
+			self.__plannedTests.remove(id)
 		else:
 			self.numTests += 1 # it's an unplanned/dynamic test
 		
@@ -124,7 +125,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 			log.info('Recent failures: ', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 			for f in self._recentFailureReasons:
 				log.info('   ' + f, extra=ColorLogFormatter.tag(LOG_FAILURES))
-		inprogress = list(self.inprogress)
+		inprogress = [self.testToDisplay(testObj, testObj.testCycle) for testObj in self.runner.getInProgressTests()]
 		if self.threads>1 and inprogress:
 			log.info('Currently executing: %s', ', '.join(sorted(inprogress)), extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 		log.info('')
