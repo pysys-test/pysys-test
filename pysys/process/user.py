@@ -109,8 +109,11 @@ class ProcessUser(object):
 	
 	"""
 
+	# Runner abort status. The fields live here since we need to check this flag mostly from subclasses of ProcessUser 
+	# and want to do that both efficiently and conveniently. 
+
 	isRunnerAborting = False
-	""" This static boolean field is set to True if this entire process is in the process of terminating 
+	""" This static boolean field is set to True if this entire process/test run is in the process of terminating 
 		early due to an interrupt from the keyboard or a signal. 
 
 		.. versionadded:: 2.2
@@ -170,6 +173,8 @@ class ProcessUser(object):
 		"""
 		A recursive lock that can be used for protecting the fields of this instance 
 		from access by background threads, as needed. 
+
+		Do NOT hold this lock while performing long operations or acquiring other locks. 
 		"""
 		
 		self.isCleanupInProgress = False
@@ -196,24 +201,6 @@ class ProcessUser(object):
 		# each had their own pool
 		return 6
 		
-	@staticmethod
-	def _setRunnerAborting():
-		# undocumented static method for signalling to all ProcessUser objects that PySys is terminating. 
-		
-		if ProcessUser.isRunnerAborting is True: return
-
-		# Set this boolean before waking up
-		ProcessUser.isRunnerAborting = True
-
-		try:
-			if ProcessUser.isRunnerAbortingEvent:
-				win32event.SetEvent(ProcessUser.isRunnerAbortingEvent)
-			if ProcessUser.isRunnerAbortingHandle:
-				os.write(ProcessUser._isRunnerAbortingWriteHandle, b'isTerminated')
-					
-		except Exception as ex:
-			log.warning('Failed to signal isRunnerAborting event/handle during termination: %r', ex)
-
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
 		which can be used for the `startProcess` ``stdouterr`` parameter. 
@@ -1444,7 +1431,38 @@ class ProcessUser(object):
 		if exceptions:
 			raise UserError('Cleanup failed%s: %s'%(' with %d errors'%len(exceptions), '; '.join(exceptions)))
 		
+	def handleRunnerAbort(self, **kwargs):
+		"""
+		Called from a background thread when the entire test run is aborting, to perform 
+		quick operations to help this test to terminate as quickly as possible. 
 
+		The default implementation attempts to immediately stop any currently running processes 
+		(in case they are holding open resources such as server sockets that the test may be blocking on). 
+
+		Subclasses may override this method, either to perform additional steps (such as closing server sockets 
+		that clients may be blocking on) or to avoid stopping processes that need to be terminated in a more orderly way. 
+
+		Unlike the `cleanup` method, this will be called from a background thread so avoid using methods that are 
+		not thread-safe. Logging performed during this method will not be included in the test's ``run.log`` output. 
+
+		The test's `cleanup` method will usually be called to perform a fuller cleanup (later, or at the same time)
+		"""
+		with self.lock:
+			if self.isCleanupInProgress: 
+				self.log.debug('handleRunnerAbort is skipping %s because cleanup is already in progress', self)
+				return
+			
+			processes = list(self.processList)
+			# we leave the final checking to cleanup(), so do NOT remove these from process list
+
+		for process in processes:
+			try:
+				if process.running(): 
+					log.info("Stopping %s process during runner abort: %r", self, process)
+					process.stop()
+			except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
+				log.info("Failed to stop %s process %r during runner abort %s: %s", self, process, e)
+		
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):
 		"""Add a validation outcome (and optionally a reason string) to the validation list.
 		

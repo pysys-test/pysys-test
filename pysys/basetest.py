@@ -142,7 +142,6 @@ class BaseTest(ProcessUser):
 		"""
 		pass
 
-
 	def cleanup(self):
 		"""
 		Contains cleanup actions to be executed after the test's `execute` and `validate` methods have completed. 
@@ -155,6 +154,9 @@ class BaseTest(ProcessUser):
 		this method.
 				
 		"""
+		if self.isRunnerAborting:
+			self.log.info('Performing test cleanup() - note that some processes may already have been terminated when the runner was signalled to abort')
+
 		try:
 			if self.manualTester and self.manualTester.running():
 				self.stopManualTester()

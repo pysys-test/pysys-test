@@ -69,6 +69,10 @@ New features:
   waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions 
   like ``time.sleep`` it is recommended to change to using the `BaseTest.pollWait` method instead, which checks this flag and 
   raises a ``KeyboardInterrupt`` to abort the test. 
+  In addition, a new method `ProcessUser.handleRunnerAbort` is called for each test that is currently executing, to provide a 
+  means of unblocking tests that are waiting for something (such as a TCP socket) not covered by the above mechanism. 
+  The default implementation simply terminates all processes, but this method can be overridden to provide additional 
+  logic or to avoid killing any processes and leave all terminations to the test's synchronous cleanup method. 
 
   To ensure a rapid exit, starting new processes is disabled once termination 
   has begun. Once the cleanup phase of a test or runner beings, the restrictions are removed since it may be necessary to 

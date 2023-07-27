@@ -43,6 +43,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
+import pysys.utils.threadutils
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -50,6 +51,9 @@ from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter, ArtifactPublisher
 import pysys.utils.allocport
+
+if IS_WINDOWS:
+	import win32event
 
 global_lock = threading.Lock() # internal, do not use
 
@@ -370,20 +374,69 @@ class BaseRunner(ProcessUser):
 			sys.stderr.flush()
 			self.log.critical('PySys received termination request (signal %s)', sig)
 
-			# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
-
-			try:
-				if ProcessUser.isRunnerAborting:
-					faulthandler.dump_traceback()
-				else:
-					faulthandler.dump_traceback_later(5, repeat=True) # dump traceback every 5 seconds, in case it's hanging for some reason
-			finally:
-				# Setting this should be enough to terminate ASAP. 
-				ProcessUser._setRunnerAborting()
+			if self.runnerAbort() is True:
+				# Schedule a traceback in case we don't abort as quickly as we'd like
+				faulthandler.dump_traceback_later(5, repeat=True) 
+			else:
+				# We were already aborting, so dump an immediate traceback
+				# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
+				faulthandler.dump_traceback()
 
 		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
 			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
 			signal.signal(signal.SIGTERM, interruptHandler)
+	
+
+	def runnerAbort(self, **kwargs):
+		"""
+		Requests that the entire test run aborts as soon as possible. 
+
+		Typically this is triggered by a process signal or a keyboard interruption, 
+		but it is also possible for a runner or test to call it directly in response to a fatal problem. 
+
+		The default implementation sets the `ProcessUser.isRunnerAborting` flag which is checked periodically by 
+		methods that poll or wait for long-running operations, and also calls XXX on the tests that 
+		are currently executing to terminate any running processes. 
+
+		Since this may be called from a signal handler or from any thread, the implementation must 
+		remain short and avoid taking locks. Any non-trivial operations should be performed in a new 
+		background thread. 
+
+		.. versionadded:: 2.2
+
+		:return: False if nothing was done because the runner was already aborting, otherwise True. 
+			Overriding subclass implementations may wish to perform their own actions only if 
+			True is returned. 
+		"""
+		if ProcessUser.isRunnerAborting is True: 
+			# future: could try a sys.exit if this takes too long as a fallback
+			return False
+
+		# Set this boolean before waking up the event/handle, to avoid the risk of going back into a wait again
+		ProcessUser.isRunnerAborting = True
+
+		try:
+			if ProcessUser.isRunnerAbortingEvent:
+				win32event.SetEvent(ProcessUser.isRunnerAbortingEvent)
+			if ProcessUser.isRunnerAbortingHandle:
+				os.write(ProcessUser._isRunnerAbortingWriteHandle, b'isTerminated')
+					
+		except Exception as ex:
+			log.warning('Failed to signal isRunnerAborting event/handle during termination: %r', ex)
+		
+		inProgressTests = self.getInProgressTests()
+		if inProgressTests:
+			def abortTests(**kwargs):
+				for test in inProgressTests:
+					try:
+						if not test.isCleanupInProgress: 
+							log.debug('handleRunnerAbort for %s', test)
+							test.handleRunnerAbort()
+					except Exception as ex:
+						log.info('handleRunnerAbort failed for %s: %r', test, ex)
+			pysys.utils.threadutils.BackgroundThread(self, name="handleRunnerAbort", target=abortTests, kwargsForTarget={}).thread.start()
+
+		return True
 
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -1064,7 +1117,7 @@ class BaseRunner(ProcessUser):
 		if ProcessUser.isRunnerAborting is False: # in case signal handler wasn't called/wasn't called yet
 			self.log.critical('PySys received termination request (keyboard interrupt)')
 
-		ProcessUser._setRunnerAborting()
+		self.runnerAbort()
 
 	def logTestHeader(self, descriptor, cycle, **kwargs):
 		"""
@@ -1364,7 +1417,7 @@ class TestContainer(object):
 				log.warning("%s occurred while running test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
 
-			if self.kbrdInt: self.testObj.addOutcome(BLOCKED, 'Test interrupted by termination request', abortOnError=False)
+			if self.kbrdInt: self.testObj.addOutcome(BLOCKED, 'Test interrupted by runner abort', abortOnError=False)
 
 			# call the cleanup method to tear down the test
 			try:
@@ -1374,7 +1427,7 @@ class TestContainer(object):
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 				self.runner.handleKbrdInt()
-				self.testObj.addOutcome(BLOCKED, 'Test interrupted by termination request during cleanup', abortOnError=False)
+				self.testObj.addOutcome(BLOCKED, 'Test interrupted by runner abort during cleanup', abortOnError=False)
 			except UserError as ex: # will already have been logged with stack trace
 				self.testObj.addOutcome(BLOCKED, str(ex), abortOnError=False)
 			except Exception as ex:
