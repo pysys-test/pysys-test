@@ -133,7 +133,7 @@ class PySysTest(BaseTest):
 		self.assertPathExists('myoutdir/__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
 		
 		# check Python code coverage worked
-		self.assertGrep('pysys.out', expr='Preparing Python coverage report in: .*__coverage_python.myoutdir')
+		self.assertGrep('pysys.out', expr=r'Preparing Python coverage report from \d+ files in: .*__coverage_python.myoutdir')
 		self.assertThatGrep('pysys.out', 'Executed .*python-coverage-html.*(exit status .*)', 
 			'value == expected', expected='exit status 0')
 
