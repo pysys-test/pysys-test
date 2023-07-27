@@ -20,6 +20,7 @@ class PySysTest(BaseTest):
 			runPySys(self, name, args, workingDir=sampledir+'/test', 
 				# this is so we can run git
 				environs={'PATH':os.environ['PATH']}, 
+				disableCoverage=True, # the COVERAGE_FILE setting from the top-level run stops the coverage gen within the cookbook pysys going to the right place so disable
 				**kwargs)
 
 		# The command below is copied verbatim from the README.md
