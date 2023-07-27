@@ -85,6 +85,11 @@ class BaseTest(ProcessUser):
 			self.log.debug('Disabling coverage for this test due to disableCoverage group')
 		
 		self.__assertDetailLogger = logging.getLogger('pysys.assertions.diffs')
+
+		self.testStartTime = time.time()
+		"""
+		The time when this test object was constructed (as returned by ``time.time()``). 
+		"""
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 

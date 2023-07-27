@@ -96,6 +96,8 @@ can be accessed via instance attributes on ``self``:
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
 
+- ``self.testStartTime`` *(float)*: The time when this test object was constructed (as returned by ``time.time()``). 
+
 - ``self.testPlugins`` *(list[object])*: A list of any configured test plugin instances. This allows plugins 
   to access the functionality of other plugins if needed (for example looking them up by type in this list). 
 

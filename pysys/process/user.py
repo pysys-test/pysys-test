@@ -199,6 +199,7 @@ class ProcessUser(object):
 	@staticmethod
 	def _setRunnerAborting():
 		# undocumented static method for signalling to all ProcessUser objects that PySys is terminating. 
+		
 		if ProcessUser.isRunnerAborting is True: return
 
 		# Set this boolean before waking up

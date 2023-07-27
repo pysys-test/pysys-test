@@ -1179,7 +1179,7 @@ class TestContainer(object):
 
 		"""		
 		exc_info = []
-		self.testStart = time.time()
+		self.testStart = time.time() # set this as a fallback, but probably overwrite it with the value from the BaseTest
 		
 		defaultLogHandlersForCurrentThread = pysysLogHandler.getLogHandlersForCurrentThread()
 		try:
@@ -1300,6 +1300,8 @@ class TestContainer(object):
 					
 				# can't set this in constructor without breaking compatibility, but set it asap after construction
 				del BaseTest._currentTestCycle
+
+				self.testStart = self.testObj.testStartTime # ensure these are in sync. Give priority to the one from testObj. 
 
 				TestContainer._inProgressTests.add(self.testObj) # doesn't technically need the global lock but might as well do it here for added protection
 

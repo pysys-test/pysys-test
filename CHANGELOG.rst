@@ -116,6 +116,8 @@ New features:
   or setting the new ``self.grepTruncateIfLineLongerThan`` BaseTest field.  
   The ``waitForGrep`` method now logs warnings if dangerously long lines are detected (as defined by ``self.grepWarnIfLineLongerThan``). 
 
+- Added ``self.testStartTime`` to BaseTest, which gives the time when the test object was created. 
+
 - Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
 
 - Improved performance of waiting for processes (on Windows by blocking with WaitForSingleObject instead of sleep polling, 
