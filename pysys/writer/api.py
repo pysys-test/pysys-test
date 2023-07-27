@@ -486,7 +486,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			else:
 				logForOutcome(lambda outcome: outcome.isFailure())
 
-			if pysys.process.user.ProcessUser.isInterruptTerminationInProgress:
+			if pysys.process.user.ProcessUser.isRunnerAborting:
 				didNotStart = self.numTests-sum(self.outcomes.values())
 				log("  TERMINATED EARLY%s"%('; %d TESTS DID NOT START'%didNotStart if didNotStart else ''), extra=ColorLogFormatter.tag(LOG_FAILURES))
 			log('')

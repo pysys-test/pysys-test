@@ -108,15 +108,16 @@ can be accessed via instance attributes on ``self``:
   For example you might dynamically set this to True when a test is using options such as profiling or code coverage 
   that would make the results meaningless. 
 
-- ``self.isInterruptTerminationInProgress`` *(bool)*: Check this while performing long-running operations to 
-  ensure your test exits quickly and does not hang if PySys is interrupted (or use `BaseTest.pollWait`). 
+- ``self.isRunnerAborting`` *(bool)*: Check this while performing long-running operations to 
+  ensure your test exits quickly and does not hang if PySys needs to abort the test run e.g. due to a keyboard interruption signal. 
+  Alternatively, consider using `BaseTest.pollWait`. 
 
-- ``self.isInterruptTerminationInProgressEvent`` *(win32event.Event)*: A Windows event object that is signalled when 
-  ``isInterruptTerminationInProgress`` changes to True, for use with ``win32event.WaitForMultipleObjects``. 
+- ``self.isRunnerAbortingEvent`` *(win32event.Event)*: A Windows event object that is signalled when 
+  ``isRunnerAborting`` changes to True, for use with ``win32event.WaitForMultipleObjects``. 
   Only available on Windows. 
 
-- ``self.isInterruptTerminationInProgressHandle`` *(int)*: A linux file handle that receives a write when 
-  ``isInterruptTerminationInProgress`` changes to True, for use with ``select.select``. 
+- ``self.isRunnerAbortingHandle`` *(int)*: A linux file handle that receives a write when 
+  ``isRunnerAborting`` changes to True, for use with ``select.select``. 
   Only available on Linux. You should never read or write this handle, it is provided only for use with ``select``. 
 
 - ``self.isCleanupInProgress`` *(bool)*: Check this for advanced cases where you need different behaviour if 

@@ -373,13 +373,13 @@ class BaseRunner(ProcessUser):
 			# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
 
 			try:
-				if ProcessUser.isInterruptTerminationInProgress:
+				if ProcessUser.isRunnerAborting:
 					faulthandler.dump_traceback()
 				else:
 					faulthandler.dump_traceback_later(5, repeat=True) # dump traceback every 5 seconds, in case it's hanging for some reason
 			finally:
 				# Setting this should be enough to terminate ASAP. 
-				ProcessUser._setInterruptTerminationInProgress()
+				ProcessUser._setRunnerAborting()
 
 		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
 			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows
@@ -697,7 +697,7 @@ class BaseRunner(ProcessUser):
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 							threadPool.putRequest(request)
 						else:
-							if ProcessUser.isInterruptTerminationInProgress: raise KeyboardInterrupt()
+							if ProcessUser.isRunnerAborting: raise KeyboardInterrupt()
 
 							if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([])
 							try:
@@ -782,7 +782,7 @@ class BaseRunner(ProcessUser):
 				log.error("Caught %s performing runner cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
-			if ProcessUser.isInterruptTerminationInProgress:
+			if ProcessUser.isRunnerAborting:
 				# Log this as the last/almost last thing, to avoid misleading summary of non-failures from writers
 				log.warning('PySys terminated early due to interruption')
 
@@ -1061,10 +1061,10 @@ class BaseRunner(ProcessUser):
 		""" Deprecated - for internal use only. 
 		
 		"""
-		if ProcessUser.isInterruptTerminationInProgress is False: # in case signal handler wasn't called/wasn't called yet
+		if ProcessUser.isRunnerAborting is False: # in case signal handler wasn't called/wasn't called yet
 			self.log.critical('PySys received termination request (keyboard interrupt)')
 
-		ProcessUser._setInterruptTerminationInProgress()
+		ProcessUser._setRunnerAborting()
 
 	def logTestHeader(self, descriptor, cycle, **kwargs):
 		"""
@@ -1304,7 +1304,7 @@ class TestContainer(object):
 				TestContainer._inProgressTests.add(self.testObj) # doesn't technically need the global lock but might as well do it here for added protection
 
 				# Check for test run abort here - to reduce/avoid races where it gets started just after we get an interruption and iterate over the in-progress list
-				if ProcessUser.isInterruptTerminationInProgress: raise KeyboardInterrupt()
+				if ProcessUser.isRunnerAborting: raise KeyboardInterrupt()
 
 			# drop the global_lock here
 

@@ -109,14 +109,14 @@ class ProcessUser(object):
 	
 	"""
 
-	isInterruptTerminationInProgress = False
+	isRunnerAborting = False
 	""" This static boolean field is set to True if this entire process is in the process of terminating 
 		early due to an interrupt from the keyboard or a signal. 
 
 		.. versionadded:: 2.2
 	"""
 
-	isInterruptTerminationInProgressEvent = win32event.CreateEvent(None, True, False, None) if IS_WINDOWS else None
+	isRunnerAbortingEvent = win32event.CreateEvent(None, True, False, None) if IS_WINDOWS else None
 	""" A Windows (pywin32) event that will be set/signalled when PySys is requested to terminate, or 
 	``None`` if not supported on this platform. 
 
@@ -126,7 +126,7 @@ class ProcessUser(object):
 	.. versionadded:: 2.2
 	"""
 
-	isInterruptTerminationInProgressHandle = None
+	isRunnerAbortingHandle = None
 	""" A file handle that will have bytes available for reading when PySys is requested to terminate, or 
 	``None`` if not supported on this platform. Not available on Windows. 
 
@@ -197,21 +197,21 @@ class ProcessUser(object):
 		return 6
 		
 	@staticmethod
-	def _setInterruptTerminationInProgress():
+	def _setRunnerAborting():
 		# undocumented static method for signalling to all ProcessUser objects that PySys is terminating. 
-		if ProcessUser.isInterruptTerminationInProgress is True: return
+		if ProcessUser.isRunnerAborting is True: return
 
 		# Set this boolean before waking up
-		ProcessUser.isInterruptTerminationInProgress = True
+		ProcessUser.isRunnerAborting = True
 
 		try:
-			if ProcessUser.isInterruptTerminationInProgressEvent:
-				win32event.SetEvent(ProcessUser.isInterruptTerminationInProgressEvent)
-			if ProcessUser.isInterruptTerminationInProgressHandle:
-				os.write(ProcessUser._isInterruptTerminationInProgressWriteHandle, b'isTerminated')
+			if ProcessUser.isRunnerAbortingEvent:
+				win32event.SetEvent(ProcessUser.isRunnerAbortingEvent)
+			if ProcessUser.isRunnerAbortingHandle:
+				os.write(ProcessUser._isRunnerAbortingWriteHandle, b'isTerminated')
 					
 		except Exception as ex:
-			log.warning('Failed to signal isInterruptTerminationInProgress event/handle during termination: %r', ex)
+			log.warning('Failed to signal isRunnerAborting event/handle during termination: %r', ex)
 
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
@@ -911,14 +911,14 @@ class ProcessUser(object):
 			MAX_SLEEP = 2
 			self.log.debug('pollWait %s secs', secs)
 			while secs > MAX_SLEEP: 
-				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				if self.isRunnerAborting is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 				time.sleep(MAX_SLEEP) 
 				secs -= MAX_SLEEP
 		
 		time.sleep(secs) 
 		# Perform an early abort if we're terminating, but not once we enter cleanup code for each test since that 
 		# may need to execute processes
-		if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+		if self.isRunnerAborting is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 
 	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 
@@ -1304,7 +1304,7 @@ class ProcessUser(object):
 			lineno[0] += 1
 			if lineno[0] % 10000 == 0:
 				# periodically check for interruption or timeout; not too often or we might slow down the normal case
-				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				if self.isRunnerAborting is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 				if time.monotonic()-starttime > timeout:
 					self.log.debug('waitForGrep watchdog signalled timeout after handling %s lines', lineno[0]) 
 					raise TimeoutError("Timed out during waitForGrep watchdog")
@@ -2564,4 +2564,4 @@ class ProcessUser(object):
 		return pool
 
 if not IS_WINDOWS:
-	ProcessUser.isInterruptTerminationInProgressHandle, ProcessUser._isInterruptTerminationInProgressWriteHandle = os.pipe()
+	ProcessUser.isRunnerAbortingHandle, ProcessUser._isRunnerAbortingWriteHandle = os.pipe()

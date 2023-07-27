@@ -64,7 +64,7 @@ New features:
   
 - Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
   are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
-  the new global flag `pysys.process.user.ProcessUser.isInterruptTerminationInProgress` which informs all tests they should 
+  the new global flag `pysys.process.user.ProcessUser.isRunnerAborting` which informs all tests they should 
   complete as quickly as possible - but in an orderly way to allow for essential cleanup. The built-in PySys methods that perform 
   waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions 
   like ``time.sleep`` it is recommended to change to using the `BaseTest.pollWait` method instead, which checks this flag and 
@@ -75,8 +75,8 @@ New features:
   run processes to perform cleanup (e.g. to terminate containers etc). The previous PySys behaviour of prompting interactively 
   once Ctrl+C is sent has been removed. 
 
-  For advanced users, in addition to the boolean flag, there is an event on Windows `pysys.process.user.ProcessUser.isInterruptTerminationInProgressEvent` 
-  and a file handle on Linux `pysys.process.user.ProcessUser.isInterruptTerminationInProgressHandle` 
+  For advanced users, in addition to the boolean flag, there is an event on Windows `pysys.process.user.ProcessUser.isRunnerAbortingEvent` 
+  and a file handle on Linux `pysys.process.user.ProcessUser.isRunnerAbortingHandle` 
   that can be waited on in combination with other Windows objects or Unix file handles to abort if a termination request happens. 
 
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 

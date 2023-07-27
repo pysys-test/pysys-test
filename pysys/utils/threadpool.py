@@ -85,14 +85,14 @@ class WorkerThread(threading.Thread):
 		"""Start running the worker thread."""
 		try:
 			while True:
-				if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
+				if self._dismissed.is_set() or ProcessUser.isRunnerAborting is True:
 					break
 				try:
 					request = self._requests_queue.get(True, self._poll_timeout)
 				except Queue.Empty:
 					continue
 				else:
-					if self._dismissed.is_set() or ProcessUser.isInterruptTerminationInProgress is True:
+					if self._dismissed.is_set() or ProcessUser.isRunnerAborting is True:
 						self._requests_queue.put(request)
 						break
 					try:
@@ -172,7 +172,7 @@ class ThreadPool(object):
 		self.createWorkers(num_workers, poll_timeout)
 
 	def onWorkerTerminated(self):
-		if ProcessUser.isInterruptTerminationInProgress is True: log.debug("PySys worker thread terminated after isInterruptTerminationInProgress")
+		if ProcessUser.isRunnerAborting is True: log.debug("PySys worker thread terminated after isRunnerAborting")
 		with self.__lock:
 			self.workersRemaining -= 1
 
