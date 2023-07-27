@@ -1534,7 +1534,7 @@ class ProcessUser(object):
 					log.info(u'%s ... %s', outcomeReason, str(outcome).lower(), extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
-		"""Raise an AbortException with the specified outcome and reason.
+		"""Raise an AbortExecution exception with the specified outcome and reason, to abort the current test.
 		
 		See also L{skipTest}. 
 
