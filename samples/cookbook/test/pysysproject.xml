@@ -315,7 +315,7 @@
 		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
 			<property name="includeTestIf">lambda testObj: 
 				'unitTest' in testObj.descriptor.groups
-				or testObj.project.getProperty('IS_LOCAL_DEVELOPER_TEST_RUN',False)
+				or testObj.project.getProperty('isLocalDeveloperTestRun',False)
 			</property>
 			<property name="destDir" value="__coverage_python_unit_tests.${outDirName}"/>
 			<property name="pythonCoverageArgs" value=""/>

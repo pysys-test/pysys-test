@@ -844,5 +844,5 @@ If you wish to produce coverage reports using any other language, this is easy t
   
   		<property name="includeTestIf">lambda testObj: 
 			'unitTest' in testObj.descriptor.groups
-			or testObj.project.getProperty('IS_LOCAL_DEVELOPER_TEST_RUN',False)
+			or testObj.project.getProperty('isLocalDeveloperTestRun',False)
 		</property>

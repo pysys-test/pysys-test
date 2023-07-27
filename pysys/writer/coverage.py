@@ -125,12 +125,12 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	
 		coverageDestDir = self.destDir
 		assert os.path.isabs(coverageDestDir) # The base class is responsible for absolutizing this config property
-		coverageDestDir = os.path.normpath(fromLongPathSafe(coverageDestDir))
 		if not pathexists(coverageDestDir):
 			log.info('No Python coverage files were generated.')
 			return
 			
-		log.info('Preparing Python coverage report in: %s', coverageDestDir)
+		log.info('Preparing Python coverage report from %d files in: %s', len(os.listdir(coverageDestDir)), os.path.normpath(coverageDestDir))
+		coverageDestDir = os.path.normpath(fromLongPathSafe(coverageDestDir))
 
 		self.runner.startPython(['-m', 'coverage', 'combine'], abortOnError=True, 
 			workingDir=coverageDestDir, stdouterr=coverageDestDir+'/python-coverage-combine', 
