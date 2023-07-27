@@ -1295,9 +1295,10 @@ class BaseTest(ProcessUser):
 				matchcount = len(result)
 				result = None if matchcount==0 else result[0]
 		except Exception:
-			log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+			if sys.exc_info()[0] != FileNotFoundException:
+				log.warning("Caught %s: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=abortOnError)
 			result = None
 		else:
 			# short message if it succeeded, more verbose one if it failed to help you understand why, 
