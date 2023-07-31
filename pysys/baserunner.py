@@ -393,14 +393,12 @@ class BaseRunner(ProcessUser):
 
 		Typically this is triggered by a process signal or a keyboard interruption, 
 		but it is also possible for a runner or test to call it directly in response to a fatal problem. 
+		It sets the `ProcessUser.isRunnerAborting` flag which is checked periodically by 
+		methods that poll or wait for long-running operations, and also calls `handleRunnerAbort` which 
+		in turn calls that method on tests that are currently executing to terminate any running processes. 
 
-		The default implementation sets the `ProcessUser.isRunnerAborting` flag which is checked periodically by 
-		methods that poll or wait for long-running operations, and also calls `ProcessUser.handleRunnerAbort` on the tests that 
-		are currently executing to terminate any running processes. 
-
-		Since this may be called from a signal handler or from any thread, the implementation must 
-		remain short and avoid taking locks - any non-trivial operations should be performed in a new 
-		background thread. 
+		It is not recommended to override this method, but subclasses may customize runner-level handling of 
+		aborts by overriding `handleRunnerAbort`. 
 
 		.. versionadded:: 2.2
 
@@ -408,6 +406,11 @@ class BaseRunner(ProcessUser):
 			Overriding subclass implementations may wish to perform their own actions only if 
 			True is returned. 
 		"""
+		# Since this may be called from a signal handler or from any thread, the implementation must 
+		# remain short and avoid taking locks - any non-trivial operations should be performed in a new 
+		# background thread. 
+
+
 		if ProcessUser.isRunnerAborting is True: 
 			# future: could try a sys.exit if this takes too long as a fallback
 			return False
@@ -426,25 +429,45 @@ class BaseRunner(ProcessUser):
 		
 		inProgressTests = self.getInProgressTests()
 		if inProgressTests:
+			# Inherits log handlers from current thread
 			loghandlers = pysysLogHandler.getLogHandlersForCurrentThread()
 			if stdoutHandler not in loghandlers: loghandler = loghandler+[stdoutHandler]
-			def abortTests(**kwargs):
-				pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
-				log.debug('Calling handleRunnerAbort methods for %d tests', len(inProgressTests))
-				for test in inProgressTests:
-					try:
-						if not test.isCleanupInProgress: 
-							log.debug('handleRunnerAbort for %s', test)
-							test.handleRunnerAbort()
-					except Exception as ex:
-						log.info('handleRunnerAbort failed for %s: %r', test, ex)
 
-			# Inherits log handlers from current thread
-			bgthread = threading.Thread(name='handleRunnerAbort', target=abortTests)
+			def handleRunnerAbortExecute(**kwargs):
+				pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
+				try:
+					self.handleRunnerAbort()
+				except Exception as ex:
+					self.log.exception('An error occurred during handleRunnerAbort: ')
+				finally:
+					pysysLogHandler.setLogHandlersForCurrentThread([])
+
+			bgthread = threading.Thread(name='handleRunnerAbort', target=handleRunnerAbortExecute)
 			bgthread.daemon = True
 			bgthread.start()
 
 		return True
+
+	def handleRunnerAbort(self, **kwargs):
+		"""
+		Called on a background thread to implement the aborting of the test run. 
+
+		The default implementation calls `ProcessUser.handleRunnerAbort` on the tests that 
+		are currently executing to terminate any running processes. 
+
+		.. versionadded:: 2.2
+
+		"""
+		inProgressTests = self.getInProgressTests()
+		log.debug('Calling handleRunnerAbort methods for %d tests', len(inProgressTests))
+		for test in inProgressTests:
+			try:
+				if not test.isCleanupInProgress: 
+					log.debug('handleRunnerAbort for %s', test)
+					test.handleRunnerAbort()
+			except Exception as ex:
+				log.info('handleRunnerAbort failed for %s: %r', test, ex)
+		log.debug('Calling handleRunnerAbort methods for %d tests', len(inProgressTests))
 
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 

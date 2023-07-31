@@ -31,6 +31,7 @@ import queue as Queue
 
 from pysys import log
 from pysys.process.user import ProcessUser
+from pysys.internal.initlogging import pysysLogHandler, stdoutHandler
 
 # exceptions
 class NoResultsPending(Exception):
@@ -172,7 +173,10 @@ class ThreadPool(object):
 		self.createWorkers(num_workers, poll_timeout)
 
 	def onWorkerTerminated(self):
-		if ProcessUser.isRunnerAborting is True: log.debug("PySys worker thread terminated after isRunnerAborting")
+		if ProcessUser.isRunnerAborting is True: 
+			pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
+			log.debug("PySys worker thread terminated after isRunnerAborting")
+
 		with self.__lock:
 			self.workersRemaining -= 1
 
