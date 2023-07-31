@@ -395,11 +395,11 @@ class BaseRunner(ProcessUser):
 		but it is also possible for a runner or test to call it directly in response to a fatal problem. 
 
 		The default implementation sets the `ProcessUser.isRunnerAborting` flag which is checked periodically by 
-		methods that poll or wait for long-running operations, and also calls XXX on the tests that 
+		methods that poll or wait for long-running operations, and also calls `ProcessUser.handleRunnerAbort` on the tests that 
 		are currently executing to terminate any running processes. 
 
 		Since this may be called from a signal handler or from any thread, the implementation must 
-		remain short and avoid taking locks. Any non-trivial operations should be performed in a new 
+		remain short and avoid taking locks - any non-trivial operations should be performed in a new 
 		background thread. 
 
 		.. versionadded:: 2.2
@@ -426,7 +426,11 @@ class BaseRunner(ProcessUser):
 		
 		inProgressTests = self.getInProgressTests()
 		if inProgressTests:
+			loghandlers = pysysLogHandler.getLogHandlersForCurrentThread()
+			if stdoutHandler not in loghandlers: loghandler = loghandler+[stdoutHandler]
 			def abortTests(**kwargs):
+				pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
+				log.debug('Calling handleRunnerAbort methods for %d tests', len(inProgressTests))
 				for test in inProgressTests:
 					try:
 						if not test.isCleanupInProgress: 
@@ -434,7 +438,11 @@ class BaseRunner(ProcessUser):
 							test.handleRunnerAbort()
 					except Exception as ex:
 						log.info('handleRunnerAbort failed for %s: %r', test, ex)
-			pysys.utils.threadutils.BackgroundThread(self, name="handleRunnerAbort", target=abortTests, kwargsForTarget={}).thread.start()
+
+			# Inherits log handlers from current thread
+			bgthread = threading.Thread(name='handleRunnerAbort', target=abortTests)
+			bgthread.daemon = True
+			bgthread.start()
 
 		return True
 
@@ -837,7 +845,7 @@ class BaseRunner(ProcessUser):
 
 			if ProcessUser.isRunnerAborting:
 				# Log this as the last/almost last thing, to avoid misleading summary of non-failures from writers
-				log.warning('PySys terminated early due to interruption')
+				log.warning('PySys terminated early due to runner abort')
 
 		pysys.utils.allocport.logPortAllocationStats()
 

@@ -1445,15 +1445,19 @@ class ProcessUser(object):
 		Unlike the `cleanup` method, this will be called from a background thread so avoid using methods that are 
 		not thread-safe. Logging performed during this method will not be included in the test's ``run.log`` output. 
 
-		The test's `cleanup` method will usually be called to perform a fuller cleanup (later, or at the same time)
+		The test's `cleanup` method will usually be called to perform a fuller cleanup (later, or concurrently). 
+
+		.. versionadded:: 2.2
 		"""
 		with self.lock:
-			if self.isCleanupInProgress: 
-				self.log.debug('handleRunnerAbort is skipping %s because cleanup is already in progress', self)
-				return
-			
 			processes = list(self.processList)
 			# we leave the final checking to cleanup(), so do NOT remove these from process list
+
+			if self.isCleanupInProgress: 
+				# This should prevent us trying to stop processes started during cleanup() which may be important 
+				# for performing orderly cleanup
+				self.log.debug('handleRunnerAbort is skipping %s because cleanup is already in progress', self)
+				return
 
 		for process in processes:
 			try:

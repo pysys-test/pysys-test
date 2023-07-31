@@ -488,7 +488,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 
 			if pysys.process.user.ProcessUser.isRunnerAborting:
 				didNotStart = self.numTests-sum(self.outcomes.values())
-				log("  TERMINATED EARLY%s"%('; %d TESTS DID NOT START'%didNotStart if didNotStart else ''), extra=ColorLogFormatter.tag(LOG_FAILURES))
+				log("  TEST RUN ABORTED%s"%('; %d TESTS DID NOT START'%didNotStart if didNotStart else ''), extra=ColorLogFormatter.tag(LOG_FAILURES))
 			log('')
 
 		if showTestIdList:

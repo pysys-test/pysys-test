@@ -1,4 +1,4 @@
-__pysys_title__   = r""" BaseRunner/ProcessUser - early termination on interrupt """ 
+__pysys_title__   = r""" BaseRunner/ProcessUser - handleRunnerAbort for Ctrl+C or signal interrupt """ 
 #                        ================================================================================
 __pysys_purpose__ = r""" """ 
 	
@@ -46,7 +46,7 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 			self.logFileContents('pysys-run.err', maxLines=0)
 		
 	def validate(self):
-		self.assertGrep('pysys-run.out', 'WARN +PySys terminated early due to interruption')
+		self.assertGrep('pysys-run.out', 'WARN +PySys terminated early due to runner abort')
 
 		self.assertGrep('pysys-run.out', 'Summary of failures:', assertMessage='Assert we still display a summary of failures from writers despite interruption')
 
@@ -54,7 +54,7 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		self.assertGrep('pysys-run.out', 'BLOCKED: Test_ForegroundProcess')
 		if self.mode.params['multithreaded']:
 			self.assertGrep('pysys-run.out', 'BLOCKED: Test_Sleeps')
-			self.assertGrep('pysys-run.out', 'TERMINATED EARLY; 1 TESTS DID NOT START')
+			self.assertGrep('pysys-run.out', 'TEST RUN ABORTED; 1 TESTS DID NOT START')
 
 		self.assertPathExists('myoutdir/Test_ZZZ_NeverExecuted', exists=False) # should not even start this one
 		self.assertGrep('pysys-run.out', 'Test_ZZZ_NeverExecuted', contains=False)
@@ -64,5 +64,6 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		self.assertGrep('pysys-run.out', 'WARN  Writer PythonCoverageWriter failed during cleanup due to interruption') # don't want to waste time running code coverage tools during cleanup
 
 		self.assertGrep('myoutdir/Test_ForegroundProcess/run.log', 'Completed mycleanup function', assertMessage="Check that TEST cleanup executes fully even after interruption")
+		self.assertGrep('myoutdir/Test_ForegroundProcess/run.log', 'note that some processes may already have been terminated when the runner was signalled to abort', assertMessage="Check courtesy message in run.log to avoid possible confusion about why cleanup happens differently")
 		self.assertGrep('myoutdir/Test_ForegroundProcess/cleanup_program.out', 'Cleanup completed by child process', assertMessage="Check that TEST cleanup processes can execute even after interruption")
 		self.assertGrep('myoutdir/__pysys_runner.myoutdir/cleanup_program.out', 'Cleanup completed by child process', assertMessage="Check that RUNNER cleanup processes can execute even after interruption")
