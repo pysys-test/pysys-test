@@ -93,7 +93,7 @@ class WorkerThread(threading.Thread):
 				except Queue.Empty:
 					continue
 				else:
-					if self._dismissed.is_set() or ProcessUser.isRunnerAborting is True:
+					if self._dismissed.is_set() or ProcessUser.isRunnerAborting is True: 
 						self._requests_queue.put(request)
 						break
 					try:

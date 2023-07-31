@@ -1455,7 +1455,7 @@ class ProcessUser(object):
 			processes = list(self.processList)
 			# we leave the final checking to cleanup(), so do NOT remove these from process list
 
-			if self.isCleanupInProgress: 
+			if self.isCleanupInProgress: # pragma: no cover
 				# This should prevent us trying to stop processes started during cleanup() which may be important 
 				# for performing orderly cleanup
 				self.log.debug('handleRunnerAbort is skipping %s because cleanup is already in progress', self)
@@ -1466,7 +1466,7 @@ class ProcessUser(object):
 				if process.running(): 
 					log.info("Stopping %s process during runner abort: %r", self, process)
 					process.stop(hard=True)
-			except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
+			except Exception as e: # pragma: no cover - this is pretty unlikely to fail, but we'd like to know if it does
 				log.info("Failed to stop %s process %r during runner abort %s: %s", self, process, e)
 		
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):

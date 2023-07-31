@@ -221,7 +221,7 @@ class BackgroundThread(object):
 			if not outcomereported:
 				self.owner.addOutcome(BLOCKED, 'Background thread %s failed with %s: %s'%(
 					self, self.exception.__class__.__name__, self.exception), abortOnError=abortOnError)
-		elif timetaken >10: # alert user only if it took a long time
+		elif timetaken >10: # pragma: no cover - alert user only if it took a long time
 			self.log.info('Joined background thread %s in %0.1f seconds', self, timetaken)
 
 

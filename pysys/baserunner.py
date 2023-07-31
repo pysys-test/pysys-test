@@ -380,7 +380,7 @@ class BaseRunner(ProcessUser):
 			if self.runnerAbort() is True:
 				# Schedule a traceback in case we don't abort as quickly as we'd like
 				faulthandler.dump_traceback_later(5, repeat=True) 
-			else:
+			else: # pragma: no cover
 				# We were already aborting, so dump an immediate traceback
 				faulthandler.dump_traceback()
 				if time.time()-self.__runnerAbortTime>6:
@@ -429,12 +429,12 @@ class BaseRunner(ProcessUser):
 		ProcessUser.isRunnerAborting = True
 
 		try:
-			if ProcessUser.isRunnerAbortingEvent:
-				win32event.SetEvent(ProcessUser.isRunnerAbortingEvent)
+			if ProcessUser.isRunnerAbortingEvent: # pragma: no cover
+				win32event.SetEvent(ProcessUser.isRunnerAbortingEvent) 
 			if ProcessUser.isRunnerAbortingHandle:
 				os.write(ProcessUser._isRunnerAbortingWriteHandle, b'isTerminated')
 					
-		except Exception as ex:
+		except Exception as ex: # pragma: no cover
 			log.warning('Failed to signal isRunnerAborting event/handle during termination: %r', ex)
 		
 		inProgressTests = self.getInProgressTests()
@@ -447,7 +447,7 @@ class BaseRunner(ProcessUser):
 				pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
 				try:
 					self.handleRunnerAbort()
-				except Exception as ex:
+				except Exception as ex: # pragma: no cover
 					self.log.exception('An error occurred during handleRunnerAbort: ')
 				finally:
 					pysysLogHandler.setLogHandlersForCurrentThread([])
@@ -872,7 +872,7 @@ class BaseRunner(ProcessUser):
 			# call the hook to cleanup after running tests
 			try:
 				self.cleanup()
-			except Exception as ex:
+			except Exception as ex: 
 				log.error("Caught %s performing runner cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
@@ -1258,7 +1258,7 @@ class TestContainer(object):
 	def __repr__(self): return 'container<%s>'% (self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1)))
 	
 	@staticmethod
-	def __onDeleteOutputDirError(function, path, excinfo):
+	def __onDeleteOutputDirError(function, path, excinfo): # pragma: no cover
 		if function==os.rmdir:
 			# Useful to tolerate this since people foten keep a cmd window/shell/tool open on test output directories, 
 			# and while we wouldn't want to leave files around, empty directories don't usually cause problems. 
@@ -1383,7 +1383,7 @@ class TestContainer(object):
 
 
 		
-				except KeyboardInterrupt:
+				except KeyboardInterrupt: # pragma: no cover
 					self.runner.handleKbrdInt()	
 					raise		
 				except Exception:
@@ -1465,7 +1465,7 @@ class TestContainer(object):
 				log.debug('--- test cleanup')
 				self.testObj.cleanup()
 			
-			except KeyboardInterrupt:
+			except KeyboardInterrupt: # pragma: no cover
 				self.kbrdInt = True
 				self.runner.handleKbrdInt()
 				self.testObj.addOutcome(BLOCKED, 'Test interrupted by runner abort during cleanup', abortOnError=False)
@@ -1522,7 +1522,7 @@ class TestContainer(object):
 
 			try:
 				TestContainer._inProgressTests.remove(self.testObj)
-			except KeyError:
+			except KeyError: # pragma: no cover
 				pass # means we didn't add it to the set yet, or it's None - not a problem
 
 		# return a reference to self
