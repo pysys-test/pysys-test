@@ -193,9 +193,12 @@ class BackgroundThread(object):
 		# don't call thread.join for the entire time, since on windows that 
 		# leaves no opportunity to detect keyboard interrupts
 		if self.__kbdrInterrupt: raise self.__kbdrInterrupt # avoid repeatedly joining same thread
+		from pysys.process.user import ProcessUser
+
 		while self.thread.is_alive() and time.monotonic()-starttime < timeout:
 			try:
 				self.thread.join(1)
+				if ProcessUser.isRunnerAborting: raise KeyboardInterrupt('Interrupted due to runner abort')
 			except KeyboardInterrupt as ex: # pragma: no cover
 				self.__kbdrInterrupt = ex
 				raise
@@ -220,4 +223,5 @@ class BackgroundThread(object):
 					self, self.exception.__class__.__name__, self.exception), abortOnError=abortOnError)
 		elif timetaken >10: # alert user only if it took a long time
 			self.log.info('Joined background thread %s in %0.1f seconds', self, timetaken)
+
 
