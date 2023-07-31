@@ -368,19 +368,29 @@ class BaseRunner(ProcessUser):
 
 		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
+		self.__runnerAbortTime = None
 		def interruptHandler(sig, frame):
 			sys.stdout.flush()
 			sys.stderr.write('PySys received termination request (signal %s)\n'%sig)
 			sys.stderr.flush()
 			self.log.critical('PySys received termination request (signal %s)', sig)
 
+			if self.__runnerAbortTime is None: self.__runnerAbortTime = time.time()
+
 			if self.runnerAbort() is True:
 				# Schedule a traceback in case we don't abort as quickly as we'd like
 				faulthandler.dump_traceback_later(5, repeat=True) 
 			else:
 				# We were already aborting, so dump an immediate traceback
-				# Could do sys.exit if already being interrupted, but some risk that it could be due to a KeyboardInterrupt in an unexpected place so don't for now
 				faulthandler.dump_traceback()
+				if time.time()-self.__runnerAbortTime>6:
+					# Do a hard kill (with no attempt to wait for background threads etc) if we get a new interrupt when already interrupted. 
+					# Since this is really the nuclear option and for emergency use only, performs an extra time-based check too - which also 
+					# guards against the case where it was due to a KeyboardInterrupt in an unexpected place from the original one
+					sys.stdout.flush()
+					sys.stderr.write('PySys received a second termination request - now performing immediate exit of the Python process with no cleanup\n')
+					sys.stderr.flush()
+					os._exit(200)
 
 		if os.getenv('PYSYS_NO_SIGNAL_HANDLERS','').lower() != 'true':
 			signal.signal(signal.SIGINT, interruptHandler) # =CTRL+C on Windows

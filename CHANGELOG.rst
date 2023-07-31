@@ -83,6 +83,9 @@ New features:
   and a file handle on Linux `pysys.process.user.ProcessUser.isRunnerAbortingHandle` 
   that can be waited on in combination with other Windows objects or Unix file handles to abort if a termination request happens. 
 
+  If a second Ctrl+C or signal is sent more than 6 seconds after the original abort request, the PySys process will immediately 
+  perform a hard/unclean exit, without further attempts to cleanup or to print information about test failures.
+
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
   slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
   in order to provide correct logging, cleanup, and a more useful default maximum number of worker threads. 
@@ -734,7 +737,7 @@ Additional improvements which will be of use to some users:
   to provide different ``runDetails`` based on some feature of the test object or mode. 
 - Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
   without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
-  In a future release this method will be able to abort early if a test run is cancelled. 
+  In a future release (version 2.2) this method will be able to abort early if a test run is cancelled. 
 - `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
   so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
   occasional failures of the process monitoring. 
