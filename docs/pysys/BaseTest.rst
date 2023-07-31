@@ -29,7 +29,10 @@ Taken together, the PySys ``setup() -> execute() -> validate()`` methods corresp
 
 At the end of each test, PySys automatically terminates all processes it 
 started, in the `cleanup` method. If any additional custom cleanup steps are required, these can be added by calling 
-`addCleanupFunction`.
+`addCleanupFunction`. 
+
+(For advanced users, it is also possible to customize the process of aborting a test run 
+in response to a signal or Ctrl+C by overriding the `handleRunnerAbort` method`)
 
 NB: Do not ever override the ``__init__`` constructor of a test class; instead use `setup` for any initialization, 
 which ensures orderly cleanup if an exception occurs during the setup process. 

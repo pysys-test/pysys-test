@@ -33,6 +33,7 @@ isRunnerAbortingEvent
 isRunnerAbortingHandle
 grepWarnIfLineLongerThan
 grepTruncateIfLineLongerThan
+handleRunnerAbort
 		""".strip().split('\n')
 
 		def filter_member(m):
