@@ -1241,7 +1241,9 @@ class TestContainer(object):
 		self.testFileHandlerRunLog = None
 		self.testFileHandlerStdout = None
 		self.testFileHandlerStdoutBuffer = StringIO() # unicode characters written to the output for this testcase
+
 		self.kbrdInt = False
+		""" Deprecated, do not use. """
 
 	def __repr__(self): return 'container<%s>'% (self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1)))
 	
@@ -1448,8 +1450,6 @@ class TestContainer(object):
 				log.warning("%s occurred while running test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
 
-			if self.kbrdInt: self.testObj.addOutcome(BLOCKED, 'Test interrupted by runner abort', abortOnError=False)
-
 			# call the cleanup method to tear down the test
 			try:
 				log.debug('--- test cleanup')
@@ -1464,6 +1464,10 @@ class TestContainer(object):
 			except Exception as ex:
 				log.warning("%s occurred while cleaning up test - %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0].__name__), abortOnError=False)
+
+			# to avoid confusion, override any existing failure that coincides with a runner abort since it's likely a result
+			if self.kbrdInt or (self.testObj.getOutcome().isFailure() and ProcessUser.isRunnerAborting): 
+				self.testObj.addOutcome(BLOCKED, 'Test interrupted by runner abort', abortOnError=False, override=True)
 
 			# in case the thread log handlers got overwritten by a naughty test, restore before printing the final summary
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)

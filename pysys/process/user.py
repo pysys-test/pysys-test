@@ -1443,7 +1443,9 @@ class ProcessUser(object):
 		that clients may be blocking on) or to avoid stopping processes that need to be terminated in a more orderly way. 
 
 		Unlike the `cleanup` method, this will be called from a background thread so avoid using methods that are 
-		not thread-safe. Logging performed during this method will not be included in the test's ``run.log`` output. 
+		not thread-safe. 
+		
+		NB: Logging performed during this method will NOT be included in the test's ``run.log`` output. 
 
 		The test's `cleanup` method will usually be called to perform a fuller cleanup (later, or concurrently). 
 
@@ -1463,7 +1465,7 @@ class ProcessUser(object):
 			try:
 				if process.running(): 
 					log.info("Stopping %s process during runner abort: %r", self, process)
-					process.stop()
+					process.stop(hard=True)
 			except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
 				log.info("Failed to stop %s process %r during runner abort %s: %s", self, process, e)
 		
