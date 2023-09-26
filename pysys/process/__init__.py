@@ -298,7 +298,7 @@ class Process(object):
 			raise Exception('Cannot start process %s as workingDir "%s" does not exist'% (self, self.workingDir))
 		
 		# unless we're performing some cleanup logic, don't permit new processes to begin after we've been told to shutdown
-		if self.owner is not None and self.owner.isInterruptTerminationInProgress is True and self.owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+		if self.owner is not None and self.owner.isRunnerAborting is True and self.owner.isCleanupInProgress is False: raise KeyboardInterrupt()
 
 		if self.state == FOREGROUND:
 			self.startBackgroundProcess()

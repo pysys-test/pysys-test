@@ -85,6 +85,11 @@ class BaseTest(ProcessUser):
 			self.log.debug('Disabling coverage for this test due to disableCoverage group')
 		
 		self.__assertDetailLogger = logging.getLogger('pysys.assertions.diffs')
+
+		self.testStartTime = time.time()
+		"""
+		The time when this test object was constructed (as returned by ``time.time()``). 
+		"""
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
@@ -94,7 +99,9 @@ class BaseTest(ProcessUser):
 		change without notice. 
 		"""
 		return ('%s.cycle%03d'%(self.descriptor.id, self.testCycle)) if self. testCycle else self.descriptor.id
-			
+	def __repr__(self): # same is useful in repr, since that's what we get when stringifying a list of objects
+		return self.__str__()
+
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
 	def setup(self):
@@ -135,7 +142,6 @@ class BaseTest(ProcessUser):
 		"""
 		pass
 
-
 	def cleanup(self):
 		"""
 		Contains cleanup actions to be executed after the test's `execute` and `validate` methods have completed. 
@@ -148,6 +154,9 @@ class BaseTest(ProcessUser):
 		this method.
 				
 		"""
+		if self.isRunnerAborting:
+			self.log.info('Performing test cleanup() - note that some processes may already have been terminated when the runner was signalled to abort')
+
 		try:
 			if self.manualTester and self.manualTester.running():
 				self.stopManualTester()

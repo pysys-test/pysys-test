@@ -29,7 +29,10 @@ Taken together, the PySys ``setup() -> execute() -> validate()`` methods corresp
 
 At the end of each test, PySys automatically terminates all processes it 
 started, in the `cleanup` method. If any additional custom cleanup steps are required, these can be added by calling 
-`addCleanupFunction`.
+`addCleanupFunction`. 
+
+(For advanced users, it is also possible to customize the process of aborting a test run 
+in response to a signal or Ctrl+C by overriding the `handleRunnerAbort` method`)
 
 NB: Do not ever override the ``__init__`` constructor of a test class; instead use `setup` for any initialization, 
 which ensures orderly cleanup if an exception occurs during the setup process. 
@@ -96,6 +99,8 @@ can be accessed via instance attributes on ``self``:
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
 
+- ``self.testStartTime`` *(float)*: The time when this test object was constructed (as returned by ``time.time()``). 
+
 - ``self.testPlugins`` *(list[object])*: A list of any configured test plugin instances. This allows plugins 
   to access the functionality of other plugins if needed (for example looking them up by type in this list). 
 
@@ -108,15 +113,16 @@ can be accessed via instance attributes on ``self``:
   For example you might dynamically set this to True when a test is using options such as profiling or code coverage 
   that would make the results meaningless. 
 
-- ``self.isInterruptTerminationInProgress`` *(bool)*: Check this while performing long-running operations to 
-  ensure your test exits quickly and does not hang if PySys is interrupted (or use `BaseTest.pollWait`). 
+- ``self.isRunnerAborting`` *(bool)*: Check this while performing long-running operations to 
+  ensure your test exits quickly and does not hang if PySys needs to abort the test run e.g. due to a keyboard interruption signal. 
+  Alternatively, consider using `BaseTest.pollWait`. 
 
-- ``self.isInterruptTerminationInProgressEvent`` *(win32event.Event)*: A Windows event object that is signalled when 
-  ``isInterruptTerminationInProgress`` changes to True, for use with ``win32event.WaitForMultipleObjects``. 
+- ``self.isRunnerAbortingEvent`` *(win32event.Event)*: A Windows event object that is signalled when 
+  ``isRunnerAborting`` changes to True, for use with ``win32event.WaitForMultipleObjects``. 
   Only available on Windows. 
 
-- ``self.isInterruptTerminationInProgressHandle`` *(int)*: A linux file handle that receives a write when 
-  ``isInterruptTerminationInProgress`` changes to True, for use with ``select.select``. 
+- ``self.isRunnerAbortingHandle`` *(int)*: A linux file handle that receives a write when 
+  ``isRunnerAborting`` changes to True, for use with ``select.select``. 
   Only available on Linux. You should never read or write this handle, it is provided only for use with ``select``. 
 
 - ``self.isCleanupInProgress`` *(bool)*: Check this for advanced cases where you need different behaviour if 

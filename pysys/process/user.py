@@ -109,14 +109,17 @@ class ProcessUser(object):
 	
 	"""
 
-	isInterruptTerminationInProgress = False
-	""" This static boolean field is set to True if this entire process is in the process of terminating 
+	# Runner abort status. The fields live here since we need to check this flag mostly from subclasses of ProcessUser 
+	# and want to do that both efficiently and conveniently. 
+
+	isRunnerAborting = False
+	""" This static boolean field is set to True if this entire process/test run is in the process of terminating 
 		early due to an interrupt from the keyboard or a signal. 
 
 		.. versionadded:: 2.2
 	"""
 
-	isInterruptTerminationInProgressEvent = win32event.CreateEvent(None, True, False, None) if IS_WINDOWS else None
+	isRunnerAbortingEvent = win32event.CreateEvent(None, True, False, None) if IS_WINDOWS else None
 	""" A Windows (pywin32) event that will be set/signalled when PySys is requested to terminate, or 
 	``None`` if not supported on this platform. 
 
@@ -126,7 +129,7 @@ class ProcessUser(object):
 	.. versionadded:: 2.2
 	"""
 
-	isInterruptTerminationInProgressHandle = None
+	isRunnerAbortingHandle = None
 	""" A file handle that will have bytes available for reading when PySys is requested to terminate, or 
 	``None`` if not supported on this platform. Not available on Windows. 
 
@@ -170,6 +173,8 @@ class ProcessUser(object):
 		"""
 		A recursive lock that can be used for protecting the fields of this instance 
 		from access by background threads, as needed. 
+
+		Do NOT hold this lock while performing long operations or acquiring other locks. 
 		"""
 		
 		self.isCleanupInProgress = False
@@ -196,23 +201,6 @@ class ProcessUser(object):
 		# each had their own pool
 		return 6
 		
-	@staticmethod
-	def _setInterruptTerminationInProgress():
-		# undocumented static method for signalling to all ProcessUser objects that PySys is terminating. 
-		if ProcessUser.isInterruptTerminationInProgress is True: return
-
-		# Set this boolean before waking up
-		ProcessUser.isInterruptTerminationInProgress = True
-
-		try:
-			if ProcessUser.isInterruptTerminationInProgressEvent:
-				win32event.SetEvent(ProcessUser.isInterruptTerminationInProgressEvent)
-			if ProcessUser.isInterruptTerminationInProgressHandle:
-				os.write(ProcessUser._isInterruptTerminationInProgressWriteHandle, b'isTerminated')
-					
-		except Exception as ex:
-			log.warning('Failed to signal isInterruptTerminationInProgress event/handle during termination: %r', ex)
-
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
 		which can be used for the `startProcess` ``stdouterr`` parameter. 
@@ -911,14 +899,14 @@ class ProcessUser(object):
 			MAX_SLEEP = 2
 			self.log.debug('pollWait %s secs', secs)
 			while secs > MAX_SLEEP: 
-				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				if self.isRunnerAborting is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 				time.sleep(MAX_SLEEP) 
 				secs -= MAX_SLEEP
 		
 		time.sleep(secs) 
 		# Perform an early abort if we're terminating, but not once we enter cleanup code for each test since that 
 		# may need to execute processes
-		if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+		if self.isRunnerAborting is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 
 	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 
@@ -1304,7 +1292,7 @@ class ProcessUser(object):
 			lineno[0] += 1
 			if lineno[0] % 10000 == 0:
 				# periodically check for interruption or timeout; not too often or we might slow down the normal case
-				if self.isInterruptTerminationInProgress is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
+				if self.isRunnerAborting is True and self.isCleanupInProgress is False: raise KeyboardInterrupt()
 				if time.monotonic()-starttime > timeout:
 					self.log.debug('waitForGrep watchdog signalled timeout after handling %s lines', lineno[0]) 
 					raise TimeoutError("Timed out during waitForGrep watchdog")
@@ -1443,7 +1431,44 @@ class ProcessUser(object):
 		if exceptions:
 			raise UserError('Cleanup failed%s: %s'%(' with %d errors'%len(exceptions), '; '.join(exceptions)))
 		
+	def handleRunnerAbort(self, **kwargs):
+		"""
+		Called from a background thread when the entire test run is aborting, to perform 
+		quick operations to help this test to terminate as quickly as possible. 
 
+		The default implementation attempts to immediately stop any currently running processes 
+		(in case they are holding open resources such as server sockets that the test may be blocking on). 
+
+		Subclasses may override this method, either to perform additional steps (such as closing server sockets 
+		that clients may be blocking on) or to avoid stopping processes that need to be terminated in a more orderly way. 
+
+		Unlike the `cleanup` method, this will be called from a background thread so avoid using methods that are 
+		not thread-safe. 
+		
+		NB: Logging performed during this method will NOT be included in the test's ``run.log`` output. 
+
+		The test's `cleanup` method will usually be called to perform a fuller cleanup (later, or concurrently). 
+
+		.. versionadded:: 2.2
+		"""
+		with self.lock:
+			processes = list(self.processList)
+			# we leave the final checking to cleanup(), so do NOT remove these from process list
+
+			if self.isCleanupInProgress: # pragma: no cover
+				# This should prevent us trying to stop processes started during cleanup() which may be important 
+				# for performing orderly cleanup
+				self.log.debug('handleRunnerAbort is skipping %s because cleanup is already in progress', self)
+				return
+
+		for process in processes:
+			try:
+				if process.running(): 
+					log.info("Stopping %s process during runner abort: %r", self, process)
+					process.stop(hard=True)
+			except Exception as e: # pragma: no cover - this is pretty unlikely to fail, but we'd like to know if it does
+				log.info("Failed to stop %s process %r during runner abort %s: %s", self, process, e)
+		
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):
 		"""Add a validation outcome (and optionally a reason string) to the validation list.
 		
@@ -1534,7 +1559,7 @@ class ProcessUser(object):
 					log.info(u'%s ... %s', outcomeReason, str(outcome).lower(), extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
-		"""Raise an AbortException with the specified outcome and reason.
+		"""Raise an AbortExecution exception with the specified outcome and reason, to abort the current test.
 		
 		See also L{skipTest}. 
 
@@ -2564,4 +2589,4 @@ class ProcessUser(object):
 		return pool
 
 if not IS_WINDOWS:
-	ProcessUser.isInterruptTerminationInProgressHandle, ProcessUser._isInterruptTerminationInProgressWriteHandle = os.pipe()
+	ProcessUser.isRunnerAbortingHandle, ProcessUser._isRunnerAbortingWriteHandle = os.pipe()

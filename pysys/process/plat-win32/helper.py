@@ -355,15 +355,15 @@ class ProcessImpl(Process):
 		if __hProcess:
 			owner = self.owner
 			waitobjects = [__hProcess]
-			if owner and (owner.isCleanupInProgress is False) and owner.isInterruptTerminationInProgressEvent: 
-				waitobjects.append(owner.isInterruptTerminationInProgressEvent)
+			if owner and (owner.isCleanupInProgress is False) and owner.isRunnerAbortingEvent: 
+				waitobjects.append(owner.isRunnerAbortingEvent)
 
 			# In theory we could increase this timeout to further reduce contention on the Python GIL but 
 			# not doing so yet since in single-threaded mode the interrupt signal is not delivered while the 
 			# main thread is busy in the WaitForMultipleObjects call so need to keep this slow to allow responsive Ctrl+C for now
 			pollTimeoutMillis = 1000
 			if win32event.WaitForMultipleObjects(waitobjects, False, pollTimeoutMillis) != win32event.WAIT_FAILED:
-				if owner and owner.isInterruptTerminationInProgress is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+				if owner and owner.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
 				return
 		
 		self._pollWait() # fallback to a sleep to avoid spinning if an unexpected return code is returned

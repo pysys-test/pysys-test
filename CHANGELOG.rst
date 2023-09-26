@@ -64,20 +64,27 @@ New features:
   
 - Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
   are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
-  the new global flag `pysys.process.user.ProcessUser.isInterruptTerminationInProgress` which informs all tests they should 
+  the new global flag `pysys.process.user.ProcessUser.isRunnerAborting` which informs all tests they should 
   complete as quickly as possible - but in an orderly way to allow for essential cleanup. The built-in PySys methods that perform 
   waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions 
   like ``time.sleep`` it is recommended to change to using the `BaseTest.pollWait` method instead, which checks this flag and 
   raises a ``KeyboardInterrupt`` to abort the test. 
+  In addition, a new method `ProcessUser.handleRunnerAbort` is called for each test that is currently executing, to provide a 
+  means of unblocking tests that are waiting for something (such as a TCP socket) not covered by the above mechanism. 
+  The default implementation simply terminates all processes, but this method can be overridden to provide additional 
+  logic or to avoid killing any processes and leave all terminations to the test's synchronous cleanup method. 
 
   To ensure a rapid exit, starting new processes is disabled once termination 
   has begun. Once the cleanup phase of a test or runner beings, the restrictions are removed since it may be necessary to 
   run processes to perform cleanup (e.g. to terminate containers etc). The previous PySys behaviour of prompting interactively 
   once Ctrl+C is sent has been removed. 
 
-  For advanced users, in addition to the boolean flag, there is an event on Windows `pysys.process.user.ProcessUser.isInterruptTerminationInProgressEvent` 
-  and a file handle on Linux `pysys.process.user.ProcessUser.isInterruptTerminationInProgressHandle` 
+  For advanced users, in addition to the boolean flag, there is an event on Windows `pysys.process.user.ProcessUser.isRunnerAbortingEvent` 
+  and a file handle on Linux `pysys.process.user.ProcessUser.isRunnerAbortingHandle` 
   that can be waited on in combination with other Windows objects or Unix file handles to abort if a termination request happens. 
+
+  If a second Ctrl+C or signal is sent more than 6 seconds after the original abort request, the PySys process will immediately 
+  perform a hard/unclean exit, without further attempts to cleanup or to print information about test failures.
 
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
   slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
@@ -115,6 +122,8 @@ New features:
   If reading from a file that has long lines, consider adding the new `pysys.mappers.TruncateLongLines` to the mappers list to shorten them, 
   or setting the new ``self.grepTruncateIfLineLongerThan`` BaseTest field.  
   The ``waitForGrep`` method now logs warnings if dangerously long lines are detected (as defined by ``self.grepWarnIfLineLongerThan``). 
+
+- Added ``self.testStartTime`` to BaseTest, which gives the time when the test object was created. 
 
 - Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
 
@@ -168,6 +177,10 @@ New features:
 - Changed the ``Dir:`` printed in the header at the start of each test's output to always appear, and to give the full absolute 
   path of the test directory (not just its parent). This is helpful for quickly navigating between tests when running inside 
   an IDE. 
+
+- Added `pysys.baserunner.BaseRunner.getInProgressTests` for getting a list of the tests that are currently executing across 
+  all worker threads. If you suspect a test failure could be related to other tests executing at the same time, logging 
+  this list could be helpful for debugging the problem. 
 
 Fixes:
 
@@ -724,7 +737,7 @@ Additional improvements which will be of use to some users:
   to provide different ``runDetails`` based on some feature of the test object or mode. 
 - Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
   without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
-  In a future release this method will be able to abort early if a test run is cancelled. 
+  In a future release (version 2.2) this method will be able to abort early if a test run is cancelled. 
 - `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
   so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
   occasional failures of the process monitoring. 
