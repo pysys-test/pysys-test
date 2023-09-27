@@ -979,7 +979,7 @@ class BaseTest(ProcessUser):
 			# if it failed try to summarize in the outcome reason if possible 
 			if (not result) and os.path.exists(unifiedDiffOutput):
 				summaryDiffLines = []
-				with open(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1)) as f:
+				with open(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1)) as f: # strict handling of encoding errors is best here
 					for l in f:
 						if len(summaryDiffLines) > 50: break
 						if l.startswith(('-', '+')) and not l.startswith(('+++', '---')): summaryDiffLines.append(l.strip())
@@ -1011,7 +1011,7 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
-	def assertGrepOfGrep(self, file, grepRegex, expectedRegex, encoding=None, reFlags=0, mappers=[], **kwargs):
+	def assertGrepOfGrep(self, file, grepRegex, expectedRegex, encoding=None, encodingReplaceOnError=False, reFlags=0, mappers=[], **kwargs):
 		"""Perform a validation by using a regular expression "(...)" group to extract the first matching value from a text file 
 		and then use a second regex to validate that the extracted value is as expected. 
 
@@ -1031,9 +1031,9 @@ class BaseTest(ProcessUser):
 		assert 'contains' not in kwargs, 'The contains= argument is not supported by this method'
 
 		return self.assertThatGrep(file, grepRegex, conditionstring='re.match(expectedRegex, value%s)'%(', flags='+str(int(reFlags)) if reFlags else ''), 
-			expectedRegex=expectedRegex, encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+			expectedRegex=expectedRegex, encoding=encoding, encodingReplaceOnError=encodingReplaceOnError, reFlags=reFlags, mappers=mappers, **kwargs)
 
-	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
+	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, encodingReplaceOnError=False, reFlags=0, mappers=[], **kwargsForAssertThat):
 		r"""Perform a validation by using a regular expression to extract the first matching value from a text file and then check 
 		the extracted string value is correct using an `assertThat` conditionstring.
 
@@ -1092,6 +1092,9 @@ class BaseTest(ProcessUser):
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
+		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+			Added in PySys 2.2.
+
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
@@ -1116,7 +1119,7 @@ class BaseTest(ProcessUser):
 
 		"""
 		def grep(file, expr):
-			e = self.grep(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
+			e = self.grep(file, expr, encoding=encoding, encodingReplaceOnError=encodingReplaceOnError, reFlags=reFlags, mappers=mappers)
 			
 			if isinstance(e, str) and not self.project.getProperty('pysysLegacyAssertThatGrepNewLineBehaviour', False): 
 				# while not a problem for most regexes, it's certainly possible to create a regex that captures the newline 
@@ -1130,7 +1133,7 @@ class BaseTest(ProcessUser):
 		return self.assertThat(conditionstring, value__eval='grep(%r, %r)'%(file, grepRegex), 
 			**kwargsForAssertThat)
 
-	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, 
+	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, encodingReplaceOnError=False, 
 			abortOnError=False, assertMessage=None, reFlags=0, mappers=[], expr='', filedir=None):
 		r"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
@@ -1241,6 +1244,9 @@ class BaseTest(ProcessUser):
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
+		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+			Added in PySys 2.2.
+
 		:param bool abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
@@ -1299,7 +1305,7 @@ class BaseTest(ProcessUser):
 			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
 			
-			result = getmatches(f, expr, ignores=ignores, returnFirstOnly=(contains==True), encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+			result = getmatches(f, expr, ignores=ignores, returnFirstOnly=(contains==True), encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers, encodingReplaceOnError=encodingReplaceOnError)
 			if not contains:
 				matchcount = len(result)
 				result = None if matchcount==0 else result[0]

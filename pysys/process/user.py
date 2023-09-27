@@ -1119,7 +1119,7 @@ class ProcessUser(object):
 		return self.waitForGrep(file, expr=expr, filedir=filedir, **waitForGrepArgs)
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			ignores=[], process=None, errorExpr=[], errorIf=None, abortOnError=None, encoding=None, detailMessage='', filedir=None, 
+			ignores=[], process=None, errorExpr=[], errorIf=None, abortOnError=None, encoding=None, encodingReplaceOnError=False, detailMessage='', filedir=None, 
 			reFlags=0, mappers=[], quiet=False):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
@@ -1215,6 +1215,9 @@ class ProcessUser(object):
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 
+		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+			Added in PySys 2.2.
+		
 		:param str detailMessage: An extra string to add to the start of the message logged when waiting to provide extra 
 			information about the wait condition. e.g. ``detailMessage='Wait for server startup: '``. 
 			
@@ -1303,7 +1306,7 @@ class ProcessUser(object):
 		while 1:
 			try:
 				if pathexists(f):
-					matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers)
+					matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers, encodingReplaceOnError=encodingReplaceOnError)
 
 					if pysys.utils.safeeval.safeEval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
 						timetaken = time.monotonic()-starttime
@@ -1319,7 +1322,7 @@ class ProcessUser(object):
 					
 					if errorExpr:
 						for err in errorExpr:
-							errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers) # add .* to capture entire err msg for a better outcome reason
+							errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers, encodingReplaceOnError=encodingReplaceOnError) # add .* to capture entire err msg for a better outcome reason
 							if errmatches:
 								err = errmatches[0].group(0).strip()
 								msg = '%s found while %s'%(quotestring(err), msg[0].lower()+msg[1:])
@@ -1846,7 +1849,7 @@ class ProcessUser(object):
 		return self.getExprFromFile(path=path, expr=expr, returnAll=True, returnNoneIfMissing=False, 
 			encoding=encoding, reFlags=reFlags, mappers=mappers, mustExist=mustExist, **kwargs)
 
-	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, mustExist=True, encoding=None, reFlags=0, mappers=[]):
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, mustExist=True, encoding=None, encodingReplaceOnError=False, reFlags=0, mappers=[]):
 		r""" Searches for a regular expression in the specified file, and returns it. 
 		
 		Use of this function is discouraged - consider using `grep` / `grepOrNone` / `grepAll` instead. 
@@ -1897,6 +1900,9 @@ class ProcessUser(object):
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 
+		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+			Added in PySys 2.2.
+
 		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
 			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
 			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
@@ -1930,7 +1936,7 @@ class ProcessUser(object):
 		if mustExist is False and not os.path.exists(path):
 			pass
 		else: 
-			with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
+			with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path), errors='backslashreplace' if encodingReplaceOnError else None) as f:
 				for l in applyMappers(f, mappers):
 				
 					match = compiled.search(l)
@@ -1988,6 +1994,8 @@ class ProcessUser(object):
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+
+			Any character encoding errors will result in backslash escape sequences being logged instead. 
 			
 		:param Callable[[line],None] logFunction: The function that will be used to log individual lines from the file. 
 			Usually this is ``self.log.info(u'  %s', line, extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))``	
@@ -2016,7 +2024,7 @@ class ProcessUser(object):
 		actualpath= os.path.join(self.output, path)
 		try:
 			# always open with a specific encoding not in bytes mode, since otherwise we can't reliably pass the read lines to the logger
-			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or PREFERRED_ENCODING, errors='replace')
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or PREFERRED_ENCODING, errors='backslashreplace')
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False

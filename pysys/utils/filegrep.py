@@ -32,7 +32,7 @@ from pysys.mappers import applyMappers
 
 log = logging.getLogger('pysys.assertions')
 
-def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], returnFirstOnly=False):
+def getmatches(file, regexpr, ignores=None, encoding=None, encodingReplaceOnError=False, flags=0, mappers=[], returnFirstOnly=False):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches 
 	(or if returnFirstOnly=True, just the first).
 	
@@ -41,6 +41,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], 
 	:param mappers: A list of lambdas or generator functions used to pre-process the file's lines before looking for matches. 
 	:param ignores: A list of regexes which will cause matches to be discarded. These are applied *after* any mappers. 
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
 	:param returnFirstOnly: If True, stops reading the file as soon as the first match is found and returns it. 
 	:return: A list of the match objects, or the match object or None if returnFirstOnly is True
 	:rtype: list
@@ -58,20 +59,32 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], 
 	if not pathexists(file):
 		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
-		with openfile(file, 'r', encoding=encoding) as f:
-			for l in applyMappers(f, mappers):
-				match = rexp.search(l)
-				if match is not None: 
-					shouldignore = False
-					for i in ignores:
-						if i.search(l):
-							shouldignore = True
-							break
-					if shouldignore: continue
-					
-					log.debug(("Found match for line: %s" % l).rstrip())
-					if returnFirstOnly is True: return match
-					matches.append(match)
+		try:
+			with openfile(file, 'r', encoding=encoding, errors='backslashreplace' if encodingReplaceOnError else None) as f:
+				for l in applyMappers(f, mappers):
+					match = rexp.search(l)
+					if match is not None: 
+						shouldignore = False
+						for i in ignores:
+							if i.search(l):
+								shouldignore = True
+								break
+						if shouldignore: continue
+						
+						log.debug(("Found match for line: %s" % l).rstrip())
+						if returnFirstOnly is True: return match
+						matches.append(match)
+		except UnicodeDecodeError as ex:
+			# help people find the cause of the problem by including some context
+			try:
+				contextchars = 20
+				problematictext = ex.object[max(0, ex.start-contextchars) : min(len(ex.object), min(ex.end, ex.start+100)+contextchars) ]
+				# repr ensures other chars like \n are escaped, but to avoid it being unreadable we avoid double-escaping of the backslash chars
+				ex.reason = ex.reason+'; text is: ... %s ...' % repr(problematictext.decode(ex.encoding, errors='backslashreplace')).replace('\\\\x','\\x')
+			except:
+				pass
+			raise ex
+		
 		if returnFirstOnly is True: return None
 		return matches
 

@@ -67,7 +67,12 @@ New features:
   `BaseTest.assertThatGrep()`. This approach is superior to putting both extraction and validation into 
   a single `BaseTest.assertGrep()` regular expression due to improved messages on failure which make 
   tests easier to write and debug. 
-  
+
+- Added ``encodingReplaceOnError`` boolean parameter to `BaseTest.assertGrep()`, `BaseTest.assertThatGrep()`, `BaseTest.assertGrepOfGrep()` and 
+  `BaseTest.waitForGrep()`, which can be used to prevent exceptions while reading file content 
+  when the file contains invalid/unexpected characters (or the encoding is set incorrectly). 
+  This ensures detection of error conditions etc can still complete reliably even if some unexpected characters are found elsewhere in the file. 
+
 - Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
   are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
   the new global flag `pysys.process.user.ProcessUser.isRunnerAborting` which informs all tests they should 
