@@ -25,7 +25,7 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		self.pysys.pysys('pysys-print', ['print', 
 			'Test', # should catch Test but not Test1
 			'subdir1/TestSub1A', # relative path us
-			os.path.abspath(self.input+'/subdir1')+os.sep+'TestSUB1B', # absolute path, os separator, case insensitivity
+			os.path.abspath(self.input+'/subdir1')+os.sep+('TestSUB1B' if IS_WINDOWS else 'TestSub1B'), # absolute path, os separator, case insensitivity (only on windows)
 			# but not TestSub1C
 			'subdir2', # a dir with nested items
 			], workingDir=self.input)
