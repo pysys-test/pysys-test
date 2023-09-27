@@ -20,6 +20,12 @@ New features:
 
 - Added support for Python 3.11, and removed support for Python 3.6 (which is now end of life). 
 
+- Added command line support for running and printing tests by their (absolute or relative) directory rather than their test id. 
+  This allows use of shell completion, and also makes it possible to run all the tests found under a set of named subdirectories. 
+  For example::
+
+    pysys run performance-tests correctness-tests/foo/Test_001 
+
 - Changed imports in the default new testcase templates to allow Python IDEs to correctly locate the PySys BaseTest class. 
   This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests, 
   change ``import pysys`` to ``import pysys.basetest, pysys.mappers``, and make sure references to `pysys.basetest.BaseTest` 

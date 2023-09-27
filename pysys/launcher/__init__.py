@@ -233,7 +233,14 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				index = index1 = index2 = None
 				t = t.rstrip('/\\')
 
-				if re.search(r'^[%s]*$'%MODE_CHARS, t): # single test id (not a range or regex)
+				if os.path.isdir(t):
+					dirtomatch = os.path.normcase(os.path.abspath(t))
+					matches = [descriptors[i] for i in range(0,len(descriptors)) 
+						if os.path.normcase(descriptors[i].testDir)==dirtomatch 
+						or os.path.normcase(os.path.normpath(descriptors[i].testDir)).startswith(dirtomatch+os.sep)]
+					if not matches: raise UserError("No tests found under directory: \"%s\""%t)
+
+				elif re.search(r'^[%s]*$'%MODE_CHARS, t): # single test id (not a range or regex)
 					if '~' in t:
 						testspecid, testspecmode = t.split('~')
 						index = findMatchingIndex(testspecid)
@@ -255,7 +262,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 							raise UserError('Test "%s" cannot be selected with the specified mode(s).'%matches[0].id)
 				elif '~' in t:
 					# The utility of this would be close to zero and lots more to implement/test, so not worth it
-					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
+					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range, regular expression or directory path')
 				elif re.search('^:[%s]*'%TEST_ID_CHARS, t):
 					index = findMatchingIndex(t.split(':')[1])
 					matches = descriptors[:index+1]
@@ -276,10 +283,17 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 					try:
 						matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
 					except Exception as ex:
-						raise UserError('"%s" contains characters not valid in a test id, but isn\'t a valid regular expression either: %s'%(t, ex))
+						raise UserError('"%s" contains characters not valid in a test id, but isn\'t a valid regular expression or an existing directory either: %s'%(t, ex))
 					if not matches: raise UserError("No test ids found matching regular expression: \"%s\""%t)
 
-				if not matches: raise UserError("No test ids found matching: \"%s\""%st)
+				if not matches: raise UserError("No test ids found matching: \"%s\""%t)
+				if '~' not in t:
+					for m in matches:
+						if not modedescriptors[m.id]:
+							# if user explicitly specified an individual test and excluded all modes it can run in, 
+							# we shouldn't silently skip/exclude it as they clearly made a mistake
+							raise UserError('Test "%s" cannot be selected with the specified mode(s).'%m.id)
+
 				tests.extend(matches)
 
 			except UserError:

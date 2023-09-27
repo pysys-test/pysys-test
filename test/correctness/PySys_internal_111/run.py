@@ -77,7 +77,7 @@ class PySysTest(BaseTest):
 		runPySys(self, 'error-run-mode-with-range', 
 			['run', 'SomeId1:2~MyMode'], workingDir='test', expectedExitStatus=10)
 		self.assertThatGrep('error-run-mode-with-range.err', 'ERROR: .*', 
-			expected='ERROR: A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
+			expected='ERROR: A ~MODE test mode selector can only be use with a test id, not a range, regular expression or directory path')
 
 		runPySys(self, 'error-run-nonexistent-mode', 
 			['run', '--mode', 'MyNonExistentMode', 'MyTest'], workingDir='test', expectedExitStatus=10)
