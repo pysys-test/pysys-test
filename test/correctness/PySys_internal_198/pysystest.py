@@ -20,8 +20,6 @@ from pysysinternalhelpers import PySysTestHelper
 class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 
 	def execute(self):
-
-		#self.copy(self.input, self.output+'/test')
 		self.pysys.pysys('pysys-run', ['run', '-o', self.output+'/myoutdir', '--record'], workingDir=self.input)
 		
 	def validate(self):
