@@ -430,7 +430,29 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 	Project ``${...}`` properties can be used in the path. 
 	"""
-	
+
+	testsuiteName = None
+	"""
+	Overrides the content written to the ``<testsuite name=...>`` attribute (defaults to ``@TESTID@``), 
+	A recommended alternate value is ``@TESTID_PACKAGE@`` which represents the test id up to the final ``.``. 
+
+	.. versionadded:: 2.2
+	"""
+	testcaseClassname = None
+	"""
+	Overrides the content written to the ``<testcase classname=...>`` attribute (defaults to ``@CLASSNAME@``), 
+	A recommended alternate value is empty string, since the classname (typically "PySys") is not very useful for most PySys tests. 
+
+	.. versionadded:: 2.2
+	"""
+	testcaseName = None # default is @TESTID@
+	"""
+	Overrides the content written to the ``<testcase name=...>`` attribute (defaults to ``@TESTID@``), 
+	A recommended alternate value is ``@TESTID_NO_PACKAGE_OR_MODE@~@MODE@`` when using ``testsuiteName`` to hold the package part of the test id. 
+
+	.. versionadded:: 2.2
+	"""
+
 	def __init__(self, **kwargs):
 		self.cycle = -1
 
@@ -441,6 +463,23 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		deletedir(self.outputDir)
 		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
+
+	def substitute(self, configured, default, descriptor):
+		if configured is None: return default # but not if it's empty!
+		if '@' not in configured: return configured
+
+		id = descriptor.idWithoutMode.split('.')
+		TESTID_PACKAGE = '.'.join(id[:-1])
+		TESTID_NO_PACKAGE_OR_MODE = id[-1]
+
+		return (configured
+			.replace('@TESTID_NO_PACKAGE_OR_MODE@', TESTID_NO_PACKAGE_OR_MODE)
+			.replace('@TESTID_PACKAGE@', TESTID_PACKAGE)
+			.replace('@TESTID@', descriptor.id)
+			.replace('@MODE@', descriptor.mode or '')
+			.replace('@CLASSNAME@', descriptor.classname)
+		).lstrip('.').rstrip('~') # stripping leading . helps cover cases where there is sometimes no package
+		
 
 	def processResult(self, testObj, **kwargs):
 		# Creates a test summary file in the Apache Ant JUnit XML format. 
@@ -455,7 +494,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		document = impl.createDocument(None, 'testsuite', None)		
 		rootElement = document.documentElement
 		attr1 = document.createAttribute('name')
-		attr1.value = testObj.descriptor.id
+		attr1.value = self.substitute(self.testsuiteName, testObj.descriptor.id, testObj.descriptor)
 		attr2 = document.createAttribute('tests')
 		attr2.value='1'
 		attr3 = document.createAttribute('failures')
@@ -475,11 +514,12 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 		# add the testcase information
 		testcase = document.createElement('testcase')
-		attr1 = document.createAttribute('classname')
-		attr1.value = testObj.descriptor.classname
+		if self.testcaseClassname != '@OMIT@': # probably not needed since empty string seems to work better, but useful to have the option (crrently undocumented)
+			attr1 = document.createAttribute('classname')
+			attr1.value = self.substitute(self.testcaseClassname, testObj.descriptor.classname, testObj.descriptor)
+			testcase.setAttributeNode(attr1)
 		attr2 = document.createAttribute('name')
-		attr2.value = testObj.descriptor.id		   	
-		testcase.setAttributeNode(attr1)
+		attr2.value = self.substitute(self.testcaseName, testObj.descriptor.id, testObj.descriptor)
 		testcase.setAttributeNode(attr2)
 		
 		# add in failure information if the test has failed

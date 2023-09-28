@@ -181,6 +181,18 @@ New features:
   the problem of disabling coverage generation for performance/robustness tests - for that you should set the ``disableCoverage`` group 
   on the relevant tests or test directories. 
 
+- Added configuration options to `pysys.writer.outcomes.JUnitXMLResultsWriter` for customizing how PySys test descriptor concepts 
+  (test id, mode etc) are mapped to JUnit concepts, to suit the many different tools that have their own interpretions 
+  of this file format. The default mapping produces suboptimal results in some tools, due to duplicating the test id in the ``<testsuite>`` 
+  and ``<testcase>`` names. A mapping that works better in many tools can be configured using::
+
+    <writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+      ...
+      <property name="testsuiteName" value="@TESTID_PACKAGE@"/>
+      <property name="testcaseName" value="@TESTID_NO_PACKAGE_OR_MODE@~@MODE@"/>
+      <property name="testcaseClassname" value=""/>
+    <writer>
+
 - Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
   the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
   modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 

@@ -23,6 +23,9 @@
 		
 		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
 			<property name="outputDir" value="__pysys_junit_xml"/>
+			<property name="testsuiteName" value="@TESTID_PACKAGE@"/>
+			<property name="testcaseName" value="@TESTID_NO_PACKAGE_OR_MODE@~@MODE@"/>
+			<property name="testcaseClassname" value=""/>
 		</writer>
 		
 		<!-- Code coverage for .py files -->

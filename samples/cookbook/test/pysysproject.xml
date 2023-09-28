@@ -263,6 +263,11 @@
 			test root dir (or the outdir if specified on the pysys run command).
 			-->
 			<property name="outputDir" value="__pysys_junit_xml"/>
+
+			<!-- Specify how to map PySys test id/mode to JUnit testsuite/case concepts -->
+			<property name="testsuiteName" value="@TESTID_PACKAGE@"/>
+			<property name="testcaseName" value="@TESTID_NO_PACKAGE_OR_MODE@~@MODE@"/>
+			<property name="testcaseClassname" value=""/>
 		</writer>
 		
 		<!-- Writes all outcomes (or just the failure outcomes) to a .json file suitable for machine parsing.
