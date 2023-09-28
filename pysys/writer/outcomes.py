@@ -246,15 +246,18 @@ class TextResultsWriter(BaseRecordResultsWriter):
 			self.fp.close()
 			self.fp = None
 
-	def processResult(self, testObj, **kwargs):
+	def processResult(self, testObj, cycle=None, **kwargs):
 		# Writes the test id and outcome to the logfile. 
 		
-		if "cycle" in kwargs: 
-			if self.cycle != kwargs["cycle"]:
-				self.cycle = kwargs["cycle"]
+		if cycle is not None and self.runner.threads==1 and self.runner.cycles>1:  # only makes sense to group by cycles if single-threaded
+			if self.cycle != cycle:
+				self.cycle = cycle
 				self.fp.write('\n[Cycle %d]:\n'%(self.cycle+1))
 		
-		self.fp.write("%s: %s\n" % (testObj.getOutcome(), testObj.descriptor.id))
+		self.fp.write("%s: %s\n" % (testObj.getOutcome(), 
+			# Use str() which includes cycle if a) we need to and b) we haven't already displayed it above
+			str(testObj) if self.runner.cycles>1 and self.runner.threads>1
+			else testObj.descriptor.id))
 
 
 class XMLResultsWriter(BaseRecordResultsWriter):
