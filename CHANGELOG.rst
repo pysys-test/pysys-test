@@ -139,7 +139,7 @@ New features:
 - Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
 
 - Improved performance of waiting for processes (on Windows by blocking with WaitForSingleObject instead of sleep polling, 
-  and on Linux if kernel version is 5.3+ and Python=3.9 using pidfd_open).
+  and on Linux if kernel version is >=5.3 and Python>=3.9 using pidfd_open).
 
 - Added project property attribute ``path=`` as an alternative to ``value=`` for properties containing a path, which 
   should be normalized to remove any ``/../`` path components. 
