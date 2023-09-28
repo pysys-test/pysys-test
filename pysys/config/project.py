@@ -359,7 +359,9 @@ class _XMLProjectParser(object):
 	def getDescriptorLoaderPlugins(self):
 		for node in self.root.getElementsByTagName('descriptor-loader-plugin'):
 			if node.parentNode == self.root:
-				raise UserError('From PySys version 2.2, <descriptor-loader-plugin> is no longer supported at the project level - please move it to <pysysdirconfig> instead')
+				# Eventually will be an exception but for now we just log a warning to allow the same project to work with both new and old versions simultaneously for easy migration
+				# raise UserError(...)
+				log.warning('From PySys version 2.2, <descriptor-loader-plugin> is no longer supported at the project level - please move it to <pysysdirconfig> instead')
 
 	def getMakerDetails(self):
 		nodes = self.root.getElementsByTagName('maker')
