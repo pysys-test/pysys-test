@@ -521,7 +521,10 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		attr2 = document.createAttribute('name')
 		attr2.value = self.substitute(self.testcaseName, testObj.descriptor.id, testObj.descriptor)
 		testcase.setAttributeNode(attr2)
-		
+		attr5 = document.createAttribute('time')	
+		attr5.value = '%s'%kwargs['testTime']
+		testcase.setAttributeNode(attr5)
+
 		# add in failure information if the test has failed
 		if (outcome.isFailure() or outcome == SKIPPED):
 			failure = document.createElement('skipped' if outcome==SKIPPED else 'failure')

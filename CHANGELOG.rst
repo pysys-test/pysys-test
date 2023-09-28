@@ -215,6 +215,8 @@ Fixes:
   double-quotes, and trailing backslashes.
 - Fixed sensitivity to system clock changes by using ``time.monotonic`` rather than ``time.time`` for timeouts 
   and time measurements that do not need wall clock time. 
+- Added ``time=`` attribute to JUnit XML output in the ``<testcase>`` node (in addition to the ``<testsuite>`` node where 
+  it already existed), which is required by some tools. 
 
 Minor behaviour changes:
 
