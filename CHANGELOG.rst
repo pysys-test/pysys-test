@@ -1712,7 +1712,7 @@ Assertion and waitForGrep improvements:
   of references. Use this feature with caution, since it overwrites reference files with no backup. In 
   particular, make sure you have committed all reference files to version control before running the command, and 
   then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
-  committing. 
+  committing. From PySys 2.2 onwards the shorter option ``-XupdateDiffReferences`` may be used instead. 
 
 Improvements to the ``pysys.py`` tool: 
 - PySys now supports v3.8 of Python. 

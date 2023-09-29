@@ -900,7 +900,7 @@ class BaseTest(ProcessUser):
 		committing. To use 
 		this feature, run::
 		
-			pysys.py run -XautoUpdateAssertDiffReferences
+			pysys.py run -XupdateDiffReferences
 		
 		:param str file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
 		:param str file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
@@ -964,9 +964,9 @@ class BaseTest(ProcessUser):
 					ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), 
 					stripWhitespace=stripWhitespace)
 				
-				if (not result) and self.getBoolProperty('autoUpdateAssertDiffReferences'):
+				if (not result) and (self.getBoolProperty('autoUpdateAssertDiffReferences') or self.getBoolProperty('updateDiffReferences')):
 					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), logFunction=logDiffLine)
-					log.warning('... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
+					log.warning('... -XupdateDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
 					self.copy(f1, f2)
 					continue
 
