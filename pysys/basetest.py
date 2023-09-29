@@ -567,7 +567,7 @@ class BaseTest(ProcessUser):
 			# Produces self-describing log messages like this:
 			# Assert that {actual == expected} with actual{=myDataStructure['item1'][-1].getId()} ="foo" expected="foo" ... passed
 			# Assert that {actual == expected} with actual{=myDataStructure['item2'][-1].getId()} ="bar" expected="bar" ... passed
-			# Assert that {actual == expected} with actual{=myDataStructure['item3'][-1].getId()} ="baZaar" expected="baz" ... failed [run.py:123]
+			# Assert that {actual == expected} with actual{=myDataStructure['item3'][-1].getId()} ="baZaar" expected="baz" ... failed [pysystest.py:123]
 			#       actual: 'baZaar'
 			#     expected: 'baz'
 			#                 ^
