@@ -1506,8 +1506,11 @@ class TestContainer(object):
 			log.info("Test final outcome:  %s", str(self.testObj.getOutcome()), extra=BaseLogFormatter.tag(str(self.testObj.getOutcome()).lower(), 0))
 			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
 				log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
+				loc = self.testObj.getOutcomeLocation()
+				if loc: # it's quite useful to have the location of the first error (as an absolute path) so you can easily jump to it from the test failure without having to scroll through all the run.log output
+					log.info("                     [%s:%s]", loc[0], loc[1])
 			log.info("")
-			
+
 			pysysLogHandler.flush()
 			if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
 			
