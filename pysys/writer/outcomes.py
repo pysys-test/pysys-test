@@ -326,6 +326,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 		
+		mkdir(os.path.dirname(self.logfile))
 		self.fp = io.open(toLongPathSafe(self.logfile), "wb")
 	
 		impl = getDOMImplementation()

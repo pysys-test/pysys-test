@@ -211,6 +211,11 @@ New features:
       <property name="verbose" value="true"/>
     </writer>
 
+- Added ``--writer CLASSNAME`` argument to ``pysys run`` which can be used to selectively enable an individual writer would not otherwise  
+  be enabled. For example use ``--writer TextResultsWriter`` to enable the text summary log without using ``--record`` which might enable 
+  several other writers you don't need. This option could be used in a ``PYSYS_DEFAULT_ARGS`` environment variable to enable a writer 
+  just for the current user. 
+
 - Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
   the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
   modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 

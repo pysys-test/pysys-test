@@ -253,8 +253,14 @@ class BaseRunner(ProcessUser):
 
 			writer.pluginProperties = writerprops
 			pysys.utils.misc.setInstanceVariablesFromDict(writer, writerprops)
-			
-			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): return None
+			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): 
+				# allow overriding isEnabled using the command line
+				if not (
+					extraOptions.get('writerEnable') and any(
+						# match either the qualified or unqualified classname
+						writername in (writer.__class__.__name__, getattr(writer.__class__, '__module__','')+'.'+writer.__class__.__name__)
+					for writername in extraOptions['writerEnable'])):
+					return None
 			if pluginAlias: # only set alias if enabled (tests could use the existence of the alias to check if it's enabled e.g. for code cov)
 				if hasattr(self, pluginAlias): raise UserError('Alias "%s" for writer conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
 				setattr(self, pluginAlias, writer)
@@ -282,7 +288,7 @@ class BaseRunner(ProcessUser):
 		if annotationsWriter is not None:
 			self.writers.append(annotationsWriter)
 		
-		if extraOptions.get('progressWritersEnabled', False):
+		if extraOptions.get('progressWritersEnabled', False): #  a hack from before we added the "writerEnable" option
 			if progresswriters: 
 				self.writers.extend(progresswriters)
 			else:
