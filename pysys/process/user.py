@@ -1613,7 +1613,7 @@ class ProcessUser(object):
 			return self.__outcomeReason
 
 	def getOutcomeLocation(self):
-		"""Get the location in the Python source file where this location was added. 
+		"""Get the location in the Python source file where this outcome was added. 
 		
 		.. versionadded:: 1.6.0
 		
