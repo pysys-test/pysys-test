@@ -1513,7 +1513,7 @@ class TestContainer(object):
 			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
 				log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 				loc = self.testObj.getOutcomeLocation()
-				if loc: # it's quite useful to have the location of the first error (as an absolute path) so you can easily jump to it from the test failure without having to scroll through all the run.log output
+				if loc and loc[0]: # it's quite useful to have the location of the first error (as an absolute path) so you can easily jump to it from the test failure without having to scroll through all the run.log output
 					log.info("                     [%s:%s]", loc[0], loc[1])
 			log.info("")
 
