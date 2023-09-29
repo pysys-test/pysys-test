@@ -1574,7 +1574,7 @@ class ProcessUser(object):
 
 		:param outcomeReason: A string summarizing the reason for the outcome.
 		
-		.. versionchange:: 2.2 Previous outcomes are no longer overridden when aborting. 
+		.. versionchanged:: 2.2 Previous outcomes are no longer overridden when aborting. 
 		"""
 		raise AbortExecution(outcome, outcomeReason, callRecord)
 
