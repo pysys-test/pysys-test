@@ -22,7 +22,7 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 		self.assertGrep('pysys.out', expr=r'Failed to format log message', contains=False)
-		self.assertDiff('pysys.out', 'pysys.out', includes=['reason', 'Sample message', 'outcome', 'Id', 'Title', 'FAILED', 'My exception', 'Traceback'])
+		self.assertDiff('pysys.out', 'pysys.out', includes=['reason', 'Sample message', 'outcome', 'Id', 'Title', 'FAILED', 'BLOCKED', 'My exception', 'Traceback'])
 		
 		# check run.log not affected
 		self.assertGrep('myoutdir/PySys_NestedTestcase/run.log', expr=r'INFO +skipped reason message ... skipped')

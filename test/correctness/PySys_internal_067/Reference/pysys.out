@@ -1,14 +1,51 @@
-DEBUG PySys is installed at: c:\dev\pysys-test\pysys; python from C:\dev\venv-py3\Scripts\python.exe
-DEBUG Loading project file: C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win\test\pysysproject.xml
+DEBUG PySys is installed at: c:\dev\pysys\pysys; python from C:\dev\venv-py3.9\Scripts\python.exe
+DEBUG Working dir=C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\test, args=c:\dev\pysys\pysys\__main__.py run -o C:\dev\pysys\test\correctness\PySys_internal_067\Output\win/myoutdir -v DEBUG
+DEBUG Main environment vars: PATH=C:\dev\venv-py3.9\Scripts;C:\Windows;C:\Windows\system32;C:\Windows\System32\Wbem
+  PYSYS_COLOR=tRue
+  PYSYS_TEST_FRIENDLY_ESCAPES=true
+  PYSYS_USERNAME=pysystestuser
+  PYTHONDONTWRITEBYTECODE=true
+  PYTHONPATH=C:\dev\pysys\test\correctness;c:\dev\pysys;c:\dev\apama-lib5\win\amd64\all\python\3.9.5\python39.zip;c:\dev\apama-lib5\win\amd64\all\python\3.9.5\DLLs;c:\dev\apama-lib5\win\amd64\all\python\3.9.5\lib;c:\dev\apama-lib5\win\amd64\all\python\3.9.5;C:\dev\venv-py3.9;C:\dev\venv-py3.9\lib\site-packages;C:\dev\venv-py3.9\lib\site-packages\win32;C:\dev\venv-py3.9\lib\site-packages\win32\lib;C:\dev\venv-py3.9\lib\site-packages\Pythonwin;C:\dev\pysys\test\pysys-extensions;C:\dev\pysys\test/internal/utilities/extensions
+  PYTHONWARNINGS=error
+DEBUG Loading project file: C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\test\pysysproject.xml
 DEBUG Setting project property osfamily="windows"
 DEBUG Setting project property verboseWaitForSignal="true"
 DEBUG Setting project property defaultAbortOnError="true"
-DEBUG Adding value to path: C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win\test\extrapath
+DEBUG Adding value to path: C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\test\extrapath
 DEBUG Successfully initialized the coloring library
-INFO  Running 1 tests with 1 threads using PySys 1.6.0.dev1 in Python 3.6.6
+DEBUG <BLUE>Usable CPU count for process = 16<END>
+DEBUG <BLUE>TCP ephemeral port range is: 49152-65536; this leaves a total of 48128 ports for running servers<END>
+INFO  Running 1 tests with 1 test threads (OS CPUs=16) using PySys 2.2.dev1 in Python 3.9.5 and encoding cp1252
+
+DEBUG <BLUE>Default environment variables for this process: 
+  environment  : COMMONPROGRAMFILES=C:\Program Files\Common Files
+  environment  : COMMONPROGRAMFILES(X86)=C:\Program Files (x86)\Common Files
+  environment  : COMSPEC=C:\Windows\system32\cmd.exe
+  environment  : NUMBER_OF_PROCESSORS=16
+  environment  : OS=Windows_NT
+  environment  : PATH=C:\dev\venv-py3.9\Scripts;C:\Windows;C:\Windows\system32;C:\Windows\System32\Wbem
+  environment  : PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+  environment  : PROCESSOR_ARCHITECTURE=AMD64
+  environment  : PROGRAMFILES=C:\Program Files
+  environment  : PROGRAMFILES(X86)=C:\Program Files (x86)
+  environment  : PYSYS_COLOR=tRue
+  environment  : PYSYS_TEST_FRIENDLY_ESCAPES=true
+  environment  : PYSYS_USERNAME=pysystestuser
+  environment  : PYTHONDONTWRITEBYTECODE=true
+  environment  : PYTHONPATH=C:\dev\pysys\test\correctness;c:\dev\pysys;c:\dev\apama-lib5\win\amd64\all\python\3.9.5\python39.zip;c:\dev\apama-lib5\win\amd64\all\python\3.9.5\DLLs;c:\dev\apama-lib5\win\amd64\all\python\3.9.5\lib;c:\dev\apama-lib5\win\amd64\all\python\3.9.5;C:\dev\venv-py3.9;C:\dev\venv-py3.9\lib\site-packages;C:\dev\venv-py3.9\lib\site-packages\win32;C:\dev\venv-py3.9\lib\site-packages\win32\lib;C:\dev\venv-py3.9\lib\site-packages\Pythonwin;C:\dev\pysys\test\pysys-extensions;C:\dev\pysys\test/internal/utilities/extensions
+  environment  : PYTHONWARNINGS=error
+  environment  : SYSTEMDRIVE=C:
+  environment  : SYSTEMROOT=C:\Windows
+  environment  : TERM_PROGRAM=
+  environment  : WINDIR=C:\Windows
+<END>
+DEBUG <BLUE>Starting test execution<END>
+DEBUG <BLUE>deletedir failed to update permissions and delete \\?\C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\myoutdir\PySys_NestedTestcase on this attempt: [WinError 3] The system cannot find the path specified: '\\\\?\\C:\\dev\\pysys\\test\\correctness\\PySys_internal_067\\Output\\win\\myoutdir\\PySys_NestedTestcase'<END>
+DEBUG <BLUE>deletedir failed to update permissions and delete \\?\C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\myoutdir\PySys_NestedTestcase on this attempt: [WinError 3] The system cannot find the path specified: '\\\\?\\C:\\dev\\pysys\\test\\correctness\\PySys_internal_067\\Output\\win\\myoutdir\\PySys_NestedTestcase'<END>
 INFO  ==============================================================
 INFO  Id:    <CYAN>PySys_NestedTestcase<END>
 INFO  Title: <CYAN>Nested testcase<END>
+INFO  Dir:   <CYAN>C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\test\PySys_NestedTestcase<END>
 DEBUG <BLUE>Execution order hint: 0.0<END>
 INFO  ==============================================================
 DEBUG <BLUE>--- test execute<END>
@@ -16,10 +53,11 @@ INFO  Sample message info
 WARN  <MAGENTA>Sample message warn<END>
 ERROR <RED>Sample message at error with exception trace: <END>
 <RED>Traceback (most recent call last):
-  File "C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win\test\PySys_NestedTestcase\run.py", line 10, in execute
+  File "C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\test\PySys_NestedTestcase\run.py", line 10, in execute
     raise Exception('My exception')
 Exception: My exception<END>
 INFO  skipped reason message ... <YELLOW>skipped<END>
+DEBUG <BLUE>addOutcome is removing existing outcome(s): [SKIPPED(non-failure)] with reason "skipped reason message"<END>
 WARN  blocked reason message ... <RED>blocked<END> [run.py:15]
 WARN  dumpedcore reason message ... <YELLOW>dumped core<END> [run.py:16]
 WARN  timedout reason message ... <MAGENTA>timed out<END> [run.py:17]
@@ -31,15 +69,17 @@ WARN  <MAGENTA>Aborted test due to FAILED outcome<END>
 DEBUG <BLUE>--- test cleanup<END>
 DEBUG <BLUE>ProcessUser cleanup function done.<END>
 INFO  
-INFO  Test duration: <BLUE>0.10 secs<END>
-INFO  Test final outcome:  <RED>FAILED<END>
-INFO  Test outcome reason: <CYAN>abort reason message<END>
+INFO  Test duration: <BLUE>0.02 secs<END>
+INFO  Test final outcome:  <RED>BLOCKED<END>
+INFO  Test outcome reason: <CYAN>blocked reason message (+4 other failures)<END>
+INFO                       [C:\dev\pysys\test\correctness\PySys_internal_067\Output\win\test\PySys_NestedTestcase\run.py:15]
 INFO  
 CRIT  
 CRIT  Summary of failures: 
-CRIT  <RED>  FAILED: PySys_NestedTestcase <END>
-CRIT  <CYAN>      abort reason message<END>
+CRIT  <RED>  BLOCKED: PySys_NestedTestcase <END>
+CRIT  <CYAN>      blocked reason message (+4 other failures)<END>
 CRIT        PySys_NestedTestcase\
 CRIT        ..\myoutdir\PySys_NestedTestcase\
 CRIT  
 DEBUG <BLUE>ProcessUser cleanup function done.<END>
+DEBUG <BLUE>TCP server port allocation stats: portPoolSize=48111, peakAllocatedPorts=0, lifetimeTotalAllocatedPorts=0<END>

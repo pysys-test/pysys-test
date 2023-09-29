@@ -258,6 +258,9 @@ Minor behaviour changes:
   and ``__pysys_python_class__`` contains at least one dot character, for example ``mypackage.MyTestClass``.
 - The process exit status returned by ``pysys run`` if no tests were found matching the specified options is now ``9`` 
   (instead of the default fatal error code of ``10`` as in previous versions). 
+- Changed `pysys.basetest.abort` to not override any existing failure outcomes. However if the abort outcome is SKIPPED or some other 
+  non-failure, the previous behaviour of overriding existing outcomes is preserved. To precisely control when to override previous 
+  failure outcomes, use `basetest.BaseTest.addOutcome` instead, which has an ``override=`` option. 
 
 -----------------
 What's new in 2.1

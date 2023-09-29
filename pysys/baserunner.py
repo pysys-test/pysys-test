@@ -1451,8 +1451,13 @@ class TestContainer(object):
 							self.testObj.addOutcome(BLOCKED, 'Test title is still TODO', abortOnError=False)
 
 					except AbortExecution as e:
-						del self.testObj.outcome[:]
-						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
+						# Add this outcome but do not make it take precedence over existing outcomes, since 
+						# they might have more information or at the very least may contribute info via the "+N other failures" text
+						# If someone wants override behaviour they can get it by doing self.addOutcome(..., abortOnError=True, override=True)
+						# However special-case this for non-failure outcomes (especially SKIPPED but also PASSED) to avoid confusing "N other failures" messages
+						if not e.outcome.isFailure(): del self.testObj.outcome[:]
+						if not (e.value and self.testObj.getOutcomeReason() == e.value and self.testObj.getOutcome()==e.outcome): # don't re-add the same outcome reason
+							self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
 						log.warning('Aborted test due to %s outcome'%e.outcome) # nb: this could be due to SKIPPED
 
 					if self.detectCore(self.outsubdir):

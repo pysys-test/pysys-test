@@ -1566,9 +1566,15 @@ class ProcessUser(object):
 		
 		See also L{skipTest}. 
 
-		:param outcome: The outcome, which will override any existing outcomes previously recorded.
+		:param outcome: The outcome, which will NOT override any existing outcomes previously recorded, unless 
+			the abort outcome is a non-failure (such as SKIPPED). 
+			If you want overriding behaviour for failure outcomes, instead of this function use::
+
+				self.addOutcome(outcome, outcomeReason, abortOnError=True, override=True)
+
 		:param outcomeReason: A string summarizing the reason for the outcome.
 		
+		.. versionchange:: 2.2 Previous outcomes are no longer overridden when aborting. 
 		"""
 		raise AbortExecution(outcome, outcomeReason, callRecord)
 
