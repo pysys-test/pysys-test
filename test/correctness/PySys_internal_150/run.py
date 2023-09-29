@@ -53,7 +53,7 @@ class PySysTest(BaseTest):
 			for f in os.listdir(outdir) 
 			if os.path.isfile(f) or f.startswith('_')])))
 		self.assertDiff('outdir-contents.txt')
-		self.assertPathExists('cookbook/test/__pysys-latest-results.log')
+		self.assertPathExists('cookbook/test/__pysys_results.pysys-run-tests.log')
 
 		# Git commit in runDetails
 		self.assertGrep('pysys-run-tests.out', 'vcsCommit: .+')

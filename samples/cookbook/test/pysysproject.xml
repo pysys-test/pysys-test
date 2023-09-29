@@ -302,7 +302,7 @@
 			to get a useful summary of all the failures. 
 		-->
 		<writer classname="pysys.writer.outcomes.TextResultsWriter">
-			<property name="file" value="${testRootDir}/__pysys_results.log"/>
+			<property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
 			<!-- Included detailed information like outcome reasons and test titles -->
 			<property name="verbose" value="true"/>
 		</writer>

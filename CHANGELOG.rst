@@ -207,7 +207,7 @@ New features:
   Example configuration::
 
     <writer classname="TextResultsWriter" module="pysys.writer">
-      <property name="file" value="${testRootDir}/__pysys_results.log"/>
+      <property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
       <property name="verbose" value="true"/>
     </writer>
 
