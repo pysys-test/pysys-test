@@ -44,6 +44,11 @@
 			<property name="outputDir" value="${root}"/>
 		</writer>
 
+		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary_verbose.log">
+			<property name="outputDir" value="${root}"/>
+			<property name="verbose" value="true"/>
+		</writer>
+
 		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary.csv">
 			<property name="outputDir" value="${root}"/>
 		</writer>

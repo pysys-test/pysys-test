@@ -296,9 +296,15 @@
 			<property name="useFileURL" value="true"/>
 		</writer>
 		
-		<!-- Writes all outcomes to a text file; only enabled when the record flag is specified. -->
+		<!-- Writes all outcomes to a text file; only enabled when the record flag is specified.
+			Can be a useful way to view the current or final status of the current/latest test run. 
+			The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
+			to get a useful summary of all the failures. 
+		-->
 		<writer classname="pysys.writer.outcomes.TextResultsWriter">
-			<property name="file" value="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log"/>
+			<property name="file" value="${testRootDir}/__pysys_results.log"/>
+			<!-- Included detailed information like outcome reasons and test titles -->
+			<property name="verbose" value="true"/>
 		</writer>
 
 		<!-- Writes all outcomes to a CSV file; only enabled when the record flag is specified. 

@@ -75,6 +75,11 @@
 		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
 			<property name="showTestTitle" value="true"/>
 		</writer>
+
+		<writer classname="TextResultsWriter" module="pysys.writer">
+			<property name="file" value="${testRootDir}/__pysys_results.log"/>
+			<property name="verbose" value="true"/>
+		</writer>
 	</writers>
 	
 	<pysysdirconfig>

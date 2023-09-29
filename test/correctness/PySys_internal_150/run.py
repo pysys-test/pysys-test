@@ -14,10 +14,11 @@ class PySysTest(BaseTest):
 		if sys.version_info[0:2] < tuple([3,6]): self.skipTest('Samples work on Python 3.6+ only')
 
 		sampledir = self.project.testRootDir+'/../samples/cookbook'
+		self.copy(sampledir, self.output+'/cookbook') # need to copy it because we put the text summary .log in the testRootDir
 
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
-			runPySys(self, name, args, workingDir=sampledir+'/test', 
+			runPySys(self, name, args, workingDir='cookbook/test', 
 				# this is so we can run git
 				environs={'PATH':os.environ['PATH']}, 
 				disableCoverage=True, # the COVERAGE_FILE setting from the top-level run stops the coverage gen within the cookbook pysys going to the right place so disable
@@ -52,6 +53,7 @@ class PySysTest(BaseTest):
 			for f in os.listdir(outdir) 
 			if os.path.isfile(f) or f.startswith('_')])))
 		self.assertDiff('outdir-contents.txt')
+		self.assertPathExists('cookbook/test/__pysys-latest-results.log')
 
 		# Git commit in runDetails
 		self.assertGrep('pysys-run-tests.out', 'vcsCommit: .+')

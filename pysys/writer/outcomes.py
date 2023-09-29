@@ -206,15 +206,27 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 
 
 class TextResultsWriter(BaseRecordResultsWriter):
-	"""Writer to log a summary of the results to a logfile in .txt format.
+	"""Writer to log a summary of the results to a log file in text format.
 	
+	Only enabled when the record flag is specified.
+
+	Can be a useful way to view the current or final status of the current/latest test run. 
+	The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
+	to get a nice summary of all the failures. 
 	"""
 
 	outputDir = None
 	"""
 	The directory to write the logfile, if an absolute path is not specified. The default is the working directory. 
 
-	Project ``${...}`` properties can be used in the path. 
+	Project ``${...}`` properties can be used in the path, for example ``${eval:os.path.expanduser('~')}`` for the current user's home directory. 
+	"""
+
+	verbose = False
+	"""
+	Display more details in the output including the outcome reason and the test title. 
+
+	.. versionadded:: 2.2
 	"""
 	
 	def __init__(self, logfile, **kwargs):
@@ -228,36 +240,61 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		# platform and test host. 
 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
+		log.info('TextResultsWriter is recording results at: %s', self.logfile)
 
-		self.fp = flushfile(openfile(self.logfile, "w", encoding='utf-8'))
-		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
-		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
-		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
-		self.fp.write('\n')
+		self.fp = flushfile(openfile(self.logfile, "w", encoding='utf-8', errors='backslashreplace'))
+		if not self.verbose: # these are a bit ugly; keep them for compat, but for people using the new verbose mode don't bother
+			self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
+			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
+			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 		for k, v in kwargs['runner'].runDetails.items():
-			if k in {'startTime', 'hostname'}: continue # don't duplicate the above
+			if (not self.verbose) and k in {'startTime', 'hostname'}: continue # don't duplicate the above
 			self.fp.write("%-20s%s\n"%(k+': ', v))
+		self.fp.write('\n')
+
+		self.failureIds = set()
+		self.executed = 0
 
 	def cleanup(self, **kwargs):
 		# Flushes and closes the file handle to the logfile.  
 
 		if self.fp: 
-			self.fp.write('\n\n\n')
+			self.fp.write('\n')
+			if self.verbose:
+				self.fp.write('Completed execution of %d tests%s\n'%(self.executed, f', and found {len(self.failureIds)} failures:' if self.failureIds else ''))
+				if self.failureIds:
+					self.fp.write(' '.join(sorted(list(self.failureIds))))
+
 			self.fp.close()
 			self.fp = None
 
 	def processResult(self, testObj, cycle=None, **kwargs):
 		# Writes the test id and outcome to the logfile. 
 		
-		if cycle is not None and self.runner.threads==1 and self.runner.cycles>1:  # only makes sense to group by cycles if single-threaded
+		if (not self.verbose) and cycle is not None and self.runner.threads==1 and self.runner.cycles>1:  # only makes sense to group by cycles if single-threaded
 			if self.cycle != cycle:
 				self.cycle = cycle
 				self.fp.write('\n[Cycle %d]:\n'%(self.cycle+1))
-		
-		self.fp.write("%s: %s\n" % (testObj.getOutcome(), 
-			# Use str() which includes cycle if a) we need to and b) we haven't already displayed it above
-			str(testObj) if self.runner.cycles>1 and self.runner.threads>1
-			else testObj.descriptor.id))
+
+
+		if self.verbose:
+			self.executed += 1
+			if testObj.getOutcome().isFailure():
+				self.failureIds.add(testObj.descriptor.id)
+			# This is designed to permit sorting the entire file such that similar "reasons" grouped together
+			# Providing the absolute path of the output dir allows jumping to the relevant files in an editor
+			text = '* '+str(testObj)
+
+			if testObj.descriptor.title and testObj.descriptor.title != testObj.descriptor.idWithoutMode: text += f" | {testObj.descriptor.title}"
+			# use ! vs + to ensure failures are all sorted together
+			text += f"\n  {'! ' if testObj.getOutcome().isFailure() else '+ '}{testObj.getOutcome()}{' '+testObj.getOutcomeReason() if testObj.getOutcomeReason() else ''} - {testObj.output}"
+		else:
+			text = "%s: %s" % (testObj.getOutcome(), 
+				# Use str() which includes cycle if a) we need to and b) we haven't already displayed it above
+				str(testObj) if self.runner.cycles>1 and self.runner.threads>1
+				else testObj.descriptor.id)
+
+		self.fp.write(text+'\n')
 
 
 class XMLResultsWriter(BaseRecordResultsWriter):

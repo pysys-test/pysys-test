@@ -193,6 +193,24 @@ New features:
       <property name="testcaseClassname" value=""/>
     <writer>
 
+- Added ``verbose`` configuration option to `pysys.writer.outcomes.TextResultsWriter` which produces gives a lot more information about 
+  each test result including the outcome reason, test title, and absolute path of the output directory (across two lines). Although in 
+  multi-threaded mode the order of test results in the file will be non-deterministic (whatever order the scheduler picks for executing 
+  the tests), the format is designed so that tests are grouped by failure mode (outcome and reason) when the log file is run through a 
+  shell ``sort`` command. 
+
+  The new format could be useful for monitoring in-progress test runs (maybe you wish to start solving some of the failures while 
+  the test run is still executing), or for performing bulk triage of a large set of failures at the end of a long test run. Opening 
+  the log file in an IDE that supports jump to file would allow for clicking the output directories for further investigation of failures 
+  where needed. 
+
+  Example configuration::
+
+    <writer classname="TextResultsWriter" module="pysys.writer">
+      <property name="file" value="${testRootDir}/__pysys_results.log"/>
+      <property name="verbose" value="true"/>
+    </writer>
+
 - Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
   the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
   modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
