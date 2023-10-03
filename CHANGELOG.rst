@@ -173,7 +173,7 @@ New features:
 - Change the debug format when starting a process to only show environment variables whose values differ from the default environment. 
 
 - Added support for ``.tar.gz`` and ``.tar.xz`` to  `pysys.writer.testoutput.TestOutputArchiveWriter` which are both smaller 
-  in many cases than``.zip`` files. See the new ``format`` option to control this. 
+  in many cases than ``.zip`` files. See the new ``format`` option to control this. 
 
 - Added ``includeTestIf`` option to `pysys.writer.coverage.PythonCoverageWriter` and `pysys.writer.testoutput.CollectTestOutputWriter` 
   which allows creating multiple coverage writers that collect data from different subsets of your tests, for example to separate out 
@@ -254,7 +254,7 @@ Minor behaviour changes:
   own per-project maker template. 
 - User-provided userData in test descriptors is now subject to automatic substitution of ``${...}`` project properties. 
   Such properties can be escaped using ``${$}`` if needed. 
-- Test descriptor loading now assumes modules as on the PYTHONPATH rather than in a ``run.py`` file if the module is not explicitly specified 
+- Test descriptor loading now assumes modules are on the PYTHONPATH rather than in a ``run.py`` file if the module is not explicitly specified 
   and ``__pysys_python_class__`` contains at least one dot character, for example ``mypackage.MyTestClass``.
 - The process exit status returned by ``pysys run`` if no tests were found matching the specified options is now ``9`` 
   (instead of the default fatal error code of ``10`` as in previous versions). 
