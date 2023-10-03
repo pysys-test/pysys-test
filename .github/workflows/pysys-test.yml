@@ -33,32 +33,32 @@ jobs:
       matrix:
         # A selection range of OS, Python and Java versions
         include:
-          - test-run-id: lnx-py3.11-doc-deploy
+          - test-run-id: lnx-py3.12-doc-deploy
             os: ubuntu-latest
-            python-version: "3.11"
+            python-version: "3.12"
             doc-and-deploy: true
           
-          - test-run-id: mac-py3.7
+          - test-run-id: mac-py3.8
             os: macos-latest
-            python-version: "3.7"
+            python-version: "3.8"
 
-          - test-run-id: win-py3.7
+          - test-run-id: win-py3.8
             os: windows-latest
-            python-version: "3.7"
+            python-version: "3.8"
 
-          - test-run-id: win-py3.11
+          - test-run-id: win-py3.12
             os: windows-latest
-            python-version: "3.11"
+            python-version: "3.12"
 
           # --- Additional testing combinations
 
-          #- test-run-id: mac-py3.7
+          #- test-run-id: mac-py3.8
           #  os: macos-latest
-          #  python-version: "3.7"
+          #  python-version: "3.8"
 
-          #- test-run-id: lnx-py3.7
+          #- test-run-id: lnx-py3.8
           #  os: ubuntu-latest
-          #  python-version: "3.7"
+          #  python-version: "3.8"
 
           #- test-run-id: lnx-py3.9
           #  os: ubuntu-latest
