@@ -18,7 +18,7 @@ Version 2.2 is under development.
 
 New features:
 
-- Added support for Python 3.11, and removed support for Python 3.6 (which is now end of life). 
+- Added support for Python 3.11 and 3.12, and removed support for Python 3.6 and 3.7 (which are now end of life). 
 
 - Added command line support for running and printing tests by their (absolute or relative) directory rather than their test id. 
   This allows use of shell completion, and also makes it possible to run all the tests found under a set of named subdirectories. 

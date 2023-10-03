@@ -65,7 +65,7 @@ class PySysTest(BaseTest):
 		##########
 		archivedir = self.output+'/testroot/__pysys_output_archives_tar.gz'
 		self.log.info('--- Checking %s', os.path.basename(archivedir))
-		shutil.unpack_archive(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*'))[0], extract_dir=self.output+'/extracted-tar.gz')
+		self.unpackArchive(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*'))[0], 'extracted-tar.gz', autoCleanup=False)
 		self.assertThat('members == expected', members=sorted(os.listdir(self.output+'/extracted-tar.gz')), expected=sorted([
 			'__pysys_skipped_archive_files.txt', 'a', 'f1.txt', 'f3.txt', 'run.log', u'unicode_filename_\xa3.txt']), archive=os.path.basename(archivedir))
 		self.assertGrep(self.output+'/extracted-tar.gz/__pysys_skipped_archive_files.txt', 'test_output.*cycle.*f2.txt')
@@ -74,7 +74,7 @@ class PySysTest(BaseTest):
 		##########
 		archivedir = self.output+'/testroot/__pysys_output_archives_tar.xz'
 		self.log.info('--- Checking %s', os.path.basename(archivedir))
-		shutil.unpack_archive(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*'))[0], extract_dir=self.output+'/extracted-tar.xz')
+		self.unpackArchive(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*'))[0], 'extracted-tar.xz', autoCleanup=False)
 		self.assertThat('members == expected', members=sorted(os.listdir(self.output+'/extracted-tar.xz')), expected=sorted([
 			'__pysys_skipped_archive_files.txt', 'a', 'f1.txt', 'f3.txt', 'run.log', u'unicode_filename_\xa3.txt']), archive=os.path.basename(archivedir))
 		self.assertGrep(self.output+'/extracted-tar.xz/__pysys_skipped_archive_files.txt', 'test_output.*cycle.*f2.txt')
