@@ -2332,7 +2332,14 @@ class ProcessUser(object):
 		if os.path.samefile(dest, toLongPathSafe(self.output)): dest = os.path.join(dest, os.path.basename(archive)[:os.path.basename(archive).find('.')])
 		if autoCleanup: self.addCleanupFunction(lambda: self.deleteDir(dest, ignore_errors=True))
 		# this takes care of multi-file archives such as tar.XXX/zip etc
-		shutil.unpack_archive(archive, dest)
+		unpackargs = {}
+		if sys.version_info[:2] == (3, 12) and not '.zip' in archive:
+			# avoid deprecation warning in 3.12 by explicitly requesting safe tar unpacking; unfortunately not accepted by .zip
+			# see https://github.com/python/cpython/issues/102950#issuecomment-1745101949
+			# for 3.13+ we may have to extend this hack, but maybe there will be a better fix by then
+			unpackargs['filter'] = 'data'
+
+		shutil.unpack_archive(archive, dest, **unpackargs)
 		return dest
 
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
