@@ -22,6 +22,7 @@ support for long paths on Windows. Also some simple utilities for loading proper
 """
 
 import os, shutil, time, locale
+import sys
 import collections
 import json
 import logging
@@ -128,6 +129,12 @@ def mkdir(path):
 			os.makedirs(path)
 	return origpath
 
+if sys.version_info[:2] < (3, 12): # cope with deprecation of onerror in v3.12. We don't use the third parameter of onerror/onexc anyway so can just pass it through
+	def __rmtree(path, onexc=None):
+		shutil.rmtree(path, onerror=onexc)
+else:
+	__rmtree = shutil.rmtree
+
 def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	r"""
 	Recursively delete the specified directory, with optional retries. 
@@ -142,14 +149,16 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	
 	:param ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. 
 	
-	:param onerror: A callable that with arguments (function, path, excinfo), called when an error occurs while 
-		deleting. See the documentation for ``shutil.rmtree`` for more information. 
+	:param onerror: A callable with arguments (function, path, excinfo), called when an error occurs while 
+		deleting. See the documentation of ``onexc`` /  ``onerror`` for ``shutil.rmtree`` for more information. 
+		On Python 3.12+ ``excinfo`` holds the exception object, in earlier versions it holds 
+		the tuple returned from ``sys.exc_info()``. 
 	"""
 	if ignore_errors: assert onerror==None, 'cannot set onerror and also ignore_errors'
 	
 	path = toLongPathSafe(path)
 	try:
-		def pysysOnError(function, path, excinfo):
+		def pysysOnError(function, path, _):
 			try: # helps with both Windows "readonly" attribute and linux permissions issues
 				perms = stat.S_IWRITE | stat.S_IREAD
 				if os.path.isdir(path): perms = perms | stat.S_IEXEC
@@ -164,11 +173,11 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 
 		# delete as many files as we can first, so if there's an error deleting some files (e.g. due to windows file 
 		# locking) we don't use any more disk space than we need to. This is ignores errors BUT attempts to change permissions first
-		shutil.rmtree(path, onerror=pysysOnError)
+		__rmtree(path, onexc=pysysOnError)
 		
 		# then try again, being more careful
 		if os.path.exists(path) and not ignore_errors:					
-			shutil.rmtree(path, onerror=onerror)
+			__rmtree(path, onexc=onerror)
 	except Exception as ex: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
 		if retries <= 0:
