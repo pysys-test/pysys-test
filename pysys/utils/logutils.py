@@ -335,6 +335,7 @@ def stdoutPrint(s):
 	
 	:param s: a unicode or bytes string. A newline will be added automatically. 
 	"""
+	# be careful using this from "pysys print" where we mess with the streams to send logging output to stderr
 	if isinstance(s, binary_type):
 		s += b'\n'
 	else:

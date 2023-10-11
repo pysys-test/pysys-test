@@ -26,6 +26,22 @@ New features:
 
     pysys run performance-tests correctness-tests/foo/Test_001 
 
+- Added ``pysys ls`` as a short and convenient alias for ``pysys print``. 
+
+- Added ``pysys ls/print`` sort option ``--sort dirAndTitle`` which first groups tests whose parent/base directory is the same 
+  and then sorts by title. In many cases this is the most useful way of recursively listing a large set of test titles, 
+  since titles in different parent directories often do not sort together very cleanly. 
+
+- Added ``pysys ls/print`` option ``-v`` (``--verbose``) which provides a convenient way to list tests with a little extra 
+  information compared. The results are sorted by dirAndTitle (so that similar tests are grouped together), and both the title 
+  and the test directory displayed (equivalent to ``--dir`` ``--title``). The verbose listing is especially 
+  useful for finding out what tests you have covering different areas. Displaying the absolute directory name makes it 
+  easy to jump to any tests of interest (either when running from an IDE that supports hyperlinks or by copying the directory 
+  name into a shell/command prompt). 
+
+- Added colouring of the test title when printing a test listing with ``--verbose`` or ``--dir --title``, so that it stands out 
+  better from the other content. 
+
 - Changed imports in the default new testcase templates to allow Python IDEs to correctly locate the PySys BaseTest class. 
   This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests, 
   change ``import pysys`` to ``import pysys.basetest, pysys.mappers``, and make sure references to `pysys.basetest.BaseTest` 
