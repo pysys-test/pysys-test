@@ -28,11 +28,11 @@ New features:
 
 - Added ``pysys ls`` as a short and convenient alias for ``pysys print``. 
 
-- Added ``pysys ls/print`` sort option ``--sort dirAndTitle`` which first groups tests whose parent/base directory is the same 
+- Added ``pysys print`` sort option ``--sort dirAndTitle`` which first groups tests whose parent/base directory is the same 
   and then sorts by title. In many cases this is the most useful way of recursively listing a large set of test titles, 
   since titles in different parent directories often do not sort together very cleanly. 
 
-- Added ``pysys ls/print`` option ``-v`` (``--verbose``) which provides a convenient way to list tests with a little extra 
+- Added ``pysys print`` option ``-v`` (``--verbose``) which provides a convenient way to list tests with a little extra 
   information compared. The results are sorted by dirAndTitle (so that similar tests are grouped together), and both the title 
   and the test directory displayed (equivalent to ``--dir`` ``--title``). The verbose listing is especially 
   useful for finding out what tests you have covering different areas. Displaying the absolute directory name makes it 
@@ -41,6 +41,9 @@ New features:
 
 - Added colouring of the test title when printing a test listing with ``--verbose`` or ``--dir --title``, so that it stands out 
   better from the other content. 
+
+- Changed ``pysys print --grep`` to print the directory (not only title) and sort by dirAndTitle. Also the matching part of 
+  each title is now highlighted in red (unless console colouring is disabled). 
 
 - Changed imports in the default new testcase templates to allow Python IDEs to correctly locate the PySys BaseTest class. 
   This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests, 

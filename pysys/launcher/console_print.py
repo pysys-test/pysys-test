@@ -165,6 +165,13 @@ class ConsolePrintHelper(object):
 			elif option in ("-G", "--grep"):
 				self.grep = value
 
+				# when doing grep mode, the verbose options are useful
+				if not self.sort:
+					self.sort = 'dirAndTitle'
+				if not self.printOnly:
+					self.printOnly.append('title')
+					self.printOnly.append('dir')
+					
 			elif option == '--json':
 				self.json = True
 
@@ -254,10 +261,13 @@ class ConsolePrintHelper(object):
 					print("="*80)
 					print(str(descriptor))
 				else:
-					if not self.printOnly or 'title' in self.printOnly:
-						print("%s%s| %s" % (descriptor.id, padding, 
-						  addColor(LOG_TEST_DETAILS if len(self.printOnly)>1 else None,
-						  descriptor.title)))
+					if (not self.printOnly) or 'title' in self.printOnly:
+						title = descriptor.title
+						if self.grep:
+							title = re.sub(regex, lambda m: addColor(LOG_FAILURES, m.group(0)), title)
+						elif len(self.printOnly)>1:
+							title = addColor(LOG_TEST_DETAILS, title)
+						print("%s%s| %s" % (descriptor.id, padding, title))
 					if 'dir' in self.printOnly:
 						print("%s%s" % ('   ' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
 					#print("%s%s| %s" % (descriptor.id, padding,  descriptor.title))
