@@ -74,7 +74,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, encodingReplaceOnErro
 						log.debug(("Found match for line: %s" % l).rstrip())
 						if returnFirstOnly is True: return match
 						matches.append(match)
-		except UnicodeDecodeError as ex:
+		except UnicodeDecodeError as ex: # pragma: no cover
 			# help people find the cause of the problem by including some context
 			try:
 				contextchars = 20
