@@ -162,8 +162,8 @@ Selection and filtering options
 
 Test identifiers
 ----------------
-By default, PySys executes all available tests under the current directory will be run. Alternatively to run just a 
-subset, one or more tests or sequences of tests can be specified on the command line. In both cases, tests are filtered 
+By default, PySys executes all available tests under the current directory. Alternatively to run just a subset, 
+one or more tests or sequences of tests can be specified on the command line. In both cases, tests are filtered 
 based on the selection options listed above (e.g. --include/--exclude). 
 
 Tests should contain only alphanumeric and the underscore characters. The following syntax is used 
@@ -183,6 +183,8 @@ to select an individual test, or a sequence of numbered tests:
 e.g. 
    {scriptname} run -c2 -w4 -u -j=x1.5 Test_007 Test_001: 3:5
    {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
+
+To list the modes supported by the tests under the current directory, use "pysys ls --modes".
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		
 		# show project help at the end so it's more prominent
