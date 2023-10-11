@@ -206,11 +206,11 @@ New features:
 
   Example configuration::
 
-    <writer classname="TextResultsWriter" module="pysys.writer">
+    <writer classname="TextResultsWriter" module="pysys.writer" alias="verboseTextResultsWriter">
       <property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
       <property name="verbose" value="true"/>
     </writer>
-
+  
 - Added ``--writer CLASSNAME|ALIAS`` argument to ``pysys run`` which can be used to selectively enable an individual writer would not otherwise  
   be enabled. For example use ``--writer TextResultsWriter`` to enable the text summary log without using ``--record`` which might enable 
   several other writers you don't need. This option could be used in a ``PYSYS_DEFAULT_ARGS`` environment variable to enable a writer 
