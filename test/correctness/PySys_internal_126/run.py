@@ -15,7 +15,17 @@ class PySysTest(BaseTest):
 			self.assertThat('portIsInUse == False', portIsInUse=portIsInUse(port=port, host='', socketAddressFamily=family), family=family, addr=addr)
 
 
-		list(self.createThreadPoolExecutor().map(subtest, socket.getaddrinfo(socket.gethostname(), None)+socket.getaddrinfo('localhost', None)))
+		retries = 0
+		while True:
+			try:
+				list(self.createThreadPoolExecutor().map(subtest, socket.getaddrinfo(socket.gethostname(), None)+socket.getaddrinfo('localhost', None)))
+				break
+			except socket.gaierror as ex: # retry for help macos races on GH Actions
+				self.log.exception('Got exception: ')
+				retries += 1
+				if retries >= 3: raise
+				self.wait(5)
+				continue
 			
 	def validate(self):
 		# check check we have no errors
