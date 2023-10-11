@@ -155,7 +155,7 @@ class PySysTest(BaseTest):
 			expected=f'NestedNotVerified{os.sep}run.py:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])')
 
 		js = pysys.utils.fileutils.loadJSON(self.output+'/__pysys_outcomes.json')
-		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results'])
+		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results', 'artifacts'])
 		self.assertThat('jsonOutDir == expected', jsonOutDir__eval="js['runDetails']['outDirName']", expected='myoutdir')
 		self.assertThat('hasCycle', hasCycle__eval="'cycle' in js['results'][0]")
 		self.assertThat('testDir == expected', testDir=next(x for x in js['results'] if x['testId']=='NestedFail')['testDir'], expected='test/NestedFail')

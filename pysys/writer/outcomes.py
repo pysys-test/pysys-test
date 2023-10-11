@@ -82,8 +82,9 @@ class flushfile():
 		"""
 		if self.fp is not None: self.fp.close()
 
-class JSONResultsWriter(BaseRecordResultsWriter):
-	"""Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner.
+class JSONResultsWriter(BaseRecordResultsWriter, ArtifactPublisher):
+	"""Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner, 
+	and a list of published ``artifacts`` (e.g. code coverage etc).
 	
 	The following fields are always included for each test result:
 	
@@ -99,6 +100,9 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 	If applicable, some tests/runs may have additional fields such as ``cycle``, ``title`` and ``outputDir``. 
 
 	.. versionadded:: 2.1
+
+	.. versionchanged:: 2.2 Added ``artifacts`` dictionary recording artifact paths published during execution of the tests, for 
+	    example code coverage and performance reports. 
 	
 	"""
 	
@@ -129,6 +133,7 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.fp = None
+		self.artifacts = {} # category: [paths]
 
 	def setup(self, **kwargs):
 		self.runner = kwargs['runner']
@@ -152,9 +157,19 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 		self.fp.write(', "results":[\n')
 		self.fp.flush()
 
+	def publishArtifact(self, path, category, **kwargs):
+		# to keep the file readable, store artifacts and put them all at the end
+		self.artifacts.setdefault(category, []).append(path)
+
 	def cleanup(self, **kwargs):
 		if not self.fp: return
-		self.fp.write('\n]}\n')
+
+		self.fp.write('\n],')
+
+		self.fp.write('"artifacts": ')
+		json.dump(self.artifacts, self.fp)
+		self.fp.write('}\n')
+		
 		self.fp.close()
 		self.fp = None
 		
