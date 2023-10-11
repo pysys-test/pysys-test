@@ -21,6 +21,7 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 			'--writer=JSONResultsWriter', # unqualified
 			'--writer=pysys.writer.outcomes.TextResultsWriter', # qualified
 			'--writer', 'XMLResultsWriter',
+			'--writer', 'MyConsoleFailureAnnotationsAlias'
 			# NOT CSVResultsWriter
 		], workingDir=self.input)
 		
@@ -29,3 +30,5 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 			'testsummary.json', 
 			'testsummary.log', 
 			'testsummary.xml'])
+		self.assertGrep('pysys-run.out', 'MyConsoleFailureAnnotations1::')
+		self.assertGrep('pysys-run.out', 'MyConsoleFailureAnnotations2::', contains=False)

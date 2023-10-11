@@ -128,8 +128,8 @@ Execution options
 		print("""
 Advanced:
    -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
-       --writer    CLASSNAME   enables the specified writer (in addition to any writers already enabled automatically), 
-		                       for example "--writer TextResultsWriter" (can be specified multiple times)
+       --writer    NAME        enables the specified writer (in addition to any writers already enabled automatically), 
+		                       by alias or classname, for example "--writer TextResultsWriter" 
    -g, --progress              enables the writer that prints progress updates after completion of each test
    -p, --purge                 purge files except run.log from the output directory to save space (unless test fails)
    --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 

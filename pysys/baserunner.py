@@ -258,7 +258,7 @@ class BaseRunner(ProcessUser):
 				if not (
 					extraOptions.get('writerEnable') and any(
 						# match either the qualified or unqualified classname
-						writername in (writer.__class__.__name__, getattr(writer.__class__, '__module__','')+'.'+writer.__class__.__name__)
+						writername in (writer.__class__.__name__, getattr(writer.__class__, '__module__','')+'.'+writer.__class__.__name__, pluginAlias)
 					for writername in extraOptions['writerEnable'])):
 					return None
 			if pluginAlias: # only set alias if enabled (tests could use the existence of the alias to check if it's enabled e.g. for code cov)
