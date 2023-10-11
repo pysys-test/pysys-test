@@ -31,9 +31,9 @@ PySys includes support for GitHub actions, and you can see the results of execut
 
 Now it's time to start exploring the pysystest.py files in each of the tests. 
 
-The best way to find out what each test does is to print out the test titles like this:
+The best way to find out what each test does is to list the test titles like this:
 
-	pysys.py print
+	pysys.py ls
 
 Start with 001 test in the correctness/ directory which is a simple example to show the basics, then move on to the 
 higher numbered tests to explore in more detail how to execute processes, validate results and more. 
