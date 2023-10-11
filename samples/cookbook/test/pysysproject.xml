@@ -300,8 +300,10 @@
 			Can be a useful way to view the current or final status of the current/latest test run. 
 			The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
 			to get a useful summary of all the failures. 
+			Specifying an alias allows this writer configuration to be enabled on a per-user basis using the "writer" 
+			command line argument. 
 		-->
-		<writer classname="pysys.writer.outcomes.TextResultsWriter">
+		<writer classname="pysys.writer.outcomes.TextResultsWriter" alias="verboseTextResultsWriter">
 			<property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
 			<!-- Included detailed information like outcome reasons and test titles -->
 			<property name="verbose" value="true"/>
