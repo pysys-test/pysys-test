@@ -270,15 +270,6 @@ class ConsolePrintHelper(object):
 						print("%s%s| %s" % (descriptor.id, padding, title))
 					if 'dir' in self.printOnly:
 						print("%s%s" % ('   ' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
-					#print("%s%s| %s" % (descriptor.id, padding,  descriptor.title))
-					#print("  %s%s" % ('' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
-					#print()
-					#print("%s%s %s" % (descriptor.id, padding,  os.path.abspath(descriptor.testDir) ))
-
-					#print("  %s%s" % ('' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
-					#print("%s | %s"%(addColor(LOG_TEST_DETAILS, descriptor.title), descriptor.id))
-					#print("%s%s | %s"%(descriptor.id, padding, addColor(LOG_TEST_DETAILS, descriptor.title), ))
-					#print("    %s" % (os.path.abspath(descriptor.testDir) ))
 
 def printTest(args):
 	try:
