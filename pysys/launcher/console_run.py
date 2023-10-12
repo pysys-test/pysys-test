@@ -62,6 +62,7 @@ class ConsoleLaunchHelper(object):
 			"mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'vo', 'progress', 'printLogs=', 'grep=', 
 			'ci', 'sort=', 
 			'writer=',
+			'preserveEmptyOutputs',
 			]
 
 
@@ -132,6 +133,7 @@ Advanced:
 		                       by alias or classname, for example "--writer TextResultsWriter" 
    -g, --progress              enables the writer that prints progress updates after completion of each test
    -p, --purge                 purge files except run.log from the output directory to save space (unless test fails)
+   --preserveEmptyOutputs      prevents the usual deletion of empty files and directories after a test completes
    --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 
                                console; options are: all|none|failures (default is all).
    -s, --sort      STRING      sort by: random (useful for performance testing and and reproducing test races)
@@ -249,6 +251,9 @@ To list the modes supported by the tests under the current directory, use "pysys
 
 			elif option in ("-p", "--purge"):
 				self.purge = True		  
+			
+			elif option in ['--preserveEmptyOutputs']:
+				__extraRunnerOptions['preserveEmptyOutputs'] = True
 
 			elif option in ("-v", "--verbosity"):
 				verbosity = value

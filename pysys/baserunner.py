@@ -243,6 +243,7 @@ class BaseRunner(ProcessUser):
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
+		self.__preserveEmptyOutputs = extraOptions.get('preserveEmptyOutputs', False)
 		
 		self.__randomlyShuffleTests = extraOptions['sort']=='random'
 		
@@ -528,7 +529,7 @@ class BaseRunner(ProcessUser):
 	def testComplete(self, testObj, dir):
 		"""Called after a testcase's completion (including finalization of the output and 
 		`pysys.basetest.BaseTest.cleanup`) to allow for post-completion tasks such as purging 
-		unwanted files from the output directory.
+		unwanted files from the output directory and giving writers a chance to visit the output and collect interesting files.
 		
 		The default implementation removes all files with a zero file length in order to 
 		only include files with content of interest. Should ``self.purge`` be ``True``, the purging will remove
@@ -547,17 +548,13 @@ class BaseRunner(ProcessUser):
 		:param dir: The absolute path of the test output directory to perform the purge on (testObj.output).
 				
 		"""
-		if self.purge:
-			removeNonZero = True
-			for outcome in testObj.outcome:
-				if outcome != PASSED:
-					removeNonZero = False
-					break
-		else:
-			removeNonZero = False
+		# don't remove nonzero files for outcomes where we might be interested in the output dir - failures, notverified, inspect etc
+		uninterestingOutcome = testObj.getOutcome() in [PASSED, SKIPPED]
+		removeNonZero = self.purge and uninterestingOutcome
 
 		try:
-			for (dirpath, dirnames, filenames) in os.walk(toLongPathSafe(os.path.normpath(dir)), topdown=False):
+			rootdir = toLongPathSafe(os.path.normpath(dir))
+			for (dirpath, dirnames, filenames) in os.walk(rootdir, topdown=False):
 				deleted = 0
 				for file in filenames:
 					path = os.path.join(dirpath, file)
@@ -579,8 +576,8 @@ class BaseRunner(ProcessUser):
 							self._collectErrorAlreadyReported = True
 					
 					# Now proceed with cleaning files
-			
-					if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
+					if (not self.__preserveEmptyOutputs) and (
+							(size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path))):
 						count = 0
 						while count < 3:
 							try:
@@ -592,15 +589,23 @@ class BaseRunner(ProcessUser):
 								time.sleep(0.1)
 								count = count + 1
 								
-				# always try to delete empty directories (just as we do for empty files); 
-				# until we have some kind of internal option for disabling this for debugging 
-				# purpose only delete dirs when we've just deleted the contents ourselves 
-				if removeNonZero or (deleted > 0 and deleted == len(filenames)):
+				# to reduce clutter, always try to delete empty directories (just as we do for empty files)
+
+				# nb: any logging at this stage doesn't go to run.log, only to the console
+				if (not self.__preserveEmptyOutputs) and (len(filenames)-deleted == 0):
 					try:
 						os.rmdir(dirpath)
+
+						# if test failed or we're not in --purge mode, it could be interesting to know which empty dirs exists
+						(log.debug if uninterestingOutcome else log.info)('Purged empty output directory now that test is complete: %s', fromLongPathSafe(dirpath))
 					except Exception as ex:
 						# there might be non-empty subdirectories, so don't raise this as an error
-						pass
+						try:
+							if os.listdir(dirpath) or not os.path.exists(dirpath): continue # not empty OR already deleted - no surprise and not worth logging
+						except Exception: 
+							pass
+
+						log.warning('Purge of empty output directory "%s" failed: %s', fromLongPathSafe(dirpath), ex)
 						
 
 		except OSError as ex:

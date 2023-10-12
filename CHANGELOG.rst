@@ -239,6 +239,11 @@ New features:
 - Added ``artifacts`` dictionary to `pysys.writer.outcomes.JSONResultsWriter` which records artifact paths published during execution of the tests, for 
   example code coverage and performance reports.
 
+- Added ``--preserveEmptyOutputs`` argument to ``pysys run`` which disables the usual behaviour of deleting empty (zero-length) files and directories. 
+  This could be useful for comparing successful vs failure runs of the same test if the presence of empty files/dirs is relevant to the outcome. 
+  The default test output cleanup behaviour was also changed to delete empty directories (not just files), and to permit the deletion of 
+  non-zero/purgable files after a ``SKIPPED`` outcome (previously only a ``PASSED`` outcome would delete non-zero/purgeable files).
+
 - Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
   the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
   modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
