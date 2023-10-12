@@ -2105,8 +2105,8 @@ class ProcessUser(object):
 		
 		For example this can be used with `pysys.basetest.BaseTest.assertDiff` like this::
 		
-		self.assertDiff(
-			self.write_text('MyDir-contents.txt', '\\n'.join( self.listDirContents('MyDir') )))
+			self.assertDiff(
+				self.write_text('MyDir-contents.txt', '\\n'.join( self.listDirContents('MyDir') )))
 		
 		:param str path: The path to search, either absolute or relative to the output directory.
 		:param bool recurse: Set this to False to just include the specified directory but not any children. 
