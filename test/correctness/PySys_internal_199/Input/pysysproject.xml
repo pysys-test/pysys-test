@@ -1,0 +1,31 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<pysysdirconfig>
+		<input-dir>.</input-dir>
+	</pysysdirconfig>
+
+	<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">
+	</writer>	
+
+	<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary.log">
+	</writer>
+
+	<writer classname="pysys.writer.outcomes.JSONResultsWriter" file="testsummary.json">
+	</writer>
+	
+	<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary.csv">
+	</writer>
+
+	<writer classname="ConsoleFailureAnnotationsWriter" module="pysys.writer" alias="MyConsoleFailureAnnotationsAlias">
+		<property name="format" value="MyConsoleFailureAnnotations1::@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@"/>
+	</writer>
+	<writer classname="ConsoleFailureAnnotationsWriter" module="pysys.writer">
+		<property name="format" value="MyConsoleFailureAnnotations2::@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@"/>
+	</writer>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+	</default-file-encodings>	
+	
+</pysysproject>

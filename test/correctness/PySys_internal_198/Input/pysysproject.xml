@@ -1,0 +1,37 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+
+	<pysysdirconfig>
+		<input-dir>.</input-dir>
+	</pysysdirconfig>
+
+
+	<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+		<property name="outputDir" value="../junit-recommended"/>
+
+		<!-- Specify how to map PySys test id/mode to JUnit testsuite/case concepts -->
+		<property name="testsuiteName" value="@TESTID_PACKAGE@"/>
+		<property name="testcaseName" value="@TESTID_NO_PACKAGE_OR_MODE@~@MODE@"/>
+		<property name="testcaseClassname" value=""/>
+	</writer>
+
+	<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+		<property name="outputDir" value="../junit-default"/>
+	</writer>
+
+	<writer classname="JUnitXMLResultsWriter" module="pysys.writer"> <!-- to show values not used in others-->
+		<property name="outputDir" value="../junit-special"/>
+
+		<property name="testcaseName" value="id=@TESTID@"/>
+		<property name="testcaseClassname" value="class=@CLASSNAME@"/>
+	</writer>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+</pysysproject>

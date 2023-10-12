@@ -82,8 +82,9 @@ class flushfile():
 		"""
 		if self.fp is not None: self.fp.close()
 
-class JSONResultsWriter(BaseRecordResultsWriter):
-	"""Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner.
+class JSONResultsWriter(BaseRecordResultsWriter, ArtifactPublisher):
+	"""Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner, 
+	and a list of published ``artifacts`` (e.g. code coverage etc).
 	
 	The following fields are always included for each test result:
 	
@@ -99,6 +100,9 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 	If applicable, some tests/runs may have additional fields such as ``cycle``, ``title`` and ``outputDir``. 
 
 	.. versionadded:: 2.1
+
+	.. versionchanged:: 2.2 Added ``artifacts`` dictionary recording artifact paths published during execution of the tests, for 
+	    example code coverage and performance reports. 
 	
 	"""
 	
@@ -129,6 +133,7 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.fp = None
+		self.artifacts = {} # category: [paths]
 
 	def setup(self, **kwargs):
 		self.runner = kwargs['runner']
@@ -152,9 +157,19 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 		self.fp.write(', "results":[\n')
 		self.fp.flush()
 
+	def publishArtifact(self, path, category, **kwargs):
+		# to keep the file readable, store artifacts and put them all at the end
+		self.artifacts.setdefault(category, []).append(path)
+
 	def cleanup(self, **kwargs):
 		if not self.fp: return
-		self.fp.write('\n]}\n')
+
+		self.fp.write('\n],')
+
+		self.fp.write('"artifacts": ')
+		json.dump(self.artifacts, self.fp)
+		self.fp.write('}\n')
+		
 		self.fp.close()
 		self.fp = None
 		
@@ -206,15 +221,27 @@ class JSONResultsWriter(BaseRecordResultsWriter):
 
 
 class TextResultsWriter(BaseRecordResultsWriter):
-	"""Writer to log a summary of the results to a logfile in .txt format.
+	"""Writer to log a summary of the results to a log file in text format.
 	
+	Only enabled when the record flag is specified.
+
+	Can be a useful way to view the current or final status of the current/latest test run. 
+	The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
+	to get a nice summary of all the failures. 
 	"""
 
 	outputDir = None
 	"""
 	The directory to write the logfile, if an absolute path is not specified. The default is the working directory. 
 
-	Project ``${...}`` properties can be used in the path. 
+	Project ``${...}`` properties can be used in the path, for example ``${eval:os.path.expanduser('~')}`` for the current user's home directory. 
+	"""
+
+	verbose = False
+	"""
+	Display more details in the output including the outcome reason and the test title. 
+
+	.. versionadded:: 2.2
 	"""
 	
 	def __init__(self, logfile, **kwargs):
@@ -228,33 +255,61 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		# platform and test host. 
 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
+		log.info('TextResultsWriter is recording results at: %s', self.logfile)
 
-		self.fp = flushfile(openfile(self.logfile, "w", encoding='utf-8'))
-		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
-		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
-		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
-		self.fp.write('\n')
+		self.fp = flushfile(openfile(self.logfile, "w", encoding='utf-8', errors='backslashreplace'))
+		if not self.verbose: # these are a bit ugly; keep them for compat, but for people using the new verbose mode don't bother
+			self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
+			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
+			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 		for k, v in kwargs['runner'].runDetails.items():
-			if k in {'startTime', 'hostname'}: continue # don't duplicate the above
+			if (not self.verbose) and k in {'startTime', 'hostname'}: continue # don't duplicate the above
 			self.fp.write("%-20s%s\n"%(k+': ', v))
+		self.fp.write('\n')
+
+		self.failureIds = set()
+		self.executed = 0
 
 	def cleanup(self, **kwargs):
 		# Flushes and closes the file handle to the logfile.  
 
 		if self.fp: 
-			self.fp.write('\n\n\n')
+			self.fp.write('\n')
+			if self.verbose:
+				self.fp.write('Completed execution of %d tests%s\n'%(self.executed, f', and found {len(self.failureIds)} failures:' if self.failureIds else ''))
+				if self.failureIds:
+					self.fp.write(' '.join(sorted(list(self.failureIds))))
+
 			self.fp.close()
 			self.fp = None
 
-	def processResult(self, testObj, **kwargs):
+	def processResult(self, testObj, cycle=None, **kwargs):
 		# Writes the test id and outcome to the logfile. 
 		
-		if "cycle" in kwargs: 
-			if self.cycle != kwargs["cycle"]:
-				self.cycle = kwargs["cycle"]
+		if (not self.verbose) and cycle is not None and self.runner.threads==1 and self.runner.cycles>1:  # only makes sense to group by cycles if single-threaded
+			if self.cycle != cycle:
+				self.cycle = cycle
 				self.fp.write('\n[Cycle %d]:\n'%(self.cycle+1))
-		
-		self.fp.write("%s: %s\n" % (testObj.getOutcome(), testObj.descriptor.id))
+
+
+		if self.verbose:
+			self.executed += 1
+			if testObj.getOutcome().isFailure():
+				self.failureIds.add(testObj.descriptor.id)
+			# This is designed to permit sorting the entire file such that similar "reasons" grouped together
+			# Providing the absolute path of the output dir allows jumping to the relevant files in an editor
+			text = '* '+str(testObj)
+
+			if testObj.descriptor.title and testObj.descriptor.title != testObj.descriptor.idWithoutMode: text += f" | {testObj.descriptor.title}"
+			# use ! vs + to ensure failures are all sorted together
+			text += f"\n  {'! ' if testObj.getOutcome().isFailure() else '+ '}{testObj.getOutcome()}{' '+testObj.getOutcomeReason() if testObj.getOutcomeReason() else ''} - {testObj.output}"
+		else:
+			text = "%s: %s" % (testObj.getOutcome(), 
+				# Use str() which includes cycle if a) we need to and b) we haven't already displayed it above
+				str(testObj) if self.runner.cycles>1 and self.runner.threads>1
+				else testObj.descriptor.id)
+
+		self.fp.write(text+'\n')
 
 
 class XMLResultsWriter(BaseRecordResultsWriter):
@@ -286,6 +341,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 		
+		mkdir(os.path.dirname(self.logfile))
 		self.fp = io.open(toLongPathSafe(self.logfile), "wb")
 	
 		impl = getDOMImplementation()
@@ -430,7 +486,29 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 	Project ``${...}`` properties can be used in the path. 
 	"""
-	
+
+	testsuiteName = None
+	"""
+	Overrides the content written to the ``<testsuite name=...>`` attribute (defaults to ``@TESTID@``), 
+	A recommended alternate value is ``@TESTID_PACKAGE@`` which represents the test id up to the final ``.``. 
+
+	.. versionadded:: 2.2
+	"""
+	testcaseClassname = None
+	"""
+	Overrides the content written to the ``<testcase classname=...>`` attribute (defaults to ``@CLASSNAME@``), 
+	A recommended alternate value is empty string, since the classname (typically "PySys") is not very useful for most PySys tests. 
+
+	.. versionadded:: 2.2
+	"""
+	testcaseName = None # default is @TESTID@
+	"""
+	Overrides the content written to the ``<testcase name=...>`` attribute (defaults to ``@TESTID@``), 
+	A recommended alternate value is ``@TESTID_NO_PACKAGE_OR_MODE@~@MODE@`` when using ``testsuiteName`` to hold the package part of the test id. 
+
+	.. versionadded:: 2.2
+	"""
+
 	def __init__(self, **kwargs):
 		self.cycle = -1
 
@@ -441,6 +519,23 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		deletedir(self.outputDir)
 		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
+
+	def substitute(self, configured, default, descriptor):
+		if configured is None: return default # but not if it's empty!
+		if '@' not in configured: return configured
+
+		id = descriptor.idWithoutMode.split('.')
+		TESTID_PACKAGE = '.'.join(id[:-1])
+		TESTID_NO_PACKAGE_OR_MODE = id[-1]
+
+		return (configured
+			.replace('@TESTID_NO_PACKAGE_OR_MODE@', TESTID_NO_PACKAGE_OR_MODE)
+			.replace('@TESTID_PACKAGE@', TESTID_PACKAGE)
+			.replace('@TESTID@', descriptor.id)
+			.replace('@MODE@', descriptor.mode or '')
+			.replace('@CLASSNAME@', descriptor.classname)
+		).lstrip('.').rstrip('~') # stripping leading . helps cover cases where there is sometimes no package
+		
 
 	def processResult(self, testObj, **kwargs):
 		# Creates a test summary file in the Apache Ant JUnit XML format. 
@@ -455,7 +550,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		document = impl.createDocument(None, 'testsuite', None)		
 		rootElement = document.documentElement
 		attr1 = document.createAttribute('name')
-		attr1.value = testObj.descriptor.id
+		attr1.value = self.substitute(self.testsuiteName, testObj.descriptor.id, testObj.descriptor)
 		attr2 = document.createAttribute('tests')
 		attr2.value='1'
 		attr3 = document.createAttribute('failures')
@@ -475,13 +570,17 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 		# add the testcase information
 		testcase = document.createElement('testcase')
-		attr1 = document.createAttribute('classname')
-		attr1.value = testObj.descriptor.classname
+		if self.testcaseClassname != '@OMIT@': # probably not needed since empty string seems to work better, but useful to have the option (crrently undocumented)
+			attr1 = document.createAttribute('classname')
+			attr1.value = self.substitute(self.testcaseClassname, testObj.descriptor.classname, testObj.descriptor)
+			testcase.setAttributeNode(attr1)
 		attr2 = document.createAttribute('name')
-		attr2.value = testObj.descriptor.id		   	
-		testcase.setAttributeNode(attr1)
+		attr2.value = self.substitute(self.testcaseName, testObj.descriptor.id, testObj.descriptor)
 		testcase.setAttributeNode(attr2)
-		
+		attr5 = document.createAttribute('time')	
+		attr5.value = '%s'%kwargs['testTime']
+		testcase.setAttributeNode(attr5)
+
 		# add in failure information if the test has failed
 		if (outcome.isFailure() or outcome == SKIPPED):
 			failure = document.createElement('skipped' if outcome==SKIPPED else 'failure')

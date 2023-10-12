@@ -263,6 +263,11 @@
 			test root dir (or the outdir if specified on the pysys run command).
 			-->
 			<property name="outputDir" value="__pysys_junit_xml"/>
+
+			<!-- Specify how to map PySys test id/mode to JUnit testsuite/case concepts -->
+			<property name="testsuiteName" value="@TESTID_PACKAGE@"/>
+			<property name="testcaseName" value="@TESTID_NO_PACKAGE_OR_MODE@~@MODE@"/>
+			<property name="testcaseClassname" value=""/>
 		</writer>
 		
 		<!-- Writes all outcomes (or just the failure outcomes) to a .json file suitable for machine parsing.
@@ -291,9 +296,17 @@
 			<property name="useFileURL" value="true"/>
 		</writer>
 		
-		<!-- Writes all outcomes to a text file; only enabled when the record flag is specified. -->
-		<writer classname="pysys.writer.outcomes.TextResultsWriter">
-			<property name="file" value="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log"/>
+		<!-- Writes all outcomes to a text file; only enabled when the record flag is specified.
+			Can be a useful way to view the current or final status of the current/latest test run. 
+			The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
+			to get a useful summary of all the failures. 
+			Specifying an alias allows this writer configuration to be enabled on a per-user basis using the "writer" 
+			command line argument. 
+		-->
+		<writer classname="pysys.writer.outcomes.TextResultsWriter" alias="verboseTextResultsWriter">
+			<property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
+			<!-- Included detailed information like outcome reasons and test titles -->
+			<property name="verbose" value="true"/>
 		</writer>
 
 		<!-- Writes all outcomes to a CSV file; only enabled when the record flag is specified. 

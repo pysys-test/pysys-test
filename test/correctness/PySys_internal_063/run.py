@@ -21,7 +21,7 @@ class PySysTest(BaseTest):
 		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=[r'\d5'])
 		self.waitForGrep('run.log', expr='Contents of .*f2.txt', abortOnError=True, ignores=[' DEBUG '])
 
-		self.logFileContents(self.output+'/f1.txt', mappers=[pysys.mappers.IncludeLinesBetween('.*018', '.*020')])
+		self.logFileContents(self.output+'/f1.txt', mappers=[pysys.mappers.IncludeLinesBetween('.*018', '.*020')], message='Custom message for @PATH@ goes here: ')
 		
 	def validate(self):
 		self.assertGrep('run.log', expr='Contents of f1.txt')
@@ -32,3 +32,5 @@ class PySysTest(BaseTest):
 		self.assertGrep('run.log', expr='f2 line 003')
 		self.assertGrep('run.log', expr='f2 line 001', contains=False)
 		self.assertGrep('run.log', expr='f2 line 005', contains=False)
+
+		self.assertGrep('run.log', expr='Custom message for f1.txt goes here: ')

@@ -243,6 +243,7 @@ class BaseRunner(ProcessUser):
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
+		self.__preserveEmptyOutputs = extraOptions.get('preserveEmptyOutputs', False)
 		
 		self.__randomlyShuffleTests = extraOptions['sort']=='random'
 		
@@ -253,8 +254,14 @@ class BaseRunner(ProcessUser):
 
 			writer.pluginProperties = writerprops
 			pysys.utils.misc.setInstanceVariablesFromDict(writer, writerprops)
-			
-			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): return None
+			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): 
+				# allow overriding isEnabled using the command line
+				if not (
+					extraOptions.get('writerEnable') and any(
+						# match either the qualified or unqualified classname
+						writername in (writer.__class__.__name__, getattr(writer.__class__, '__module__','')+'.'+writer.__class__.__name__, pluginAlias)
+					for writername in extraOptions['writerEnable'])):
+					return None
 			if pluginAlias: # only set alias if enabled (tests could use the existence of the alias to check if it's enabled e.g. for code cov)
 				if hasattr(self, pluginAlias): raise UserError('Alias "%s" for writer conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
 				setattr(self, pluginAlias, writer)
@@ -282,7 +289,7 @@ class BaseRunner(ProcessUser):
 		if annotationsWriter is not None:
 			self.writers.append(annotationsWriter)
 		
-		if extraOptions.get('progressWritersEnabled', False):
+		if extraOptions.get('progressWritersEnabled', False): #  a hack from before we added the "writerEnable" option
 			if progresswriters: 
 				self.writers.extend(progresswriters)
 			else:
@@ -522,7 +529,7 @@ class BaseRunner(ProcessUser):
 	def testComplete(self, testObj, dir):
 		"""Called after a testcase's completion (including finalization of the output and 
 		`pysys.basetest.BaseTest.cleanup`) to allow for post-completion tasks such as purging 
-		unwanted files from the output directory.
+		unwanted files from the output directory and giving writers a chance to visit the output and collect interesting files.
 		
 		The default implementation removes all files with a zero file length in order to 
 		only include files with content of interest. Should ``self.purge`` be ``True``, the purging will remove
@@ -541,17 +548,13 @@ class BaseRunner(ProcessUser):
 		:param dir: The absolute path of the test output directory to perform the purge on (testObj.output).
 				
 		"""
-		if self.purge:
-			removeNonZero = True
-			for outcome in testObj.outcome:
-				if outcome != PASSED:
-					removeNonZero = False
-					break
-		else:
-			removeNonZero = False
+		# don't remove nonzero files for outcomes where we might be interested in the output dir - failures, notverified, inspect etc
+		uninterestingOutcome = testObj.getOutcome() in [PASSED, SKIPPED]
+		removeNonZero = self.purge and uninterestingOutcome
 
 		try:
-			for (dirpath, dirnames, filenames) in os.walk(toLongPathSafe(os.path.normpath(dir)), topdown=False):
+			rootdir = toLongPathSafe(os.path.normpath(dir))
+			for (dirpath, dirnames, filenames) in os.walk(rootdir, topdown=False):
 				deleted = 0
 				for file in filenames:
 					path = os.path.join(dirpath, file)
@@ -573,8 +576,8 @@ class BaseRunner(ProcessUser):
 							self._collectErrorAlreadyReported = True
 					
 					# Now proceed with cleaning files
-			
-					if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
+					if (not self.__preserveEmptyOutputs) and (
+							(size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path))):
 						count = 0
 						while count < 3:
 							try:
@@ -586,15 +589,23 @@ class BaseRunner(ProcessUser):
 								time.sleep(0.1)
 								count = count + 1
 								
-				# always try to delete empty directories (just as we do for empty files); 
-				# until we have some kind of internal option for disabling this for debugging 
-				# purpose only delete dirs when we've just deleted the contents ourselves 
-				if removeNonZero or (deleted > 0 and deleted == len(filenames)):
+				# to reduce clutter, always try to delete empty directories (just as we do for empty files)
+
+				# nb: any logging at this stage doesn't go to run.log, only to the console
+				if (not self.__preserveEmptyOutputs) and (len(filenames)-deleted == 0):
 					try:
 						os.rmdir(dirpath)
+
+						# if test failed or we're not in --purge mode, it could be interesting to know which empty dirs exists
+						(log.debug if uninterestingOutcome else log.info)('Purged empty output directory now that test is complete: %s', fromLongPathSafe(dirpath))
 					except Exception as ex:
 						# there might be non-empty subdirectories, so don't raise this as an error
-						pass
+						try:
+							if os.listdir(dirpath) or not os.path.exists(dirpath): continue # not empty OR already deleted - no surprise and not worth logging
+						except Exception: 
+							pass
+
+						log.warning('Purge of empty output directory "%s" failed: %s', fromLongPathSafe(dirpath), ex)
 						
 
 		except OSError as ex:
@@ -1445,8 +1456,13 @@ class TestContainer(object):
 							self.testObj.addOutcome(BLOCKED, 'Test title is still TODO', abortOnError=False)
 
 					except AbortExecution as e:
-						del self.testObj.outcome[:]
-						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
+						# Add this outcome but do not make it take precedence over existing outcomes, since 
+						# they might have more information or at the very least may contribute info via the "+N other failures" text
+						# If someone wants override behaviour they can get it by doing self.addOutcome(..., abortOnError=True, override=True)
+						# However special-case this for non-failure outcomes (especially SKIPPED but also PASSED) to avoid confusing "N other failures" messages
+						if not e.outcome.isFailure(): del self.testObj.outcome[:]
+						if not (e.value and self.testObj.getOutcomeReason() == e.value and self.testObj.getOutcome()==e.outcome): # don't re-add the same outcome reason
+							self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
 						log.warning('Aborted test due to %s outcome'%e.outcome) # nb: this could be due to SKIPPED
 
 					if self.detectCore(self.outsubdir):
@@ -1506,8 +1522,11 @@ class TestContainer(object):
 			log.info("Test final outcome:  %s", str(self.testObj.getOutcome()), extra=BaseLogFormatter.tag(str(self.testObj.getOutcome()).lower(), 0))
 			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
 				log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
+				loc = self.testObj.getOutcomeLocation()
+				if loc and loc[0]: # it's quite useful to have the location of the first error (as an absolute path) so you can easily jump to it from the test failure without having to scroll through all the run.log output
+					log.info("                     [%s:%s]", loc[0], loc[1])
 			log.info("")
-			
+
 			pysysLogHandler.flush()
 			if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
 			

@@ -39,7 +39,7 @@ def printUsage(returncode=0):
 	sys.stdout.write("    where [command] can be:\n")
 	sys.stdout.write("       makeproject - create the configuration file for a new project of PySys testcases\n")
 	sys.stdout.write("       make        - create a new testcase in the current project\n")
-	sys.stdout.write("       print       - print list or details of tests under the current working directory\n")
+	sys.stdout.write("       print | ls  - print a list of tests under the current working directory\n")
 	sys.stdout.write("       run         - run a set of tests under the current working directory\n")
 	sys.stdout.write("       clean       - clean the output subdirectories of tests under the current working directory\n")
 	sys.stdout.write("\n")
@@ -63,7 +63,7 @@ def main(args):
 			makeTest(args[1:])
 		elif mode == "makeproject":
 			makeProject(args[1:])
-		elif mode == "print":
+		elif mode == "print" or mode == 'ls':
 			printTest(args[1:])
 		elif mode == "clean":
 			cleanTest(args[1:])

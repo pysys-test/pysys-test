@@ -155,7 +155,7 @@ class PySysTest(BaseTest):
 			expected=f'NestedNotVerified{os.sep}run.py:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])')
 
 		js = pysys.utils.fileutils.loadJSON(self.output+'/__pysys_outcomes.json')
-		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results'])
+		self.assertThat('jsonTopLevelKeys == expected', jsonTopLevelKeys=list(js.keys()), expected=['runDetails', 'results', 'artifacts'])
 		self.assertThat('jsonOutDir == expected', jsonOutDir__eval="js['runDetails']['outDirName']", expected='myoutdir')
 		self.assertThat('hasCycle', hasCycle__eval="'cycle' in js['results'][0]")
 		self.assertThat('testDir == expected', testDir=next(x for x in js['results'] if x['testId']=='NestedFail')['testDir'], expected='test/NestedFail')
@@ -165,3 +165,18 @@ class PySysTest(BaseTest):
 			# NB: does NOT include passed, since we didn't list that one
 			'NestedFail', 'NestedFail', 'NestedNotVerified', 'NestedNotVerified', 'NestedSkipped', 'NestedSkipped', 'NestedTimedout', 'NestedTimedout',
 		])
+
+		# Sort it because this is what we expect many users to do with the output, so good to see how it looks and whether sort grouping happens as desired
+		self.copy('testsummary_verbose.log', 'testsummary_verbose_sorted.log', encoding='utf-8', 
+        	mappers=[pysys.mappers.SortLines()])
+		self.logFileContents('testsummary_verbose.log', maxLines=10, tail=True)
+		self.logFileContents('testsummary_verbose_sorted.log', maxLines=10, tail=True)
+		self.assertOrderedGrep('testsummary_verbose_sorted.log', [
+			# failures before successes, then finally the test titles (other lines are effectively unordered)
+			'  ! FAILED - .*NestedFail.cycle1',
+			'  [+] NOT VERIFIED - .*NestedNotVerified',
+			'[*] NestedFail.cycle001 | Nested testcase fail',
+		])
+
+		self.assertGrep('testsummary_verbose.log', 'MyDynamicUnplannedTest NestedFail NestedTimedout', 
+			assertMessage='Check summary contains a (sorted) list of failed test ids for re-running')

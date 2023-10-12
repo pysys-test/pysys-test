@@ -30,6 +30,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors, MODE_CHARS
 from pysys.exceptions import UserError
 from pysys.config.project import Project
+from pysys.utils.logutils import ColorLogFormatter
 
 class ConsolePrintHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -50,8 +51,8 @@ class ConsolePrintHelper(object):
 		self.name = name
 		self.sort = None
 		self.grep = None
-		self.optionString = 'hfgdrm:a:t:i:e:s:G:DT'
-		self.optionList = ["help","full","groups","modes","requirements","dir", "title", "mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
+		self.optionString = 'hfgdrm:a:t:i:e:s:G:DTv'
+		self.optionList = ["help","full","groups","modes","requirements","dir", "title", "mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep=", "verbose"] 
 		
 
 	def printUsage(self):
@@ -64,6 +65,7 @@ class ConsolePrintHelper(object):
 		print("       -h | --help                 print this message")
 		print("")
 		print("    output options:")
+		print("       -v | --verbose              print with extra detail (--dir --title) and convenient sorting (dirAndTitle)")
 		print("       -f | --full                 print full information for each test (multi-line)")
 		print("            --json                 print full information as JSON")
 		print("       -D | --dir                  print the absolute path for each test directory")
@@ -73,7 +75,7 @@ class ConsolePrintHelper(object):
 		print("       -d | --modes                print all modes")
 		print("       -r | --requirements         print all test requirements")
 		print("")
-		print("       -s | --sort   STRING        sort by: title, id, executionOrderHint")
+		print("       -s | --sort   STRING        sort by one of: title dirAndTitle id executionOrderHint")
 		print("")
 		print("    selection/filtering options:")
 		print("       -G | --grep      STRING     print only tests whose title or id contains the specified regex")
@@ -122,7 +124,14 @@ class ConsolePrintHelper(object):
 
 			elif option in ('-T', '--title'):
 				self.printOnly.append('title')
-				
+
+			elif option in ("-v", "--verbose"):
+				if not self.sort:
+					self.sort = 'dirAndTitle'
+				if not self.printOnly:
+					self.printOnly.append('title')
+					self.printOnly.append('dir')
+
 			elif option in ("-g", "--groups"):
 				self.groups = True
 				
@@ -156,6 +165,13 @@ class ConsolePrintHelper(object):
 			elif option in ("-G", "--grep"):
 				self.grep = value
 
+				# when doing grep mode, the verbose options are useful
+				if not self.sort:
+					self.sort = 'dirAndTitle'
+				if not self.printOnly:
+					self.printOnly.append('title')
+					self.printOnly.append('dir')
+					
 			elif option == '--json':
 				self.json = True
 
@@ -183,6 +199,8 @@ class ConsolePrintHelper(object):
 				descriptors.sort(key=lambda d: [d.executionOrderHint, d._defaultSortKey.lower()])
 			elif self.sort.lower()=='title':
 				descriptors.sort(key=lambda d: [d.title.lower(), d.title, d._defaultSortKey.lower()])
+			elif self.sort.lower()=='dirAndTitle'.lower(): # often the most useful way of doing title sorting, since it groups related tests
+				descriptors.sort(key=lambda d: [os.path.dirname(d.testDir), d.title.lower(), d.title, d._defaultSortKey.lower()])
 			else:
 				raise UserError('Unknown sort key: %s'%self.sort)
 			
@@ -231,14 +249,25 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
+			colorFormatter = ColorLogFormatter({})
+			colorFormatter.initColoringLibrary() # have to explicitly call this to get it installed to sys.stdout (on windows), not stdoutHandler.stream.getUnderlyingStream (=stderr)
+			def addColor(category, s):
+				if not category: return s
+				return colorFormatter.formatArg(category, s) 
+		
 			for descriptor in descriptors:
 				padding = " " * (maxsize - len(descriptor.id))
 				if self.full:
 					print("="*80)
-					print(descriptor)
+					print(str(descriptor))
 				else:
-					if not self.printOnly or 'title' in self.printOnly:
-						print("%s%s| %s" % (descriptor.id, padding, descriptor.title))
+					if (not self.printOnly) or 'title' in self.printOnly:
+						title = descriptor.title
+						if self.grep:
+							title = re.sub(regex, lambda m: addColor(LOG_FAILURES, m.group(0)), title)
+						elif len(self.printOnly)>1:
+							title = addColor(LOG_TEST_DETAILS, title)
+						print("%s%s| %s" % (descriptor.id, padding, title))
 					if 'dir' in self.printOnly:
 						print("%s%s" % ('   ' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
 

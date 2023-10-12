@@ -61,6 +61,8 @@ class ConsoleLaunchHelper(object):
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=",
 			"mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'vo', 'progress', 'printLogs=', 'grep=', 
 			'ci', 'sort=', 
+			'writer=',
+			'preserveEmptyOutputs',
 			]
 
 
@@ -126,21 +128,23 @@ Execution options
 		if printXOptions: printXOptions()
 		print("""
 Advanced:
-   -g, --progress              print progress updates after completion of each test
    -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
+       --writer    NAME        enables the specified writer (in addition to any writers already enabled automatically), 
+		                       by alias or classname, for example "--writer TextResultsWriter" 
+   -g, --progress              enables the writer that prints progress updates after completion of each test
    -p, --purge                 purge files except run.log from the output directory to save space (unless test fails)
+   --preserveEmptyOutputs      prevents the usual deletion of empty files and directories after a test completes
    --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 
                                console; options are: all|none|failures (default is all).
    -s, --sort      STRING      sort by: random (useful for performance testing and and reproducing test races)
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
    -XcodeCoverage              enable collecting and reporting on code coverage with all coverage writers in the project
-   -XautoUpdateAssertDiffReferences 
-                               this is a special command for automatically updating the reference files when an 
+   -XupdateDiffReferences      this is a special command for automatically updating the reference files when an 
                                assertDiff fails
 
-The PYSYS_DEFAULT_ARGS environment variable can be used to specify any pysys run arguments that you always wish to use, 
-for example PYSYS_DEFAULT_ARGS=--progress --outdir __pysys_output. 
+The PYSYS_DEFAULT_ARGS environment variable can be used to specify any pysys run arguments that you wish to use on 
+a per-user basis, for example: PYSYS_DEFAULT_ARGS=--progress --writer=TextResultsWriter --outdir=__pysys_output
 
 Selection and filtering options
 -------------------------------
@@ -160,8 +164,8 @@ Selection and filtering options
 
 Test identifiers
 ----------------
-By default, PySys executes all available tests under the current directory will be run. Alternatively to run just a 
-subset, one or more tests or sequences of tests can be specified on the command line. In both cases, tests are filtered 
+By default, PySys executes all available tests under the current directory. Alternatively to run just a subset, 
+one or more tests or sequences of tests can be specified on the command line. In both cases, tests are filtered 
 based on the selection options listed above (e.g. --include/--exclude). 
 
 Tests should contain only alphanumeric and the underscore characters. The following syntax is used 
@@ -181,6 +185,8 @@ to select an individual test, or a sequence of numbered tests:
 e.g. 
    {scriptname} run -c2 -w4 -u -j=x1.5 Test_007 Test_001: 3:5
    {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
+
+To list the modes supported by the tests under the current directory, use "pysys ls --modes".
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		
 		# show project help at the end so it's more prominent
@@ -228,7 +234,11 @@ e.g.
 		# so that it doesn't get enabled with -vDEBUG only -vassertions=DEBUG 
 		# as it is incredibly verbose and slow and not often useful
 		logging.getLogger('pysys.assertions').setLevel(logging.INFO)
-				
+
+		# special hidden dict of extra values to pass to the runner, since we can't change 
+		# the public API now
+		self.userOptions['__extraRunnerOptions'] = __extraRunnerOptions = {}
+
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage(printXOptions)	  
@@ -241,6 +251,9 @@ e.g.
 
 			elif option in ("-p", "--purge"):
 				self.purge = True		  
+			
+			elif option in ['--preserveEmptyOutputs']:
+				__extraRunnerOptions['preserveEmptyOutputs'] = True
 
 			elif option in ("-v", "--verbosity"):
 				verbosity = value
@@ -321,6 +334,9 @@ e.g.
 				
 			elif option in ["-g", "--progress"]:
 				self.progress = True
+			
+			elif option in ['--writer']:
+				__extraRunnerOptions.setdefault('writerEnable', []).append(value)
 
 			elif option in ["--printLogs"]:
 				printLogs = getattr(PrintLogs, value.upper(), None)
@@ -373,14 +389,12 @@ e.g.
 		# retained for compatibility, but PYSYS_DEFAULT_ARGS is a better way to achieve the same thing
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
 		
-		# special hidden dict of extra values to pass to the runner, since we can't change 
-		# the public API now
-		self.userOptions['__extraRunnerOptions'] = {
+		__extraRunnerOptions.update({
 			'progressWritersEnabled':self.progress,
 			'printLogs': printLogs,
 			'printLogsDefault': printLogsDefault, # to use if not provided by a CI writer or cmdline
 			'sort': self.sort
-		}
+		})
 		
 		# load project AFTER we've parsed the arguments, which opens the possibility of using cmd line config in 
 		# project properties if needed

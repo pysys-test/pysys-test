@@ -169,12 +169,13 @@ rootLogger = logging.getLogger(
 
 log = rootLogger
 
-stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stderr if len(sys.argv)>=2 and sys.argv[1] in ['print', 'debug'] else sys.stdout, writebytes=False))
-"""The handler that sends pysys.* log output from to the console, 
+stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stderr if len(sys.argv)>=2 and sys.argv[1] in ['print', 'ls', 'debug'] else sys.stdout, writebytes=False))
+"""The handler that sends pysys.* log output from to the console (typically stdout), 
 including buffered output from completed tests when running in parallel.
 
 The .stream field can be used to access the wrapper we use throughout 
 pysys to safely write to the console (with coloring support if enabled). 
+
 """
 
 pysysLogHandler = DelegatingPerThreadLogHandler()

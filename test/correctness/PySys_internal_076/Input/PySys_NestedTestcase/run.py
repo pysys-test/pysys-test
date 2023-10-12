@@ -15,4 +15,4 @@ class PySysTest(BaseTest):
 			pass
 
 	def validate(self):
-		pass 
+		self.addOutcome(PASSED)

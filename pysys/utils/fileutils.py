@@ -168,7 +168,8 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 				else:
 					os.remove(path)
 			except Exception as ex:
-				log.debug('deletedir failed to update permissions and delete %s on this attempt: %s', path, ex)
+				if os.path.exists(path):
+					log.debug('deletedir failed to update permissions and delete %s on this attempt: %s', path, ex)
 				pass
 
 		# delete as many files as we can first, so if there's an error deleting some files (e.g. due to windows file 

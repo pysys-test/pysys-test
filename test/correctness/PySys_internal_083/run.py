@@ -42,6 +42,12 @@ class PySysTest(BaseTest):
 		self.assertDiff('test-nonlocal.txt', 'test-nonlocal.txt', filedir1=self.output, filedir2=self.output)
 		self.assertThat('%s==%s', repr(TEST_STR), repr(self.getExprFromFile('test-nonlocal.txt', TEST_STR)))
 		
+		self.log.info('')
+		self.log.info('now testing using with INCORRECT encoding but with replacement turned on:')
+		self.assertGrep('test-nonlocal.txt', expr='Hello', contains=True, encoding='ascii', encodingReplaceOnError=True)
+		self.assertGrepOfGrep('test-nonlocal.txt', 'Hello', 'Hello', encoding='ascii', encodingReplaceOnError=True) # also tests assertThatGrep, grep, and getExprFromFile
+		self.waitForGrep('test-nonlocal.txt', expr='Hello', encoding='ascii', encodingReplaceOnError=True)
+
 	
 	def getDefaultFileEncoding(self, file, **xargs):
 		if self.__myDefaultEncoding != None:

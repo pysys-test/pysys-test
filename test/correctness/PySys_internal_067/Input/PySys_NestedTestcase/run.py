@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 			self.log.exception('Sample message at error with exception trace: ')
 
 		self.addOutcome(SKIPPED, 'skipped reason message', abortOnError=False)
-		self.addOutcome(BLOCKED, 'blocked reason message', abortOnError=False)
+		self.addOutcome(BLOCKED, 'blocked reason message', abortOnError=False, override=True)
 		self.addOutcome(DUMPEDCORE, 'dumpedcore reason message', abortOnError=False)
 		self.addOutcome(TIMEDOUT, 'timedout reason message', abortOnError=False)
 		self.addOutcome(FAILED, 'failed reason message', abortOnError=False)

@@ -31,9 +31,11 @@ class PySysTest(BaseTest):
 		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, expectedExitStatus='!=0')
 		runPySys(self, 'nonexistent-regex', ['print', 'non-existent.*'], workingDir=testsdir, expectedExitStatus='!=0')
 		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, defaultproject=True)
-			
+
+		runPySys(self, 'verbose', ['ls', '-v'], workingDir=testsdir) 
+
 	def validate(self):
-		for t in ['basic', 'thistest', 'full', 'groups', 'modes', 'printTitle', 'printDir', 'printTitleAndDir']:
+		for t in ['basic', 'thistest', 'full', 'groups', 'modes', 'printTitle', 'printDir', 'printTitleAndDir', 'verbose']:
 			self.assertGrep(t+'.err', expr='.*', contains=False) # no errors
 
 		self.assertGrep('basic.out', expr='PySys_internal_073 *[|] *[^ ]+')
@@ -60,3 +62,6 @@ class PySysTest(BaseTest):
 		self.assertGrep('emptydir.err', expr='The supplied options did not result in the selection of any tests')
 		self.assertGrep('nonexistent.err', expr='No tests found matching id: \"non-existent\"')
 		self.assertGrep('nonexistent-regex.err', expr='No test ids found matching regular expression: "non-existent.*"')
+
+		self.assertGrep('verbose.out', expr='PySys_internal_073 *[|] *[^ ]+')
+		self.assertGrep('verbose.out', expr=r'[/\\]PySys_internal_073')
