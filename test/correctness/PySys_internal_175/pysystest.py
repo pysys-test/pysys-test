@@ -22,7 +22,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.logFileContents('pysys-run.out')
 		
 	def validate(self):
-		self.assertThat('paths == expected', paths=', '.join(pysys.utils.fileutils.listDirContents(self.output+'/MyNewTest')), 
+		self.assertThat('paths == expected', paths=', '.join(self.listDirContents('MyNewTest')), 
 			expected='pysystest.xml, run.py, Input/, Output/, Reference/')
 		self.assertGrep('MyNewTest/pysystest.xml', 'myGroup')
 		self.assertGrep('pysys-make-help.out', 'Customized (legacy) test maker MyLegacyMaker', literal=True)

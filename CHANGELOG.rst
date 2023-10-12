@@ -256,6 +256,8 @@ New features:
   all worker threads. If you suspect a test failure could be related to other tests executing at the same time, logging 
   this list could be helpful for debugging the problem. 
 
+- Added `BaseTest.listDirContents` to provide easier access to the existing `pysys.utils.fileutils.listDirContents` method. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 

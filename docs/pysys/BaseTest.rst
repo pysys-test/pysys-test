@@ -245,6 +245,7 @@ The helper methods for common file I/O operations are:
 	grepOrNone
 	grepAll
 	logFileContents
+	listDirContents
 	write_text
 	getDefaultFileEncoding
 

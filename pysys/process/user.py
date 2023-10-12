@@ -2088,6 +2088,28 @@ class ProcessUser(object):
 		self.log.info('', extra=logextra)
 		return True
 
+	def listDirContents(self, path, recurse=True):
+		r"""
+		Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable 
+		for diffing. 
+		
+		The contents are returned in a normalized form suitable for diffing: relative to the scanned path, with forward 
+		slashes on all platforms, a trailing slash for directories, and sorted to ensure deterministic results. 
+		Symbolic links are not searched. 
+		
+		For example this can be used with `pysys.basetest.BaseTest.assertDiff` like this::
+		
+		self.assertDiff(
+			self.write_text('MyDir-contents.txt', '\\n'.join( self.listDirContents('MyDir') )))
+		
+		:param str path: The path to search, either absolute or relative to the output directory.
+		:param bool recurse: Set this to False to just include the specified directory but not any children. 
+		:return: A list of strings with the relative paths found, e.g. ``["mysubdir/myfile.txt", "mysubdir/mysubsubdir/"]``. 
+		
+		.. versionadded:: 2.2
+		"""
+		return pysys.utils.fileutils.listDirContents(os.path.join(self.output, path), recurse=recurse)
+
 	def mkdir(self, path):
 		"""
 		Create a directory, with recursive creation of any parent directories.
