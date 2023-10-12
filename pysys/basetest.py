@@ -1171,7 +1171,10 @@ class BaseTest(ProcessUser):
 			# addition to regex escaping. Square brackets are often the clearest way to escape regular expression 
 			# characters such as \ . and ()
 			self.assertGrep('myserver.log', r'c:[\]Foo[\]bar[.]txt')
-			
+
+			# Alternatively when dealing with paths on different OSes, a convenient approach is to perform a replacement on the final expression
+			self.assertGrep('myserver.log', 'Checking for path: .*abc/def/ghi/jkl[.]txt'.replace('/', r'[/\\]'))
+
 			# The IncludeLinesBetween mapper is very useful if you want to grep within a subset of the lines:
 			self.assertGrep('myserver.log', r'MyClass', mappers=[
 				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
@@ -1211,7 +1214,7 @@ class BaseTest(ProcessUser):
 			for example ``" ERROR .*"``. 
 			
 			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
-			be treated as literal values. 
+			be treated as literal values, or use the argument ``literal=True``. 
 			
 			If you wish to do something with the text inside the match you can use the ``re`` named 
 			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.
