@@ -258,6 +258,8 @@ New features:
 
 - Added `BaseTest.listDirContents` to provide easier access to the existing `pysys.utils.fileutils.listDirContents` method. 
 
+- Added ``message=`` for customizing the introductory log message in `BaseTest.logFileContents`. 
+
 Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
