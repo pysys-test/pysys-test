@@ -176,8 +176,8 @@ class ConsolePrintHelper(object):
 			if not self.sort:
 				self.sort = 'dirAndTitle'
 			self.printOnly.append('title')
-			if 'testfile' not in self.printOnly: # don't add both
-				self.printOnly.append('dir')
+			if 'dir' not in self.printOnly: # don't add both
+				self.printOnly.append('testfile')
 
 	def printTests(self):
 			Project.findAndLoadProject()

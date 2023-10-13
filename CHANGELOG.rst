@@ -36,13 +36,13 @@ New features:
 
 - Added ``pysys print`` option ``-v`` (``--verbose``) which provides a convenient way to list tests with a little extra 
   information compared. The results are sorted by dirAndTitle (so that similar tests are grouped together), and both the title 
-  and the test directory displayed (equivalent to ``--dir`` ``--title``). The verbose listing is especially 
+  and the main test file displayed (equivalent to ``--title --testfile``). The verbose listing is especially 
   useful for finding out what tests you have covering different areas. Displaying the absolute directory name makes it 
   easy to jump to any tests of interest (either when running from an IDE that supports hyperlinks or by copying the directory 
   name into a shell/command prompt). If you wish to display the test file instead of the test directory, use ``-vF``. 
 
-- Added colouring of the test title when printing a test listing with ``--verbose`` or ``--dir --title``, so that it stands out 
-  better from the other content. 
+- Added colouring of the test title when printing a test listing with both title and testfile/dir (e.g. ``--verbose``), 
+  so that it stands out better from the other content. 
 
 - Changed ``pysys print --grep`` to print the directory (not only title) and sort by dirAndTitle. Also the matching part of 
   each title is now highlighted in red (unless console colouring is disabled). 
