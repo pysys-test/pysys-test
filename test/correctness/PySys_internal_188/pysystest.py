@@ -64,6 +64,6 @@ class PySysTest(PySysTestHelper, pysys.basetest.BaseTest):
 		self.assertGrep('pysys-run.out', 'WARN  Writer PythonCoverageWriter failed during cleanup due to interruption') # don't want to waste time running code coverage tools during cleanup
 
 		self.assertGrep('myoutdir/Test_ForegroundProcess/run.log', 'Completed mycleanup function', assertMessage="Check that TEST cleanup executes fully even after interruption")
-		self.assertGrep('myoutdir/Test_ForegroundProcess/run.log', 'note that some processes may already have been terminated when the runner was signalled to abort', assertMessage="Check courtesy message in run.log to avoid possible confusion about why cleanup happens differently")
+		self.assertGrep('myoutdir/Test_ForegroundProcess/run.log', 'note that the some of this test\'s processes may already have been terminated due to the runner abort', assertMessage="Check courtesy message in run.log to avoid possible confusion about why cleanup happens differently")
 		self.assertGrep('myoutdir/Test_ForegroundProcess/cleanup_program.out', 'Cleanup completed by child process', assertMessage="Check that TEST cleanup processes can execute even after interruption")
 		self.assertGrep('myoutdir/__pysys_runner.myoutdir/cleanup_program.out', 'Cleanup completed by child process', assertMessage="Check that RUNNER cleanup processes can execute even after interruption")
