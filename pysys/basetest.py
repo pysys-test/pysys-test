@@ -155,7 +155,7 @@ class BaseTest(ProcessUser):
 				
 		"""
 		if self.isRunnerAborting:
-			self.log.info('Performing test cleanup() - note that some processes may already have been terminated when the runner was signalled to abort')
+			self.log.info('Performing test cleanup() - note that the some of this test\'s processes may already have been terminated due to the runner abort')
 
 		try:
 			if self.manualTester and self.manualTester.running():
