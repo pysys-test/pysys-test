@@ -10,15 +10,62 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
----
-2.2
----
+-----------------
+What's new in 2.2
+-----------------
 
-Version 2.2 is under development. 
+PySys 2.2 was released in October 2023. 
 
-New features:
+This release improves usability of the ``pysys`` command line, gives a better experience editing/running tests from IDEs, 
+improves performance and Ctrl+C cancellation handling, and adds a few new methods and parameters you can use in your tests. 
+This release also adds support for Python 3.11 and 3.12, and removes support for the end-of-life 3.6 and 3.7 Python releases. 
 
-- Added support for Python 3.11 and 3.12, and removed support for Python 3.6 and 3.7 (which are now end of life). 
+Some new features you might want to try out include:
+
+- Instead of running ``pysys print``, use the equivalent ``pysys ls`` to save some keystrokes. Try out the new ``--verbose`` 
+  flag which groups related tests (sorting by title), and prints the full path of each test file (e.g. ``XXX/pysystest.py``) so you can 
+  easily open up any tests of interest directly from your IDE or shell. 
+
+- Now that ``pysys run`` accepts directory paths (not only test ids), you can use your shell's directory tab completion to help specify 
+  the tests to run. 
+
+- Get better code completion and avoid warnings when editing tests inside your Python-enabled IDE/editor by following the 
+  new best practices described in the PySys documentation. For example use mix-in helper classes (not ``<test-plugin>``) for 
+  sharing logic between tests, use ``import pysys.basetest, pysys.mappers`` not ``import pysys`` at the start of 
+  all tests, and make sure references to ``pysys.basetest.BaseTest`` in your test class class inheritance list are fully qualified. 
+
+  To use a Python IDE with PySys, either configure it to use a venv/Python installation that has PySys installed, or
+  specify the path to the PySys package with a ``PYTHONPATH`` environment variable (e.g. using a ``.env`` file). 
+  If your project has any custom Python extensions configured with a ``<pythonpath>`` element you should add that to your 
+  editor's ``PYTHONPATH`` too. 
+
+- Use the new `BaseTest.assertGrepOfGrep()` method if you're extracting a line of text from a file and 
+  then validating it with a regular expression. You'll get much more descriptive messages is a test fails using 
+  this approach rather than doing it all in a single ``assertGrep``. 
+
+- Tale a look at the new `BaseTest.createThreadPoolExecutor`, `BaseTest.listDirContents` and `pysys.mappers.IncludeMatches` methods. 
+
+- Considering switching to ``.tar.gz`` or ``.tar.xz`` instead of ``.zip`` format to get smaller (better compressed) test output 
+  directory archives when using `pysys.writer.testoutput.TestOutputArchiveWriter`. 
+
+- Add a `pysys.writer.outcomes.TextResultsWriter` with ``verbose`` set to true to your project configuration, and enable it 
+  with an environment variable (e.g ``PYSYS_DEFAULT_ARGS=--writer verboseTextResultsWriter``) so that whenever you kick off a long test 
+  run you can check on the failures while it executes (or after it's completed - even if you close your shell/window) just by browsing 
+  through the text file. You can also pipe the file through ``sort`` to group related failures together. 
+  Example configuration::
+
+    <writer classname="TextResultsWriter" module="pysys.writer" alias="verboseTextResultsWriter">
+      <property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
+      <property name="verbose" value="true"/>
+    </writer>
+
+- Use the environment variable ``PYSYS_PROJECT_APPEND`` to run PySys with any user-specific settings you like (e.g. custom writers) 
+  without modifying the main project file.
+
+Command line usability
+----------------------
+
+This release adds several enhancements aimed at making it easier to use the ``pysys`` command line:
 
 - Added command line support for running and printing tests by their (absolute or relative) directory rather than their test id. 
   This allows use of shell completion, and also makes it possible to run all the tests found under a set of named subdirectories. 
@@ -28,42 +75,83 @@ New features:
 
 - Added ``pysys ls`` as a short and convenient alias for ``pysys print``. 
 
-- Added ``pysys print`` sort option ``--sort dirAndTitle`` which first groups tests whose parent/base directory is the same 
-  and then sorts by title. In many cases this is the most useful way of recursively listing a large set of test titles, 
-  since titles in different parent directories often do not sort together very cleanly. 
+- Added the pysys print sort option ``--sort dirAndTitle`` which first groups tests whose parent/base directory is the same 
+  and then sorts by title. In many cases this is the most useful way of recursively listing a large set of test titles 
+  (since titles in different parent directories often do not sort together very cleanly when using ``--sort title``). 
 
-- Added ``pysys print -F`` or ``---testfile`` which prints the file containing each test (typically the ``pysystest.py`` file). 
+- Added ``--dir`` (``-D``), ``--testfile`` (``-F``) and ``--title`` (``-T``) options to ``pysys print`` to allow listing the directories, 
+  files (e.g. ``pysystest.py``) and optionally also the titles for each matching test (without the far more verbose output of ``--full``). 
 
-- Added ``pysys print`` option ``-v`` (``--verbose``) which provides a convenient way to list tests with a little extra 
-  information compared. The results are sorted by dirAndTitle (so that similar tests are grouped together), and both the title 
-  and the main test file displayed (equivalent to ``--title --testfile``). The verbose listing is especially 
-  useful for finding out what tests you have covering different areas. Displaying the absolute directory name makes it 
-  easy to jump to any tests of interest (either when running from an IDE that supports hyperlinks or by copying the directory 
-  name into a shell/command prompt). If you wish to display the test file instead of the test directory, use ``-vF``. 
+- Added pysys print option ``-v`` (``--verbose``) which provides a convenient way to list tests with a bit more  
+  information for each one. The results are sorted by ``dirAndTitle`` (so that similar tests are grouped together), and both the title 
+  and the main test file are displayed (equivalent to specifying ``--title --testfile``). The verbose listing is especially 
+  useful for finding out what tests you have covering different areas. Displaying the test file paths makes it 
+  easy to jump to any tests of interest (either when running from an IDE that supports hyperlinks or by copying the path 
+  into a shell/command prompt). If you wish to display the directory instead of the test file, use ``-vD``. 
 
-- Added colouring of the test title when printing a test listing with both title and testfile/dir (e.g. ``--verbose``), 
+- Added colouring of the test title when printing a test listing with both title and ``testfile``/``dir`` (e.g. ``--verbose``), 
   so that it stands out better from the other content. 
 
-- Changed ``pysys print --grep`` to print the directory (not only title) and sort by dirAndTitle. Also the matching part of 
-  each title is now highlighted in red (unless console colouring is disabled). 
+- Changed pysys print ``--grep`` to print the test file path (not only the title), and to sort by ``dirAndTitle``. 
+  Also, the matching part of each title is now highlighted in red (unless console colouring is disabled). 
 
-- Changed imports in the default new testcase templates to allow Python IDEs to correctly locate the PySys BaseTest class. 
+- Added ``verbose`` configuration option to `pysys.writer.outcomes.TextResultsWriter` which produces gives a lot more information about 
+  each test result including the outcome reason, test title, and absolute path of the output directory (across two lines). 
+
+  The new format could be useful for monitoring in-progress test runs (maybe you wish to start solving some of the failures while 
+  the test run is still executing), or for performing bulk triage of a large set of failures at the end of a long test run. Opening 
+  the log file in an IDE that supports jump-to-file would allow clicking the output directories for further investigation of failures 
+  where needed. 
+
+  Although in multi-threaded mode the order of test results in the file will be non-deterministic (whatever order the scheduler picks for executing 
+  the tests), the format is designed so that tests are grouped by failure mode (outcome and reason) when the log file is run through a 
+  shell ``sort`` command. 
+
+  Example configuration::
+
+    <writer classname="TextResultsWriter" module="pysys.writer" alias="verboseTextResultsWriter">
+      <property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
+      <property name="verbose" value="true"/>
+    </writer>
+  
+- Added ``--writer CLASSNAME|ALIAS`` argument to ``pysys run`` which can be used to selectively enable an individual writer that would not 
+  otherwise  be enabled. For example, use ``--writer TextResultsWriter`` to enable the text summary log without using ``--record`` which might enable 
+  several other writers you don't need. This option could be used in a ``PYSYS_DEFAULT_ARGS`` environment variable to enable a writer 
+  just for the current user. To enable a specific writer (if present in a given project) without enabling all writers of the same 
+  class, set the ``alias=`` attribute on the writer configuration and specify the writer.
+
+- Added ``--preserveEmptyOutputs`` argument to ``pysys run`` which disables the usual behaviour of deleting empty (zero-length) files and directories. 
+  This could be useful for comparing successful vs failure runs of the same test if the presence of empty files/dirs is relevant to the outcome. 
+  The default test output cleanup behaviour was also changed to delete empty directories (not just files), and to permit the deletion of 
+  non-zero/purgeable files after a ``SKIPPED`` outcome (previously only a ``PASSED`` outcome would delete non-zero/purgeable files).
+
+- Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
+  the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
+  modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
+
+IDE/editor support
+------------------
+
+Several changes make it easier to write and execute PySys tests from Python-enabled IDEs/editors:
+
+- Changed the imports of the default "new testcase" templates to allow Python IDEs to correctly locate the PySys ``BaseTest`` class. 
   This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests, 
   change ``import pysys`` to ``import pysys.basetest, pysys.mappers``, and make sure references to `pysys.basetest.BaseTest` 
   in the class inheritance list are fully qualified. 
   
-  To use a Python IDE with PySys, either configure it to use a Python installation or venv that has PySys installed, or
+  To use a Python IDE with PySys, either configure it to use a Python installation or ``venv`` that has PySys installed, or
   specify the path to the PySys classes with a ``PYTHONPATH`` environment variable (e.g. using a ``.env`` file). 
-  If your project has any custom Python extensions configured with a ``<pythonpath>`` element you should add that to your 
+  If your project has any custom Python extensions configured with a ``<pythonpath>`` element, you should add that to your 
   editor's ``PYTHONPATH`` too. 
 
-- Defined a new recommended pattern for reusing logic across tests. Previously, users created multiple custom BaseTest classes or 
-  used the ``<test-plugin>`` element in the project configuration to define reusable peices. Both are now discouraged - 
-  BaseTest subclassing creates the possibility of unpredictable bugs due to clashes in field/method names (and other multiple 
+- Defined a new recommended pattern for reusing logic across tests. Previously, users created multiple custom ``BaseTest`` subclasses or 
+  used the ``<test-plugin>`` element in the project configuration to define reusable peices. Both are now discouraged. 
+  ``BaseTest`` subclassing creates the possibility of unpredictable bugs due to clashes in field/method names (and other multiple 
   inheritance dangers). The test plugin concept has the big downside that Python IDEs and editors cannot detect the ``self.PLUGIN_ALIAS`` 
-  configuration from the PySys project and therefore code completion and navigation are impossible. The preferred approach is now 
-  to use standard Python for reuse, by creating "mix-in" helper classes that expose functionality using inheritance. A key constraint 
-  is that the helper class you inherit from contain only a single field holding an instance that encapsulates all the functionality 
+  configuration from the PySys project and therefore code completion and navigation are impossible. 
+  
+  The preferred approach is now to use standard Python for reuse, by creating "mix-in" helper classes that expose functionality using inheritance. 
+  A key constraint is that the helper class you inherit from contain only a single field holding an instance that encapsulates all the functionality 
   to avoid name clashes. 
   
   In the getting started sample there is a ``MyServerHelper`` mix-in class that provides a field called ``self.myserver`` through 
@@ -77,22 +165,24 @@ New features:
 	  	server = self.myserver.startServer(name="my_server")
       ...
 
-  Since this approach uses standard Python, any IDE will be able to give assistance for the myserver methods (provided your extension 
-  classes are on its configured PYTHONPATH). 
+  Since this approach uses standard Python, any IDE will be able to give assistance for the ``myserver`` methods (provided your extension 
+  classes are on its configured ``PYTHONPATH``). 
   
-  Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of 
+  Any number of helpers can be added to each test that needs them. Just ensure that the ``BaseTest`` class is listed last in the list of 
   classes your test inherits from. 
 
-- Added `BaseTest.assertGrepOfGrep()` to simplify the common case of extracting a value using a grep 
-  expression and then checks that value using another regular expression. This is a small wrapper method around 
-  `BaseTest.assertThatGrep()`. This approach is superior to putting both extraction and validation into 
-  a single `BaseTest.assertGrep()` regular expression due to improved messages on failure which make 
-  tests easier to write and debug. 
+- Changed the header at the start of each test's console output to always include ``Dir:``, which now gives the full absolute 
+  path of the test directory (not just its parent). This is helpful for quickly navigating between tests when running inside 
+  an IDE. 
 
-- Added ``encodingReplaceOnError`` boolean parameter to `BaseTest.assertGrep()`, `BaseTest.assertThatGrep()`, `BaseTest.assertGrepOfGrep()` and 
-  `BaseTest.waitForGrep()`, which can be used to prevent exceptions while reading file content 
-  when the file contains invalid/unexpected characters (or the encoding is set incorrectly). 
-  This ensures detection of error conditions etc can still complete reliably even if some unexpected characters are found elsewhere in the file. 
+- Added project property ``pysysLogAbsolutePaths`` which can be set to a true/false value to control whether absolute paths will be logged 
+  for assertion failure locations and in the summary of failed test directories. 
+  To avoid clutter this remains false by default, unless the ``PYSYS_LOG_ABSOLUTE_PATHS`` environment variable is set or PySys detects it is being executed inside 
+  an IDE. Currently only Visual Studio Code is supported automatically, though you can add support for the environment variables of other 
+  IDEs using a project property like ``<property name="pysysLogAbsolutePaths" value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"/>``.
+
+Ctrl+C/SIGTERM handling
+-----------------------
 
 - Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
   are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
@@ -101,7 +191,7 @@ New features:
   waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions 
   like ``time.sleep`` it is recommended to change to using the `BaseTest.pollWait` method instead, which checks this flag and 
   raises a ``KeyboardInterrupt`` to abort the test. 
-  In addition, a new method `ProcessUser.handleRunnerAbort` is called for each test that is currently executing, to provide a 
+  In addition, a new method `pysys.process.user.ProcessUser.handleRunnerAbort` is called for each test that is currently executing, to provide a 
   means of unblocking tests that are waiting for something (such as a TCP socket) not covered by the above mechanism. 
   The default implementation simply terminates all processes, but this method can be overridden to provide additional 
   logic or to avoid killing any processes and leave all terminations to the test's synchronous cleanup method. 
@@ -118,61 +208,82 @@ New features:
   If a second Ctrl+C or signal is sent more than 6 seconds after the original abort request, the PySys process will immediately 
   perform a hard/unclean exit, without further attempts to cleanup or to print information about test failures.
 
+Helper functions to use in your tests
+-------------------------------------
+
+- Added `BaseTest.assertGrepOfGrep()` to simplify the common case of extracting a value using a grep 
+  expression and then checks that value using another regular expression. This is a small wrapper method around 
+  `BaseTest.assertThatGrep()`. This approach is superior to putting both extraction and validation into 
+  a single `BaseTest.assertGrep()` regular expression due to improved messages on failure which make 
+  tests easier to write and debug. 
+
 - Added a `BaseTest.createThreadPoolExecutor` method that creates a PySys-friendly thread pool to parallelize 
   slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python's own thread pool 
   in order to provide correct logging, cleanup, and a more useful default maximum number of worker threads. 
 
-- Added a fallback mechanism for writing log messages from unregistered threads (not created with a PySys 
-  thread pool or background thread) to stdout. Previously such logging did not go anywhere. However it is best to 
-  use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
-  ``run.log`` files for the test that generatered it. 
-
-- Added `pysys.utils.osutils.getUsableCPUCount` to provide the number of CPUs that are usable by PySys which may be less than 
-  are available in the machine. This implementation attempts to use cgroups v1 or v2 configuration (``cpu.cfs_quota/period_us`` or ``cpu.max`` - 
-  but not ``cpu.shares``) if present. The current implementation assumes cgroups is mounted at ``/sys/fs/cgroup``. 
-
-- Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
-  to provide a default upper limit on the number of workers. 
-  
-  This is based on the `pysys.utils.osutils.getUsableCPUCount` value, but also follows the example of Python's 
-  ThreadPoolExecutor class in capping the number of workers, to avoid 
-  taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the 
-  Python Global Interpreter Lock. Initially this maximum is set to the high value of 100 but it may be reduced in 
-  future PySys releases. The upper limit can be overridden on a per-project basis by setting the project property ``pysysMaxWorkerThreads``. 
-  The default number of threads can also be further lowered for specific machines or users by setting the ``PYSYS_DEFAULT_THREADS`` 
-  environment variable. 
+- Added `BaseTest.listDirContents` to provide easier access to the existing `pysys.utils.fileutils.listDirContents` method. 
 
 - Added `pysys.mappers.IncludeMatches` for including just substrings matching a regular expression 
   when doing a file copy or diff. 
 
-- Added ``mustExist`` option to `BaseTest.grepOrNone` and `BaseTest.grepAll` to allow treating files not existing the same as if they 
-  did not contain the matching expression.   
+- Added ``mustExist`` option to `BaseTest.grepOrNone` and `BaseTest.grepAll` to avoid an exception when files do no exist, 
+  and instead treat it the same as if they existed but did not contain the matching expression.   
 
-- Improved `BaseTest.waitForGrep` robustness when the file being checked is big or contains long lines, by checking for timeout during 
+Minor improvements:
+
+- Change the debug format when starting a process to only show environment variables whose values differ from the default environment. 
+
+- Improved `BaseTest.waitForGrep` robustness when the file being checked is big or contains long lines, by checking for timeout expiry during 
   each pass through the file not just at the end, and logging a warning if excessively large lines are found (given that evaluating 
   regular expressions on lines with 10,000s of characters can sometimes take a very long time).  
   If reading from a file that has long lines, consider adding the new `pysys.mappers.TruncateLongLines` to the mappers list to shorten them, 
-  or setting the new ``self.grepTruncateIfLineLongerThan`` BaseTest field.  
+  or setting the new ``self.grepTruncateIfLineLongerThan`` field of ``BaseTest``.  
   The ``waitForGrep`` method now logs warnings if dangerously long lines are detected (as defined by ``self.grepWarnIfLineLongerThan``). 
 
 - Added ``self.testStartTime`` to BaseTest, which gives the time when the test object was created. 
 
 - Improved outcome reason for `BaseTest.assertDiff` to include some of the differing lines.
 
-- Improved performance of waiting for processes (on Windows by blocking with WaitForSingleObject instead of sleep polling, 
-  and on Linux if kernel version is >=5.3 and Python>=3.9 using pidfd_open).
+- Added `pysys.utils.osutils.getUsableCPUCount` to provide the number of CPUs that are usable by PySys which may be less than 
+  are available in the machine. This implementation attempts to use cgroups v1 or v2 configuration (``cpu.cfs_quota/period_us`` or ``cpu.max`` - 
+  but not ``cpu.shares``) if present. The current implementation assumes cgroups is mounted at ``/sys/fs/cgroup``. 
 
-- Added project property attribute ``path=`` as an alternative to ``value=`` for properties containing a path, which 
-  should be normalized to remove any ``/../`` path components. 
+- Added ``encodingReplaceOnError`` boolean parameter to `BaseTest.assertGrep()`, `BaseTest.assertThatGrep()`, `BaseTest.assertGrepOfGrep()` and 
+  `BaseTest.waitForGrep()`, which can be used to prevent exceptions while reading file content 
+  when the file contains invalid/unexpected characters (or the encoding is set incorrectly). 
+  This ensures detection of error conditions etc can still complete reliably even if some unexpected characters are found elsewhere in the file. 
 
-- Added ``--dir`` (``-D``) and ``--title`` (``-T``) options to ``pysys print`` to allow listing the directories - and optionally also the titles - for each 
-  matching test (without the far more verbose output of ``--full``). To print both titles and directories, use ``pysys print -TD``. 
+- Added ``message=`` for customizing the introductory log message in `BaseTest.logFileContents`. 
 
-- Added project property ``pysysLogAbsolutePaths`` which can be set to a true/false value to control whether absolute paths will be logged 
-  for assertion failure locations and in the summary of failed test directories, rather than the usual paths relative to current directory. 
-  By default this is false unless the ``PYSYS_LOG_ABSOLUTE_PATHS`` environment variable is set or PySys detects it is being executed inside 
-  an IDE. Currently only Visual Studio Code is supported automatically, though you can check for the environment variables of other 
-  IDEs using a project property like ``value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"``.
+Performance improvements
+------------------------
+
+- Improved performance of waiting for processes (on Windows by blocking with ``WaitForSingleObject`` instead of sleep polling, 
+  and on Linux if kernel version is >=5.3 and Python>=3.9 using ``pidfd_open``).
+
+- Improved the algorithm for selecting the default number of worker threads when running with ``--threads=auto`` or ``--ci`` 
+  to provide a default upper limit on the number of workers. 
+  
+  This is based on the `pysys.utils.osutils.getUsableCPUCount` value, but also follows the example of Python's 
+  ``ThreadPoolExecutor`` class in capping the number of workers, to avoid 
+  taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the 
+  Python Global Interpreter Lock. Initially this cap is set to the high value of 100 but it may be reduced in 
+  future PySys releases. The upper limit can be overridden on a per-project basis by setting the project property ``pysysMaxWorkerThreads``. 
+  The default number of threads can also be further lowered for specific machines or users by setting the ``PYSYS_DEFAULT_THREADS`` 
+  environment variable. 
+
+Project and test configuration
+------------------------------
+
+- Enhanced how user-provided ``userData`` in test descriptors is processed, to include automatic substitution of ``${...}`` project properties, 
+  and to support specifying user data keys independently using ``_`` or ``.`` syntax as an alternative to providing an entire dictionary, 
+  for example::
+
+	__pysys_user_data.myDataKey1__ = "a, ${PROJECT_PROP}, b"
+	__pysys_user_data_myDataKey2__ = 12345
+
+- Added project property attribute ``path=`` as an alternative to ``value=`` for properties containing a path. 
+  When ``path`` is used, paths are normalized to remove any ``/../`` components. 
 
 - Added a ``pysysdirconfig`` option for setting the default ``pysys make`` template to one already defined at project level or 
   in a parent ``pysysdirconfig``::
@@ -181,29 +292,17 @@ New features:
 
   See :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml`.
 
-- Enhanced how user-provided userData in test descriptors is processed, to include automatic substitution of ``${...}`` project properties, 
-  and to support specifying user data keys independently using ``_`` or ``.`` syntax as an alternative to providing an entire dictionary, 
-  for example::
-
-	__pysys_user_data.myDataKey1__ = "a, ${PROJECT_PROP}, b"
-	__pysys_user_data_myDataKey2__ = 12345
-
 - Improved test descriptor loading for shared Python test classes so that it is no longer necessary to set ``__pysys_python_module__ = "PYTHONPATH"`` when 
   setting a ``__pysys_python_class__`` that contains at least one dot character, for example ``mypackage.MyTestClass``.
 
-- Change the debug format when starting a process to only show environment variables whose values differ from the default environment. 
+Writers
+-------
 
 - Added support for ``.tar.gz`` and ``.tar.xz`` to  `pysys.writer.testoutput.TestOutputArchiveWriter` which are both smaller 
   in many cases than ``.zip`` files. See the new ``format`` option to control this. 
 
-- Added ``includeTestIf`` option to `pysys.writer.coverage.PythonCoverageWriter` and `pysys.writer.testoutput.CollectTestOutputWriter` 
-  which allows creating multiple coverage writers that collect data from different subsets of your tests, for example to separate out 
-  a full report from all tests from a smaller report from just the unit tests or smoke tests. However note this is not intended to solve 
-  the problem of disabling coverage generation for performance/robustness tests - for that you should set the ``disableCoverage`` group 
-  on the relevant tests or test directories. 
-
 - Added configuration options to `pysys.writer.outcomes.JUnitXMLResultsWriter` for customizing how PySys test descriptor concepts 
-  (test id, mode etc) are mapped to JUnit concepts, to suit the many different tools that have their own interpretions 
+  (test id, mode etc) are mapped to JUnit concepts, to suit the many different tools that have their own interpretations 
   of this file format. The default mapping produces suboptimal results in some tools, due to duplicating the test id in the ``<testsuite>`` 
   and ``<testcase>`` names. A mapping that works better in many tools can be configured using::
 
@@ -214,87 +313,61 @@ New features:
       <property name="testcaseClassname" value=""/>
     <writer>
 
-- Added ``verbose`` configuration option to `pysys.writer.outcomes.TextResultsWriter` which produces gives a lot more information about 
-  each test result including the outcome reason, test title, and absolute path of the output directory (across two lines). Although in 
-  multi-threaded mode the order of test results in the file will be non-deterministic (whatever order the scheduler picks for executing 
-  the tests), the format is designed so that tests are grouped by failure mode (outcome and reason) when the log file is run through a 
-  shell ``sort`` command. 
-
-  The new format could be useful for monitoring in-progress test runs (maybe you wish to start solving some of the failures while 
-  the test run is still executing), or for performing bulk triage of a large set of failures at the end of a long test run. Opening 
-  the log file in an IDE that supports jump to file would allow for clicking the output directories for further investigation of failures 
-  where needed. 
-
-  Example configuration::
-
-    <writer classname="TextResultsWriter" module="pysys.writer" alias="verboseTextResultsWriter">
-      <property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
-      <property name="verbose" value="true"/>
-    </writer>
-  
-- Added ``--writer CLASSNAME|ALIAS`` argument to ``pysys run`` which can be used to selectively enable an individual writer would not otherwise  
-  be enabled. For example use ``--writer TextResultsWriter`` to enable the text summary log without using ``--record`` which might enable 
-  several other writers you don't need. This option could be used in a ``PYSYS_DEFAULT_ARGS`` environment variable to enable a writer 
-  just for the current user. To enable a specific writer (if present in a given project) without enabling all writers of the same 
-  class, set the ``alias=`` attribute on the writer configuration and specify the writer.
+- Added ``includeTestIf`` option to `pysys.writer.coverage.PythonCoverageWriter` and `pysys.writer.testoutput.CollectTestOutputWriter` 
+  which allows creating multiple coverage writers that collect data from different subsets of your tests, for example to separate out 
+  a full report from all tests from a smaller report from just the unit tests or smoke tests. However note this is not intended to solve 
+  the problem of disabling coverage generation for performance/robustness tests - for that you should set the ``disableCoverage`` group 
+  on the relevant tests or test directories. 
 
 - Added ``artifacts`` dictionary to `pysys.writer.outcomes.JSONResultsWriter` which records artifact paths published during execution of the tests, for 
   example code coverage and performance reports.
-
-- Added ``--preserveEmptyOutputs`` argument to ``pysys run`` which disables the usual behaviour of deleting empty (zero-length) files and directories. 
-  This could be useful for comparing successful vs failure runs of the same test if the presence of empty files/dirs is relevant to the outcome. 
-  The default test output cleanup behaviour was also changed to delete empty directories (not just files), and to permit the deletion of 
-  non-zero/purgable files after a ``SKIPPED`` outcome (previously only a ``PASSED`` outcome would delete non-zero/purgeable files).
-
-- Added environment variable ``PYSYS_PROJECT_APPEND`` which treats the main ``pysysproject.xml`` file as if it had additional XML from 
-  the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
-  modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
-
-- Changed the ``Dir:`` printed in the header at the start of each test's output to always appear, and to give the full absolute 
-  path of the test directory (not just its parent). This is helpful for quickly navigating between tests when running inside 
-  an IDE. 
 
 - Added `pysys.baserunner.BaseRunner.getInProgressTests` for getting a list of the tests that are currently executing across 
   all worker threads. If you suspect a test failure could be related to other tests executing at the same time, logging 
   this list could be helpful for debugging the problem. 
 
-- Added `BaseTest.listDirContents` to provide easier access to the existing `pysys.utils.fileutils.listDirContents` method. 
-
-- Added ``message=`` for customizing the introductory log message in `BaseTest.logFileContents`. 
-
-Fixes:
+Fixes
+-----
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
   output artifacts and instead use the ``GITHUB_OUTPUT`` variable. 
 - Upgraded the sample GitHub Actions to latest versions ready for upcoming github.com upgrade of Node version. 
 - Prevented duplicate tests passed on the command line resulting in the same test executing more than once. 
-- Improved command line generation on Windows to better handle corner cases such as embedded backslashes or
-  double-quotes, and trailing backslashes.
 - Fixed sensitivity to system clock changes by using ``time.monotonic`` rather than ``time.time`` for timeouts 
   and time measurements that do not need wall clock time. 
 - Added ``time=`` attribute to JUnit XML output in the ``<testcase>`` node (in addition to the ``<testsuite>`` node where 
   it already existed), which is required by some tools. 
 
-Minor behaviour changes:
+Minor behaviour changes
+-----------------------
 
-- Fixed `pysys.basetest.assertThatGrep` to strip trailing newlines from the matched part of the line in the rare cases where 
+There should be no breaking changes in this release, however the following behaviour changes might be observed by some users:
+
+- Changed `BaseTest.abort` to not override any existing failure outcomes. However, if the abort outcome is ``SKIPPED`` or some other 
+  non-failure, the previous behaviour of overriding existing outcomes is preserved. To precisely control when to override previous 
+  failure outcomes, use `BaseTest.addOutcome` instead, which has an ``override=`` option. 
+- Fixed `BaseTest.assertThatGrep` to strip trailing newlines from the matched part of the line in the rare cases where 
   the regular expression unintentionally captures newline characters (e.g. ``[^xyz]``). If you have tests that rely on 
   this behaviour it is recommended to fix them, but if that is impractical set the project property 
-  ``pysysLegacyAssertThatGrepNewLineBehaviour`` to true to retain the previous behaviour. This preeprty may be removed in a future 
+  ``pysysLegacyAssertThatGrepNewLineBehaviour`` to true to retain the previous behaviour. This property may be removed in a future 
   major release. 
-- Improved pysystestxml_upgrader.py sample to accept one or more directory arguments instead of upgrading the current 
+- Improved the ``pysystestxml_upgrader.py`` sample script to accept one or more directory arguments instead of upgrading the current 
   working directory. 
 - Removed the ``authors`` field from the default ``pysys make`` template. If you find it useful feel free to add it to your 
   own per-project maker template. 
-- User-provided userData in test descriptors is now subject to automatic substitution of ``${...}`` project properties. 
+- User-provided ``userData`` in test descriptors is now subject to automatic substitution of ``${...}`` project properties. 
   Such properties can be escaped using ``${$}`` if needed. 
-- Test descriptor loading now assumes modules are on the PYTHONPATH rather than in a ``run.py`` file if the module is not explicitly specified 
+- Test descriptor loading now assumes modules are on the ``PYTHONPATH`` rather than in a ``run.py`` file if the module is not explicitly specified 
   and ``__pysys_python_class__`` contains at least one dot character, for example ``mypackage.MyTestClass``.
 - The process exit status returned by ``pysys run`` if no tests were found matching the specified options is now ``9`` 
   (instead of the default fatal error code of ``10`` as in previous versions). 
-- Changed `pysys.basetest.abort` to not override any existing failure outcomes. However if the abort outcome is SKIPPED or some other 
-  non-failure, the previous behaviour of overriding existing outcomes is preserved. To precisely control when to override previous 
-  failure outcomes, use `basetest.BaseTest.addOutcome` instead, which has an ``override=`` option. 
+- Added a fallback mechanism for writing log messages from unregistered threads (not created with a PySys 
+  thread pool or background thread) to stdout, although with a warning to discourage it. 
+  Previously such logging did not go anywhere. However. it is still best to 
+  use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
+  ``run.log`` files for the test that generated it. 
+- Improved ``startProcess`` command line generation on Windows to better handle corner cases such as embedded backslashes or
+  double-quotes, and trailing backslashes.
 
 -----------------
 What's new in 2.1
@@ -833,8 +906,8 @@ Additional improvements which will be of use to some users:
   `BaseTest.deleteDir()` method. 
 - Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
 
-Fixes
------
+Fixes in 2.0
+------------
 - Fixed methods such as `BaseTest.assertGrep` to treat ``ignores='a string'`` as a list containing that string, 
   rather than as separate expressions containing each letter in the string which could lead to ignoring lines 
   that shoudl not be ignored. 
