@@ -32,12 +32,14 @@ New features:
   and then sorts by title. In many cases this is the most useful way of recursively listing a large set of test titles, 
   since titles in different parent directories often do not sort together very cleanly. 
 
+- Added ``pysys print -F`` or ``---testfile`` which prints the file containing each test (typically the ``pysystest.py`` file). 
+
 - Added ``pysys print`` option ``-v`` (``--verbose``) which provides a convenient way to list tests with a little extra 
   information compared. The results are sorted by dirAndTitle (so that similar tests are grouped together), and both the title 
   and the test directory displayed (equivalent to ``--dir`` ``--title``). The verbose listing is especially 
   useful for finding out what tests you have covering different areas. Displaying the absolute directory name makes it 
   easy to jump to any tests of interest (either when running from an IDE that supports hyperlinks or by copying the directory 
-  name into a shell/command prompt). 
+  name into a shell/command prompt). If you wish to display the test file instead of the test directory, use ``-vF``. 
 
 - Added colouring of the test title when printing a test listing with ``--verbose`` or ``--dir --title``, so that it stands out 
   better from the other content. 

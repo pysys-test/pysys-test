@@ -25,6 +25,7 @@ class PySysTest(BaseTest):
 		runPySys(self, 'printTitle', ['print', '--title'], workingDir=testsdir)
 		runPySys(self, 'printDir', ['print', '--dir'], workingDir=testsdir)
 		runPySys(self, 'printTitleAndDir', ['print', '-TD'], workingDir=testsdir)
+		runPySys(self, 'printTitleAndFile', ['print', '-TF'], workingDir=testsdir)
 		runPySys(self, 'groups', ['print', '--groups'], workingDir=testsdir)
 		runPySys(self, 'modes', ['print', '--modes'], workingDir=testsdir)
 		runPySys(self, 'requirements', ['print', '--requirements'], workingDir=testsdir)
@@ -35,7 +36,7 @@ class PySysTest(BaseTest):
 		runPySys(self, 'verbose', ['ls', '-v'], workingDir=testsdir) 
 
 	def validate(self):
-		for t in ['basic', 'thistest', 'full', 'groups', 'modes', 'printTitle', 'printDir', 'printTitleAndDir', 'verbose']:
+		for t in ['basic', 'thistest', 'full', 'groups', 'modes', 'printTitle', 'printDir', 'printTitleAndDir', 'printTitleAndFile', 'verbose']:
 			self.assertGrep(t+'.err', expr='.*', contains=False) # no errors
 
 		self.assertGrep('basic.out', expr='PySys_internal_073 *[|] *[^ ]+')
@@ -51,7 +52,7 @@ class PySysTest(BaseTest):
 		self.assertGrepOfGrep('printDir.out',          '.+', '^[^ ].*'+re.escape(os.sep))
 		self.assertGrepOfGrep('printTitleAndDir.out',  '.+', '[^ ]+ | .+')
 		self.assertGrep('printTitleAndDir.out',  '  +.+'+re.escape(os.sep))
-
+		self.assertGrep('printTitleAndFile.out',  '  +.+'+re.escape(os.sep)+'pysystest.py')
 
 		self.assertGrep('modes.out', expr='MyMode') # just pick one example
 		self.assertLineCount('thistest.out', expr='.', condition='==1')

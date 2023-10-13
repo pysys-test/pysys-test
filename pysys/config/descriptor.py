@@ -207,7 +207,7 @@ class TestDescriptor(object):
 		# undocumented API currently
 		# Gets the file containing the test logic - typically a .py file, but could be some other format e.g. .java (but not XML)
 		# Usually relative to testDir, but may be an absolute path
-		if self.file.endswith('.xml'):
+		if self.file.endswith('.xml') and self.module and self.module != 'PYTHONPATH':
 			return self.module
 		
 		if self.file.startswith(self.testDir): return self.file[len(self.testDir)+1:]

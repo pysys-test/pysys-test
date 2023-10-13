@@ -51,8 +51,8 @@ class ConsolePrintHelper(object):
 		self.name = name
 		self.sort = None
 		self.grep = None
-		self.optionString = 'hfgdrm:a:t:i:e:s:G:DTv'
-		self.optionList = ["help","full","groups","modes","requirements","dir", "title", "mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep=", "verbose"] 
+		self.optionString = 'hfgdrm:a:t:i:e:s:G:DTPFv'
+		self.optionList = ["help","full","groups","modes","requirements","dir", "title", "testfile", "mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep=", "verbose"] 
 		
 
 	def printUsage(self):
@@ -69,7 +69,8 @@ class ConsolePrintHelper(object):
 		print("       -f | --full                 print full information for each test (multi-line)")
 		print("            --json                 print full information as JSON")
 		print("       -D | --dir                  print the absolute path for each test directory")
-		print("       -T | --title                print the test id and title for each test")
+		print("       -P | --dir                  print the absolute path for each test directory")
+		print("       -F | --testfile             print the file containing the test logic (e.g. pysystest.py)")
 		print("")
 		print("       -g | --groups               print all test groups")
 		print("       -d | --modes                print all modes")
@@ -111,7 +112,7 @@ class ConsolePrintHelper(object):
 		except Exception:
 			log.warning("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
-			
+		verbose = False
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage()
@@ -125,12 +126,11 @@ class ConsolePrintHelper(object):
 			elif option in ('-T', '--title'):
 				self.printOnly.append('title')
 
+			elif option in ('-F', '--testfile'):
+				self.printOnly.append('testfile')
+
 			elif option in ("-v", "--verbose"):
-				if not self.sort:
-					self.sort = 'dirAndTitle'
-				if not self.printOnly:
-					self.printOnly.append('title')
-					self.printOnly.append('dir')
+				verbose = True
 
 			elif option in ("-g", "--groups"):
 				self.groups = True
@@ -165,19 +165,19 @@ class ConsolePrintHelper(object):
 			elif option in ("-G", "--grep"):
 				self.grep = value
 
-				# when doing grep mode, the verbose options are useful
-				if not self.sort:
-					self.sort = 'dirAndTitle'
-				if not self.printOnly:
-					self.printOnly.append('title')
-					self.printOnly.append('dir')
-					
 			elif option == '--json':
 				self.json = True
 
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
+
+		if verbose or self.grep:
+			if not self.sort:
+				self.sort = 'dirAndTitle'
+			self.printOnly.append('title')
+			if 'testfile' not in self.printOnly: # don't add both
+				self.printOnly.append('dir')
 
 	def printTests(self):
 			Project.findAndLoadProject()
@@ -270,6 +270,9 @@ class ConsolePrintHelper(object):
 						print("%s%s| %s" % (descriptor.id, padding, title))
 					if 'dir' in self.printOnly:
 						print("%s%s" % ('   ' if len(self.printOnly)>1 else '', os.path.abspath(descriptor.testDir)))
+					if 'testfile' in self.printOnly:
+						print("%s%s" % ('   ' if len(self.printOnly)>1 else '', os.path.normpath(os.path.join(descriptor.testDir, descriptor._getTestFile()))))
+
 
 def printTest(args):
 	try:
