@@ -420,7 +420,8 @@ def decideWorkerThreads(threads: str):
 
 	# Following the example of Python's ThreadPoolExecutor, put an upper bound on the number of CPUs PySys will use 
 	# to avoid taking over wide machines pointlessly, given the GIL will limit how much can really be used
-	maxThreads = Project.getInstance().getProperty('pysysMaxWorkerThreads', 32)
+	# Hard to know what it should be, so for now, set it to a high number
+	maxThreads = Project.getInstance().getProperty('pysysMaxWorkerThreads', 100)
 	
 	if threads.lower().startswith('x'):
 		threads = max(1, int(float(threads[1:])*N_CPUS))

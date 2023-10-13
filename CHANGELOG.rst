@@ -135,10 +135,10 @@ New features:
   to provide a default upper limit on the number of workers. 
   
   This is based on the `pysys.utils.osutils.getUsableCPUCount` value, but also follows the example of Python's 
-  ThreadPoolExecutor class in capping the number of workers at a value of 32, to avoid 
+  ThreadPoolExecutor class in capping the number of workers, to avoid 
   taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the 
-  Python Global Interpreter Lock. 
-  The standard PySys maximum of 32 can be overridden on a per-project basis by setting the project property ``pysysMaxWorkerThreads``. 
+  Python Global Interpreter Lock. Initially this maximum is set to the high value of 100 but it may be reduced in 
+  future PySys releases. The upper limit can be overridden on a per-project basis by setting the project property ``pysysMaxWorkerThreads``. 
   The default number of threads can also be further lowered for specific machines or users by setting the ``PYSYS_DEFAULT_THREADS`` 
   environment variable. 
 
