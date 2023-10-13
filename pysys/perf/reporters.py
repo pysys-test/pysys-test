@@ -125,7 +125,7 @@ class CSVPerformanceReporter(BasePerformanceReporter):
 							log.info('Rewriting CSV to aggregate results across all %d cycles'%self.runner.cycles)
 							perfFile.dump(p)
 				
-					log.info('Performance results were written to: %s', os.path.normpath(p).replace(os.path.normpath(self.project.testRootDir), '').lstrip('/\\'))
+					log.info('Performance results were written to: %s', os.path.normpath(p)) # absolute path is easiest to deal with
 					log.info('  (add the above path to env %s to show a comparison against that baseline on future test runs)', PrintSummaryPerformanceReporter.BASELINES_ENV_VAR)
 					
 					if self.publishArtifactCategory:
