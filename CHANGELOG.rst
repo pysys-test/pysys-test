@@ -43,7 +43,7 @@ Some new features you might want to try out include:
   then validating it with a regular expression. You'll get much more descriptive messages is a test fails using 
   this approach rather than doing it all in a single ``assertGrep``. 
 
-- Tale a look at the new `BaseTest.createThreadPoolExecutor`, `BaseTest.listDirContents` and `pysys.mappers.IncludeMatches` methods. 
+- See also the new `BaseTest.createThreadPoolExecutor`, `BaseTest.listDirContents` and `pysys.mappers.IncludeMatches` methods. 
 
 - Considering switching to ``.tar.gz`` or ``.tar.xz`` instead of ``.zip`` format to get smaller (better compressed) test output 
   directory archives when using `pysys.writer.testoutput.TestOutputArchiveWriter`. 
