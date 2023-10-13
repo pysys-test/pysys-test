@@ -28,6 +28,7 @@ except Exception:
 	pass 
 
 from pysys.config.manual import *
+from pysys.utils.threadutils import createThreadInitializer
 
 
 class ManualTester(object):  # pragma: no cover
@@ -60,6 +61,7 @@ class ManualTester(object):  # pragma: no cover
 		self.currentStep = -1
 		self.results = {}
 		self.defect = ""
+		self.__loggingInitializer = createThreadInitializer(owner)
 
 	def build(self):
 		self.parentContainer = Tk()
@@ -199,6 +201,7 @@ class ManualTester(object):  # pragma: no cover
 		Called on a background thread by startManualTester. 
 		"""
 		# this runs on a background thread
+		self.__loggingInitializer()
 		try:
 			self.build()
 			self.parentContainer.mainloop()
