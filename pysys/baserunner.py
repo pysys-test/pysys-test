@@ -198,6 +198,11 @@ class BaseRunner(ProcessUser):
 		self.log = log
 		self.runner = self
 
+		# Currently pysysIgnoredLoggerNames property is undocumented/untested
+		from pysys.internal.initlogging import DelegatingPerThreadLogHandler
+		pysysIgnoredLoggerNames = [x.strip() for x in self.project.getProperty('pysysIgnoredLoggerNames','').split(',') if x]
+		DelegatingPerThreadLogHandler.IGNORED_LOGGER_NAMES = set(pysysIgnoredLoggerNames)
+
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
 		# runner subclasses to do so if required. 

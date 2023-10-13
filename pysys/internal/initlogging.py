@@ -112,6 +112,9 @@ class DelegatingPerThreadLogHandler(logging.Handler):
 		super(DelegatingPerThreadLogHandler, self).__init__()
 		self.__threadLocals = threading.local()
 
+	""" Used if there is a logger category that should not go through the usual PySys logging mechanics """
+	IGNORED_LOGGER_NAMES = set()
+
 	def setLogHandlersForCurrentThread(self, handlers):
 		self.__threadLocals.handlers = handlers
 		self.__threadLocals.emitFunctions = [(h.level, h.emit) for h in handlers] if handlers else None
@@ -120,6 +123,7 @@ class DelegatingPerThreadLogHandler(logging.Handler):
 		return getattr(self.__threadLocals, 'handlers', []) or []
 	
 	def emit(self, record):
+		if record.name in DelegatingPerThreadLogHandler.IGNORED_LOGGER_NAMES: return
 		functions = getattr(self.__threadLocals, 'emitFunctions', None) 
 		if functions is None:
 			_unregisteredThreadLogHandler.emit(record)
