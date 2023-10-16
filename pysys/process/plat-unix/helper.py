@@ -48,7 +48,7 @@ from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.process import Process
-from pysys.process.user import ProcessUser
+import pysys.process.user as  # can't import ProcessUser class itself without circular dependency
 
 PYSYS_DISABLE_PROCESS_GROUP_CLEANUP = os.getenv('PYSYS_DISABLE_PROCESS_GROUP_CLEANUP','').lower()=='true' # undocumented option for disabling this when executed within another framework
 
@@ -183,10 +183,10 @@ class ProcessImpl(Process):
 		# While waiting for process to terminate, modern Linux kernels (5.3+) give us a way to block for completion without polling, so we 
 		# can use a larger timeout to avoid wasting time in the Python GIL (but not so large as to stop us from checking for abort
 		owner = self.owner
-		if self.pidfd and ProcessUser.isRunnerAbortingHandle:
-			if owner is not None and ProcessUser.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+		if self.pidfd and processuser.ProcessUser.isRunnerAbortingHandle:
+			if owner is not None and processuser.ProcessUser.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
 
-			waitobjects = [ ProcessUser.isRunnerAbortingHandle, self.pidfd]
+			waitobjects = [ processuser.isRunnerAbortingHandle, self.pidfd]
 
 			pollTimeoutMillis = 3000
 			if select.select(waitobjects, [], [], pollTimeoutMillis/1000.0)[0]: # if objects were signalled or got anything other than timeout/block, something was signalled so we won't be doing this again
@@ -195,7 +195,7 @@ class ProcessImpl(Process):
 					if self.pidfd: os.close(self.pidfd)
 					self.pidfd = None
 
-			if owner is not None and ProcessUser.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+			if owner is not None and processuser.ProcessUser.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
 			return
 		
 		self._pollWait(0.05) # fallback to a fixed sleep to avoid spinning if an unexpected return code is returned
@@ -291,3 +291,4 @@ class ProcessImpl(Process):
 ProcessWrapper = ProcessImpl # old name for compatibility
 
 log.debug("OS and python supports pidfd_open: %s", hasattr(os, 'pidfd_open'))
+
