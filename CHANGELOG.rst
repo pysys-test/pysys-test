@@ -366,8 +366,6 @@ There should be no breaking changes in this release, however the following behav
   Previously such logging did not go anywhere. However. it is still best to 
   use a standard PySys mechanism for creating background threads since otherwise the logging is not written to 
   ``run.log`` files for the test that generated it. 
-- Improved ``startProcess`` command line generation on Windows to better handle corner cases such as embedded backslashes or
-  double-quotes, and trailing backslashes.
 
 -----------------
 What's new in 2.1

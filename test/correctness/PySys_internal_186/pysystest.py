@@ -76,5 +76,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.testCmdLine('cacls.exe', ['C:\\'])
 		self.testCmdLine('subst.exe', ['/D', 'Z:'])
 
+		self.testCmdLine('program.exe', ['a>>b'])
+
 	def validate(self):
 		self.addOutcome(PASSED)
