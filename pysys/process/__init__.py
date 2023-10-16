@@ -94,7 +94,7 @@ class Process(object):
 		self.state = state
 		self.timeout = timeout
 		self.expectedExitStatus = expectedExitStatus
-		self.owner = owner
+		self.owner = owner # nb: this CAN be initialzied to None, e.g. when test frameworks instantiate ProcessWrapper directly without calling startProcess
 
 		# 'publicly' available data attributes set on execution
 		self.pid = None
