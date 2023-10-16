@@ -34,7 +34,6 @@ from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.config.project import Project
-from pysys.process.helper import ProcessImpl
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
@@ -329,7 +328,7 @@ class ProcessUser(object):
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, onError=None, quiet=False, stdouterr=None, 
-			background=False, info={}, processFactory=pysys.process.helper.ProcessImpl):
+			background=False, info={}, processFactory=None):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.Process` object.
 		
@@ -502,6 +501,7 @@ class ProcessUser(object):
 		startTime = time.monotonic()
 		
 		# pass everything as a named parameter, which makes life easier for custom factory methods
+		if processFactory is None: processFactory = pysys.process.helper.ProcessImpl
 		process = processFactory(command=command, arguments=arguments, environs=environs, workingDir=workingDir, 
 			state=state, timeout=timeout, stdout=stdout, stderr=stderr, 
 			displayName=displayName, expectedExitStatus=expectedExitStatus, info=info, owner=self)
@@ -2639,3 +2639,4 @@ class ProcessUser(object):
 
 if not IS_WINDOWS:
 	ProcessUser.isRunnerAbortingHandle, ProcessUser._isRunnerAbortingWriteHandle = os.pipe()
+import pysys.process.helper

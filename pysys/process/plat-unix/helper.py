@@ -184,7 +184,7 @@ class ProcessImpl(Process):
 					if self.pidfd: os.close(self.pidfd)
 					self.pidfd = None
 
-			if owner is not None and ProcessUser.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
+			if owner is not None and processuser.ProcessUser.isRunnerAborting is True and owner.isCleanupInProgress is False: raise KeyboardInterrupt()
 			return
 		
 		self._pollWait(0.05) # fallback to a fixed sleep to avoid spinning if an unexpected return code is returned
