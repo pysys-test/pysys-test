@@ -19,23 +19,11 @@
 
 :meta private: No reason to publically document this. 
 
-The import path of the `pysys.process.helper` module is set up
-at runtime so as to select either the Win32 modules (located in pysys.process.plat-win32), or the 
-unix modules (located in pysys.process.plat-unix)
-
-The module contains the `pysys.process.user.ProcessUser` which holds all the logic for process management and 
-other common capabilities that are used by subclasses `pysys.basetest.BaseTest` and `pysys.baserunner.BaseRunner`.
-
- that can be extended by subclasses that 
-require the ability to start, stop, interact and monitor processes started by the PySys 
-framework. Subclasses within the framework are the L{pysys.basetest.BaseTest} and 
-L{pysys.baserunner.BaseRunner} classes, both of which may be required to start processes as part 
-of the execution of a set of testcases. The import path of the helper and monitor modules is set up
+The import path of the helper and monitor modules is set up
 at runtime so as to select either the Win32 modules (located in pysys.process.plat-win32), or the 
 unix modules (located in pysys.process.plat-unix); both modules are written to display common 
 functionality in order to provide a unified abstraction where the user is not required to select the 
 correct modules based on their current operation system.
-
 
 """
 
@@ -48,7 +36,7 @@ from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.process import Process
-import pysys.process.user as  # can't import ProcessUser class itself without circular dependency
+import pysys.process.user as processuser # can't import ProcessUser class itself without circular dependency
 
 PYSYS_DISABLE_PROCESS_GROUP_CLEANUP = os.getenv('PYSYS_DISABLE_PROCESS_GROUP_CLEANUP','').lower()=='true' # undocumented option for disabling this when executed within another framework
 
