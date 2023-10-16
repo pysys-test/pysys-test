@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Process Module - argument escaping</title>    
+    <title>Process Module - argument escaping (including cmd.exe bat script handling)</title>    
     <purpose><![CDATA[
 Tests that a variety of arguments containing special characters such as spaces can be passed correctly. 
 ]]>

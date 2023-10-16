@@ -134,57 +134,30 @@ class ProcessImpl(Process):
 		The returned value can be added to the end of a command line, with an intervening
 		space, and will be treated as a separate argument by the standard Windows command
 		line parsers (CommandLineToArgvW and parse_cmdline).  Double quotes, whitespace
-		and backslashes in the argument will be preserved for the parser to see them.
+		and backslashes in the argument should be preserved for the parser to see them.
 		
-		Windows' quoting and escaping rules are somewhat complex and the implementation
-		of this method was derived from a few different sources:
+		The current implementation is not yet fully compliant, but does a reasonable job for most 
+		cases. 
+
+		Windows' quoting and escaping rules are somewhat complex, see:
 		https://docs.microsoft.com/en-us/previous-versions/17w5ykft(v=vs.85)
 		http://www.windowsinspired.com/the-correct-way-to-quote-command-line-arguments/
 		http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
 		http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
 		https://daviddeley.com/autohotkey/parameters/parameters.htm
-		This method tries to avoid any areas of different behaviour between the two
-		standard parsers, in particular the undocumented rules around handling of
-		consecutive unescaped double quote characters.
-		"""
-		whitespace = None
-		# Short-circuit some easy and common cases:
-		# - No quotes, no whitespace (just return the input unchanged)
-		# - No quotes, no trailing backslash, whitespace (wrap in double quotes)
-		# Everything else falls through to the more complex algorithm
-		if '\"' not in input:
-			empty = (len(input) == 0)
-			whitespace = (empty or ' ' in input or '\t' in input)
-			if not whitespace: return input
-			if not empty and input[-1] != '\\': return '\"%s\"' % input
-		# Make sure we look for whitespace exactly once
-		if whitespace is None: whitespace = (' ' in input or '\t' in input)
 
-		output = []
-		backslash = 0
-		for ch in input:
-			# Count backslashes until we hit a non-backslash
-			if ch == '\\':
-				backslash += 1
-			elif ch == '\"':
-				# Add any pending backslashes (escaped)
-				# Then add the escaped double quote
-				output.extend([2 * backslash * '\\', '\\\"'])
-				backslash = 0
-			else:
-				# Add any pending backslashes (unescaped)
-				# Then add the next character
-				output.extend([backslash * '\\', ch])
-				backslash = 0
-		if whitespace:
-			# Add any pending backslashes (escaped)
-			# Wrap the whole argument in double quotes
-			output.extend([2 * backslash * '\\', '\"'])
-			output.insert(0, '\"')
-		else:
-			# Add any pending backslashes (unescaped)
-			output.append(backslash * '\\')
-		return ''.join(output)
+		Note that windows cmd.exe command prompt performs various additional replacements on the 
+		entire command line (nb: NOT on individual args) after the above which seriously complicates matters. 
+		For full accuracy it may be necessary to special case .bat/.cmd and cmd.exe invocations and
+		perform ``^`` escaping on them after the main algorithm, possibly with a startProcess override 
+		in case the auto-detection of cmd.exe goes wrong, and possible with a (temporary) project property to downgrade 
+		to the previous behaviour in case of unexpected problems. 
+
+		See:
+		https://learn.microsoft.com/en-us/archive/blogs/twistylittlepassagesallalike/everyone-quotes-command-line-arguments-the-wrong-way
+		https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows
+		"""
+		return '\"%s\"'%input.replace('"', '""')
 
 	def __buildCommandLine(self, command, args):
 		""" Private method to build a Windows command line from a command plus argument list.

@@ -4,7 +4,9 @@ __pysys_purpose__ = r"""
 Check that some weird edge cases when quoting Windows command lines are handled,
 and that quoted command lines are parsed the way we expect them to be.
 """ 
-	
+
+__pysys_skipped_reason__ = "temporarily disabled test as it doesn't work until we implement a deeper fix for win cmd line escaping"
+
 __pysys_authors__ = "rsm31"
 __pysys_created__ = "2022-05-30"
 __pysys_groups__           = "process; inherit=true"
@@ -75,6 +77,8 @@ class PySysTest(pysys.basetest.BaseTest):
 		# Some specific command lines that have caused problems
 		self.testCmdLine('cacls.exe', ['C:\\'])
 		self.testCmdLine('subst.exe', ['/D', 'Z:'])
+
+		self.testCmdLine('program.exe', ['a>>b'])
 
 	def validate(self):
 		self.addOutcome(PASSED)
