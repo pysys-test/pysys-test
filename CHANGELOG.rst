@@ -40,7 +40,7 @@ Some new features you might want to try out include:
   editor's ``PYTHONPATH`` too. 
 
 - Use the new `BaseTest.assertGrepOfGrep()` method if you're extracting a line of text from a file and 
-  then validating it with a regular expression. You'll get much more descriptive messages is a test fails using 
+  then validating it with a regular expression. You'll get much more descriptive messages if a test fails using 
   this approach rather than doing it all in a single ``assertGrep``. 
 
 - See also the new `BaseTest.createThreadPoolExecutor`, `BaseTest.listDirContents` and `pysys.mappers.IncludeMatches` methods. 
