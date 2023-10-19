@@ -8,7 +8,7 @@
 
 	<!-- Specify a minimum required PySys version to run these tests. Update this each time you upgrade your project 
 	so that everyone gets a clear message if accidentally running tests using an old version. -->
-	<requires-pysys>2.2</requires-pysys>
+	<requires-pysys>2.3</requires-pysys>
 
 	<!-- Specify a minimum required python version to run these tests. -->
 	<requires-python>3.8</requires-python>

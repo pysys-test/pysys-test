@@ -39,7 +39,7 @@ jobs:
         id: deps
         run: |
           python -m pip install --upgrade pip
-          pip install pysys==2.2
+          pip install pysys==2.3
 
           pip install coverage
 
