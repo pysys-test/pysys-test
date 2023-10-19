@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.testoutput &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.testoutput &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -183,9 +183,11 @@
 
 <span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">import</span> <span class="nn">locale</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
 
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="o">*</span>
@@ -193,16 +195,20 @@
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.safeeval</span> <span class="kn">import</span> <span class="n">safeEval</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TestOutputArchiveWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter">[docs]</a><span class="k">class</span> <span class="nc">TestOutputArchiveWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer that creates zip archives of each failed test&#39;s output directory, </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer that creates zip of tar.gz/xz archives of each failed test&#39;s output directory, </span>
 <span class="sd">	producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. </span>
 <span class="sd">	</span>
 <span class="sd">	This writer is enabled when running with ``--record``. If using this writer in conjunction with a CI writer that </span>
 <span class="sd">	publishes the generated archives, be sure to include this writer first in the list of writers in your project </span>
 <span class="sd">	configuration. </span>
+
+<span class="sd">	Note that the zip file format typically generates much larger files than tar.xz (and tar.gz) so use the latter format </span>
+<span class="sd">	where possible. </span>
 
 <span class="sd">	Publishes artifacts with category name &quot;TestOutputArchive&quot; and the directory (unless there are no archives) </span>
 <span class="sd">	as &quot;TestOutputArchiveDir&quot; for any enabled `pysys.writer.api.ArtifactPublisher` writers. </span>
@@ -213,7 +219,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">destDir</span> <span class="o">=</span> <span class="s1">&#39;__pysys_output_archives.$</span><span class="si">{outDirName}</span><span class="s1">/&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The directory to write the archives to, as an absolute path, or relative to the testRootDir (or --outdir if specified). </span>
 
 <span class="sd">	This directory will be deleted at the start of the run if it already exists. </span>
@@ -221,23 +227,31 @@
 <span class="sd">	Project ``${...}`` properties can be used in the path. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
+	<span class="nb">format</span> <span class="o">=</span> <span class="s2">&quot;zip&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The archive type. Supported types are ``zip``, ``tar.gz`` and ``tar.xz``. The latter are often significantly smaller than zip </span>
+<span class="sd">	files due to cross-file compression. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
 	<span class="n">maxTotalSizeMB</span> <span class="o">=</span> <span class="mf">1024.0</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The (approximate) limit on the total size of all archives.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">maxArchiveSizeMB</span> <span class="o">=</span> <span class="mf">200.0</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	The (approximate) limit on the size each individual test archive.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The (approximate) limit on the size each individual test ``zip`` file, or of the total uncompressed size of the files if making a ``tar.*`` file. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">maxArchives</span> <span class="o">=</span> <span class="mi">50</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The maximum number of archives to create. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">archiveAtEndOfRun</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># if at end of run can give deterministic order, also reduces I/O while tests are executing</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	By default all archives are created at the end of the run once all tests have finished executing. This avoids </span>
 <span class="sd">	I/O contention with execution of tests, and also selection of the tests to generated archives to be done </span>
 <span class="sd">	in a deterministic (but pseudo-random) fashion rather than just taking the first N failures. </span>
@@ -248,12 +262,12 @@
 
 
 	<span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="s1">&#39;REQUIRES INSPECTION&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be archived. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A regular expression indicating test output paths that will be excluded from archiving, for example large </span>
 <span class="sd">	temporary files that are not useful for diagnosing problems. </span>
 <span class="sd">	</span>
@@ -264,7 +278,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A regular expression indicating test output paths that will be included in the archive. This can be used to </span>
 <span class="sd">	archive just some particular files. Note that for use cases such as collecting graphs and code coverage files </span>
 <span class="sd">	generated by a test run, the collect-test-output feature is usually a better fit than using this writer. </span>
@@ -283,7 +297,7 @@
 		<span class="c1"># avoid double-expanding (which could mess up ${$} escapes), but if using default value we need to expand it</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">==</span> <span class="n">TestOutputArchiveWriter</span><span class="o">.</span><span class="n">destDir</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)))</span>
-		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;.zip&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)):</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;.zip&#39;</span><span class="p">,</span> <span class="s1">&#39;.tar.gz&#39;</span><span class="p">,</span> <span class="s1">&#39;.tar.xz&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)):</span>
 			<span class="n">deletedir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span> <span class="c1"># remove any existing archives (but not if this dir seems to have other stuff in it!)</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span> <span class="k">else</span> <span class="kc">None</span>
@@ -305,7 +319,7 @@
 
 	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archiveAtEndOfRun</span><span class="p">:</span>
-			<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span><span class="p">):</span> <span class="c1"># sort by hash of testId so make order deterministic</span>
+			<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span><span class="p">):</span> <span class="c1"># sort by hash of testId so make order deterministic but also give a varied distribution of ids</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">_archiveTestOutputDir</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span><span class="p">)</span>
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span><span class="p">:</span>
@@ -321,7 +335,7 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">,</span> <span class="s1">&#39;TestOutputArchiveDir&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TestOutputArchiveWriter.shouldArchive"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter.shouldArchive">[docs]</a>	<span class="k">def</span> <span class="nf">shouldArchive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Decides whether this test is eligible for archiving of its output. </span>
 <span class="sd">		</span>
 <span class="sd">		The default implementation archives only tests that have a failure outcome, or are listed in </span>
@@ -339,22 +353,25 @@
 		<span class="nb">id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.cycle</span><span class="si">%03d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">testCycle</span><span class="p">))</span> <span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">testCycle</span> <span class="k">else</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span>
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archiveAtEndOfRun</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">hash</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span> <span class="nb">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="p">])</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="nb">id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="nb">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="p">])</span> <span class="c1"># need a stable hash (not &quot;hash()&quot;) to get a varied but deterministic set of ids</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_archiveTestOutputDir</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
 	
 <div class="viewcode-block" id="TestOutputArchiveWriter._newArchive"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter._newArchive">[docs]</a>	<span class="k">def</span> <span class="nf">_newArchive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Creates and opens a new archive file for the specified id.</span>
 <span class="sd">		</span>
 <span class="sd">		:return: (str path, filehandle) The path will include an appropriate extension for this archive type. </span>
 <span class="sd">		  The filehandle must have the same API as Python&#39;s ZipFile class. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.zip&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;outDirName&#39;</span><span class="p">]))</span>
-		<span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZIP_DEFLATED</span><span class="p">,</span> <span class="n">allowZip64</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+		<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;outDirName&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">))</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;zip&#39;</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZIP_DEFLATED</span><span class="p">,</span> <span class="n">allowZip64</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;tar.&#39;</span><span class="p">),</span> <span class="s1">&#39;Supported formats are: zip, tar.gz, tar.xz not &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span>
+		<span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w:&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="TestOutputArchiveWriter._archiveTestOutputDir"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter._archiveTestOutputDir">[docs]</a>	<span class="k">def</span> <span class="nf">_archiveTestOutputDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Creates an archive for the specified test, unless doing so would violate the configured limits </span>
 <span class="sd">		(e.g. maxArchives). </span>
 <span class="sd">		</span>
@@ -393,8 +410,8 @@
 
 				<span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">outputDir</span><span class="p">):</span>
 					<span class="c1"># Just the files, don&#39;t bother with the directories for now</span>
-					
 					<span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">fn</span><span class="p">:</span> <span class="p">[</span><span class="n">fn</span><span class="o">!=</span><span class="s1">&#39;run.log&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="p">]</span> <span class="p">)</span> <span class="c1"># be deterministic, and put run.log first</span>
+					<span class="n">dirs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 					
 					<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
 						<span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -418,7 +435,7 @@
 						
 						<span class="k">try</span><span class="p">:</span>
 							<span class="k">if</span> <span class="n">fileSize</span> <span class="o">&gt;</span> <span class="n">bytesRemaining</span><span class="p">:</span>
-								<span class="k">if</span> <span class="n">triedTmpZipFile</span><span class="p">:</span> <span class="c1"># to save effort, don&#39;t keep trying once we&#39;re close - from now on only attempt small files</span>
+								<span class="k">if</span> <span class="n">triedTmpZipFile</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="o">!=</span><span class="s1">&#39;zip&#39;</span><span class="p">:</span> <span class="c1"># to save effort, don&#39;t keep trying once we&#39;re close - from now on only attempt small files; also not possible if making a tar</span>
 									<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
 									<span class="k">continue</span>
 								<span class="n">triedTmpZipFile</span> <span class="o">=</span> <span class="kc">True</span>
@@ -440,18 +457,29 @@
 									
 							<span class="c1"># Here&#39;s where we actually add it to the real archive</span>
 							<span class="n">memberName</span> <span class="o">=</span> <span class="n">fn</span><span class="p">[</span><span class="n">rootlen</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-							<span class="n">myzip</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">memberName</span><span class="p">)</span>
+							<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;zip&#39;</span><span class="p">:</span>
+								<span class="n">myzip</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">memberName</span><span class="p">)</span>
+							<span class="k">else</span><span class="p">:</span>
+								<span class="n">myzip</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">memberName</span><span class="p">)</span>
 						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># might happen due to file locking or similar</span>
 							<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Failed to add output file &quot;</span><span class="si">%s</span><span class="s1">&quot; to archive: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
 							<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
 							<span class="k">continue</span>
 						<span class="n">filesInZip</span> <span class="o">+=</span> <span class="mi">1</span>
-						<span class="n">bytesRemaining</span> <span class="o">-=</span> <span class="n">myzip</span><span class="o">.</span><span class="n">getinfo</span><span class="p">(</span><span class="n">memberName</span><span class="p">)</span><span class="o">.</span><span class="n">compress_size</span>
+						<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;zip&#39;</span><span class="p">:</span>
+							<span class="n">bytesRemaining</span> <span class="o">-=</span> <span class="n">myzip</span><span class="o">.</span><span class="n">getinfo</span><span class="p">(</span><span class="n">memberName</span><span class="p">)</span><span class="o">.</span><span class="n">compress_size</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="n">bytesRemaining</span> <span class="o">-=</span> <span class="n">myzip</span><span class="o">.</span><span class="n">getmember</span><span class="p">(</span><span class="n">memberName</span><span class="p">)</span><span class="o">.</span><span class="n">size</span> <span class="c1"># no way to get compressed size unfortunately</span>
 				
 				<span class="k">if</span> <span class="n">skippedFiles</span> <span class="ow">and</span> <span class="n">fileIncludesRegex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># keep the archive clean if there&#39;s an explicit include</span>
 					<span class="n">skippedFilesStr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">skippedFiles</span><span class="p">])</span>
 					<span class="n">skippedFilesStr</span> <span class="o">=</span> <span class="n">skippedFilesStr</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-					<span class="n">myzip</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span><span class="s1">&#39;__pysys_skipped_archive_files.txt&#39;</span><span class="p">,</span> <span class="n">skippedFilesStr</span><span class="p">)</span>
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;zip&#39;</span><span class="p">:</span>
+						<span class="n">myzip</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span><span class="s1">&#39;__pysys_skipped_archive_files.txt&#39;</span><span class="p">,</span> <span class="n">skippedFilesStr</span><span class="p">)</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">tarinfo</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">TarInfo</span><span class="p">(</span><span class="s1">&#39;__pysys_skipped_archive_files.txt&#39;</span><span class="p">)</span>
+						<span class="n">tarinfo</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">skippedFilesStr</span><span class="p">)</span>
+						<span class="n">myzip</span><span class="o">.</span><span class="n">addfile</span><span class="p">(</span><span class="n">tarinfo</span><span class="p">,</span> <span class="n">fileobj</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">skippedFilesStr</span><span class="p">))</span>
 	
 			<span class="k">if</span> <span class="n">filesInZip</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
 				<span class="c1"># don&#39;t leave empty zips around</span>
@@ -468,7 +496,7 @@
 			<span class="k">raise</span></div></div>
 		
 <div class="viewcode-block" id="CollectTestOutputWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter">[docs]</a><span class="k">class</span> <span class="nc">CollectTestOutputWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">TestOutputVisitor</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer that collects files matching a specified pattern from the output directory after each test, and puts </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer that collects files matching a specified pattern from the output directory after each test, and puts </span>
 <span class="sd">	them in a single directory or archive - for example code coverage files or performance graphs. </span>
 <span class="sd">	</span>
 <span class="sd">	This writer can be used as-is or as a base class for writers that need to collect files during test execution </span>
@@ -484,7 +512,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">destDir</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The directory in which the files will be collected, as an absolute path, or relative to the testRootDir (or --outdir if specified). </span>
 
 <span class="sd">	This directory will be deleted at the start of the run if it already exists. </span>
@@ -493,16 +521,42 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">destArchive</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Optional filename of a .zip archive to generate with the contents of the destDir. </span>
 <span class="sd">	</span>
 <span class="sd">	If a non-absolute path is specified it is evaluated relative to the destDir. </span>
 <span class="sd">	</span>
 <span class="sd">	Project ``${...}`` properties can be used in the path. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	
+
+	<span class="n">includeTestIf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A Python lambda that will be evaluated at the end of a test to determine whether output from a given test should be collected. </span>
+
+<span class="sd">	For example code coverage collectors built on this class can include only unit tests or only tests that run in </span>
+<span class="sd">	pull requests/CI (to ensure a stable baseline for coverage comparisons). This is useful if you wish to have multiple coverage writers </span>
+<span class="sd">	to generate separate coverage reports for all correctness/integration tests versus seeing the coverage achieved in your </span>
+<span class="sd">	unit tests (or a small set of smoke tests used in pull requests). </span>
+
+<span class="sd">	Note that this option only disables the collection/aggregation it does not do anything to actually disable the generation of the files, </span>
+<span class="sd">	so do not use it for excluding performance/soak/reliability tests from code coverage. For that purpose set the </span>
+<span class="sd">	``disableCoverage`` group on the relevant tests (possibly using ``pysysdirconfig.xml`` at the directory level) or the set </span>
+<span class="sd">	``self.disableCoverage = True`` on the test object, which will prevent any coverage-related slowdown in the test execution. </span>
+
+<span class="sd">	For example::</span>
+
+<span class="sd">		&lt;property name=&quot;includeTestIf&quot;&gt;lambda testObj: </span>
+<span class="sd">			&#39;unitTest&#39; in testObj.descriptor.groups</span>
+<span class="sd">			or testObj.project.getProperty(&#39;isLocalDeveloperTestRun&#39;,False)</span>
+<span class="sd">		&lt;/property&gt;</span>
+<span class="sd">	</span>
+<span class="sd">	The expression is evaluated using the `pysys.utils.safeeval.safeEval` function. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
 	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A regular expression indicating the test output paths that will be collected. This can be used to </span>
 <span class="sd">	archive just some particular files. This is required. </span>
 <span class="sd">	</span>
@@ -511,7 +565,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A regular expression indicating test output paths that will be excluded from collection. </span>
 <span class="sd">	</span>
 <span class="sd">	For example ``&quot;.*/MyTest_001/.*/mybigfile.*[.]tmp&quot;``.</span>
@@ -520,7 +574,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">outputPattern</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@&#39;</span> 
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A string indicating the file (and optionally subdirectory name) to use when writing each collected file to </span>
 <span class="sd">	the destDir. </span>
 <span class="sd">	</span>
@@ -544,13 +598,13 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">publishArtifactDirCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> 
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	If specified, the output directory will be published as an artifact using the specified category name, </span>
 <span class="sd">	e.g. ``MyCodeCoverageDir``. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">publishArtifactArchiveCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> 
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	If specified the ``destArchive`` file (if any) will be published as an artifact using the specified category name.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
@@ -587,6 +641,9 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">collectedFileCount</span> <span class="o">=</span> <span class="mi">0</span>
 
 	<span class="k">def</span> <span class="nf">visitTestOutputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeTestIf</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeTestIf</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">safeEval</span><span class="p">(</span><span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">includeTestIf</span><span class="p">)(</span><span class="n">testObj</span><span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+
 		<span class="c1"># strip off test root dir prefix for the regex comparison</span>
 		<span class="n">cmppath</span> <span class="o">=</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">cmppath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">):</span>
@@ -619,7 +676,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">collectedFileCount</span> <span class="o">+=</span> <span class="mi">1</span>
 	
 <div class="viewcode-block" id="CollectTestOutputWriter.archiveAndPublish"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter.archiveAndPublish">[docs]</a>	<span class="k">def</span> <span class="nf">archiveAndPublish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Generate an archive of the destDir (if configured) and publish artifacts (if configured). </span>
 <span class="sd">		</span>
 <span class="sd">		Called by default as part of `cleanup()`.</span>
@@ -677,7 +734,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

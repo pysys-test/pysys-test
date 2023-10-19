@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Change Log &mdash; PySys v2.1  documentation</title>
+  <title>Change Log &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -50,7 +50,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PySys v2.1
+            <a href="index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -84,12 +84,24 @@
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-new-in-2-2">What’s new in 2.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-usability">Command line usability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ide-editor-support">IDE/editor support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ctrl-c-sigterm-handling">Ctrl+C/SIGTERM handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helper-functions-to-use-in-your-tests">Helper functions to use in your tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-improvements">Performance improvements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#project-and-test-configuration">Project and test configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writers">Writers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixes">Fixes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#minor-behaviour-changes">Minor behaviour changes</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-new-in-2-1">What’s new in 2.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-new-in-2-0">What’s new in 2.0</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#version-and-documentation-changes">Version and documentation changes</a></li>
@@ -101,7 +113,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#process-management-improvements">Process management improvements</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#line-mapper-text-manipulation-improvements">Line mapper/text manipulation improvements</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#basetest-api-improvements">BaseTest API improvements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fixes">Fixes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixes-in-2-0">Fixes in 2.0</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#migration-notes">Migration notes</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#breaking-changes">Breaking changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#deprecations">Deprecations</a></li>
@@ -174,7 +186,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PySys v2.1</a>
+          <a href="index.html">PySys v2.2</a>
         
       </nav>
 
@@ -232,6 +244,332 @@
 request in the PySys test framework. For how-tos and advice,
 <a class="reference external" href="https://stackoverflow.com/questions/ask?tags=pysys">ask a question</a>.</p>
 </div>
+<div class="section" id="what-s-new-in-2-2">
+<h2>What’s new in 2.2<a class="headerlink" href="#what-s-new-in-2-2" title="Permalink to this headline">¶</a></h2>
+<p>PySys 2.2 was released in October 2023.</p>
+<p>This release improves usability of the <code class="docutils literal notranslate"><span class="pre">pysys</span></code> command line, gives a better experience editing/running tests from IDEs,
+improves performance and Ctrl+C cancellation handling, and adds a few new methods and parameters you can use in your tests.
+This release also adds support for Python 3.11 and 3.12, and removes support for the end-of-life 3.6 and 3.7 Python releases.</p>
+<p>Some new features you might want to try out include:</p>
+<ul>
+<li><p>Instead of running <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">print</span></code>, use the equivalent <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">ls</span></code> to save some keystrokes. Try out the new <code class="docutils literal notranslate"><span class="pre">--verbose</span></code>
+flag which groups related tests (sorting by title), and prints the full path of each test file (e.g. <code class="docutils literal notranslate"><span class="pre">XXX/pysystest.py</span></code>) so you can
+easily open up any tests of interest directly from your IDE or shell.</p></li>
+<li><p>Now that <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> accepts directory paths (not only test ids), you can use your shell’s directory tab completion to help specify
+the tests to run.</p></li>
+<li><p>Get better code completion and avoid warnings when editing tests inside your Python-enabled IDE/editor by following the
+new best practices described in the PySys documentation. For example use mix-in helper classes (not <code class="docutils literal notranslate"><span class="pre">&lt;test-plugin&gt;</span></code>) for
+sharing logic between tests, use <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pysys.basetest,</span> <span class="pre">pysys.mappers</span></code> not <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pysys</span></code> at the start of
+all tests, and make sure references to <code class="docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code> in your test class class inheritance list are fully qualified.</p>
+<p>To use a Python IDE with PySys, either configure it to use a venv/Python installation that has PySys installed, or
+specify the path to the PySys package with a <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> environment variable (e.g. using a <code class="docutils literal notranslate"><span class="pre">.env</span></code> file).
+If your project has any custom Python extensions configured with a <code class="docutils literal notranslate"><span class="pre">&lt;pythonpath&gt;</span></code> element you should add that to your
+editor’s <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> too.</p>
+</li>
+<li><p>Use the new <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrepOfGrep()</span></code></a> method if you’re extracting a line of text from a file and
+then validating it with a regular expression. You’ll get much more descriptive messages if a test fails using
+this approach rather than doing it all in a single <code class="docutils literal notranslate"><span class="pre">assertGrep</span></code>.</p></li>
+<li><p>See also the new <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.createThreadPoolExecutor" title="pysys.basetest.BaseTest.createThreadPoolExecutor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.createThreadPoolExecutor</span></code></a>, <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.listDirContents" title="pysys.basetest.BaseTest.listDirContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.listDirContents</span></code></a> and <a class="reference internal" href="autodocgen/pysys.mappers.html#pysys.mappers.IncludeMatches" title="pysys.mappers.IncludeMatches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers.IncludeMatches</span></code></a> methods.</p></li>
+<li><p>Considering switching to <code class="docutils literal notranslate"><span class="pre">.tar.gz</span></code> or <code class="docutils literal notranslate"><span class="pre">.tar.xz</span></code> instead of <code class="docutils literal notranslate"><span class="pre">.zip</span></code> format to get smaller (better compressed) test output
+directory archives when using <a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter" title="pysys.writer.testoutput.TestOutputArchiveWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.TestOutputArchiveWriter</span></code></a>.</p></li>
+<li><p>Add a <a class="reference internal" href="autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.TextResultsWriter" title="pysys.writer.outcomes.TextResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.TextResultsWriter</span></code></a> with <code class="docutils literal notranslate"><span class="pre">verbose</span></code> set to true to your project configuration, and enable it
+with an environment variable (e.g <code class="docutils literal notranslate"><span class="pre">PYSYS_DEFAULT_ARGS=--writer</span> <span class="pre">verboseTextResultsWriter</span></code>) so that whenever you kick off a long test
+run you can check on the failures while it executes (or after it’s completed - even if you close your shell/window) just by browsing
+through the text file. You can also pipe the file through <code class="docutils literal notranslate"><span class="pre">sort</span></code> to group related failures together.
+Example configuration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">writer</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;TextResultsWriter&quot;</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;pysys.writer&quot;</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;verboseTextResultsWriter&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;file&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/__pysys_results.$</span><span class="si">{outDirName}</span><span class="s2">.log&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;verbose&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">writer</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Use the environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_PROJECT_APPEND</span></code> to run PySys with any user-specific settings you like (e.g. custom writers)
+without modifying the main project file.</p></li>
+</ul>
+<div class="section" id="command-line-usability">
+<h3>Command line usability<a class="headerlink" href="#command-line-usability" title="Permalink to this headline">¶</a></h3>
+<p>This release adds several enhancements aimed at making it easier to use the <code class="docutils literal notranslate"><span class="pre">pysys</span></code> command line:</p>
+<ul>
+<li><p>Added command line support for running and printing tests by their (absolute or relative) directory rather than their test id.
+This allows use of shell completion, and also makes it possible to run all the tests found under a set of named subdirectories.
+For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="n">performance</span><span class="o">-</span><span class="n">tests</span> <span class="n">correctness</span><span class="o">-</span><span class="n">tests</span><span class="o">/</span><span class="n">foo</span><span class="o">/</span><span class="n">Test_001</span>
+</pre></div>
+</div>
+</li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">ls</span></code> as a short and convenient alias for <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">print</span></code>.</p></li>
+<li><p>Added the pysys print sort option <code class="docutils literal notranslate"><span class="pre">--sort</span> <span class="pre">dirAndTitle</span></code> which first groups tests whose parent/base directory is the same
+and then sorts by title. In many cases this is the most useful way of recursively listing a large set of test titles
+(since titles in different parent directories often do not sort together very cleanly when using <code class="docutils literal notranslate"><span class="pre">--sort</span> <span class="pre">title</span></code>).</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">--dir</span></code> (<code class="docutils literal notranslate"><span class="pre">-D</span></code>), <code class="docutils literal notranslate"><span class="pre">--testfile</span></code> (<code class="docutils literal notranslate"><span class="pre">-F</span></code>) and <code class="docutils literal notranslate"><span class="pre">--title</span></code> (<code class="docutils literal notranslate"><span class="pre">-T</span></code>) options to <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">print</span></code> to allow listing the directories,
+files (e.g. <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code>) and optionally also the titles for each matching test (without the far more verbose output of <code class="docutils literal notranslate"><span class="pre">--full</span></code>).</p></li>
+<li><p>Added pysys print option <code class="docutils literal notranslate"><span class="pre">-v</span></code> (<code class="docutils literal notranslate"><span class="pre">--verbose</span></code>) which provides a convenient way to list tests with a bit more
+information for each one. The results are sorted by <code class="docutils literal notranslate"><span class="pre">dirAndTitle</span></code> (so that similar tests are grouped together), and both the title
+and the main test file are displayed (equivalent to specifying <code class="docutils literal notranslate"><span class="pre">--title</span> <span class="pre">--testfile</span></code>). The verbose listing is especially
+useful for finding out what tests you have covering different areas. Displaying the test file paths makes it
+easy to jump to any tests of interest (either when running from an IDE that supports hyperlinks or by copying the path
+into a shell/command prompt). If you wish to display the directory instead of the test file, use <code class="docutils literal notranslate"><span class="pre">-vD</span></code>.</p></li>
+<li><p>Added colouring of the test title when printing a test listing with both title and <code class="docutils literal notranslate"><span class="pre">testfile</span></code>/<code class="docutils literal notranslate"><span class="pre">dir</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">--verbose</span></code>),
+so that it stands out better from the other content.</p></li>
+<li><p>Changed pysys print <code class="docutils literal notranslate"><span class="pre">--grep</span></code> to print the test file path (not only the title), and to sort by <code class="docutils literal notranslate"><span class="pre">dirAndTitle</span></code>.
+Also, the matching part of each title is now highlighted in red (unless console colouring is disabled).</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">verbose</span></code> configuration option to <a class="reference internal" href="autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.TextResultsWriter" title="pysys.writer.outcomes.TextResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.TextResultsWriter</span></code></a> which produces gives a lot more information about
+each test result including the outcome reason, test title, and absolute path of the output directory (across two lines).</p>
+<p>The new format could be useful for monitoring in-progress test runs (maybe you wish to start solving some of the failures while
+the test run is still executing), or for performing bulk triage of a large set of failures at the end of a long test run. Opening
+the log file in an IDE that supports jump-to-file would allow clicking the output directories for further investigation of failures
+where needed.</p>
+<p>Although in multi-threaded mode the order of test results in the file will be non-deterministic (whatever order the scheduler picks for executing
+the tests), the format is designed so that tests are grouped by failure mode (outcome and reason) when the log file is run through a
+shell <code class="docutils literal notranslate"><span class="pre">sort</span></code> command.</p>
+<p>Example configuration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">writer</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;TextResultsWriter&quot;</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;pysys.writer&quot;</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;verboseTextResultsWriter&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;file&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/__pysys_results.$</span><span class="si">{outDirName}</span><span class="s2">.log&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;verbose&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">writer</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">--writer</span> <span class="pre">CLASSNAME|ALIAS</span></code> argument to <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> which can be used to selectively enable an individual writer that would not
+otherwise  be enabled. For example, use <code class="docutils literal notranslate"><span class="pre">--writer</span> <span class="pre">TextResultsWriter</span></code> to enable the text summary log without using <code class="docutils literal notranslate"><span class="pre">--record</span></code> which might enable
+several other writers you don’t need. This option could be used in a <code class="docutils literal notranslate"><span class="pre">PYSYS_DEFAULT_ARGS</span></code> environment variable to enable a writer
+just for the current user. To enable a specific writer (if present in a given project) without enabling all writers of the same
+class, set the <code class="docutils literal notranslate"><span class="pre">alias=</span></code> attribute on the writer configuration and specify the writer.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">--preserveEmptyOutputs</span></code> argument to <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> which disables the usual behaviour of deleting empty (zero-length) files and directories.
+This could be useful for comparing successful vs failure runs of the same test if the presence of empty files/dirs is relevant to the outcome.
+The default test output cleanup behaviour was also changed to delete empty directories (not just files), and to permit the deletion of
+non-zero/purgeable files after a <code class="docutils literal notranslate"><span class="pre">SKIPPED</span></code> outcome (previously only a <code class="docutils literal notranslate"><span class="pre">PASSED</span></code> outcome would delete non-zero/purgeable files).</p></li>
+<li><p>Added environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_PROJECT_APPEND</span></code> which treats the main <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file as if it had additional XML from
+the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without
+modifying the main project file. The XML file to append must have <code class="docutils literal notranslate"><span class="pre">&lt;pysysproject&gt;</span></code> as its root XML node.</p></li>
+</ul>
+</div>
+<div class="section" id="ide-editor-support">
+<h3>IDE/editor support<a class="headerlink" href="#ide-editor-support" title="Permalink to this headline">¶</a></h3>
+<p>Several changes make it easier to write and execute PySys tests from Python-enabled IDEs/editors:</p>
+<ul>
+<li><p>Changed the imports of the default “new testcase” templates to allow Python IDEs to correctly locate the PySys <code class="docutils literal notranslate"><span class="pre">BaseTest</span></code> class.
+This allows for code assist/navigation/completion which would otherwise not work. To apply this change to existing tests,
+change <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pysys</span></code> to <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pysys.basetest,</span> <span class="pre">pysys.mappers</span></code>, and make sure references to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a>
+in the class inheritance list are fully qualified.</p>
+<p>To use a Python IDE with PySys, either configure it to use a Python installation or <code class="docutils literal notranslate"><span class="pre">venv</span></code> that has PySys installed, or
+specify the path to the PySys classes with a <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> environment variable (e.g. using a <code class="docutils literal notranslate"><span class="pre">.env</span></code> file).
+If your project has any custom Python extensions configured with a <code class="docutils literal notranslate"><span class="pre">&lt;pythonpath&gt;</span></code> element, you should add that to your
+editor’s <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> too.</p>
+</li>
+<li><p>Defined a new recommended pattern for reusing logic across tests. Previously, users created multiple custom <code class="docutils literal notranslate"><span class="pre">BaseTest</span></code> subclasses or
+used the <code class="docutils literal notranslate"><span class="pre">&lt;test-plugin&gt;</span></code> element in the project configuration to define reusable peices. Both are now discouraged.
+<code class="docutils literal notranslate"><span class="pre">BaseTest</span></code> subclassing creates the possibility of unpredictable bugs due to clashes in field/method names (and other multiple
+inheritance dangers). The test plugin concept has the big downside that Python IDEs and editors cannot detect the <code class="docutils literal notranslate"><span class="pre">self.PLUGIN_ALIAS</span></code>
+configuration from the PySys project and therefore code completion and navigation are impossible.</p>
+<p>The preferred approach is now to use standard Python for reuse, by creating “mix-in” helper classes that expose functionality using inheritance.
+A key constraint is that the helper class you inherit from contain only a single field holding an instance that encapsulates all the functionality
+to avoid name clashes.</p>
+<p>In the getting started sample there is a <code class="docutils literal notranslate"><span class="pre">MyServerHelper</span></code> mix-in class that provides a field called <code class="docutils literal notranslate"><span class="pre">self.myserver</span></code> through
+which all of the real functionality is encapsulated and exposed to individual tests for reuse. To use it all you need to do
+is inherit the helper in any tests that need it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">myorg.myserverhelper</span> <span class="kn">import</span> <span class="n">MyServerHelper</span>
+<span class="k">class</span> <span class="nc">PySysTest</span><span class="p">(</span><span class="n">MyServerHelper</span><span class="p">,</span> <span class="n">pysys</span><span class="o">.</span><span class="n">basetest</span><span class="o">.</span><span class="n">BaseTest</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myserver</span><span class="o">.</span><span class="n">startServer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_server&quot;</span><span class="p">)</span>
+  <span class="o">...</span>
+</pre></div>
+</div>
+<p>Since this approach uses standard Python, any IDE will be able to give assistance for the <code class="docutils literal notranslate"><span class="pre">myserver</span></code> methods (provided your extension
+classes are on its configured <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>).</p>
+<p>Any number of helpers can be added to each test that needs them. Just ensure that the <code class="docutils literal notranslate"><span class="pre">BaseTest</span></code> class is listed last in the list of
+classes your test inherits from.</p>
+</li>
+<li><p>Changed the header at the start of each test’s console output to always include <code class="docutils literal notranslate"><span class="pre">Dir:</span></code>, which now gives the full absolute
+path of the test directory (not just its parent). This is helpful for quickly navigating between tests when running inside
+an IDE.</p></li>
+<li><p>Added project property <code class="docutils literal notranslate"><span class="pre">pysysLogAbsolutePaths</span></code> which can be set to a true/false value to control whether absolute paths will be logged
+for assertion failure locations and in the summary of failed test directories.
+To avoid clutter this remains false by default, unless the <code class="docutils literal notranslate"><span class="pre">PYSYS_LOG_ABSOLUTE_PATHS</span></code> environment variable is set or PySys detects it is being executed inside
+an IDE. Currently only Visual Studio Code is supported automatically, though you can add support for the environment variables of other
+IDEs using a project property like <code class="docutils literal notranslate"><span class="pre">&lt;property</span> <span class="pre">name=&quot;pysysLogAbsolutePaths&quot;</span> <span class="pre">value=&quot;${eval:</span> <span class="pre">os.getenv('TERM_PROGRAM','')=='vscode'</span> <span class="pre">}&quot;/&gt;</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="ctrl-c-sigterm-handling">
+<h3>Ctrl+C/SIGTERM handling<a class="headerlink" href="#ctrl-c-sigterm-handling" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes
+are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting
+the new global flag <a class="reference internal" href="autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser.isRunnerAborting" title="pysys.process.user.ProcessUser.isRunnerAborting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.isRunnerAborting</span></code></a> which informs all tests they should
+complete as quickly as possible - but in an orderly way to allow for essential cleanup. The built-in PySys methods that perform
+waiting all check this flag periodically, but if you have any custom code that performs polling or waiting using Python functions
+like <code class="docutils literal notranslate"><span class="pre">time.sleep</span></code> it is recommended to change to using the <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.pollWait" title="pysys.basetest.BaseTest.pollWait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.pollWait</span></code></a> method instead, which checks this flag and
+raises a <code class="docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code> to abort the test.
+In addition, a new method <a class="reference internal" href="autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser.handleRunnerAbort" title="pysys.process.user.ProcessUser.handleRunnerAbort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.handleRunnerAbort</span></code></a> is called for each test that is currently executing, to provide a
+means of unblocking tests that are waiting for something (such as a TCP socket) not covered by the above mechanism.
+The default implementation simply terminates all processes, but this method can be overridden to provide additional
+logic or to avoid killing any processes and leave all terminations to the test’s synchronous cleanup method.</p>
+<p>To ensure a rapid exit, starting new processes is disabled once termination
+has begun. Once the cleanup phase of a test or runner beings, the restrictions are removed since it may be necessary to
+run processes to perform cleanup (e.g. to terminate containers etc). The previous PySys behaviour of prompting interactively
+once Ctrl+C is sent has been removed.</p>
+<p>For advanced users, in addition to the boolean flag, there is an event on Windows <a class="reference internal" href="autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser.isRunnerAbortingEvent" title="pysys.process.user.ProcessUser.isRunnerAbortingEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.isRunnerAbortingEvent</span></code></a>
+and a file handle on Linux <a class="reference internal" href="autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser.isRunnerAbortingHandle" title="pysys.process.user.ProcessUser.isRunnerAbortingHandle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.isRunnerAbortingHandle</span></code></a>
+that can be waited on in combination with other Windows objects or Unix file handles to abort if a termination request happens.</p>
+<p>If a second Ctrl+C or signal is sent more than 6 seconds after the original abort request, the PySys process will immediately
+perform a hard/unclean exit, without further attempts to cleanup or to print information about test failures.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="helper-functions-to-use-in-your-tests">
+<h3>Helper functions to use in your tests<a class="headerlink" href="#helper-functions-to-use-in-your-tests" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Added <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrepOfGrep()</span></code></a> to simplify the common case of extracting a value using a grep
+expression and then checks that value using another regular expression. This is a small wrapper method around
+<a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertThatGrep()</span></code></a>. This approach is superior to putting both extraction and validation into
+a single <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrep()</span></code></a> regular expression due to improved messages on failure which make
+tests easier to write and debug.</p></li>
+<li><p>Added a <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.createThreadPoolExecutor" title="pysys.basetest.BaseTest.createThreadPoolExecutor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.createThreadPoolExecutor</span></code></a> method that creates a PySys-friendly thread pool to parallelize
+slow operations (e.g. HTTP requests) in your tests. This should be used instead of Python’s own thread pool
+in order to provide correct logging, cleanup, and a more useful default maximum number of worker threads.</p></li>
+<li><p>Added <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.listDirContents" title="pysys.basetest.BaseTest.listDirContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.listDirContents</span></code></a> to provide easier access to the existing <a class="reference internal" href="autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.listDirContents" title="pysys.utils.fileutils.listDirContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.fileutils.listDirContents</span></code></a> method.</p></li>
+<li><p>Added <a class="reference internal" href="autodocgen/pysys.mappers.html#pysys.mappers.IncludeMatches" title="pysys.mappers.IncludeMatches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers.IncludeMatches</span></code></a> for including just substrings matching a regular expression
+when doing a file copy or diff.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">mustExist</span></code> option to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.grepOrNone" title="pysys.basetest.BaseTest.grepOrNone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.grepOrNone</span></code></a> and <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.grepAll" title="pysys.basetest.BaseTest.grepAll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.grepAll</span></code></a> to avoid an exception when files do no exist,
+and instead treat it the same as if they existed but did not contain the matching expression.</p></li>
+</ul>
+<p>Minor improvements:</p>
+<ul class="simple">
+<li><p>Change the debug format when starting a process to only show environment variables whose values differ from the default environment.</p></li>
+<li><p>Improved <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.waitForGrep" title="pysys.basetest.BaseTest.waitForGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.waitForGrep</span></code></a> robustness when the file being checked is big or contains long lines, by checking for timeout expiry during
+each pass through the file not just at the end, and logging a warning if excessively large lines are found (given that evaluating
+regular expressions on lines with 10,000s of characters can sometimes take a very long time).
+If reading from a file that has long lines, consider adding the new <a class="reference internal" href="autodocgen/pysys.mappers.html#pysys.mappers.TruncateLongLines" title="pysys.mappers.TruncateLongLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers.TruncateLongLines</span></code></a> to the mappers list to shorten them,
+or setting the new <code class="docutils literal notranslate"><span class="pre">self.grepTruncateIfLineLongerThan</span></code> field of <code class="docutils literal notranslate"><span class="pre">BaseTest</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">waitForGrep</span></code> method now logs warnings if dangerously long lines are detected (as defined by <code class="docutils literal notranslate"><span class="pre">self.grepWarnIfLineLongerThan</span></code>).</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">self.testStartTime</span></code> to BaseTest, which gives the time when the test object was created.</p></li>
+<li><p>Improved outcome reason for <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertDiff</span></code></a> to include some of the differing lines.</p></li>
+<li><p>Added <a class="reference internal" href="autodocgen/pysys.utils.osutils.html#pysys.utils.osutils.getUsableCPUCount" title="pysys.utils.osutils.getUsableCPUCount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.osutils.getUsableCPUCount</span></code></a> to provide the number of CPUs that are usable by PySys which may be less than
+are available in the machine. This implementation attempts to use cgroups v1 or v2 configuration (<code class="docutils literal notranslate"><span class="pre">cpu.cfs_quota/period_us</span></code> or <code class="docutils literal notranslate"><span class="pre">cpu.max</span></code> -
+but not <code class="docutils literal notranslate"><span class="pre">cpu.shares</span></code>) if present. The current implementation assumes cgroups is mounted at <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code>.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">encodingReplaceOnError</span></code> boolean parameter to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrep()</span></code></a>, <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertThatGrep()</span></code></a>, <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrepOfGrep()</span></code></a> and
+<a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.waitForGrep" title="pysys.basetest.BaseTest.waitForGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.waitForGrep()</span></code></a>, which can be used to prevent exceptions while reading file content
+when the file contains invalid/unexpected characters (or the encoding is set incorrectly).
+This ensures detection of error conditions etc can still complete reliably even if some unexpected characters are found elsewhere in the file.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">message=</span></code> for customizing the introductory log message in <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.logFileContents" title="pysys.basetest.BaseTest.logFileContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.logFileContents</span></code></a>.</p></li>
+</ul>
+</div>
+<div class="section" id="performance-improvements">
+<h3>Performance improvements<a class="headerlink" href="#performance-improvements" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Improved performance of waiting for processes (on Windows by blocking with <code class="docutils literal notranslate"><span class="pre">WaitForSingleObject</span></code> instead of sleep polling,
+and on Linux if kernel version is &gt;=5.3 and Python&gt;=3.9 using <code class="docutils literal notranslate"><span class="pre">pidfd_open</span></code>).</p></li>
+<li><p>Improved the algorithm for selecting the default number of worker threads when running with <code class="docutils literal notranslate"><span class="pre">--threads=auto</span></code> or <code class="docutils literal notranslate"><span class="pre">--ci</span></code>
+to provide a default upper limit on the number of workers.</p>
+<p>This is based on the <a class="reference internal" href="autodocgen/pysys.utils.osutils.html#pysys.utils.osutils.getUsableCPUCount" title="pysys.utils.osutils.getUsableCPUCount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.osutils.getUsableCPUCount</span></code></a> value, but also follows the example of Python’s
+<code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> class in capping the number of workers, to avoid
+taking over very wide servers which is likely to be pointless and/or counter-productive for performance due to the
+Python Global Interpreter Lock. Initially this cap is set to the high value of 100 but it may be reduced in
+future PySys releases. The upper limit can be overridden on a per-project basis by setting the project property <code class="docutils literal notranslate"><span class="pre">pysysMaxWorkerThreads</span></code>.
+The default number of threads can also be further lowered for specific machines or users by setting the <code class="docutils literal notranslate"><span class="pre">PYSYS_DEFAULT_THREADS</span></code>
+environment variable.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="project-and-test-configuration">
+<h3>Project and test configuration<a class="headerlink" href="#project-and-test-configuration" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Enhanced how user-provided <code class="docutils literal notranslate"><span class="pre">userData</span></code> in test descriptors is processed, to include automatic substitution of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> project properties,
+and to support specifying user data keys independently using <code class="docutils literal notranslate"><span class="pre">_</span></code> or <code class="docutils literal notranslate"><span class="pre">.</span></code> syntax as an alternative to providing an entire dictionary,
+for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__pysys_user_data</span><span class="o">.</span><span class="n">myDataKey1__</span> <span class="o">=</span> <span class="s2">&quot;a, $</span><span class="si">{PROJECT_PROP}</span><span class="s2">, b&quot;</span>
+<span class="n">__pysys_user_data_myDataKey2__</span> <span class="o">=</span> <span class="mi">12345</span>
+</pre></div>
+</div>
+</li>
+<li><p>Added project property attribute <code class="docutils literal notranslate"><span class="pre">path=</span></code> as an alternative to <code class="docutils literal notranslate"><span class="pre">value=</span></code> for properties containing a path.
+When <code class="docutils literal notranslate"><span class="pre">path</span></code> is used, paths are normalized to remove any <code class="docutils literal notranslate"><span class="pre">/../</span></code> components.</p></li>
+<li><p>Added a <code class="docutils literal notranslate"><span class="pre">pysysdirconfig</span></code> option for setting the default <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> template to one already defined at project level or
+in a parent <code class="docutils literal notranslate"><span class="pre">pysysdirconfig</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">set</span><span class="o">-</span><span class="n">default</span><span class="o">-</span><span class="n">maker</span><span class="o">-</span><span class="n">template</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my-test&quot;</span><span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="pysys/TestDescriptors.html#sample-pysysdirconfig-xml"><span class="std std-ref">Sample pysysdirconfig.xml</span></a>.</p>
+</li>
+<li><p>Improved test descriptor loading for shared Python test classes so that it is no longer necessary to set <code class="docutils literal notranslate"><span class="pre">__pysys_python_module__</span> <span class="pre">=</span> <span class="pre">&quot;PYTHONPATH&quot;</span></code> when
+setting a <code class="docutils literal notranslate"><span class="pre">__pysys_python_class__</span></code> that contains at least one dot character, for example <code class="docutils literal notranslate"><span class="pre">mypackage.MyTestClass</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="writers">
+<h3>Writers<a class="headerlink" href="#writers" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Added support for <code class="docutils literal notranslate"><span class="pre">.tar.gz</span></code> and <code class="docutils literal notranslate"><span class="pre">.tar.xz</span></code> to  <a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter" title="pysys.writer.testoutput.TestOutputArchiveWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.TestOutputArchiveWriter</span></code></a> which are both smaller
+in many cases than <code class="docutils literal notranslate"><span class="pre">.zip</span></code> files. See the new <code class="docutils literal notranslate"><span class="pre">format</span></code> option to control this.</p></li>
+<li><p>Added configuration options to <a class="reference internal" href="autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JUnitXMLResultsWriter" title="pysys.writer.outcomes.JUnitXMLResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.JUnitXMLResultsWriter</span></code></a> for customizing how PySys test descriptor concepts
+(test id, mode etc) are mapped to JUnit concepts, to suit the many different tools that have their own interpretations
+of this file format. The default mapping produces suboptimal results in some tools, due to duplicating the test id in the <code class="docutils literal notranslate"><span class="pre">&lt;testsuite&gt;</span></code>
+and <code class="docutils literal notranslate"><span class="pre">&lt;testcase&gt;</span></code> names. A mapping that works better in many tools can be configured using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">writer</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;JUnitXMLResultsWriter&quot;</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;pysys.writer&quot;</span><span class="o">&gt;</span>
+  <span class="o">...</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;testsuiteName&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;@TESTID_PACKAGE@&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;testcaseName&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;@TESTID_NO_PACKAGE_OR_MODE@~@MODE@&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;testcaseClassname&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">/&gt;</span>
+<span class="o">&lt;</span><span class="n">writer</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">includeTestIf</span></code> option to <a class="reference internal" href="autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter" title="pysys.writer.coverage.PythonCoverageWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.coverage.PythonCoverageWriter</span></code></a> and <a class="reference internal" href="autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a>
+which allows creating multiple coverage writers that collect data from different subsets of your tests, for example to separate out
+a full report from all tests from a smaller report from just the unit tests or smoke tests. However note this is not intended to solve
+the problem of disabling coverage generation for performance/robustness tests - for that you should set the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group
+on the relevant tests or test directories.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">artifacts</span></code> dictionary to <a class="reference internal" href="autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter" title="pysys.writer.outcomes.JSONResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.JSONResultsWriter</span></code></a> which records artifact paths published during execution of the tests, for
+example code coverage and performance reports.</p></li>
+<li><p>Added <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getInProgressTests" title="pysys.baserunner.BaseRunner.getInProgressTests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.getInProgressTests</span></code></a> for getting a list of the tests that are currently executing across
+all worker threads. If you suspect a test failure could be related to other tests executing at the same time, logging
+this list could be helpful for debugging the problem.</p></li>
+</ul>
+</div>
+<div class="section" id="fixes">
+<h3>Fixes<a class="headerlink" href="#fixes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Fixed the GitHub Actions support to stop using the recently deprecated <code class="docutils literal notranslate"><span class="pre">::set-output</span></code> mechanism for publishing
+output artifacts and instead use the <code class="docutils literal notranslate"><span class="pre">GITHUB_OUTPUT</span></code> variable.</p></li>
+<li><p>Upgraded the sample GitHub Actions to latest versions ready for upcoming github.com upgrade of Node version.</p></li>
+<li><p>Prevented duplicate tests passed on the command line resulting in the same test executing more than once.</p></li>
+<li><p>Fixed sensitivity to system clock changes by using <code class="docutils literal notranslate"><span class="pre">time.monotonic</span></code> rather than <code class="docutils literal notranslate"><span class="pre">time.time</span></code> for timeouts
+and time measurements that do not need wall clock time.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">time=</span></code> attribute to JUnit XML output in the <code class="docutils literal notranslate"><span class="pre">&lt;testcase&gt;</span></code> node (in addition to the <code class="docutils literal notranslate"><span class="pre">&lt;testsuite&gt;</span></code> node where
+it already existed), which is required by some tools.</p></li>
+</ul>
+</div>
+<div class="section" id="minor-behaviour-changes">
+<h3>Minor behaviour changes<a class="headerlink" href="#minor-behaviour-changes" title="Permalink to this headline">¶</a></h3>
+<p>There should be no breaking changes in this release, however the following behaviour changes might be observed by some users:</p>
+<ul class="simple">
+<li><p>Changed <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.abort" title="pysys.basetest.BaseTest.abort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.abort</span></code></a> to not override any existing failure outcomes. However, if the abort outcome is <code class="docutils literal notranslate"><span class="pre">SKIPPED</span></code> or some other
+non-failure, the previous behaviour of overriding existing outcomes is preserved. To precisely control when to override previous
+failure outcomes, use <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.addOutcome" title="pysys.basetest.BaseTest.addOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.addOutcome</span></code></a> instead, which has an <code class="docutils literal notranslate"><span class="pre">override=</span></code> option.</p></li>
+<li><p>Fixed <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertThatGrep</span></code></a> to strip trailing newlines from the matched part of the line in the rare cases where
+the regular expression unintentionally captures newline characters (e.g. <code class="docutils literal notranslate"><span class="pre">[^xyz]</span></code>). If you have tests that rely on
+this behaviour it is recommended to fix them, but if that is impractical set the project property
+<code class="docutils literal notranslate"><span class="pre">pysysLegacyAssertThatGrepNewLineBehaviour</span></code> to true to retain the previous behaviour. This property may be removed in a future
+major release.</p></li>
+<li><p>Improved the <code class="docutils literal notranslate"><span class="pre">pysystestxml_upgrader.py</span></code> sample script to accept one or more directory arguments instead of upgrading the current
+working directory.</p></li>
+<li><p>Removed the <code class="docutils literal notranslate"><span class="pre">authors</span></code> field from the default <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> template. If you find it useful feel free to add it to your
+own per-project maker template.</p></li>
+<li><p>User-provided <code class="docutils literal notranslate"><span class="pre">userData</span></code> in test descriptors is now subject to automatic substitution of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> project properties.
+Such properties can be escaped using <code class="docutils literal notranslate"><span class="pre">${$}</span></code> if needed.</p></li>
+<li><p>Test descriptor loading now assumes modules are on the <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> rather than in a <code class="docutils literal notranslate"><span class="pre">run.py</span></code> file if the module is not explicitly specified
+and <code class="docutils literal notranslate"><span class="pre">__pysys_python_class__</span></code> contains at least one dot character, for example <code class="docutils literal notranslate"><span class="pre">mypackage.MyTestClass</span></code>.</p></li>
+<li><p>The process exit status returned by <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> if no tests were found matching the specified options is now <code class="docutils literal notranslate"><span class="pre">9</span></code>
+(instead of the default fatal error code of <code class="docutils literal notranslate"><span class="pre">10</span></code> as in previous versions).</p></li>
+<li><p>Added a fallback mechanism for writing log messages from unregistered threads (not created with a PySys
+thread pool or background thread) to stdout, although with a warning to discourage it.
+Previously such logging did not go anywhere. However. it is still best to
+use a standard PySys mechanism for creating background threads since otherwise the logging is not written to
+<code class="docutils literal notranslate"><span class="pre">run.log</span></code> files for the test that generated it.</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="what-s-new-in-2-1">
 <h2>What’s new in 2.1<a class="headerlink" href="#what-s-new-in-2-1" title="Permalink to this headline">¶</a></h2>
 <p>PySys 2.1 was released in March 2022.</p>
@@ -243,7 +581,7 @@ minor enhancements and fixes.</p>
 <ul class="simple">
 <li><p>Added a <code class="docutils literal notranslate"><span class="pre">__pysys_parameterized_test_modes__</span></code> field to the <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> descriptor which makes it easier to
 configure a list of modes for a parameterized test that uses the same Python logic to cover multiple testing
-scenarios. See <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">User Guide</span></a> for detailed information about modes.</p></li>
+scenarios. See <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">Guides</span></a> for detailed information about modes.</p></li>
 <li><p>Renamed <code class="docutils literal notranslate"><span class="pre">combineModeDimensions</span></code> to <a class="reference internal" href="autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.createModeCombinations</span></code></a> for
 improved usability.</p></li>
 <li><p>Made the <code class="docutils literal notranslate"><span class="pre">__pysys_groups__</span></code> inheritance specifier <code class="docutils literal notranslate"><span class="pre">inherit=true/false</span></code> optional (defaults to <code class="docutils literal notranslate"><span class="pre">true</span></code>) since in
@@ -261,7 +599,7 @@ a <code class="docutils literal notranslate"><span class="pre">from</span> <span
 </ul>
 <p>New features related to performance testing:</p>
 <ul class="simple">
-<li><p>Added detailed documentation to the <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">User Guide</span></a> about how to use PySys for performance testing.</p></li>
+<li><p>Added detailed documentation to the <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">Guides</span></a> about how to use PySys for performance testing.</p></li>
 <li><p>Added a new performance reporter class <a class="reference internal" href="autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.JSONPerformanceReporter" title="pysys.perf.reporters.JSONPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf.reporters.JSONPerformanceReporter</span></code></a> which writes performance
 results in a format that’s easy to machine-read for handling by other systems. To use this instead of (or as well)
 as the default CSV reporter, add <code class="docutils literal notranslate"><span class="pre">&lt;performance-reporter</span> <span class="pre">classname=&quot;...&quot;/&gt;</span></code> elements to your project configuration.</p></li>
@@ -365,8 +703,8 @@ when there was no failure outcome.</p></li>
 </ul>
 <p>Deprecations:</p>
 <ul class="simple">
-<li><p>Moved the performance classes from package <code class="docutils literal notranslate"><span class="pre">pysys.utils.perfreporters</span></code> to <a class="reference internal" href="autodocgen/pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a>. The old module is
-deprecated but is not planned for removal so this is not a breaking change.</p></li>
+<li><p>Moved the performance classes from <code class="docutils literal notranslate"><span class="pre">pysys.utils.perfreporters</span></code> to <a class="reference internal" href="autodocgen/pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a>. The old module is deprecated but
+is not planned for removal so this is not a breaking change.</p></li>
 </ul>
 </div>
 <div class="section" id="what-s-new-in-2-0">
@@ -609,7 +947,7 @@ generation of the mode name from the parameters).</p>
 argument was specified. Now it is possible to configure multiple modes as primary (see above), and there is a helper
 method to add <code class="docutils literal notranslate"><span class="pre">'isPrimary':True</span></code> to a whole list/dict of modes which is handy when using modes for testing
 different test scenarios where you really want all of them executed by default even during quick local test runs.</p>
-<p>For more details see <a class="reference internal" href="pysys/TestDescriptors.html"><span class="doc">Test Descriptors</span></a>, <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">User Guide</span></a> and the Getting Started sample.</p>
+<p>For more details see <a class="reference internal" href="pysys/TestDescriptors.html"><span class="doc">Test Descriptors</span></a>, <a class="reference internal" href="pysys/UserGuide.html"><span class="doc">Guides</span></a> and the Getting Started sample.</p>
 <p>Note that when using the new lambda-based mode configuration, the convention that modes begin with a capital letter
 is enforced by automatic upper-casing of the initial letter. If needed this can be turned off for existing projects
 which use lowercase mode names and have a mixture of old and new modes styles by setting the project property
@@ -659,7 +997,7 @@ Windows “jobs”). This is especially useful when starting a process using a s
 only the wrapper script would have been killed, whereas now the process it starts is also terminated.</p></li>
 <li><p>Fixed the default library path on macOS(R). Instead of setting <code class="docutils literal notranslate"><span class="pre">DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib</span></code>
 (which overrides executables’ default libraries), we now use the <code class="docutils literal notranslate"><span class="pre">DYLD_FALLBACK_LIBRARY_PATH</span></code> environment
-variable. The <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.LIBRARY_PATH_ENV_VAR</span></code> constant is now set to ‘DYLD_FALLBACK_LIBRARY_PATH`.
+variable. The <a class="reference internal" href="autodocgen/pysys.constants.html#pysys.constants.LIBRARY_PATH_ENV_VAR" title="pysys.constants.LIBRARY_PATH_ENV_VAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.LIBRARY_PATH_ENV_VAR</span></code></a> constant is now set to ‘DYLD_FALLBACK_LIBRARY_PATH`.
 Additionally, some extra items were added to the value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.DYLD_LIBRARY_PATH</span></code> to match the
 defaults as described in the latest macOS documentation.</p></li>
 <li><p>Added improved debug logging to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.startProcess" title="pysys.basetest.BaseTest.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.startProcess()</span></code></a> including a full command line for manually re-running
@@ -746,7 +1084,7 @@ for measuring code coverage when testing custom PySys plugins.</p></li>
 to provide different <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> based on some feature of the test object or mode.</p></li>
 <li><p>Added <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.pollWait" title="pysys.basetest.BaseTest.pollWait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.pollWait</span></code></a> which should be used instead of <code class="docutils literal notranslate"><span class="pre">time.sleep</span></code> when polling for something to happen
 without any log messages (or the existing <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.wait" title="pysys.basetest.BaseTest.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.wait</span></code></a> for longer polls where you do want logging).
-In a future release this method will be able to abort early if a test run is cancelled.</p></li>
+In a future release (version 2.2) this method will be able to abort early if a test run is cancelled.</p></li>
 <li><p><a class="reference internal" href="autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor.stop" title="pysys.process.monitor.BaseProcessMonitor.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor.stop</span></code></a> now waits for the process monitor to terminate before returning,
 so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding
 occasional failures of the process monitoring.</p></li>
@@ -758,8 +1096,8 @@ refer to the old name).</p></li>
 <li><p>Added a <code class="docutils literal notranslate"><span class="pre">quiet=True/False</span></code> option to <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.waitForGrep" title="pysys.basetest.BaseTest.waitForGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.waitForGrep</span></code></a> to disable the INFO-level logging.</p></li>
 </ul>
 </div>
-<div class="section" id="fixes">
-<h3>Fixes<a class="headerlink" href="#fixes" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fixes-in-2-0">
+<h3>Fixes in 2.0<a class="headerlink" href="#fixes-in-2-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Fixed methods such as <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrep</span></code></a> to treat <code class="docutils literal notranslate"><span class="pre">ignores='a</span> <span class="pre">string'</span></code> as a list containing that string,
 rather than as separate expressions containing each letter in the string which could lead to ignoring lines
@@ -973,12 +1311,7 @@ capabilities to support additional tools/languages etc</p></li>
 <p>So, in this release we introduce the concept of “plugins” which use <em>composition</em> rather than <em>inheritance</em> to
 provide a simpler way to share functionality across tests. There are currently 3 kinds of plugin:</p>
 <ul class="simple">
-<li><p><strong>test plugins</strong>; instances of test plugins are created for each <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> that is instantiated, which allows them
-to operate independently of other tests, starting and stopping processes just like code in the <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> class
-would. Test plugins are configured with <code class="docutils literal notranslate"><span class="pre">&lt;test-plugin</span> <span class="pre">classname=&quot;...&quot;</span> <span class="pre">alias=&quot;...&quot;/&gt;</span></code> and can be any Python
-class provided it has a method <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">testobj)</span></code> (and no constructor arguments).
-As the plugins are instantiated just after the <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass, you can use them any time after (but not within)
-your test’s <code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__()</span></code> constructor (for example, in <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest.setup" title="pysys.basetest.BaseTest.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.setup()</span></code></a>).</p></li>
+<li><p><strong>test plugins</strong> NB: as of PySys 2.2 these are no longer recommended - instead the “helper class” paradigm is preferred.</p></li>
 <li><p><strong>runner plugins</strong>; these are instantiated just once per invocation of PySys, by the BaseRunner,
 before <a class="reference internal" href="autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> is called. Unlike test plugins, any processes or state they maintain are
 shared across all tests. These can be used to start servers/VMs that are shared across tests.
@@ -994,7 +1327,7 @@ of the run.</p></li>
 <p>A test plugin could look like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyTestPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="n">myPluginProperty</span> <span class="o">=</span> <span class="s1">&#39;default value&#39;</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Example of a plugin configuration property. The value for this plugin instance can be overridden using ``&lt;property .../&gt;``.</span>
 <span class="sd">        Types such as boolean/list[str]/int/float will be automatically converted from string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1558,7 +1891,7 @@ evaluate arbitrary Python expressions in the parameters, for example:</p>
 <span class="n">Assert</span> <span class="n">that</span> <span class="p">(</span><span class="n">actual</span> <span class="o">==</span> <span class="n">expected</span><span class="p">)</span> <span class="k">with</span> <span class="n">actual</span> <span class="p">(</span><span class="n">myDataStructure</span><span class="p">[</span><span class="s1">&#39;item3&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getId</span><span class="p">())</span> <span class="o">=</span><span class="s1">&#39;baZaar&#39;</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="s1">&#39;baz&#39;</span> <span class="o">...</span> <span class="n">failed</span>
      <span class="n">actual</span><span class="p">:</span> <span class="s1">&#39;baZaar&#39;</span>
    <span class="n">expected</span><span class="p">:</span> <span class="s1">&#39;baz&#39;</span>
-               <span class="o">^</span>
+                <span class="o">^</span>
 </pre></div>
 </div>
 <p>Note that when two named parameters are provided and the condition string is a simple equality
@@ -1624,7 +1957,7 @@ the reference file with the contents of the comparison file, providing an easy w
 of references. Use this feature with caution, since it overwrites reference files with no backup. In
 particular, make sure you have committed all reference files to version control before running the command, and
 then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before
-committing.</p></li>
+committing. From PySys 2.2 onwards the shorter option <code class="docutils literal notranslate"><span class="pre">-XupdateDiffReferences</span></code> may be used instead.</p></li>
 </ul>
 <p>Improvements to the <code class="docutils literal notranslate"><span class="pre">pysys.py</span></code> tool:
 - PySys now supports v3.8 of Python.</p>
@@ -1686,8 +2019,8 @@ for example:</p>
 and each named value will be set as a variable on the <a class="reference internal" href="pysys/BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> class. If a static (non-instance) variable of the same name
 exists on the test class at construction then the <code class="docutils literal notranslate"><span class="pre">&lt;user-data&gt;</span></code> will override it, but its type will be coerced
 automatically to an int/float/bool to match the type of the variable. A <code class="docutils literal notranslate"><span class="pre">pysys.py</span> <span class="pre">run</span> <span class="pre">-Xname=value</span></code> argument can be
-specified to provide a temporary override for any items in the test’s user data. Note that there is no
-automatic substituting of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties in user data values.</p>
+specified to provide a temporary override for any items in the test’s user data.
+(from v2.2 onwards there is also automatic substituting of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties in user data values).</p>
 </li>
 </ul>
 <p>Bug fixes:</p>
@@ -3222,7 +3555,7 @@ utility class</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

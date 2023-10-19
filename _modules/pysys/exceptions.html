@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.exceptions &mdash; PySys v2.1  documentation</title>
+  <title>pysys.exceptions &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.1</a>
+          <a href="../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -178,7 +178,7 @@
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="n">TIMEDOUT</span>
 
 <div class="viewcode-block" id="AbortExecution"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.AbortExecution">[docs]</a><span class="k">class</span> <span class="nc">AbortExecution</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Raised to abort execution of a test.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Raised to abort execution of a test.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">callRecord</span> <span class="o">=</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span>
@@ -187,7 +187,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="FileNotFoundException"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.FileNotFoundException">[docs]</a><span class="k">class</span> <span class="nc">FileNotFoundException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when a file cannot be found.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when a file cannot be found.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">value</span>
@@ -196,7 +196,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="IncorrectFileTypeException"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.IncorrectFileTypeException">[docs]</a><span class="k">class</span> <span class="nc">IncorrectFileTypeException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when the extension of a file is incorrect.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when the extension of a file is incorrect.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">value</span>
@@ -205,7 +205,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="ExecutableNotFoundException"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.ExecutableNotFoundException">[docs]</a><span class="k">class</span> <span class="nc">ExecutableNotFoundException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when an executable cannot be found.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when an executable cannot be found.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">value</span>
@@ -214,7 +214,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="ProcessError"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.ProcessError">[docs]</a><span class="k">class</span> <span class="nc">ProcessError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when creating a process.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when creating a process.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">value</span>
@@ -223,13 +223,13 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="ProcessTimeout"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.ProcessTimeout">[docs]</a><span class="k">class</span> <span class="nc">ProcessTimeout</span><span class="p">(</span><span class="n">AbortExecution</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when a process times out.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when a process times out.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="nb">super</span><span class="p">(</span><span class="n">ProcessTimeout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="InvalidDescriptorException"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.InvalidDescriptorException">[docs]</a><span class="k">class</span> <span class="nc">InvalidDescriptorException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when a testcase descriptor is invalid.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when a testcase descriptor is invalid.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">value</span>
@@ -238,7 +238,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="InvalidXMLException"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.InvalidXMLException">[docs]</a><span class="k">class</span> <span class="nc">InvalidXMLException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when an input XML file is invalid.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when an input XML file is invalid.&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">value</span>
@@ -247,7 +247,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
 
 <div class="viewcode-block" id="UserError"><a class="viewcode-back" href="../../autodocgen/pysys.exceptions.html#pysys.exceptions.UserError">[docs]</a><span class="k">class</span> <span class="nc">UserError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Exception raised when the user has made a mistake, for example </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Exception raised when the user has made a mistake, for example </span>
 <span class="sd">	specifying a wrong value or providing an invalid file.</span>
 <span class="sd">	</span>
 <span class="sd">	This exception should be raised with a user-friendly error message, </span>
@@ -271,7 +271,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

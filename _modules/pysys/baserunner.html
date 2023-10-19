@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.baserunner &mdash; PySys v2.1  documentation</title>
+  <title>pysys.baserunner &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.1</a>
+          <a href="../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -189,12 +189,15 @@
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">import</span> <span class="nn">queue</span>
 <span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">faulthandler</span>
 
 <span class="kn">import</span> <span class="nn">pysys</span>
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.threadpool</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
+<span class="kn">import</span> <span class="nn">pysys.utils.threadutils</span>
 <span class="kn">from</span> <span class="nn">pysys.basetest</span> <span class="kn">import</span> <span class="n">BaseTest</span>
 <span class="kn">from</span> <span class="nn">pysys.process.user</span> <span class="kn">import</span> <span class="n">ProcessUser</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">BaseLogFormatter</span>
@@ -203,10 +206,15 @@
 <span class="kn">from</span> <span class="nn">pysys.writer</span> <span class="kn">import</span> <span class="n">ConsoleSummaryResultsWriter</span><span class="p">,</span> <span class="n">ConsoleProgressResultsWriter</span><span class="p">,</span> <span class="n">BaseSummaryResultsWriter</span><span class="p">,</span> <span class="n">BaseProgressResultsWriter</span><span class="p">,</span> <span class="n">ArtifactPublisher</span>
 <span class="kn">import</span> <span class="nn">pysys.utils.allocport</span>
 
+<span class="k">if</span> <span class="n">IS_WINDOWS</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">win32event</span>
+
 <span class="n">global_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span> <span class="c1"># internal, do not use</span>
 
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.runner&#39;</span><span class="p">)</span>
+
 <div class="viewcode-block" id="BaseRunner"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner">[docs]</a><span class="k">class</span> <span class="nc">BaseRunner</span><span class="p">(</span><span class="n">ProcessUser</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;A single instance of the runner class is responsible for orchestrating </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;A single instance of the runner class is responsible for orchestrating </span>
 <span class="sd">	concurrent execution of tests, and managing setup and cleanup of </span>
 <span class="sd">	any resources that are shared across multiple testcases.</span>
 
@@ -341,7 +349,13 @@
 		<span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">allocport</span><span class="o">.</span><span class="n">initializePortPool</span><span class="p">()</span>
 
 		<span class="n">ProcessUser</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span>
+
+		<span class="c1"># Currently pysysIgnoredLoggerNames property is undocumented/untested</span>
+		<span class="kn">from</span> <span class="nn">pysys.internal.initlogging</span> <span class="kn">import</span> <span class="n">DelegatingPerThreadLogHandler</span>
+		<span class="n">pysysIgnoredLoggerNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pysysIgnoredLoggerNames&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+		<span class="n">DelegatingPerThreadLogHandler</span><span class="o">.</span><span class="n">IGNORED_LOGGER_NAMES</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pysysIgnoredLoggerNames</span><span class="p">)</span>
 
 		<span class="c1"># Set a sensible default output dir for the runner. Many projects do not actually write </span>
 		<span class="c1"># any per-runner files so we do not create (or clean) this path automatically, it&#39;s up to </span>
@@ -356,6 +370,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">purge</span> <span class="o">=</span> <span class="n">purge</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">=</span> <span class="n">cycle</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">threads</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_initThreadPoolMaxWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">outsubdir</span> <span class="o">=</span> <span class="n">outsubdir</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">descriptors</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">xargs</span> <span class="o">=</span> <span class="n">xargs</span>
@@ -377,14 +392,17 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">setKeywordArgs</span><span class="p">(</span><span class="n">xargs</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)</span><span class="o">*</span><span class="n">cycle</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="mi">1</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Running </span><span class="si">{numDescriptors:,}</span><span class="s1"> tests with </span><span class="si">{threads}</span><span class="s1"> threads using PySys </span><span class="si">{pysysVersion}</span><span class="s1"> in Python </span><span class="si">{pythonVersion}</span><span class="s1"> and encoding </span><span class="si">{encoding}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Running </span><span class="si">{numDescriptors:,}</span><span class="s1"> tests with </span><span class="si">{threads}</span><span class="s1"> test threads</span><span class="si">{cpus}</span><span class="s1"> using PySys </span><span class="si">{pysysVersion}</span><span class="s1"> in Python </span><span class="si">{pythonVersion}</span><span class="s1"> and encoding </span><span class="si">{encoding}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
 			<span class="n">numDescriptors</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">),</span> <span class="n">threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="n">pysysVersion</span><span class="o">=</span><span class="n">pysys</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">pythonVersion</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>
-			<span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="n">PREFERRED_ENCODING</span><span class="p">))</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="n">PREFERRED_ENCODING</span><span class="p">,</span> 
+			<span class="n">cpus</span><span class="o">=</span><span class="s1">&#39; (OS CPUs=</span><span class="si">%d</span><span class="s1">)&#39;</span><span class="o">%</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="c1"># if using fewer threads than CPUs, make it explicit</span>
+			<span class="p">))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">writers</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="n">summarywriters</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="n">progresswriters</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">printLogs</span> <span class="o">=</span> <span class="n">extraOptions</span><span class="p">[</span><span class="s1">&#39;printLogs&#39;</span><span class="p">]</span> <span class="c1"># None if not explicitly set; may be changed by writer.setup()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__printLogsDefault</span> <span class="o">=</span> <span class="n">extraOptions</span><span class="p">[</span><span class="s1">&#39;printLogsDefault&#39;</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__preserveEmptyOutputs</span> <span class="o">=</span> <span class="n">extraOptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;preserveEmptyOutputs&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">__randomlyShuffleTests</span> <span class="o">=</span> <span class="n">extraOptions</span><span class="p">[</span><span class="s1">&#39;sort&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;random&#39;</span>
 		
@@ -395,8 +413,14 @@
 
 			<span class="n">writer</span><span class="o">.</span><span class="n">pluginProperties</span> <span class="o">=</span> <span class="n">writerprops</span>
 			<span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">setInstanceVariablesFromDict</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">writerprops</span><span class="p">)</span>
-			
-			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="s1">&#39;isEnabled&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">writer</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="s1">&#39;isEnabled&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">writer</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="p">):</span> 
+				<span class="c1"># allow overriding isEnabled using the command line</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+					<span class="n">extraOptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;writerEnable&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+						<span class="c1"># match either the qualified or unqualified classname</span>
+						<span class="n">writername</span> <span class="ow">in</span> <span class="p">(</span><span class="n">writer</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">writer</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s1">&#39;__module__&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="n">writer</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">)</span>
+					<span class="k">for</span> <span class="n">writername</span> <span class="ow">in</span> <span class="n">extraOptions</span><span class="p">[</span><span class="s1">&#39;writerEnable&#39;</span><span class="p">])):</span>
+					<span class="k">return</span> <span class="kc">None</span>
 			<span class="k">if</span> <span class="n">pluginAlias</span><span class="p">:</span> <span class="c1"># only set alias if enabled (tests could use the existence of the alias to check if it&#39;s enabled e.g. for code cov)</span>
 				<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Alias &quot;</span><span class="si">%s</span><span class="s1">&quot; for writer conflicts with a field that already exists on this runner; please select a different name&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">pluginAlias</span><span class="p">))</span>
 				<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">,</span> <span class="n">writer</span><span class="p">)</span>
@@ -424,7 +448,7 @@
 		<span class="k">if</span> <span class="n">annotationsWriter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">annotationsWriter</span><span class="p">)</span>
 		
-		<span class="k">if</span> <span class="n">extraOptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;progressWritersEnabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">extraOptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;progressWritersEnabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span> <span class="c1">#  a hack from before we added the &quot;writerEnable&quot; option</span>
 			<span class="k">if</span> <span class="n">progresswriters</span><span class="p">:</span> 
 				<span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">progresswriters</span><span class="p">)</span>
 			<span class="k">else</span><span class="p">:</span>
@@ -510,15 +534,126 @@
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">runDetails</span><span class="p">[</span><span class="s1">&#39;startTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startTime</span><span class="p">))</span>
 		
+		<span class="bp">self</span><span class="o">.</span><span class="n">__runnerAbortTime</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="k">def</span> <span class="nf">interruptHandler</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PySys received termination request (signal </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">sig</span><span class="p">)</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;PySys received termination request (signal </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">sig</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__runnerAbortTime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__runnerAbortTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runnerAbort</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+				<span class="c1"># Schedule a traceback in case we don&#39;t abort as quickly as we&#39;d like</span>
+				<span class="n">faulthandler</span><span class="o">.</span><span class="n">dump_traceback_later</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+			<span class="k">else</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+				<span class="c1"># We were already aborting, so dump an immediate traceback</span>
+				<span class="n">faulthandler</span><span class="o">.</span><span class="n">dump_traceback</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">__runnerAbortTime</span><span class="o">&gt;</span><span class="mi">6</span><span class="p">:</span>
+					<span class="c1"># Do a hard kill (with no attempt to wait for background threads etc) if we get a new interrupt when already interrupted. </span>
+					<span class="c1"># Since this is really the nuclear option and for emergency use only, performs an extra time-based check too - which also </span>
+					<span class="c1"># guards against the case where it was due to a KeyboardInterrupt in an unexpected place from the original one</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PySys received a second termination request - now performing immediate exit of the Python process with no cleanup</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+					<span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_NO_SIGNAL_HANDLERS&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+			<span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">interruptHandler</span><span class="p">)</span> <span class="c1"># =CTRL+C on Windows</span>
+			<span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">interruptHandler</span><span class="p">)</span>
+	
+
+<div class="viewcode-block" id="BaseRunner.runnerAbort"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.runnerAbort">[docs]</a>	<span class="k">def</span> <span class="nf">runnerAbort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Requests that the entire test run aborts as soon as possible. </span>
+
+<span class="sd">		Typically this is triggered by a process signal or a keyboard interruption, </span>
+<span class="sd">		but it is also possible for a runner or test to call it directly in response to a fatal problem. </span>
+<span class="sd">		It sets the `ProcessUser.isRunnerAborting` flag which is checked periodically by </span>
+<span class="sd">		methods that poll or wait for long-running operations, and also calls `handleRunnerAbort` which </span>
+<span class="sd">		in turn calls that method on tests that are currently executing to terminate any running processes. </span>
+
+<span class="sd">		It is not recommended to override this method, but subclasses may customize runner-level handling of </span>
+<span class="sd">		aborts by overriding `handleRunnerAbort`. </span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+
+<span class="sd">		:return: False if nothing was done because the runner was already aborting, otherwise True. </span>
+<span class="sd">			Overriding subclass implementations may wish to perform their own actions only if </span>
+<span class="sd">			True is returned. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c1"># Since this may be called from a signal handler or from any thread, the implementation must </span>
+		<span class="c1"># remain short and avoid taking locks - any non-trivial operations should be performed in a new </span>
+		<span class="c1"># background thread. </span>
+
+
+		<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span> 
+			<span class="c1"># future: could try a sys.exit if this takes too long as a fallback</span>
+			<span class="k">return</span> <span class="kc">False</span>
+
+		<span class="c1"># Set this boolean before waking up the event/handle, to avoid the risk of going back into a wait again</span>
+		<span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="o">=</span> <span class="kc">True</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAbortingEvent</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+				<span class="n">win32event</span><span class="o">.</span><span class="n">SetEvent</span><span class="p">(</span><span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAbortingEvent</span><span class="p">)</span> 
+			<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAbortingHandle</span><span class="p">:</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ProcessUser</span><span class="o">.</span><span class="n">_isRunnerAbortingWriteHandle</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;isTerminated&#39;</span><span class="p">)</span>
+					
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Failed to signal isRunnerAborting event/handle during termination: </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+		
+		<span class="n">inProgressTests</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInProgressTests</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">inProgressTests</span><span class="p">:</span>
+			<span class="c1"># Inherits log handlers from current thread</span>
+			<span class="n">loghandlers</span> <span class="o">=</span> <span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">getLogHandlersForCurrentThread</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">stdoutHandler</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">loghandlers</span><span class="p">:</span> <span class="n">loghandler</span> <span class="o">=</span> <span class="n">loghandler</span><span class="o">+</span><span class="p">[</span><span class="n">stdoutHandler</span><span class="p">]</span>
+
+			<span class="k">def</span> <span class="nf">handleRunnerAbortExecute</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+				<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">(</span><span class="n">loghandlers</span><span class="p">)</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">handleRunnerAbort</span><span class="p">()</span>
+				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;An error occurred during handleRunnerAbort: &#39;</span><span class="p">)</span>
+				<span class="k">finally</span><span class="p">:</span>
+					<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">([])</span>
+
+			<span class="n">bgthread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;handleRunnerAbort&#39;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">handleRunnerAbortExecute</span><span class="p">)</span>
+			<span class="n">bgthread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+			<span class="n">bgthread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+		<span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="BaseRunner.handleRunnerAbort"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.handleRunnerAbort">[docs]</a>	<span class="k">def</span> <span class="nf">handleRunnerAbort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Called on a background thread to implement the aborting of the test run. </span>
+
+<span class="sd">		The default implementation calls `ProcessUser.handleRunnerAbort` on the tests that </span>
+<span class="sd">		are currently executing to terminate any running processes. </span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">inProgressTests</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInProgressTests</span><span class="p">()</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Calling handleRunnerAbort methods for </span><span class="si">%d</span><span class="s1"> tests&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">inProgressTests</span><span class="p">))</span>
+		<span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">inProgressTests</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">test</span><span class="o">.</span><span class="n">isCleanupInProgress</span><span class="p">:</span> 
+					<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;handleRunnerAbort for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+					<span class="n">test</span><span class="o">.</span><span class="n">handleRunnerAbort</span><span class="p">()</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;handleRunnerAbort failed for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Calling handleRunnerAbort methods for </span><span class="si">%d</span><span class="s1"> tests&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">inProgressTests</span><span class="p">))</span></div>
+
 	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot; Returns a human-readable and unique string representation of this runner object containing the runner class, </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Returns a human-readable and unique string representation of this runner object containing the runner class, </span>
 <span class="sd">		suitable for diagnostic purposes and display to the test author. </span>
 <span class="sd">		The format of this string may change without notice. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="c1"># there&#39;s usually only one base runner so class name is sufficient</span>
 
 <div class="viewcode-block" id="BaseRunner.getXArg"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg">[docs]</a>	<span class="k">def</span> <span class="nf">getXArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Get the value of a ``pysys run -Xkey=value`` argument, with conversion of the value to the required</span>
 <span class="sd">		int/float/bool/list[str] type as needed (to match the type of the specified default value). The default value </span>
 <span class="sd">		returned if no -X argument was provided for this key. </span>
@@ -539,7 +674,7 @@
 	<span class="c1"># methods to allow customer actions to be performed before a test run, after a test, after </span>
 	<span class="c1"># a cycle of all tests, and after all cycles</span>
 <div class="viewcode-block" id="BaseRunner.setup"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup">[docs]</a>	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.</span>
 <span class="sd">		</span>
 <span class="sd">		All runner plugins will be setup and instantiated before this method is executed. </span>
 <span class="sd">		</span>
@@ -551,9 +686,9 @@
 
 
 <div class="viewcode-block" id="BaseRunner.testComplete"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.testComplete">[docs]</a>	<span class="k">def</span> <span class="nf">testComplete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="nb">dir</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Called after a testcase&#39;s completion (including finalization of the output and </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Called after a testcase&#39;s completion (including finalization of the output and </span>
 <span class="sd">		`pysys.basetest.BaseTest.cleanup`) to allow for post-completion tasks such as purging </span>
-<span class="sd">		unwanted files from the output directory.</span>
+<span class="sd">		unwanted files from the output directory and giving writers a chance to visit the output and collect interesting files.</span>
 <span class="sd">		</span>
 <span class="sd">		The default implementation removes all files with a zero file length in order to </span>
 <span class="sd">		only include files with content of interest. Should ``self.purge`` be ``True``, the purging will remove</span>
@@ -572,17 +707,13 @@
 <span class="sd">		:param dir: The absolute path of the test output directory to perform the purge on (testObj.output).</span>
 <span class="sd">				</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">purge</span><span class="p">:</span>
-			<span class="n">removeNonZero</span> <span class="o">=</span> <span class="kc">True</span>
-			<span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">testObj</span><span class="o">.</span><span class="n">outcome</span><span class="p">:</span>
-				<span class="k">if</span> <span class="n">outcome</span> <span class="o">!=</span> <span class="n">PASSED</span><span class="p">:</span>
-					<span class="n">removeNonZero</span> <span class="o">=</span> <span class="kc">False</span>
-					<span class="k">break</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="n">removeNonZero</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="c1"># don&#39;t remove nonzero files for outcomes where we might be interested in the output dir - failures, notverified, inspect etc</span>
+		<span class="n">uninterestingOutcome</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="n">PASSED</span><span class="p">,</span> <span class="n">SKIPPED</span><span class="p">]</span>
+		<span class="n">removeNonZero</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">purge</span> <span class="ow">and</span> <span class="n">uninterestingOutcome</span>
 
 		<span class="k">try</span><span class="p">:</span>
-			<span class="k">for</span> <span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span><span class="p">)</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="nb">dir</span><span class="p">)),</span> <span class="n">topdown</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+			<span class="n">rootdir</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span>
+			<span class="k">for</span> <span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span><span class="p">)</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span> <span class="n">topdown</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 				<span class="n">deleted</span> <span class="o">=</span> <span class="mi">0</span>
 				<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
 					<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
@@ -604,8 +735,8 @@
 							<span class="bp">self</span><span class="o">.</span><span class="n">_collectErrorAlreadyReported</span> <span class="o">=</span> <span class="kc">True</span>
 					
 					<span class="c1"># Now proceed with cleaning files</span>
-			
-					<span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">removeNonZero</span> <span class="ow">and</span> <span class="s1">&#39;run.log&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPurgableFile</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+					<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__preserveEmptyOutputs</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+							<span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">removeNonZero</span> <span class="ow">and</span> <span class="s1">&#39;run.log&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPurgableFile</span><span class="p">(</span><span class="n">path</span><span class="p">))):</span>
 						<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
 						<span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
 							<span class="k">try</span><span class="p">:</span>
@@ -617,15 +748,23 @@
 								<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
 								<span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
 								
-				<span class="c1"># always try to delete empty directories (just as we do for empty files); </span>
-				<span class="c1"># until we have some kind of internal option for disabling this for debugging </span>
-				<span class="c1"># purpose only delete dirs when we&#39;ve just deleted the contents ourselves </span>
-				<span class="k">if</span> <span class="n">removeNonZero</span> <span class="ow">or</span> <span class="p">(</span><span class="n">deleted</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">deleted</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)):</span>
+				<span class="c1"># to reduce clutter, always try to delete empty directories (just as we do for empty files)</span>
+
+				<span class="c1"># nb: any logging at this stage doesn&#39;t go to run.log, only to the console</span>
+				<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__preserveEmptyOutputs</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span><span class="o">-</span><span class="n">deleted</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
 					<span class="k">try</span><span class="p">:</span>
 						<span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+
+						<span class="c1"># if test failed or we&#39;re not in --purge mode, it could be interesting to know which empty dirs exists</span>
+						<span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span> <span class="k">if</span> <span class="n">uninterestingOutcome</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">)(</span><span class="s1">&#39;Purged empty output directory now that test is complete: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">dirpath</span><span class="p">))</span>
 					<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
 						<span class="c1"># there might be non-empty subdirectories, so don&#39;t raise this as an error</span>
-						<span class="k">pass</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span> <span class="k">continue</span> <span class="c1"># not empty OR already deleted - no surprise and not worth logging</span>
+						<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> 
+							<span class="k">pass</span>
+
+						<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Purge of empty output directory &quot;</span><span class="si">%s</span><span class="s1">&quot; failed: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">dirpath</span><span class="p">),</span> <span class="n">ex</span><span class="p">)</span>
 						
 
 		<span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
@@ -634,7 +773,7 @@
 
 
 <div class="viewcode-block" id="BaseRunner.isPurgableFile"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.isPurgableFile">[docs]</a>	<span class="k">def</span> <span class="nf">isPurgableFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Decides if the specified non-empty file should be purged (deleted) after a test passes when </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Decides if the specified non-empty file should be purged (deleted) after a test passes when </span>
 <span class="sd">		``--purge`` is enabled.</span>
 
 <span class="sd">		By default this will return True, meaning that all files (other than the special case of run.log) </span>
@@ -654,7 +793,7 @@
 
 
 <div class="viewcode-block" id="BaseRunner.cycleComplete"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.cycleComplete">[docs]</a>	<span class="k">def</span> <span class="nf">cycleComplete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Cycle complete method which can optionally be overridden to perform </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Cycle complete method which can optionally be overridden to perform </span>
 <span class="sd">		custom operations between the repeated execution of a set of testcases.</span>
 <span class="sd">		</span>
 <span class="sd">		The default implementation of this method does nothing. Note that providing </span>
@@ -670,7 +809,7 @@
 
 	<span class="c1"># perform a test run</span>
 <div class="viewcode-block" id="BaseRunner.start"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.start">[docs]</a>	<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printSummary</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Starts the execution of a set of testcases.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Starts the execution of a set of testcases.</span>
 <span class="sd">		</span>
 <span class="sd">		Do not override this method - instead, override ``setup`` and/or call ``addCleanupFunction`` to customize the behaviour </span>
 <span class="sd">		of this runner. </span>
@@ -760,6 +899,13 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">_initialEnviron</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_initialCwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 
+		<span class="c1"># Logging this here jsut once allows us to skip re-logging these every time we start a process</span>
+		<span class="n">processlogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.process.defaultenv&#39;</span><span class="p">)</span>
+		<span class="n">debuginfo</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initialEnviron</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span> <span class="c1"># matches the logic in process __init__</span>
+			<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  environment  : </span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="n">e</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialEnviron</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="p">)</span>
+		<span class="n">processlogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Default environment variables for this process: </span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">debuginfo</span><span class="p">))</span>
+
 		<span class="c1"># call the hook to setup the test output writers</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__remainingTests</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
 		<span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="p">):</span>
@@ -777,6 +923,8 @@
 		<span class="c1"># create the thread pool if running with more than one thread</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
 			<span class="n">threadPool</span> <span class="o">=</span> <span class="n">ThreadPool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="n">requests_queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_testScheduler</span><span class="p">)</span>
+
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Starting test execution&#39;</span><span class="p">)</span> <span class="c1"># since we don&#39;t get immediate feedback in multi-threaded mode, indicate we&#39;ve completed the runner setup phase</span>
 
 		<span class="c1"># loop through each cycle</span>
 		
@@ -806,37 +954,40 @@
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__randomlyShuffleTests</span><span class="p">:</span> <span class="c1"># must re-shuffle within each cycle to be useful for perf testing etc</span>
 						<span class="n">descriptors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)</span>
 						<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)</span>
-						
+					
 					<span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">:</span>
 						<span class="n">container</span> <span class="o">=</span> <span class="n">TestContainer</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">cycle</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 						<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 							<span class="n">request</span> <span class="o">=</span> <span class="n">WorkRequest</span><span class="p">(</span><span class="n">container</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">containerCallback</span><span class="p">,</span> <span class="n">exc_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">containerExceptionCallback</span><span class="p">)</span>
 							<span class="n">threadPool</span><span class="o">.</span><span class="n">putRequest</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 						<span class="k">else</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
+
 							<span class="k">if</span> <span class="n">singleThreadStdoutDisable</span><span class="p">:</span> <span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">([])</span>
 							<span class="k">try</span><span class="p">:</span>
 								<span class="n">singleThreadedResult</span> <span class="o">=</span> <span class="n">container</span><span class="p">()</span> <span class="c1"># run test</span>
 							<span class="k">finally</span><span class="p">:</span>
 								<span class="k">if</span> <span class="n">singleThreadStdoutDisable</span><span class="p">:</span> <span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">([</span><span class="n">stdoutHandler</span><span class="p">])</span>
 							<span class="bp">self</span><span class="o">.</span><span class="n">containerCallback</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">ident</span><span class="p">,</span> <span class="n">singleThreadedResult</span><span class="p">)</span>
+
+
 				<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-					<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt detected... </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
+					<span class="c1"># Don&#39;t raise this, better to continue</span>
 				
 				<span class="k">if</span> <span class="ow">not</span> <span class="n">concurrentcycles</span><span class="p">:</span>
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
 						<span class="k">try</span><span class="p">:</span>
 							<span class="n">threadPool</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 						<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-							<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup... </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-							<span class="n">threadPool</span><span class="o">.</span><span class="n">dismissWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-							<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;Termination request detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup...&quot;</span><span class="p">)</span>
+							<span class="n">threadPool</span><span class="o">.</span><span class="n">dismissWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="n">do_join</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
 		
 					<span class="c1"># call the hook for end of cycle if one has been provided</span>
 					<span class="k">try</span><span class="p">:</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">cycleComplete</span><span class="p">()</span>
 					<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-						<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt detected while running cycleComplete... </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
 					<span class="k">except</span><span class="p">:</span>
 						<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -848,11 +999,11 @@
 					<span class="c1"># this is the method that invokes containerCallback and containerExceptionCallback</span>
 					<span class="n">threadPool</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 				<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;test interrupt from keyboard - joining threads ... &quot;</span><span class="p">)</span>
-					<span class="n">threadPool</span><span class="o">.</span><span class="n">dismissWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;Termination request detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup...&quot;</span><span class="p">)</span>
+					<span class="n">threadPool</span><span class="o">.</span><span class="n">dismissWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="n">do_join</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 				<span class="k">else</span><span class="p">:</span>
-					<span class="n">threadPool</span><span class="o">.</span><span class="n">dismissWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+					<span class="n">threadPool</span><span class="o">.</span><span class="n">dismissWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">,</span> <span class="n">do_join</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 			<span class="c1"># perform clean on the performance reporters - before the writers, in case the writers want to do something </span>
 			<span class="c1"># with the perf output</span>
@@ -862,7 +1013,10 @@
 						<span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2"> performing performance reporter cleanup: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 						<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Caught exception performing performance reporter cleanup: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span> <span class="c1"># useful to have it on stderr too, esp during development</span>
 						<span class="n">fatalerrors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Failed to cleanup performance reporter </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">perfreporter</span><span class="p">),</span> <span class="n">ex</span><span class="p">))</span>
-			
+
+			<span class="c1"># We COULD in future set isCleanupInProgress=True here if we want to make it possible for writers (e.gt. code coverage) </span>
+			<span class="c1"># to start child processes even during an interrupt termination, but for now it seems best not to</span>
+
 			<span class="c1"># perform cleanup on the test writers - this also takes care of logging summary results</span>
 			<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__resultWritingLock</span><span class="p">:</span>
 				<span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="p">:</span>
@@ -872,6 +1026,10 @@
 						<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Writer </span><span class="si">%s</span><span class="s2"> failed during cleanup - </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 						<span class="c1"># might stop results being completely displayed to user</span>
 						<span class="n">fatalerrors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Writer </span><span class="si">%s</span><span class="s1"> failed during cleanup: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">writer</span><span class="p">),</span> <span class="n">ex</span><span class="p">))</span>
+					<span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> 
+						<span class="c1"># explicitly handle this and avoid stack trace, since it&#39;s common for code coverage to execute child processes, which will not be possible during interruption</span>
+						<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Writer </span><span class="si">%s</span><span class="s2"> failed during cleanup due to interruption&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="p">)</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
 				<span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="p">[:]</span>
 		
 			<span class="k">try</span><span class="p">:</span>
@@ -884,9 +1042,13 @@
 			<span class="c1"># call the hook to cleanup after running tests</span>
 			<span class="k">try</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
-			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> 
 				<span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2"> performing runner cleanup: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 				<span class="n">fatalerrors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Failed to cleanup runner: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+
+			<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span><span class="p">:</span>
+				<span class="c1"># Log this as the last/almost last thing, to avoid misleading summary of non-failures from writers</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;PySys terminated early due to runner abort&#39;</span><span class="p">)</span>
 
 		<span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">allocport</span><span class="o">.</span><span class="n">logPortAllocationStats</span><span class="p">()</span>
 
@@ -916,7 +1078,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span></div>
 
 <div class="viewcode-block" id="BaseRunner.processCoverageData"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.processCoverageData">[docs]</a>	<span class="k">def</span> <span class="nf">processCoverageData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Called during cleanup after execution of all tests has completed to allow </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Called during cleanup after execution of all tests has completed to allow </span>
 <span class="sd">		processing of coverage data (if enabled), for example generating </span>
 <span class="sd">		reports etc. </span>
 <span class="sd">		</span>
@@ -927,7 +1089,7 @@
 		<span class="k">pass</span></div>
 
 	<span class="k">def</span> <span class="nf">containerCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thread</span><span class="p">,</span> <span class="n">container</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Callback method on completion of running a test.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Callback method on completion of running a test.</span>
 
 <span class="sd">		:meta private: Internal method</span>
 
@@ -956,14 +1118,13 @@
 			<span class="n">testDurationSecs</span><span class="o">=</span><span class="n">container</span><span class="o">.</span><span class="n">testTime</span><span class="p">,</span>
 			<span class="n">runLogOutput</span><span class="o">=</span><span class="n">container</span><span class="o">.</span><span class="n">testFileHandlerStdoutBuffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
 		
-		<span class="c1"># prompt for continuation on control-C</span>
 		<span class="k">if</span> <span class="n">container</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
 		
 		<span class="c1"># call the hook for end of test execution</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">testComplete</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">testObj</span><span class="p">,</span> <span class="n">container</span><span class="o">.</span><span class="n">outsubdir</span><span class="p">)</span>
 
 	<span class="k">def</span> <span class="nf">reportPerformanceResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Reports a new performance number to the configured performance reporters. See `pysys.basetest.reportPerformanceResult` </span>
 <span class="sd">		for details of the arguments. </span>
 <span class="sd">		</span>
@@ -1033,7 +1194,7 @@
 					<span class="n">extra</span> <span class="o">=</span> <span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_PERFORMANCE</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
 
 	<span class="k">def</span> <span class="nf">reportTestOutcome</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">testStart</span><span class="p">,</span> <span class="n">testDurationSecs</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Records the result of a completed test, including notifying any configured writers, and writing the </span>
 <span class="sd">		specified output to the console (if permitted by the `constants.PrintLogs` setting). </span>
 <span class="sd">		</span>
@@ -1100,7 +1261,7 @@
 
 
 <div class="viewcode-block" id="BaseRunner.publishArtifact"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.publishArtifact">[docs]</a>	<span class="k">def</span> <span class="nf">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Notifies any interested `pysys.writer.api.ArtifactPublisher` writers about an artifact that they may wish to publish.  </span>
 
 <span class="sd">		Called when a file or directory artifact is published (e.g. by another writer).</span>
@@ -1131,8 +1292,25 @@
 		<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__artifactWriters</span><span class="p">:</span>
 			<span class="n">a</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="BaseRunner.getInProgressTests"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getInProgressTests">[docs]</a>	<span class="k">def</span> <span class="nf">getInProgressTests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Get a list of the test objects that are currently executing.  </span>
+
+<span class="sd">		This method can be called from any thread, and it is safe to access ``testObj.descriptor`` and to call </span>
+<span class="sd">		``str()`` on the test object. However unless otherwise stated, avoid accessing other fields/methods of the test object </span>
+<span class="sd">		since most are not designed to be safely used by other threads. </span>
+<span class="sd">		The objects returned by this method will always have been fully constructed, but ``setup`` may not yet have been called, </span>
+<span class="sd">		and if the test is finishing, ``cleanup`` may or may not have been called or be underway. </span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+
+<span class="sd">		:return: A list of `pysys.basetest.BaseTest` test objects, sorted based on their string representation. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">TestContainer</span><span class="o">.</span><span class="n">_inProgressTests</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">))</span></div>
+
+
 	<span class="k">def</span> <span class="nf">containerExceptionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thread</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Callback method for unhandled exceptions thrown when running a test.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Callback method for unhandled exceptions thrown when running a test.</span>
 <span class="sd">		</span>
 <span class="sd">		:meta private: This method would need a better signature before being made public. </span>
 <span class="sd">		</span>
@@ -1144,53 +1322,16 @@
 
 
 <div class="viewcode-block" id="BaseRunner.handleKbrdInt"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.handleKbrdInt">[docs]</a>	<span class="k">def</span> <span class="nf">handleKbrdInt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="c1"># pragma: no cover (can&#39;t auto-test keyboard interrupt handling)</span>
-		<span class="sd">&quot;&quot;&quot;Handle a ``Ctrl+C`` keyboard exception caught during running of a set of testcases.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Deprecated - for internal use only. </span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__remainingTests</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">isatty</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
-			<span class="n">prompt</span> <span class="o">=</span> <span class="kc">False</span>
-		
-		<span class="k">def</span> <span class="nf">finish</span><span class="p">():</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performing runner cleanup after keyboard interrupt&#39;</span><span class="p">)</span>
-			
-			<span class="k">try</span><span class="p">:</span>
-				<span class="c1"># perform cleanup on the test writers - this also takes care of logging summary results</span>
-				<span class="c1"># this is a stipped down</span>
-				<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__resultWritingLock</span><span class="p">:</span>
-					<span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="p">:</span>
-						<span class="k">try</span><span class="p">:</span> 
-							<span class="n">writer</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
-						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> 
-							<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Writer </span><span class="si">%s</span><span class="s2"> failed during cleanup - </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-					<span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">writers</span><span class="p">[:]</span>
-				
-				<span class="k">try</span><span class="p">:</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">cycleComplete</span><span class="p">()</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
-				<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> 
-					<span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2"> cleaning up runner after interrupt: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-			<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupted detected during cleanup; will exit immediately&quot;</span><span class="p">)</span>
-			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="c1"># keyboard interrupt</span>
+		<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span> <span class="c1"># in case signal handler wasn&#39;t called/wasn&#39;t called yet</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;PySys received termination request (keyboard interrupt)&#39;</span><span class="p">)</span>
 
-		<span class="k">try</span><span class="p">:</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">:</span>
-				<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Keyboard interrupt detected, exiting ... </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-				<span class="n">finish</span><span class="p">()</span>
-
-			<span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
-				<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Keyboard interrupt detected, continue running remaining tests? [yes|no] ... &quot;</span><span class="p">)</span>
-				<span class="n">line</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-				<span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span> <span class="ow">or</span> <span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;yes&quot;</span><span class="p">:</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Keyboard interrupt detected; will try to continue running remaining tests&#39;</span><span class="p">)</span>
-					<span class="k">return</span>
-				<span class="k">elif</span> <span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;n&quot;</span> <span class="ow">or</span> <span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;no&quot;</span><span class="p">:</span>
-					<span class="n">finish</span><span class="p">()</span>
-		<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># don&#39;t prompt the second time</span></div>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runnerAbort</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseRunner.logTestHeader"><a class="viewcode-back" href="../../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.logTestHeader">[docs]</a>	<span class="k">def</span> <span class="nf">logTestHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">cycle</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Logs the header for the specified descriptor before a test begin to execute, </span>
 <span class="sd">		typically including the testId, title and (if applicable) cycle. </span>
 <span class="sd">		</span>
@@ -1216,12 +1357,6 @@
 			<span class="k">if</span> <span class="n">badchars</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unsupported characters &quot;</span><span class="si">%s</span><span class="s1">&quot; found in test mode &quot;</span><span class="si">%s</span><span class="s1">&quot; - please use just alphanumeric characters, dot, underscore and equals for modes&#39;</span><span class="p">,</span> 
 				<span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">badchars</span><span class="p">)),</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
 
-		<span class="n">testDir</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span>
-		<span class="k">if</span> <span class="n">testDir</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
-			<span class="n">testDir</span> <span class="o">=</span> <span class="n">testDir</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-			<span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">testDir</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">testDir</span><span class="p">:</span> <span class="c1"># only print if we&#39;re running from a higher level directory</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Dir:   </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">testDir</span><span class="p">)</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_DETAILS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
 		<span class="n">title</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 		<span class="k">if</span> <span class="n">title</span><span class="p">:</span>
 			<span class="n">title</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">wrap</span><span class="p">)</span> <span class="k">if</span> <span class="n">wrap</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="p">[</span><span class="n">title</span><span class="p">]</span>
@@ -1231,6 +1366,10 @@
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># only log if this runner is doing multiple cycles</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cycle: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_DETAILS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+		
+		<span class="c1"># It&#39;s really helpful to have the full absolute path available for jumping to it in an IDE, e.g. when fixing a test that&#39;s hanging</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Dir:   </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">),</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_DETAILS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
 		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Execution order hint: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">executionOrderHint</span><span class="p">)</span>
 		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="mi">62</span><span class="o">*</span><span class="s2">&quot;=&quot;</span><span class="p">)</span></div>
 	
@@ -1249,15 +1388,22 @@
 		
 
 <span class="k">class</span> <span class="nc">TestContainer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Internal class added to the work queue and used for co-ordinating the execution of a single test case.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Internal class added to the work queue and used for co-ordinating the execution of a single test case.</span>
 <span class="sd">	</span>
 <span class="sd">	:meta private:</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">__purgedOutputDirs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="c1"># static field</span>
+
+	<span class="n">_inProgressTests</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A constantly changing set of the testObjs currently executing. </span>
+
+<span class="sd">	This can be accessed from any thread. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">runner</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Create an instance of the TestContainer class.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Create an instance of the TestContainer class.</span>
 <span class="sd">		</span>
 <span class="sd">		:param descriptor: A reference to the testcase descriptor</span>
 <span class="sd">		:param cycle: The cycle number of the test</span>
@@ -1266,7 +1412,7 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">=</span> <span class="n">descriptor</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">cycle</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="p">:</span> <span class="n">BaseRunner</span> <span class="o">=</span> <span class="n">runner</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">outsubdir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span> <span class="o">=</span> <span class="kc">None</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">testStart</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1275,12 +1421,14 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">testFileHandlerRunLog</span> <span class="o">=</span> <span class="kc">None</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">testFileHandlerStdout</span> <span class="o">=</span> <span class="kc">None</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">testFileHandlerStdoutBuffer</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span> <span class="c1"># unicode characters written to the output for this testcase</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">=</span> <span class="kc">False</span>
 
-	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycle</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;.cycle</span><span class="si">%03d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Deprecated, do not use. &quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;container&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycle</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;.cycle</span><span class="si">%03d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
 	
 	<span class="nd">@staticmethod</span>
-	<span class="k">def</span> <span class="nf">__onDeleteOutputDirError</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">excinfo</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">__onDeleteOutputDirError</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">excinfo</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
 		<span class="k">if</span> <span class="n">function</span><span class="o">==</span><span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">:</span>
 			<span class="c1"># Useful to tolerate this since people foten keep a cmd window/shell/tool open on test output directories, </span>
 			<span class="c1"># and while we wouldn&#39;t want to leave files around, empty directories don&#39;t usually cause problems. </span>
@@ -1291,13 +1439,13 @@
 			<span class="k">raise</span> <span class="n">excinfo</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># re-raise the original error</span>
 	
 	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Over-ridden call builtin to allow the class instance to be called directly.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Over-ridden call builtin to allow the class instance to be called directly.</span>
 <span class="sd">		</span>
 <span class="sd">		Invoked by thread pool when using multiple worker threads.</span>
 
 <span class="sd">		&quot;&quot;&quot;</span>		
 		<span class="n">exc_info</span> <span class="o">=</span> <span class="p">[]</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">testStart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">testStart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="c1"># set this as a fallback, but probably overwrite it with the value from the BaseTest</span>
 		
 		<span class="n">defaultLogHandlersForCurrentThread</span> <span class="o">=</span> <span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">getLogHandlersForCurrentThread</span><span class="p">()</span>
 		<span class="k">try</span><span class="p">:</span>
@@ -1355,8 +1503,8 @@
 				<span class="k">if</span> <span class="n">initialOutputFiles</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">validateOnly</span><span class="p">:</span>
 					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Some directories from a previous run could not be deleted from the output directory before starting this test: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">initialOutputFiles</span><span class="p">))</span>
 			<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">=</span> <span class="kc">True</span>
-			
+				<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
+				<span class="k">raise</span>
 			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 				<span class="n">exc_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 				
@@ -1395,13 +1543,19 @@
 						<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">testPlugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
 
 						<span class="k">if</span> <span class="ow">not</span> <span class="n">pluginAlias</span><span class="p">:</span> <span class="k">continue</span>
-						<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Alias &quot;</span><span class="si">%s</span><span class="s1">&quot; for test-plugin conflicts with a field that already exists on this test object; please select a different name&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">pluginAlias</span><span class="p">))</span>
-						<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
+						<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">):</span> 
+							<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">))</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
+								<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Not setting test-plugin alias self.</span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> as it is already set through some other means&#39;</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+							<span class="k">else</span><span class="p">:</span>
+								<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Alias &quot;</span><span class="si">%s</span><span class="s1">&quot; for test-plugin conflicts with a field that already exists on this test object; please select a different name&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">pluginAlias</span><span class="p">))</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">,</span> <span class="n">pluginAlias</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
+
 
 		
-				<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">=</span> <span class="kc">True</span>
-				
+				<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>	
+					<span class="k">raise</span>		
 				<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 					<span class="n">exc_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 				
@@ -1412,6 +1566,15 @@
 					
 				<span class="c1"># can&#39;t set this in constructor without breaking compatibility, but set it asap after construction</span>
 				<span class="k">del</span> <span class="n">BaseTest</span><span class="o">.</span><span class="n">_currentTestCycle</span>
+
+				<span class="bp">self</span><span class="o">.</span><span class="n">testStart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">testStartTime</span> <span class="c1"># ensure these are in sync. Give priority to the one from testObj. </span>
+
+				<span class="n">TestContainer</span><span class="o">.</span><span class="n">_inProgressTests</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">)</span> <span class="c1"># doesn&#39;t technically need the global lock but might as well do it here for added protection</span>
+
+				<span class="c1"># Check for test run abort here - to reduce/avoid races where it gets started just after we get an interruption and iterate over the in-progress list</span>
+				<span class="k">if</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
+
+			<span class="c1"># drop the global_lock here</span>
 
 			<span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">writers</span><span class="p">:</span>
 				<span class="k">try</span><span class="p">:</span> 
@@ -1434,8 +1597,7 @@
 						<span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2"> while setting up test </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
 						
 				<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span><span class="p">:</span>
-					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;test interrupt from keyboard&quot;</span><span class="p">)</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test interrupt from keyboard&#39;</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+					<span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
 			
 				<span class="k">else</span><span class="p">:</span>
 					<span class="k">try</span><span class="p">:</span>
@@ -1453,8 +1615,13 @@
 							<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test title is still TODO&#39;</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 					<span class="k">except</span> <span class="n">AbortExecution</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-						<span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">outcome</span><span class="p">[:]</span>
-						<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">callRecord</span><span class="p">)</span>
+						<span class="c1"># Add this outcome but do not make it take precedence over existing outcomes, since </span>
+						<span class="c1"># they might have more information or at the very least may contribute info via the &quot;+N other failures&quot; text</span>
+						<span class="c1"># If someone wants override behaviour they can get it by doing self.addOutcome(..., abortOnError=True, override=True)</span>
+						<span class="c1"># However special-case this for non-failure outcomes (especially SKIPPED but also PASSED) to avoid confusing &quot;N other failures&quot; messages</span>
+						<span class="k">if</span> <span class="ow">not</span> <span class="n">e</span><span class="o">.</span><span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span> <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">outcome</span><span class="p">[:]</span>
+						<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span> <span class="o">==</span> <span class="n">e</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">==</span><span class="n">e</span><span class="o">.</span><span class="n">outcome</span><span class="p">):</span> <span class="c1"># don&#39;t re-add the same outcome reason</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">callRecord</span><span class="p">)</span>
 						<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted test due to </span><span class="si">%s</span><span class="s1"> outcome&#39;</span><span class="o">%</span><span class="n">e</span><span class="o">.</span><span class="n">outcome</span><span class="p">)</span> <span class="c1"># nb: this could be due to SKIPPED</span>
 
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectCore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outsubdir</span><span class="p">):</span>
@@ -1462,7 +1629,7 @@
 			
 			<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">=</span> <span class="kc">True</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test interrupt from keyboard&#39;</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
 
 			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> occurred while running test - </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1473,14 +1640,19 @@
 				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;--- test cleanup&#39;</span><span class="p">)</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 			
-			<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+			<span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="o">=</span> <span class="kc">True</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test interrupt from keyboard&#39;</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">handleKbrdInt</span><span class="p">()</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test interrupted by runner abort during cleanup&#39;</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 			<span class="k">except</span> <span class="n">UserError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># will already have been logged with stack trace</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
 				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> occurred while cleaning up test - </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test cleanup failed: </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+			<span class="c1"># to avoid confusion, override any existing failure that coincides with a runner abort since it&#39;s likely a result</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbrdInt</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">and</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span><span class="p">):</span> 
+				<span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Test interrupted by runner abort&#39;</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 			<span class="c1"># in case the thread log handlers got overwritten by a naughty test, restore before printing the final summary</span>
 			<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">(</span><span class="n">logHandlers</span><span class="p">)</span>
@@ -1509,8 +1681,11 @@
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Test final outcome:  </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()),</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">())</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="mi">0</span><span class="p">))</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span> <span class="o">!=</span> <span class="n">PASSED</span><span class="p">:</span>
 				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Test outcome reason: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">(),</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_OUTCOMES</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+				<span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeLocation</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">loc</span> <span class="ow">and</span> <span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="c1"># it&#39;s quite useful to have the location of the first error (as an absolute path) so you can easily jump to it from the test failure without having to scroll through all the run.log output</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;                     [</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-			
+
 			<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testFileHandlerRunLog</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">testFileHandlerRunLog</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 			
@@ -1523,11 +1698,16 @@
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">(</span><span class="n">defaultLogHandlersForCurrentThread</span><span class="p">)</span>
 
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">TestContainer</span><span class="o">.</span><span class="n">_inProgressTests</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testObj</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+				<span class="k">pass</span> <span class="c1"># means we didn&#39;t add it to the set yet, or it&#39;s None - not a problem</span>
+
 		<span class="c1"># return a reference to self</span>
 		<span class="k">return</span> <span class="bp">self</span>
 	
 	<span class="k">def</span> <span class="nf">detectCore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Detect any core files in a directory (unix systems only), returning C{True} if a core is present.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Detect any core files in a directory (unix systems only), returning C{True} if a core is present.</span>
 <span class="sd">		</span>
 <span class="sd">		:param dir: The directory to search for core files</span>
 <span class="sd">		:return: C{True} if a core detected, None if no core detected</span>
@@ -1555,7 +1735,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

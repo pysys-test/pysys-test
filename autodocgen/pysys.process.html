@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process &mdash; PySys v2.1  documentation</title>
+  <title>pysys.process &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -124,7 +124,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -200,7 +200,7 @@
 <h2>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pysys.process.Process">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.process.</code><code class="sig-name descname">Process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">command</span></em>, <em class="sig-param"><span class="n">arguments</span></em>, <em class="sig-param"><span class="n">environs</span></em>, <em class="sig-param"><span class="n">workingDir</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">timeout</span></em>, <em class="sig-param"><span class="n">stdout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stderr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expectedExitStatus</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">info</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.</code><code class="sig-name descname">Process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">command</span></em>, <em class="sig-param"><span class="n">arguments</span></em>, <em class="sig-param"><span class="n">environs</span></em>, <em class="sig-param"><span class="n">workingDir</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">timeout</span></em>, <em class="sig-param"><span class="n">stdout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stderr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expectedExitStatus</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">info</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">owner</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents a process that PySys has started (or can start).</p>
 <p>A platform-specific implementation subclass of this interface is returned 
@@ -222,6 +222,7 @@ display name is returned by calling <code class="docutils literal notranslate"><
 <li><p><strong>expectedExitStatus</strong> (<em>str</em>) – The condition string used to determine whether the exit status/code 
 returned by the process is correct, for example ‘==0’.</p></li>
 <li><p><strong>pid</strong> (<em>int</em>) – The process id for a running or complete process (as set by the OS), or None if it is not yet started.</p></li>
+<li><p><strong>owner</strong> (<a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser" title="pysys.process.user.ProcessUser"><em>ProcessUser</em></a>) – The owner object that is running this process.</p></li>
 <li><p><strong>exitStatus</strong> (<em>int</em>) – The process exit status for a completed process (for many processes 0 represents success), 
 or None if it has not yet completed.</p></li>
 <li><p><strong>info</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>obj</em><em>]</em>) – A mutable dictionary of user-supplied information that was passed into startProcess, 
@@ -305,6 +306,7 @@ Added in v2.1.</p></li>
 <dt id="pysys.process.Process.wait">
 <code class="sig-name descname">wait</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.wait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for a process to complete execution, raising an exception on timeout.</p>
+<p>Logs and info message if the process takes more than a few seconds to complete.</p>
 <p>This method provides basic functionality but does not check the exit status or log any messages; 
 see <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.waitProcess" title="pysys.basetest.BaseTest.waitProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.waitProcess</span></code></a> for a wrapper that adds additional functionality.</p>
 <p>Note that this method will not terminate the process if the timeout is exceeded.</p>
@@ -357,7 +359,7 @@ see <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.Ba
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

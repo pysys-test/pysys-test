@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.fileutils &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils.fileutils &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -119,6 +119,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.osutils.html">pysys.utils.osutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
@@ -144,7 +145,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -217,11 +218,11 @@ working directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – A path. Must not be a relative path. Can be None/empty. Can 
+<li><p><strong>path</strong> (<em>str</em>) – An absolute (not relative) path. Can be None/empty. Can 
 contain “..” sequences. Note that no normalization of “..” 
-sequences and slashes is performed if the OS starts with <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> already 
+sequences and slashes is performed if the path starts with <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> already 
 or is non-Windows so if in doubt run the path through <code class="docutils literal notranslate"><span class="pre">os.path.normpath</span></code> 
-before calling this method on it (<code class="docutils literal notranslate"><span class="pre">\\?\</span></code> paths with incorrect slashes or .. sequences 
+before calling this method on it (<code class="docutils literal notranslate"><span class="pre">\\?\</span></code> paths with incorrect slashes and <code class="docutils literal notranslate"><span class="pre">..</span></code> sequences 
 are not permitted by Windows).</p></li>
 <li><p><strong>onlyIfNeeded</strong> (<em>bool</em>) – Set to True to only adds the long path support if this 
 path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
@@ -231,8 +232,8 @@ returned string.</p></li>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The passed-in path, possibly with a <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> prefix added, 
-forward slashes converted to backslashes on Windows, and converted to 
-a unicode string. Trailing slashes may be removed.</p>
+forward slashes converted to backslashes on Windows, and drive letter capitalized. 
+Trailing slashes may be removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -244,9 +245,6 @@ a unicode string. Trailing slashes may be removed.</p>
 <dt id="pysys.utils.fileutils.fromLongPathSafe">
 <code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">fromLongPathSafe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#fromLongPathSafe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.fromLongPathSafe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Strip off <code class="docutils literal notranslate"><span class="pre">\\?\</span></code> prefixes added by <a class="reference internal" href="#pysys.utils.fileutils.toLongPathSafe" title="pysys.utils.fileutils.toLongPathSafe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toLongPathSafe</span></code></a>.</p>
-<p>Note that this function does not convert unicode strings back to byte 
-strings, so if you want a complete reversal of toLongPathSafe you will 
-additionally have to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">result.encode(PREFERRED_ENCODING)</span></code>.</p>
 </dd></dl>
 
 </div>
@@ -297,8 +295,10 @@ but deletes as many files as possible before doing so.</p>
 <li><p><strong>retries</strong> – The number of retries to attempt. This can be useful to 
 work around temporary failures causes by Windows file locking.</p></li>
 <li><p><strong>ignore_errors</strong> – If True, an exception is raised if the path exists but cannot be deleted.</p></li>
-<li><p><strong>onerror</strong> – A callable that with arguments (function, path, excinfo), called when an error occurs while 
-deleting. See the documentation for <code class="docutils literal notranslate"><span class="pre">shutil.rmtree</span></code> for more information.</p></li>
+<li><p><strong>onerror</strong> – A callable with arguments (function, path, excinfo), called when an error occurs while 
+deleting. See the documentation of <code class="docutils literal notranslate"><span class="pre">onexc</span></code> /  <code class="docutils literal notranslate"><span class="pre">onerror</span></code> for <code class="docutils literal notranslate"><span class="pre">shutil.rmtree</span></code> for more information. 
+On Python 3.12+ <code class="docutils literal notranslate"><span class="pre">excinfo</span></code> holds the exception object, in earlier versions it holds 
+the tuple returned from <code class="docutils literal notranslate"><span class="pre">sys.exc_info()</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -427,7 +427,7 @@ The default is UTF-8 (with optional Byte Order Mark).</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.api &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.api &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -136,7 +136,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -250,13 +250,13 @@ A prefix of double underscore <code class="docutils literal notranslate"><span c
 <tr class="row-odd"><td><p><a class="reference internal" href="#pysys.writer.api.replaceIllegalXMLCharacters" title="pysys.writer.api.replaceIllegalXMLCharacters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replaceIllegalXMLCharacters</span></code></a>(unicodeString[, …])</p></td>
 <td><p>Utility function that takes a unicode character string and replaces all characters  that are not permitted to appear in an XML document.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.stripANSIEscapeCodes" title="pysys.utils.logutils.stripANSIEscapeCodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stripANSIEscapeCodes</span></code></a>(text)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stripANSIEscapeCodes</span></code>(text)</p></td>
 <td><p>Remove any ANSI escape sequences (for example to set console color) present in the specified string.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.stdoutPrint" title="pysys.utils.logutils.stdoutPrint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stdoutPrint</span></code></a>(s)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stdoutPrint</span></code>(s)</p></td>
 <td><p>Writes the specified bytes or (preferably) unicode character string  to stdout, avoiding any redirection to loggers performed by PySys, and  performing replacements if needed based on the characters  supported by the stdout encoding, and with support for output coloring  using escape sequences (if enabled in PySys).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter" title="pysys.utils.logutils.ColorLogFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.ColorLogFormatter</span></code></a>(…)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.ColorLogFormatter</span></code>(…)</p></td>
 <td><p>Formatter supporting colored output to a console.</p></td>
 </tr>
 </tbody>
@@ -520,15 +520,17 @@ typically in the writer’s <code class="xref py py-obj docutils literal notrans
 <dl class="py attribute">
 <dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showOutputDir">
 <code class="sig-name descname">showOutputDir</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showOutputDir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configures whether the summary includes the (relative) path to the output directory for each failure.</p>
+<dd><p>Configures whether the summary includes the path to the output directory for each failure. 
+This is relative to the current working directory unless project property <code class="docutils literal notranslate"><span class="pre">pysysLogAbsolutePaths</span></code> is True.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showTestDir">
 <code class="sig-name descname">showTestDir</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showTestDir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configures whether the summary includes the (relative) path to the test directory for each failure, 
+<dd><p>Configures whether the summary includes the path to the test directory for each failure, 
 unless the output dir is displayed and the test dir is a parent of it. 
-This is useful if you run tests with an absolute –outdir.</p>
+This is useful if you run tests with an absolute –outdir. 
+This path is logged relative to the current working directory unless project property <code class="docutils literal notranslate"><span class="pre">pysysLogAbsolutePaths</span></code> is True.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -654,7 +656,7 @@ re-encode as UTF-8 again afterwards.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

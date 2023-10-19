@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.logutils &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils.logutils &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -181,7 +181,7 @@
 <span class="kn">import</span> <span class="nn">pysys</span><span class="o">,</span> <span class="nn">threading</span>
 
 <div class="viewcode-block" id="stripANSIEscapeCodes"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.stripANSIEscapeCodes">[docs]</a><span class="k">def</span> <span class="nf">stripANSIEscapeCodes</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Remove any ANSI escape sequences (for example to set console color) present in the specified string. </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Remove any ANSI escape sequences (for example to set console color) present in the specified string. </span>
 <span class="sd">	</span>
 <span class="sd">	..versionadded:: 1.6.0</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -190,7 +190,7 @@
 	<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">033</span><span class="se">\\</span><span class="s1">[[0-9;]+m&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseLogFormatter"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter">[docs]</a><span class="k">class</span> <span class="nc">BaseLogFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Base class for formatting log messages.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Base class for formatting log messages.</span>
 <span class="sd">	</span>
 <span class="sd">	This implementation delegates everything to logging.Formatter using the messagefmt and datefmt</span>
 <span class="sd">	properties. Subclasses may be implemented to provide required customizations, and can be registered</span>
@@ -216,7 +216,7 @@
 
 <div class="viewcode-block" id="BaseLogFormatter.tag"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter.tag">[docs]</a>	<span class="nd">@classmethod</span>
 	<span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">arg_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Return  dictionary to tag a string to format with color encodings.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return  dictionary to tag a string to format with color encodings.</span>
 
 <span class="sd">		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}</span>
 <span class="sd">		:param arg_index: The index of argument in the string expansion to color. This can be either a single</span>
@@ -247,7 +247,7 @@
 
 
 <div class="viewcode-block" id="ColorLogFormatter"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter">[docs]</a><span class="k">class</span> <span class="nc">ColorLogFormatter</span><span class="p">(</span><span class="n">BaseLogFormatter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Formatter supporting colored output to a console.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Formatter supporting colored output to a console.</span>
 <span class="sd">	</span>
 <span class="sd">	This implementation supports color coding of messages based on the category of the message,</span>
 <span class="sd">	and the index of the string in the format encoding. This implementation is the default for</span>
@@ -302,7 +302,7 @@
 
 <div class="viewcode-block" id="ColorLogFormatter.configureANSIEscapeCodes"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.configureANSIEscapeCodes">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">configureANSIEscapeCodes</span><span class="p">(</span><span class="n">bright</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Sets the ANSI escape codes to be used, either using the extended </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Sets the ANSI escape codes to be used, either using the extended </span>
 <span class="sd">		&quot;bright&quot; colors that look better, or the more widely supported </span>
 <span class="sd">		standard ones. </span>
 <span class="sd">		</span>
@@ -331,7 +331,7 @@
 	<span class="n">__STDOUT_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span> <span class="c1"># global lock shared by all instances of this class</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertiesDict</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Create an instance of the formatter class.&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Create an instance of the formatter class.&quot;&quot;&quot;</span>
 
 		<span class="c1"># extract to override entries in the color map from properties</span>
 		<span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">propertiesDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -367,7 +367,8 @@
 			<span class="k">with</span> <span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">__STDOUT_LOCK</span><span class="p">:</span>
 				<span class="n">stdoutbak</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
 				<span class="k">try</span><span class="p">:</span>
-					<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
+					<span class="c1"># (nb for pysys print the underlying stream might in fact be stderr, so this is dicey but does seem to work)</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdoutHandler</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">getUnderlyingStream</span><span class="p">()</span> 
 					<span class="bp">self</span><span class="o">.</span><span class="n">initColoringLibrary</span><span class="p">()</span>
 				<span class="k">finally</span><span class="p">:</span>
 					<span class="n">updatedstdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
@@ -388,7 +389,7 @@
 
 
 <div class="viewcode-block" id="ColorLogFormatter.formatException"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.formatException">[docs]</a>	<span class="k">def</span> <span class="nf">formatException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Format an exception for logging, returning the new value.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Format an exception for logging, returning the new value.</span>
 
 <span class="sd">		:param exc_info: The exception info</span>
 <span class="sd">		:return: The formatted message ready for logging</span>
@@ -403,7 +404,7 @@
 
 
 <div class="viewcode-block" id="ColorLogFormatter.format"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.format">[docs]</a>	<span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Format a log record for logging, returning the new value.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Format a log record for logging, returning the new value.</span>
 
 <span class="sd">		:param record: The message to be formatted</span>
 <span class="sd">		:return: The formatted message ready for logging</span>
@@ -436,7 +437,7 @@
 
 
 <div class="viewcode-block" id="ColorLogFormatter.formatArg"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.formatArg">[docs]</a>	<span class="k">def</span> <span class="nf">formatArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Format a single argument within a record, based on its category.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Format a single argument within a record, based on its category.</span>
 
 <span class="sd">		:param category: The logging category</span>
 <span class="sd">		:param arg: The argument within the record.</span>
@@ -447,7 +448,7 @@
 
 
 <div class="viewcode-block" id="ColorLogFormatter.colorCategoryToEscapeSequence"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.colorCategoryToEscapeSequence">[docs]</a>	<span class="k">def</span> <span class="nf">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Return the escape sequence to be used for the specified category of logging output. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Return the escape sequence to be used for the specified category of logging output. </span>
 <span class="sd">		</span>
 <span class="sd">		:param category: The category of the log message</span>
 <span class="sd">		:return: The escape sequence</span>
@@ -458,7 +459,7 @@
 
 
 <div class="viewcode-block" id="ColorLogFormatter.initColoringLibrary"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.initColoringLibrary">[docs]</a>	<span class="k">def</span> <span class="nf">initColoringLibrary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Initialize any python library required for ensuring ANSI escape sequences can be processed.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Initialize any python library required for ensuring ANSI escape sequences can be processed.</span>
 
 <span class="sd">		The default implementation does nothing on Unix but on Windows attempts to load the &quot;Colorama&quot;</span>
 <span class="sd">		library if is is present (unless the environment variable </span>
@@ -475,7 +476,7 @@
 <span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">configureANSIEscapeCodes</span><span class="p">()</span>
 
 <div class="viewcode-block" id="stdoutPrint"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.stdoutPrint">[docs]</a><span class="k">def</span> <span class="nf">stdoutPrint</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Writes the specified bytes or (preferably) unicode character string </span>
 <span class="sd">	to stdout, avoiding any redirection to loggers performed by PySys, and </span>
 <span class="sd">	performing replacements if needed based on the characters </span>
@@ -488,6 +489,7 @@
 <span class="sd">	</span>
 <span class="sd">	:param s: a unicode or bytes string. A newline will be added automatically. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># be careful using this from &quot;pysys print&quot; where we mess with the streams to send logging output to stderr</span>
 	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">):</span>
 		<span class="n">s</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 	<span class="k">else</span><span class="p">:</span>
@@ -505,7 +507,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

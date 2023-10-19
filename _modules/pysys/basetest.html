@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.basetest &mdash; PySys v2.1  documentation</title>
+  <title>pysys.basetest &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.1</a>
+          <a href="../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -195,7 +195,7 @@
 <span class="kn">import</span> <span class="nn">pysys.mappers</span>
 
 <div class="viewcode-block" id="BaseTest"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest">[docs]</a><span class="k">class</span> <span class="nc">BaseTest</span><span class="p">(</span><span class="n">ProcessUser</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your </span>
 <span class="sd">	test logic and then to validate the results against the expected behaviour. </span>
 <span class="sd">	</span>
 <span class="sd">	Apart from the `addOutcome` method this class is not thread-safe, so if </span>
@@ -203,9 +203,15 @@
 <span class="sd">	around use of its fields and methods, including any cleanup functions. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
-	<span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">outsubdir</span><span class="p">,</span> <span class="n">runner</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">outsubdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">runner</span><span class="p">):</span>
 		<span class="n">ProcessUser</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">=</span> <span class="n">descriptor</span>
+		<span class="kn">import</span> <span class="nn">pysys.baserunner</span> <span class="c1"># just needed for the type hints</span>
+		<span class="kn">import</span> <span class="nn">pysys.config.descriptor</span> <span class="c1"># just needed for the type hints</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="p">:</span> <span class="n">pysys</span><span class="o">.</span><span class="n">baserunner</span><span class="o">.</span><span class="n">BaseRunner</span> <span class="o">=</span> <span class="n">runner</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_initThreadPoolMaxWorkers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">pysys</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">TestDescriptor</span> <span class="o">=</span> <span class="n">descriptor</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">,</span> 
 			<span class="p">(</span>
 				<span class="s1">&#39;Input&#39;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">,</span> <span class="s1">&#39;Input&#39;</span><span class="p">))</span> <span class="k">else</span> <span class="s1">&#39;.&#39;</span>
@@ -214,11 +220,10 @@
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">outsubdir</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/</span><span class="se">\\</span><span class="s1">.&#39;</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/</span><span class="se">\\</span><span class="s1">.&#39;</span><span class="p">)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">disablePerformanceReporting</span> <span class="o">=</span> <span class="kc">False</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">mode</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">mode</span>
 		<span class="c1"># NB: we don&#39;t set self.mode.params as keyword arguments since it&#39;d be easy to overwrite a class/instance </span>
 		<span class="c1"># variable unintentionally with unpredictable results; accessing explicitly with self.mode is fine </span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">setKeywordArgs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">userData</span><span class="p">)</span>
@@ -234,20 +239,27 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Disabling coverage for this test due to disableCoverage group&#39;</span><span class="p">)</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">__assertDetailLogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.assertions.diffs&#39;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">testStartTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		The time when this test object was constructed (as returned by ``time.time()``). </span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		
 	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot; Returns a human-readable and unique string representation of this test object containing the descriptor id </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Returns a human-readable and unique string representation of this test object containing the descriptor id </span>
 <span class="sd">		and a suffix indicating the cycle number if this is a multi-cycle test run. </span>
 <span class="sd">		</span>
 <span class="sd">		This is suitable for diagnostic purposes and display to the test author. The format of this string may </span>
 <span class="sd">		change without notice. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.cycle</span><span class="si">%03d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testCycle</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span> <span class="n">testCycle</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span>
-			
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># same is useful in repr, since that&#39;s what we get when stringifying a list of objects</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
 	<span class="c1"># test methods for execution, validation and cleanup. The execute method is</span>
 	<span class="c1"># abstract and must be implemented by a subclass. </span>
 <div class="viewcode-block" id="BaseTest.setup"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.setup">[docs]</a>	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Contains setup actions to be executed before the test is executed. </span>
 <span class="sd">		</span>
 <span class="sd">		The ``setup`` method may be overridden by individual test classes, or (more commonly) in a custom `BaseTest` </span>
@@ -266,7 +278,7 @@
 
 
 <div class="viewcode-block" id="BaseTest.execute"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;The method tests implement to perform the test execution steps. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The method tests implement to perform the test execution steps. </span>
 <span class="sd">		</span>
 <span class="sd">		:raises NotImplementedError: If this method was not implemented yet. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -274,7 +286,7 @@
 
 
 <div class="viewcode-block" id="BaseTest.validate"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.validate">[docs]</a>	<span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;The method tests implement to perform assertions that check for the expected behaviour. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The method tests implement to perform assertions that check for the expected behaviour. </span>
 <span class="sd">		</span>
 <span class="sd">		In some cases all of the required assertions (e.g. checking that a process ran without error etc) will have </span>
 <span class="sd">		been performed in the `execute` method and so `validate` will be empty. However, where possible it is </span>
@@ -284,9 +296,8 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">pass</span></div>
 
-
 <div class="viewcode-block" id="BaseTest.cleanup"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Contains cleanup actions to be executed after the test&#39;s `execute` and `validate` methods have completed. </span>
 <span class="sd">		</span>
 <span class="sd">		The cleanup method automatically stops all processes that are still still running (assuming they were started </span>
@@ -297,6 +308,9 @@
 <span class="sd">		this method.</span>
 <span class="sd">				</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRunnerAborting</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performing test cleanup() - note that the some of this test</span><span class="se">\&#39;</span><span class="s1">s processes may already have been terminated due to the runner abort&#39;</span><span class="p">)</span>
+
 		<span class="k">try</span><span class="p">:</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">stopManualTester</span><span class="p">()</span>
@@ -320,7 +334,7 @@
 
 
 <div class="viewcode-block" id="BaseTest.addResource"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.addResource">[docs]</a>	<span class="k">def</span> <span class="nf">addResource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Add a resource which is owned by the test and therefore gets its ``__del__`` method called </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Add a resource which is owned by the test and therefore gets its ``__del__`` method called </span>
 <span class="sd">		when the test is cleaned up. </span>
 <span class="sd">		</span>
 <span class="sd">		:deprecated: Please use `addCleanupFunction` instead of this function. </span>
@@ -329,7 +343,7 @@
 
 
 <div class="viewcode-block" id="BaseTest.startProcessMonitor"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor">[docs]</a>	<span class="k">def</span> <span class="nf">startProcessMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">pmargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Start a background thread to monitor process statistics such as memory and CPU usage.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Start a background thread to monitor process statistics such as memory and CPU usage.</span>
 <span class="sd">		</span>
 <span class="sd">		All process monitors are automatically stopped on completion of </span>
 <span class="sd">		the test by L{BaseTest.cleanup}, but you may also wish to explicitly stop </span>
@@ -387,7 +401,7 @@
 
 	
 <div class="viewcode-block" id="BaseTest.stopProcessMonitor"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.stopProcessMonitor">[docs]</a>	<span class="k">def</span> <span class="nf">stopProcessMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monitor</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Request a process monitor to stop.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Request a process monitor to stop.</span>
 
 <span class="sd">		This method is deprecated - just call `pysys.process.monitor.BaseProcessMonitor.stop` directly instead. </span>
 <span class="sd">		</span>
@@ -404,10 +418,12 @@
 		<span class="n">monitor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseTest.startBackgroundThread"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.startBackgroundThread">[docs]</a>	<span class="k">def</span> <span class="nf">startBackgroundThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">kwargsForTarget</span><span class="o">=</span><span class="p">{}):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Start a new background thread that will invoke the specified `target` </span>
 <span class="sd">		function. </span>
-<span class="sd">		</span>
+
+<span class="sd">		See also `createThreadPoolExecutor`. </span>
+
 <span class="sd">		The target function will be invoked with the specified keyword </span>
 <span class="sd">		arguments, preceded by the special keyword arguments `stopping` and `log`. </span>
 <span class="sd">		The `stopping` argument is a Python C{threading.Event} instance that </span>
@@ -435,8 +451,8 @@
 <span class="sd">					t.stop() # requests thread to stop but doesn&#39;t wait for it to stop</span>
 <span class="sd">					t.join()</span>
 <span class="sd">		</span>
-<span class="sd">		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome}, </span>
-<span class="sd">		C{startProcess} and the reading of fields like ``self.output`` that don&#39;t </span>
+<span class="sd">		Note that ``BaseTest``` is not thread-safe (apart from ``addOutcome``, </span>
+<span class="sd">		``startProcess`` and the reading of fields like ``self.output`` that don&#39;t </span>
 <span class="sd">		change) so if you need to use its fields or methods from </span>
 <span class="sd">		background threads, be sure to add your own locking to the foreground </span>
 <span class="sd">		and background threads in your test, including any custom cleanup </span>
@@ -444,9 +460,9 @@
 <span class="sd">		</span>
 <span class="sd">		The BaseTest will stop and join all running background threads at the </span>
 <span class="sd">		beginning of cleanup. If a thread doesn&#39;t stop within the expected </span>
-<span class="sd">		timeout period a L{constants.TIMEDOUT} outcome will be appended. </span>
+<span class="sd">		timeout period a `constants.TIMEDOUT` outcome will be appended. </span>
 <span class="sd">		If a thread&#39;s ``target`` function raises an Exception then a </span>
-<span class="sd">		L{constants.BLOCKED} outcome will be appended during cleanup or </span>
+<span class="sd">		`constants.BLOCKED` outcome will be appended during cleanup or </span>
 <span class="sd">		when it is joined. </span>
 <span class="sd">		</span>
 <span class="sd">		:param name: A name for this thread that concisely describes its purpose. </span>
@@ -474,7 +490,7 @@
 
 	<span class="c1"># methods to control the manual tester user interface</span>
 <div class="viewcode-block" id="BaseTest.startManualTester"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.startManualTester">[docs]</a>	<span class="k">def</span> <span class="nf">startManualTester</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">FOREGROUND</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;ManualTester&#39;</span><span class="p">]):</span> <span class="c1"># pragma: no cover</span>
-		<span class="sd">&quot;&quot;&quot;Start the manual tester, which provides a UI to guide a human through the tests needed to implement this testcase.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Start the manual tester, which provides a UI to guide a human through the tests needed to implement this testcase.</span>
 <span class="sd">		</span>
 <span class="sd">		The manual tester user interface (UI) is used to describe a series of manual steps to be performed </span>
 <span class="sd">		to execute and validate a test. Only a single instance of the UI can be running at any given time, and </span>
@@ -499,9 +515,9 @@
 			<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 		
 			<span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">FOREGROUND</span><span class="p">:</span>
-				<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+				<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 				<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">running</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-					<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+					<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 					<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="s1">&#39;Manual tester timed out&#39;</span><span class="p">)</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
@@ -514,7 +530,7 @@
 
 
 <div class="viewcode-block" id="BaseTest.stopManualTester"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.stopManualTester">[docs]</a>	<span class="k">def</span> <span class="nf">stopManualTester</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-		<span class="sd">&quot;&quot;&quot;Stop the manual tester if running.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Stop the manual tester if running.</span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
@@ -525,13 +541,13 @@
 
 
 <div class="viewcode-block" id="BaseTest.waitManualTester"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.waitManualTester">[docs]</a>	<span class="k">def</span> <span class="nf">waitManualTester</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;ManualTester&#39;</span><span class="p">]):</span>  <span class="c1"># pragma: no cover</span>
-		<span class="sd">&quot;&quot;&quot;Wait for the manual tester to be stopped via user interaction.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for the manual tester to be stopped via user interaction.</span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
-			<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+			<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 			<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">running</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-				<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+				<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 				<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="s1">&#39;Timed out waiting for manual tester&#39;</span><span class="p">)</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">manualTester</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
@@ -543,7 +559,7 @@
 	<span class="c1"># on various conditions i.e. a socket becoming available for connections,</span>
 	<span class="c1"># a file to exist etc</span>
 <div class="viewcode-block" id="BaseTest.wait"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.wait">[docs]</a>	<span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait for a specified period of time, and log a message to indicate this is happening.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for a specified period of time, and log a message to indicate this is happening.</span>
 <span class="sd">		</span>
 <span class="sd">		Tests that rely on waiting for arbitrary times usually take longer to execute than necessary, and are fragile </span>
 <span class="sd">		if the timings or machine load changes, so wherever possible use a method like `waitForGrep` to </span>
@@ -561,7 +577,7 @@
 	<span class="c1"># test validation methods.</span>
 	
 <div class="viewcode-block" id="BaseTest.assertPathExists"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertPathExists">[docs]</a>	<span class="k">def</span> <span class="nf">assertPathExists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a validation that the specified file or directory path exists </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation that the specified file or directory path exists </span>
 <span class="sd">		(or does not exist). </span>
 <span class="sd">		</span>
 <span class="sd">		:param path: The path to be checked. This can be an absolute path or </span>
@@ -582,7 +598,7 @@
 		<span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="BaseTest.assertEval"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertEval">[docs]</a>	<span class="k">def</span> <span class="nf">assertEval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evalstring</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">formatparams</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a validation by substituting named ``{}`` placeholder values into a Python expression such as </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation by substituting named ``{}`` placeholder values into a Python expression such as </span>
 <span class="sd">		``{expected}=={actual}`` or ``4 &lt;= {actual} &lt;= 10``. </span>
 <span class="sd">		</span>
 <span class="sd">		:deprecated::</span>
@@ -647,7 +663,7 @@
 			<span class="k">return</span> <span class="kc">False</span></div>
 			
 <div class="viewcode-block" id="BaseTest.assertThat"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertThat">[docs]</a>	<span class="k">def</span> <span class="nf">assertThat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conditionstring</span><span class="p">,</span> <span class="o">*</span><span class="n">positional_arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression </span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression </span>
 <span class="sd">		in the context of some named values. </span>
 <span class="sd">		</span>
 <span class="sd">		This method is designed to produce very clear and informative logging and failure reasons if the assertion is </span>
@@ -703,9 +719,9 @@
 <span class="sd">			self.assertThat(&quot;actual == expected&quot;, actual__eval=&quot;myDataStructure[&#39;item3&#39;][-1].getId()&quot;, expected=&quot;baz&quot;)</span>
 
 <span class="sd">			# Produces self-describing log messages like this:</span>
-<span class="sd">			#  Assert that (actual == expected) with actual (myDataStructure[&#39;item1&#39;][-1].getId()) =&#39;foo&#39;, expected=&#39;foo&#39; ... passed</span>
-<span class="sd">			#  Assert that (actual == expected) with actual (myDataStructure[&#39;item2&#39;][-1].getId()) =&#39;bar&#39;, expected=&#39;bar&#39; ... passed</span>
-<span class="sd">			#  Assert that (actual == expected) with actual (myDataStructure[&#39;item3&#39;][-1].getId()) =&#39;baZaar&#39;, expected=&#39;baz&#39; ... failed</span>
+<span class="sd">			# Assert that {actual == expected} with actual{=myDataStructure[&#39;item1&#39;][-1].getId()} =&quot;foo&quot; expected=&quot;foo&quot; ... passed</span>
+<span class="sd">			# Assert that {actual == expected} with actual{=myDataStructure[&#39;item2&#39;][-1].getId()} =&quot;bar&quot; expected=&quot;bar&quot; ... passed</span>
+<span class="sd">			# Assert that {actual == expected} with actual{=myDataStructure[&#39;item3&#39;][-1].getId()} =&quot;baZaar&quot; expected=&quot;baz&quot; ... failed [pysystest.py:123]</span>
 <span class="sd">			#       actual: &#39;baZaar&#39;</span>
 <span class="sd">			#     expected: &#39;baz&#39;</span>
 <span class="sd">			#                 ^</span>
@@ -727,13 +743,13 @@
 <span class="sd">			It&#39;s best to put expected values into a separate named parameter (rather than using literals inside the </span>
 <span class="sd">			conditionstring), since this will produce more informative messages if there is a failure. </span>
 <span class="sd">			</span>
-<span class="sd">			Do not be tempted to use a Python f-string here, as that would deprive PySys of the </span>
+<span class="sd">			Do not be tempted to use a Python f-string here, as that would deprive this method of the </span>
 <span class="sd">			opportunity to provide a self-describing message and outcome reason. </span>
 <span class="sd">		</span>
 <span class="sd">		:param \**kwargs: All additional keyword arguments are treated as values which will be made available </span>
 <span class="sd">			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated </span>
 <span class="sd">			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace </span>
-<span class="sd">			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  </span>
+<span class="sd">			containing the local variables of the calling code and any preceding named parameters.  </span>
 
 <span class="sd">		:param \*positional_arguments: (deprecated) Unnamed positional arguments will be </span>
 <span class="sd">			substituted into the condition string using the old ``%`` format string mechanism, before it is evaluated. </span>
@@ -763,9 +779,10 @@
 		
 		<span class="n">EVAL_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;__eval&#39;</span>
 		<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="n">evalsuffix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 			<span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">EVAL_SUFFIX</span><span class="p">):</span>
 				<span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">EVAL_SUFFIX</span><span class="p">)]</span> <span class="c1"># strip the suffix</span>
-				<span class="n">displayvalues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) &#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+				<span class="n">evalsuffix</span> <span class="o">=</span> <span class="s1">&#39;{=</span><span class="si">%s</span><span class="s1">} &#39;</span><span class="o">%</span><span class="n">v</span>
 				<span class="k">try</span><span class="p">:</span>
 					<span class="c1"># evaluate in the namespace of the parent (which includes basetest)</span>
 					<span class="n">namespace</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_back</span><span class="o">.</span><span class="n">f_locals</span><span class="p">)</span>
@@ -775,14 +792,13 @@
 				<span class="k">except</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">safeeval</span><span class="o">.</span><span class="n">SafeEvalException</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
 					<span class="k">return</span> <span class="kc">False</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="n">displayvalues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 				
 			<span class="k">if</span> <span class="s1">&#39;__&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Please do not use __ in any for keywords, this is reserved for future use&#39;</span><span class="p">)</span>
 
 			<span class="c1"># use quotestring which uses repr() for escaping only if we need it; other data structures are best using normal str()</span>
 			
-			<span class="n">displayvalues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+=</span> <span class="p">(</span><span class="sa">u</span><span class="s1">&#39;=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">quotestring</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="sa">u</span><span class="s1">&#39;=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">v</span><span class="p">,)))</span>
+			<span class="c1"># probably best to put the evalsuffix early in the string so that similar assertions has the same prefix in the run.log</span>
+			<span class="n">displayvalues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">evalsuffix</span><span class="p">,</span> <span class="n">quotestring</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">v</span><span class="p">,))))</span>
 			<span class="n">namedvalues</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
 		<span class="k">if</span> <span class="n">positional_arguments</span><span class="p">:</span> <span class="c1"># yucky old-style mechanism</span>
@@ -792,17 +808,17 @@
 				<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Failed to substitute unnamed/positional arguments into </span><span class="si">%r</span><span class="s1"> using </span><span class="si">%%</span><span class="s1"> operator; this feature is deprecated, please use named arguments instead, e.g. assertThat(&quot;...&quot;, expected=..., actual=...)&#39;</span><span class="o">%</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
 				<span class="k">return</span> <span class="kc">False</span>
 		
-		<span class="n">displayvalues</span> <span class="o">=</span> <span class="s1">&#39; with &#39;</span><span class="o">+</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">displayvalues</span><span class="p">)</span> <span class="k">if</span> <span class="n">displayvalues</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+		<span class="n">displayvalues</span> <span class="o">=</span> <span class="s1">&#39; with &#39;</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">displayvalues</span><span class="p">)</span> <span class="k">if</span> <span class="n">displayvalues</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">namespace</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">namedvalues</span><span class="p">)</span>
 			<span class="n">namespace</span><span class="p">[</span><span class="s1">&#39;self&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
-			<span class="n">result</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">safeeval</span><span class="o">.</span><span class="n">safeEval</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">extraNamespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">,</span> <span class="n">errorMessage</span><span class="o">=</span><span class="s1">&#39;Failed to evaluate (</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s</span><span class="s1"> - </span><span class="si">{error}</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">displayvalues</span><span class="p">)))</span>
+			<span class="n">result</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">safeeval</span><span class="o">.</span><span class="n">safeEval</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">extraNamespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">,</span> <span class="n">errorMessage</span><span class="o">=</span><span class="s1">&#39;Failed to evaluate {</span><span class="si">%s</span><span class="s1">}</span><span class="si">%s</span><span class="s1"> - </span><span class="si">{error}</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">displayvalues</span><span class="p">)))</span>
 
 		<span class="k">except</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">safeeval</span><span class="o">.</span><span class="n">SafeEvalException</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
 			<span class="k">return</span> <span class="kc">False</span>
 		
-		<span class="n">assertMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concatAssertMessages</span><span class="p">(</span><span class="n">assertMessage</span><span class="p">,</span> <span class="s1">&#39;Assert that (</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">displayvalues</span><span class="p">),</span> <span class="n">short</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
+		<span class="n">assertMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concatAssertMessages</span><span class="p">(</span><span class="n">assertMessage</span><span class="p">,</span> <span class="s1">&#39;Assert that {</span><span class="si">%s</span><span class="s1">}</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">displayvalues</span><span class="p">),</span> <span class="n">short</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
 		
 		<span class="k">if</span> <span class="n">result</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">PASSED</span><span class="p">,</span> <span class="n">assertMessage</span><span class="p">)</span>
@@ -825,8 +841,8 @@
 
 			<span class="k">return</span> <span class="kc">False</span></div>
 	
-<div class="viewcode-block" id="BaseTest.logValueDiff"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.logValueDiff">[docs]</a>	<span class="k">def</span> <span class="nf">logValueDiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logFunction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">namedvalues</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by `assertThat`). </span>
+<div class="viewcode-block" id="BaseTest.logValueDiff"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.logValueDiff">[docs]</a>	<span class="k">def</span> <span class="nf">logValueDiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logFunction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stringsAlreadyEscaped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">namedvalues</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by `assertThat`). </span>
 <span class="sd">		</span>
 <span class="sd">		Special handling is provided for common types such as strings, lists and dicts (note that this isn&#39;t intended </span>
 <span class="sd">		for use with data structures whose string representation is too big to display on the console). </span>
@@ -835,6 +851,10 @@
 <span class="sd">			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. </span>
 <span class="sd">		:param obj expected: The baseline/expected value from which a diff will be computed to the actual value. </span>
 <span class="sd">			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. </span>
+<span class="sd">		</span>
+<span class="sd">		:param bool stringsAlreadyEscaped: Usually any str values will be quoted and escaped (possibly using ``repr()``), however in cases </span>
+<span class="sd">			where you want to compare values which have already been converted to strings using your own quoting rules this </span>
+<span class="sd">			option can be used to avoid doubling up on the quotes and escaping. </span>
 <span class="sd">			</span>
 <span class="sd">		:param function logFunction: By default each line is logged at INFO level using ``log.info()``, but an alternative </span>
 <span class="sd">			log function with the same signature can be provided if desired. </span>
@@ -881,7 +901,9 @@
 			<span class="n">v1</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">v1</span><span class="p">,)</span>
 			<span class="n">v2</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">v2</span><span class="p">,)</span>
 
-			<span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">namedvalues</span><span class="p">[</span><span class="n">namesInUse</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="ow">and</span> <span class="p">(</span> <span class="c1"># for strings do minimal escaping, but only if we can do it consistently for both strings</span>
+			<span class="k">if</span> <span class="n">stringsAlreadyEscaped</span><span class="p">:</span>
+				<span class="k">pass</span>
+			<span class="k">elif</span> <span class="n">isstring</span><span class="p">(</span><span class="n">namedvalues</span><span class="p">[</span><span class="n">namesInUse</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="ow">and</span> <span class="p">(</span> <span class="c1"># for strings do minimal escaping, but only if we can do it consistently for both strings</span>
 					<span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">namedvalues</span><span class="p">[</span><span class="n">namesInUse</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="o">==</span> 
 					<span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">namedvalues</span><span class="p">[</span><span class="n">namesInUse</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="p">):</span>
 				<span class="n">v1</span> <span class="o">=</span> <span class="n">quotestring</span><span class="p">(</span><span class="n">namedvalues</span><span class="p">[</span><span class="n">namesInUse</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
@@ -937,7 +959,7 @@
 				<span class="n">logFunction</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;  %</span><span class="si">{pad}</span><span class="s1">s </span><span class="si">%s</span><span class="s1"> ^&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">*</span><span class="n">j1</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FAILURES</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="BaseTest.assertTrue"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertTrue">[docs]</a>	<span class="k">def</span> <span class="nf">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a validation assert on the supplied expression evaluating to true.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation assert on the supplied expression evaluating to true.</span>
 <span class="sd">		</span>
 <span class="sd">		:deprecated: Use `assertThat` instead of this method, which produces </span>
 <span class="sd">			clearer messages if the assertion fails. </span>
@@ -964,7 +986,7 @@
 	
 
 <div class="viewcode-block" id="BaseTest.assertFalse"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertFalse">[docs]</a>	<span class="k">def</span> <span class="nf">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a validation assert on the supplied expression evaluating to false.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation assert on the supplied expression evaluating to false.</span>
 <span class="sd">		</span>
 <span class="sd">		:deprecated: Use `assertThat` instead of this method, which produces </span>
 <span class="sd">			clearer messages if the assertion fails. </span>
@@ -991,7 +1013,7 @@
 
 <div class="viewcode-block" id="BaseTest.assertDiff"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertDiff">[docs]</a>	<span class="k">def</span> <span class="nf">assertDiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file1</span><span class="p">,</span> <span class="n">file2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filedir1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filedir2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="p">[],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="p">[],</span> <span class="n">includes</span><span class="o">=</span><span class="p">[],</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripWhitespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a validation by comparing the contents of two text files, typically a file from the </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation by comparing the contents of two text files, typically a file from the </span>
 <span class="sd">		output directory against a file in the ``&lt;testdir&gt;/Reference/`` directory containing the expected output.</span>
 
 <span class="sd">		Differences in line ending are always ignored, and depending on the value of ``stripWhitespace`` leading </span>
@@ -1032,7 +1054,7 @@
 <span class="sd">		committing. To use </span>
 <span class="sd">		this feature, run::</span>
 <span class="sd">		</span>
-<span class="sd">			pysys.py run -XautoUpdateAssertDiffReferences</span>
+<span class="sd">			pysys.py run -XupdateDiffReferences</span>
 <span class="sd">		</span>
 <span class="sd">		:param str file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. </span>
 <span class="sd">		:param str file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.</span>
@@ -1096,9 +1118,9 @@
 					<span class="n">ignores</span><span class="p">,</span> <span class="n">sort</span><span class="p">,</span> <span class="n">replace</span><span class="p">,</span> <span class="n">includes</span><span class="p">,</span> <span class="n">unifiedDiffOutput</span><span class="o">=</span><span class="n">unifiedDiffOutput</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">f1</span><span class="p">),</span> 
 					<span class="n">stripWhitespace</span><span class="o">=</span><span class="n">stripWhitespace</span><span class="p">)</span>
 				
-				<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">result</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;autoUpdateAssertDiffReferences&#39;</span><span class="p">):</span>
+				<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">result</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;autoUpdateAssertDiffReferences&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;updateDiffReferences&#39;</span><span class="p">)):</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">unifiedDiffOutput</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">f1</span><span class="p">),</span> <span class="n">logFunction</span><span class="o">=</span><span class="n">logDiffLine</span><span class="p">)</span>
-					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file </span><span class="si">%s</span><span class="s1"> and retrying ... &#39;</span><span class="o">%</span><span class="n">f2</span><span class="p">)</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;... -XupdateDiffReferences option is enabled, so overwriting reference file </span><span class="si">%s</span><span class="s1"> and retrying ... &#39;</span><span class="o">%</span><span class="n">f2</span><span class="p">)</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span>
 					<span class="k">continue</span>
 
@@ -1108,6 +1130,21 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> failed due to </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
 			<span class="k">return</span> <span class="kc">False</span>
 		<span class="k">else</span><span class="p">:</span>
+			<span class="c1"># if it failed try to summarize in the outcome reason if possible </span>
+			<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">result</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">unifiedDiffOutput</span><span class="p">):</span>
+				<span class="n">summaryDiffLines</span> <span class="o">=</span> <span class="p">[]</span>
+				<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">unifiedDiffOutput</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">f1</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="c1"># strict handling of encoding errors is best here</span>
+					<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+						<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">summaryDiffLines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span> <span class="k">break</span>
+						<span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;+++&#39;</span><span class="p">,</span> <span class="s1">&#39;---&#39;</span><span class="p">)):</span> <span class="n">summaryDiffLines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+				<span class="k">if</span> <span class="n">summaryDiffLines</span><span class="p">:</span>
+					<span class="n">summaryDiffLines</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(),</span> <span class="n">l</span><span class="p">))</span> <span class="c1"># this typically interleaves -s and +s</span>
+					<span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">quotestring</span><span class="p">(</span><span class="n">summaryDiffLines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span>
+					<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">summaryDiffLines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+						<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">300</span><span class="p">:</span> 
+							<span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39; ...&#39;</span>
+							<span class="k">break</span>
+						<span class="k">else</span><span class="p">:</span> <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">quotestring</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
 			<span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concatAssertMessages</span><span class="p">(</span><span class="n">assertMessage</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
 		
 			<span class="n">result</span> <span class="o">=</span> <span class="n">PASSED</span> <span class="k">if</span> <span class="n">result</span> <span class="k">else</span> <span class="n">FAILED</span>
@@ -1119,7 +1156,7 @@
 			<span class="k">return</span> <span class="n">result</span></div>
 
 	<span class="k">def</span> <span class="nf">__stripTestDirPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Normalize the specified path then strip off any self.output (or failing that prefix. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Normalize the specified path then strip off any self.output (or failing that prefix. </span>
 <span class="sd">		This is preferable to using os.path.basename to shorten paths we display in outcome reasons, since it </span>
 <span class="sd">		retains path information that might be useful when triaging results. Also if a full path is specified, </span>
 <span class="sd">		it will be passed through unchanged. </span>
@@ -1128,13 +1165,35 @@
 		<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 		<span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-<div class="viewcode-block" id="BaseTest.assertThatGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertThatGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertThatGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">grepRegex</span><span class="p">,</span> <span class="n">conditionstring</span><span class="o">=</span><span class="s1">&#39;value == expected&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargsForAssertThat</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform a validation by using a regular expression to extract a &quot;value&quot; from a text file and then check </span>
-<span class="sd">		the extracted value using an `assertThat` conditionstring.</span>
+<div class="viewcode-block" id="BaseTest.assertGrepOfGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrepOfGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertGrepOfGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">grepRegex</span><span class="p">,</span> <span class="n">expectedRegex</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation by using a regular expression &quot;(...)&quot; group to extract the first matching value from a text file </span>
+<span class="sd">		and then use a second regex to validate that the extracted value is as expected. </span>
+
+<span class="sd">		Using this method to separate out the extraction and validation stages is clearer </span>
+<span class="sd">		and produces more easily debuggable messages than combining both into a single `assertGrep`. For example::</span>
+
+<span class="sd">			self.assertGrepOfGrep(&#39;myserver.log&#39;, r&#39;Successfully authenticated user .*in ([^ ]+) seconds&#39;, r&#39;[0-9.]+$&#39;)</span>
+<span class="sd">		</span>
+<span class="sd">		This is equivalent to L{assertThatGrep} with a conditionstring of &#39;re.match(expectedRegex, value)&#39;. For details on </span>
+<span class="sd">		the command line arguments, see that method. </span>
+
+<span class="sd">		Regular expressions aren&#39;t the solution for every problem, and for cases where you need to match a literal </span>
+<span class="sd">		or check a value is within a range, use L{assertThatGrep} instead. </span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="s1">&#39;contains&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;The contains= argument is not supported by this method&#39;</span>
+
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertThatGrep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">grepRegex</span><span class="p">,</span> <span class="n">conditionstring</span><span class="o">=</span><span class="s1">&#39;re.match(expectedRegex, value</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;, flags=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reFlags</span><span class="p">))</span> <span class="k">if</span> <span class="n">reFlags</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> 
+			<span class="n">expectedRegex</span><span class="o">=</span><span class="n">expectedRegex</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="n">encodingReplaceOnError</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTest.assertThatGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertThatGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertThatGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">grepRegex</span><span class="p">,</span> <span class="n">conditionstring</span><span class="o">=</span><span class="s1">&#39;value == expected&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargsForAssertThat</span><span class="p">):</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform a validation by using a regular expression to extract the first matching value from a text file and then check </span>
+<span class="sd">		the extracted string value is correct using an `assertThat` conditionstring.</span>
 
 <span class="sd">		For example::</span>
 <span class="sd">		</span>
-<span class="sd">			# This is the typical case - &quot;value&quot; is assigned to the first (...) regex group, and keyword parameters </span>
+<span class="sd">			# This is the typical case - the string &quot;value&quot; is assigned to the first (...) regex group, and keyword parameters </span>
 <span class="sd">			# (e.g. &quot;expected=&quot;) are used to validate that the &quot;value&quot; is correct</span>
 <span class="sd">			self.assertThatGrep(&#39;myserver.log&#39;, r&#39;Successfully authenticated user &quot;([^&quot;]*)&quot;&#39;, </span>
 <span class="sd">				&quot;value == expected&quot;, expected=&#39;myuser&#39;)</span>
@@ -1142,6 +1201,15 @@
 <span class="sd">			# In cases where you need multiple regex groups for matching purpose, name the one containing the value using (?P&lt;value&gt;...)</span>
 <span class="sd">			self.assertThatGrep(&#39;myserver.log&#39;, r&#39;Successfully authenticated user &quot;([^&quot;]*)&quot; in (?P&lt;value&gt;[^ ]+) seconds&#39;, </span>
 <span class="sd">				&quot;0.0 &lt;= float(value) &lt;= 60.0&quot;)</span>
+
+<span class="sd">		When your validation on the extracted value is itself to be performed with another regular expression, </span>
+<span class="sd">		separating out the extraction and validation stages is still clearer and produces more easily debuggable messages than </span>
+<span class="sd">		combining both into a single `assertGrep`. You can use the `assertGrepOfGrep` method to save </span>
+<span class="sd">		having to enter ``conditionstring=&quot;re.match(expectedRegex, value)&quot;``::</span>
+
+<span class="sd">			self.assertGrepOfGrep(&#39;myserver.log&#39;, r&#39;Successfully authenticated user &quot;.*&quot; in ([^ ]+) seconds&#39;, r&#39;[0-9.]+$&#39;)</span>
+<span class="sd">			</span>
+<span class="sd">		See also the `assertGrepOfGrep` method which is an alias for the above. </span>
 
 <span class="sd">		This method is implemented using `grep` and `assertThat`, so see those methods for more detailed </span>
 <span class="sd">		information on the parameters. </span>
@@ -1153,6 +1221,10 @@
 <span class="sd">		:param str grepRegex: The regular expression to use for extracting the value of interest from the file. </span>
 <span class="sd">			Typically this will use a ``(...)`` regular expression group to identify the part of the expression </span>
 <span class="sd">			containing the value; alternatively a single ``(?P&lt;value&gt;...)`` named group may be used. </span>
+<span class="sd">			</span>
+<span class="sd">			Only the first line matching this expression will be considered, so ensure the ``grepRegex`` should </span>
+<span class="sd">			be &quot;just specific enough&quot; to uniquely identify the required line, but without duplicating the verification </span>
+<span class="sd">			to be performed with the conditionstring assertion. </span>
 <span class="sd">		</span>
 <span class="sd">		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` </span>
 <span class="sd">			to validate that &quot;value&quot; is correct. For example ``value == expected``.</span>
@@ -1174,6 +1246,9 @@
 <span class="sd">			The default value is None which indicates that the decision will be delegated </span>
 <span class="sd">			to the L{getDefaultFileEncoding()} method. </span>
 <span class="sd">		</span>
+<span class="sd">		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. </span>
+<span class="sd">			Added in PySys 2.2.</span>
+
 <span class="sd">		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, </span>
 <span class="sd">			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. </span>
 <span class="sd">			</span>
@@ -1192,32 +1267,40 @@
 <span class="sd">		:param \**kwargs: All additional keyword arguments are treated as values which will be made available </span>
 <span class="sd">			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated </span>
 <span class="sd">			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace </span>
-<span class="sd">			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  </span>
+<span class="sd">			containing the local variables of the calling code and any preceding named parameters.  </span>
 <span class="sd">		</span>
 <span class="sd">		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). </span>
 
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">def</span> <span class="nf">grep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
-			<span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">)</span>
+			<span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="n">encodingReplaceOnError</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">)</span>
+			
+			<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pysysLegacyAssertThatGrepNewLineBehaviour&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span> 
+				<span class="c1"># while not a problem for most regexes, it&#39;s certainly possible to create a regex that captures the newline </span>
+				<span class="c1"># character and then to get surprised, </span>
+				<span class="n">e</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span>
+			
 			<span class="c1"># in case it has named parameters</span>
-			<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+			<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+			
 			<span class="k">return</span> <span class="n">e</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">conditionstring</span><span class="p">,</span> <span class="n">value__eval</span><span class="o">=</span><span class="s1">&#39;grep(</span><span class="si">%r</span><span class="s1">, </span><span class="si">%r</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">grepRegex</span><span class="p">),</span> 
 			<span class="o">**</span><span class="n">kwargsForAssertThat</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseTest.assertGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">_expr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_unused</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">literal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+<div class="viewcode-block" id="BaseTest.assertGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">_expr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_unused</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">literal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
 			<span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform a validation by checking for the presence or absence of a regular expression in the specified text file.</span>
-
-<span class="sd">		Note that if your goal is to check that a value in the file matches some criteria, it is better to </span>
-<span class="sd">		use `assertThatGrep` instead of this function, as assertThatGrep can produce better messages on failure, and </span>
-<span class="sd">		also allows for more powerful matching using a full Python expression </span>
-<span class="sd">		(e.g. numeric range checks, pre-processing strings to normalize case, etc). If you need to extract a string for </span>
-<span class="sd">		further processing without updating the test outcome, consider using `grep` instead. </span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform a validation by checking for the presence or absence of a regular expression in the specified text file.</span>
 
 <span class="sd">		The assertGrep method is good for checking in a log to confirm that something happened, or to check that </span>
 <span class="sd">		there are no error messages. </span>
-<span class="sd">		When contains=True it adds a `PASSED &lt;pysys.constants.PASSED&gt;` outcome if found or a </span>
+<span class="sd">		</span>
+<span class="sd">		Note that if your goal is to check that a value in the file matches some criteria, it is better to </span>
+<span class="sd">		use `assertThatGrep` or `assertGrepOfGrep` instead of this function, as these methods indicate the intention </span>
+<span class="sd">		more clearly, produce better messages on failure, and in the case of `assertThatGrep` </span>
+<span class="sd">		also allow for more powerful matching using a full Python expression </span>
+<span class="sd">		(e.g. numeric range checks, pre-processing strings to normalize case or path separators, etc). </span>
+<span class="sd">	</span>
+<span class="sd">		When contains=True this method adds a `PASSED &lt;pysys.constants.PASSED&gt;` outcome if found or a </span>
 <span class="sd">		`FAILED &lt;pysys.constants.FAILED&gt;` outcome if not found (except when where are named groups in the expression </span>
 <span class="sd">		in which case `BLOCKED &lt;pysys.constants.BLOCKED&gt;` is used to indicate that the return value is not valid).</span>
 <span class="sd">		When contains=False this is inverted so a `PASSED &lt;pysys.constants.PASSED&gt;` outcome is added if not found </span>
@@ -1225,25 +1308,29 @@
 
 <span class="sd">		For example::</span>
 <span class="sd">		</span>
-<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, expr=r&#39; ERROR .*&#39;, contains=False)</span>
+<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, r&#39; ERROR .*&#39;, contains=False)</span>
 
 <span class="sd">			# If error messages may be accompanied by stack traces you can use a mapper to join them into the same line </span>
 <span class="sd">			# so if your test fails, the outcome reason includes all the information. This also allows ignoring errors </span>
 <span class="sd">			# based on the stack trace:</span>
-<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, expr=r&#39; (ERROR|FATAL) .*&#39;, contains=False, </span>
+<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, r&#39; (ERROR|FATAL) .*&#39;, contains=False, </span>
 <span class="sd">				mappers=[pysys.mappers.JoinLines.JavaStackTrace()], 	</span>
 <span class="sd">				ignores=[&#39;Caused by: java.lang.RuntimeError: My expected exception&#39;])</span>
 <span class="sd">			</span>
 <span class="sd">			# In Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:</span>
-<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, expr=f&#39;Successfully authenticated user &quot;{re.escape(username)}&quot; in .* seconds[.]&#39;)</span>
+<span class="sd">			# (but assertThatGrep is a better choice here)</span>
+<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, f&#39;Successfully authenticated user &quot;{re.escape(username)}&quot; in .* seconds[.]&#39;)</span>
 <span class="sd">			</span>
 <span class="sd">			# If you need to use \ characters use a raw r&#39;...&#39; string to avoid the need for Python \ escaping in </span>
 <span class="sd">			# addition to regex escaping. Square brackets are often the clearest way to escape regular expression </span>
 <span class="sd">			# characters such as \ . and ()</span>
-<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, expr=r&#39;c:[\]Foo[\]bar[.]txt&#39;)</span>
-<span class="sd">			</span>
+<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, r&#39;c:[\]Foo[\]bar[.]txt&#39;)</span>
+
+<span class="sd">			# Alternatively when dealing with paths on different OSes, a convenient approach is to perform a replacement on the final expression</span>
+<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, &#39;Checking for path: .*abc/def/ghi/jkl[.]txt&#39;.replace(&#39;/&#39;, r&#39;[/\\]&#39;))</span>
+
 <span class="sd">			# The IncludeLinesBetween mapper is very useful if you want to grep within a subset of the lines:</span>
-<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, expr=r&#39;MyClass&#39;, mappers=[</span>
+<span class="sd">			self.assertGrep(&#39;myserver.log&#39;, r&#39;MyClass&#39;, mappers=[</span>
 <span class="sd">				pysys.mappers.IncludeLinesBetween(&#39;Error message.* - stack trace is:&#39;, stopBefore=&#39;^$&#39;),</span>
 <span class="sd">			])</span>
 <span class="sd">		</span>
@@ -1267,7 +1354,10 @@
 <span class="s2">		substitution string (containing only A-Z chars) for the regex special characters and pass everything else </span>
 <span class="s2">		through re.escape::</span>
 <span class="s2">		</span>
-<span class="s2">			self.assertGrep(&#39;myserver.log&#39;, expr=re.escape(r&#39;A&quot;string[with \lots*] of crazy characters e.g. VALUE.&#39;).replace(&#39;VALUE&#39;, &#39;(.*)&#39;))</span>
+<span class="s2">			self.assertGrep(&#39;myserver.log&#39;, re.escape(r&#39;A&quot;string[with \lots*] of crazy characters e.g. VALUE.&#39;).replace(&#39;VALUE&#39;, &#39;(.*)&#39;))</span>
+
+<span class="s2">		If you need to extract a string for further processing without performing an assertion and </span>
+<span class="s2">		updating the test outcome, see the using `grep` instead. </span>
 
 <span class="s2">		.. versionchanged:: 1.5.1</span>
 <span class="s2">			The return value and reFlags were added in 1.5.1.</span>
@@ -1278,12 +1368,12 @@
 <span class="s2">			for example ``&quot; ERROR .*&quot;``. </span>
 <span class="s2">			</span>
 <span class="s2">			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to </span>
-<span class="s2">			be treated as literal values. </span>
+<span class="s2">			be treated as literal values, or use the argument ``literal=True``. </span>
 <span class="s2">			</span>
 <span class="s2">			If you wish to do something with the text inside the match you can use the ``re`` named </span>
 <span class="s2">			group syntax ``(?P&lt;groupName&gt;...)`` to specify a name for parts of the regular expression.</span>
 <span class="s2">			</span>
-<span class="s2">			For contains=False matches, you should end the expr with `.*` if you wish to include just the </span>
+<span class="s2">			For contains=False matches, you should end the expr with `.**` if you wish to include just the </span>
 <span class="s2">			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` </span>
 <span class="s2">			then the entire matching line will be included in the outcome failure reason. </span>
 <span class="s2">		</span>
@@ -1311,6 +1401,9 @@
 <span class="s2">			The default value is None which indicates that the decision will be delegated </span>
 <span class="s2">			to the L{getDefaultFileEncoding()} method. </span>
 <span class="s2">		</span>
+<span class="s2">		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. </span>
+<span class="s2">			Added in PySys 2.2.</span>
+
 <span class="s2">		:param bool abortOnError: Set to True to make the test immediately abort if the</span>
 <span class="s2">			assertion fails. </span>
 <span class="s2">		</span>
@@ -1369,14 +1462,15 @@
 			<span class="n">compiled</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">)</span>
 			<span class="n">namedGroupsMode</span> <span class="o">=</span> <span class="n">compiled</span><span class="o">.</span><span class="n">groupindex</span>
 			
-			<span class="n">result</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">returnFirstOnly</span><span class="o">=</span><span class="p">(</span><span class="n">contains</span><span class="o">==</span><span class="kc">True</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">)</span>
+			<span class="n">result</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">returnFirstOnly</span><span class="o">=</span><span class="p">(</span><span class="n">contains</span><span class="o">==</span><span class="kc">True</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="n">encodingReplaceOnError</span><span class="p">)</span>
 			<span class="k">if</span> <span class="ow">not</span> <span class="n">contains</span><span class="p">:</span>
 				<span class="n">matchcount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 				<span class="n">result</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">matchcount</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">FileNotFoundException</span><span class="p">:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 			<span class="n">msg</span> <span class="o">=</span> <span class="n">assertMessage</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;Grep on </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;contains&#39;</span> <span class="k">if</span> <span class="n">contains</span> <span class="k">else</span> <span class="s1">&#39;does not contain&#39;</span><span class="p">,</span> <span class="n">quotestring</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="p">))</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> failed due to </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> failed due to </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
 			<span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="c1"># short message if it succeeded, more verbose one if it failed to help you understand why, </span>
@@ -1385,7 +1479,7 @@
 			<span class="k">if</span> <span class="n">outcome</span> <span class="o">==</span> <span class="n">PASSED</span><span class="p">:</span> 
 				<span class="k">if</span> <span class="n">contains</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Grep on file </span><span class="si">%s</span><span class="s1"> successfully matched expression </span><span class="si">%s</span><span class="s1"> with line: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> 
 					<span class="n">file</span><span class="p">,</span> <span class="n">quotestring</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">quotestring</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">string</span><span class="p">))</span>
-				<span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concatAssertMessages</span><span class="p">(</span><span class="n">assertMessage</span><span class="p">,</span> <span class="s1">&#39;Grep on file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file</span><span class="p">)</span>
+				<span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Grep on file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file</span>
 			<span class="k">else</span><span class="p">:</span>
 			
 				<span class="k">if</span> <span class="n">contains</span><span class="p">:</span>
@@ -1414,7 +1508,7 @@
 
 <div class="viewcode-block" id="BaseTest.assertLastGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertLastGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertLastGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">_expr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">_unused</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="p">[],</span> <span class="n">includes</span><span class="o">=</span><span class="p">[],</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a validation assert on a regular expression occurring in the last line of a text file.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation assert on a regular expression occurring in the last line of a text file.</span>
 <span class="sd">		</span>
 <span class="sd">		Rather than using this method, use `grepAll` with `assertThat` for better error messages and more </span>
 <span class="sd">		maintainable tests, e.g. you can extract the last line of a file easily </span>
@@ -1493,7 +1587,7 @@
 
 <div class="viewcode-block" id="BaseTest.assertOrderedGrep"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertOrderedGrep">[docs]</a>	<span class="k">def</span> <span class="nf">assertOrderedGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">_exprList</span><span class="o">=</span><span class="p">[],</span> <span class="n">_unused</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">exprList</span><span class="o">=</span><span class="p">[],</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   
-		<span class="sd">&quot;&quot;&quot;Perform a validation assert on a list of regular expressions occurring in specified order in a text file.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a validation assert on a list of regular expressions occurring in specified order in a text file.</span>
 <span class="sd">		</span>
 <span class="sd">		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome </span>
 <span class="sd">		to the test outcome list if the supplied regular expressions in the C{exprList} are seen in the file</span>
@@ -1576,7 +1670,7 @@
 	
 <div class="viewcode-block" id="BaseTest.assertLineCount"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.assertLineCount">[docs]</a>	<span class="k">def</span> <span class="nf">assertLineCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">_expr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">_unused</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="s2">&quot;&gt;=1&quot;</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assertMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[]):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform a validation assert on the count of lines in a text file matching a specific regular expression.</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform a validation assert on the count of lines in a text file matching a specific regular expression.</span>
 <span class="sd">		</span>
 <span class="sd">		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the </span>
 <span class="sd">		file matching the specified regular expression evaluate to true when evaluated against </span>
@@ -1656,7 +1750,7 @@
 		<span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="BaseTest.reportPerformanceResult"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult">[docs]</a>	<span class="k">def</span> <span class="nf">reportPerformanceResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Reports a new performance number to the configured performance reporters, with an associated unique string key </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Reports a new performance number to the configured performance reporters, with an associated unique string key </span>
 <span class="sd">		that identifies it for comparison purposes.</span>
 <span class="sd">		</span>
 <span class="sd">		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)</span>
@@ -1723,7 +1817,7 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">reportPerformanceResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="n">toleranceStdDevs</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="n">resultDetails</span><span class="p">)</span></div>
 			
 <div class="viewcode-block" id="BaseTest.getDefaultFileEncoding"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.getDefaultFileEncoding">[docs]</a>	<span class="k">def</span> <span class="nf">getDefaultFileEncoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">xargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Specifies what encoding should be used to read or write the specified </span>
 <span class="sd">		text file. The default implementation for BaseTest delegates to the </span>
 <span class="sd">		runner, which in turn gets its defaults from the ``pysyproject.xml`` </span>
@@ -1734,7 +1828,7 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">xargs</span><span class="p">)</span></div>
 	
 <div class="viewcode-block" id="BaseTest.pythonDocTest"><a class="viewcode-back" href="../../pysys/BaseTest.html#pysys.basetest.BaseTest.pythonDocTest">[docs]</a>	<span class="k">def</span> <span class="nf">pythonDocTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pythonFile</span><span class="p">,</span> <span class="n">pythonPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Execute the Python doctests that exist in the specified python file; </span>
 <span class="sd">		adds a FAILED outcome if any do not pass. </span>
 <span class="sd">		</span>
@@ -1817,7 +1911,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

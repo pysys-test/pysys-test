@@ -77,7 +77,7 @@ Project Links
 Installation
 ============
 
-PySys can be installed into any Python version from 3.6 to 3.10. 
+PySys can be installed into any Python version from 3.8 to 3.12. 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
@@ -240,7 +240,7 @@ License
 
 PySys System Test Framework
 
-Copyright (C) 2006-2022 M.B. Grieve
+Copyright (C) 2006-2023 M.B. Grieve
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

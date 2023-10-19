@@ -14,6 +14,12 @@ isstring
 .. autofunction:: isstring
 
 
+quotestring
+===========
+
+.. autofunction:: quotestring
+
+
 openfile
 ========
 

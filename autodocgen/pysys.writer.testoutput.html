@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.testoutput &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.testoutput &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -130,7 +130,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -193,11 +193,13 @@
 <dt id="pysys.writer.testoutput.TestOutputArchiveWriter">
 <em class="property">class </em><code class="sig-prename descclassname">pysys.writer.testoutput.</code><code class="sig-name descname">TestOutputArchiveWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#TestOutputArchiveWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
-<p>Writer that creates zip archives of each failed test’s output directory, 
+<p>Writer that creates zip of tar.gz/xz archives of each failed test’s output directory, 
 producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed.</p>
 <p>This writer is enabled when running with <code class="docutils literal notranslate"><span class="pre">--record</span></code>. If using this writer in conjunction with a CI writer that 
 publishes the generated archives, be sure to include this writer first in the list of writers in your project 
 configuration.</p>
+<p>Note that the zip file format typically generates much larger files than tar.xz (and tar.gz) so use the latter format 
+where possible.</p>
 <p>Publishes artifacts with category name “TestOutputArchive” and the directory (unless there are no archives) 
 as “TestOutputArchiveDir” for any enabled <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a> writers.</p>
 <div class="versionadded">
@@ -213,6 +215,16 @@ as “TestOutputArchiveDir” for any enabled <a class="reference internal" href
 </dd></dl>
 
 <dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.format">
+<code class="sig-name descname">format</code><em class="property"> = 'zip'</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>The archive type. Supported types are <code class="docutils literal notranslate"><span class="pre">zip</span></code>, <code class="docutils literal notranslate"><span class="pre">tar.gz</span></code> and <code class="docutils literal notranslate"><span class="pre">tar.xz</span></code>. The latter are often significantly smaller than zip 
+files due to cross-file compression.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
 <dt id="pysys.writer.testoutput.TestOutputArchiveWriter.maxTotalSizeMB">
 <code class="sig-name descname">maxTotalSizeMB</code><em class="property"> = 1024.0</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.maxTotalSizeMB" title="Permalink to this definition">¶</a></dt>
 <dd><p>The (approximate) limit on the total size of all archives.</p>
@@ -221,7 +233,7 @@ as “TestOutputArchiveDir” for any enabled <a class="reference internal" href
 <dl class="py attribute">
 <dt id="pysys.writer.testoutput.TestOutputArchiveWriter.maxArchiveSizeMB">
 <code class="sig-name descname">maxArchiveSizeMB</code><em class="property"> = 200.0</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.maxArchiveSizeMB" title="Permalink to this definition">¶</a></dt>
-<dd><p>The (approximate) limit on the size each individual test archive.</p>
+<dd><p>The (approximate) limit on the size each individual test <code class="docutils literal notranslate"><span class="pre">zip</span></code> file, or of the total uncompressed size of the files if making a <code class="docutils literal notranslate"><span class="pre">tar.*</span></code> file.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -345,6 +357,31 @@ then do something with them during cleanup, for example generate a code coverage
 </dd></dl>
 
 <dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.includeTestIf">
+<code class="sig-name descname">includeTestIf</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.includeTestIf" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Python lambda that will be evaluated at the end of a test to determine whether output from a given test should be collected.</p>
+<p>For example code coverage collectors built on this class can include only unit tests or only tests that run in 
+pull requests/CI (to ensure a stable baseline for coverage comparisons). This is useful if you wish to have multiple coverage writers 
+to generate separate coverage reports for all correctness/integration tests versus seeing the coverage achieved in your 
+unit tests (or a small set of smoke tests used in pull requests).</p>
+<p>Note that this option only disables the collection/aggregation it does not do anything to actually disable the generation of the files, 
+so do not use it for excluding performance/soak/reliability tests from code coverage. For that purpose set the 
+<code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group on the relevant tests (possibly using <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> at the directory level) or the set 
+<code class="docutils literal notranslate"><span class="pre">self.disableCoverage</span> <span class="pre">=</span> <span class="pre">True</span></code> on the test object, which will prevent any coverage-related slowdown in the test execution.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;includeTestIf&quot;</span><span class="o">&gt;</span><span class="k">lambda</span> <span class="n">testObj</span><span class="p">:</span> 
+        <span class="s1">&#39;unitTest&#39;</span> <span class="ow">in</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">groups</span>
+        <span class="ow">or</span> <span class="n">testObj</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;isLocalDeveloperTestRun&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+<span class="o">&lt;/</span><span class="nb">property</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The expression is evaluated using the <a class="reference internal" href="pysys.utils.safeeval.html#pysys.utils.safeeval.safeEval" title="pysys.utils.safeeval.safeEval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.safeeval.safeEval</span></code></a> function.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
 <dt id="pysys.writer.testoutput.CollectTestOutputWriter.fileIncludesRegex">
 <code class="sig-name descname">fileIncludesRegex</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.fileIncludesRegex" title="Permalink to this definition">¶</a></dt>
 <dd><p>A regular expression indicating the test output paths that will be collected. This can be used to 
@@ -430,7 +467,7 @@ e.g. <code class="docutils literal notranslate"><span class="pre">MyCodeCoverage
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

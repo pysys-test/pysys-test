@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Test Descriptors &mdash; PySys v2.1  documentation</title>
+  <title>Test Descriptors &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,12 +85,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Test Descriptors</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#sample-pysystest-py">Sample pysystest.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sample-pysystest-xml">Sample pysystest.xml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sample-pysysdirconfig-xml">Sample pysysdirconfig.xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sample-pysysdirconfig-xml">Sample pysysdirconfig.xml</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prefix">Prefix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#maker-templates">Maker templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#groups">Groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modes">Modes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution-order">Execution order</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skip">Skip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced">Advanced</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../autodocgen/pysys.html">API Reference</a></li>
@@ -110,7 +119,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -288,8 +297,9 @@ into a single file, typically called <code class="docutils literal notranslate">
 <span class="n">__pysys_execution_order_hint__</span> <span class="o">=</span> <span class="o">+</span><span class="mf">100.0</span>
 
 <span class="c1"># By default the test class uses this pysystest.py module, but it is possible to use a different path for the test</span>
-<span class="c1"># (even an absolute path). If you want to use a single Python class for lots of tests, set the module</span>
-<span class="c1"># to the special string &quot;PYTHONPATH&quot; and make sure it&#39;s available on the project&#39;s &lt;pythonpath&gt;.</span>
+<span class="c1"># (even an absolute path). If you want to use a single Python class for lots of tests, use a class with at least one</span>
+<span class="c1"># Python package in it (or set the module to the special string &quot;PYTHONPATH&quot;), and make sure it&#39;s available on the</span>
+<span class="c1"># project&#39;s &lt;pythonpath&gt;.</span>
 <span class="n">__pysys_python_class__</span>     <span class="o">=</span> <span class="s2">&quot;PySysTest&quot;</span>
 <span class="n">__pysys_python_module__</span>    <span class="o">=</span> <span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/pysys-extensions/MySharedTestClass.py&quot;</span> <span class="c1"># or &quot;PYTHONPATH&quot;</span>
 
@@ -308,17 +318,24 @@ into a single file, typically called <code class="docutils literal notranslate">
 
               <span class="s1">&#39;myTestDescriptorData&#39;</span><span class="p">:</span> <span class="s1">&#39;foobar&#39;</span><span class="p">,</span>
 
+        <span class="c1"># If a static field of the same name exists on the test class, it will be overridden with the associated user-data</span>
+        <span class="c1"># value, with some basic type coersion to match the default value of the static field where possible.</span>
+
               <span class="c1"># For long values such as paths if the value is to be converted to a list, newline and/or comma can be used as</span>
-              <span class="c1"># delimiters, however it is up to the Python code that&#39;s processing the user data to handle.</span>
-              <span class="c1"># Similarly, you can use project property syntax (e.g. ${propName} or ${eval: xxx}) if the code that reads</span>
-              <span class="c1"># the user data expands them (but this does not happen automatically).</span>
+              <span class="c1"># delimiters and will be automatically converted.</span>
+
+              <span class="c1"># You can use project property syntax (e.g. ${propName} or ${eval: xxx}) and these will be expanded</span>
+              <span class="c1"># automatically.</span>
               <span class="s1">&#39;myTestDescriptorPath&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;&#39;</span>
-<span class="s1">                      foo/foo-$</span><span class="si">{os_myThirdPartyLibraryVersion}</span><span class="s1"></span>
+<span class="s1">                      foo/foo-$</span><span class="si">{os_myThirdPartyLibraryVersion}</span>
 <span class="s1">                      foo/bar, foo/baz</span>
 
 <span class="s1">                      foo/bosh</span>
 <span class="s1">              &#39;&#39;&#39;</span>
       <span class="p">}</span>
+<span class="c1"># You can also specify items for the user data dictionary with separate items as follows. For non-Python pysystest.* files</span>
+<span class="c1"># you can optionally use dot syntax instead of underscore e.g. &quot;__pysys_user_data.myOtherUserData__&quot;.</span>
+<span class="n">__pysys_user_data_myOtherUserData__</span> <span class="o">=</span> <span class="s2">&quot;foo/foo-$</span><span class="si">{os_myThirdPartyLibraryVersion}</span><span class="s2">, foo/bar, foo/baz&quot;</span>
 
 <span class="c1"># It is also possible to provide the descriptor values using XML embedded in this file as follows. Note that parsing</span>
 <span class="c1"># XML is relatively slow, so add this value only if you have a good reason.</span>
@@ -365,10 +382,10 @@ using standalone XML (instead of <code class="docutils literal notranslate"><spa
 same capabilities described above for <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code>.</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
 <span class="nt">&lt;pysystest</span>
-      <span class="na">authors=</span><span class="s">&quot;userid1, userid2, Joe Bloggs&quot;</span> <span class="na">created=</span><span class="s">&quot;1999-12-31&quot;</span>
+<span class="w">      </span><span class="na">authors=</span><span class="s">&quot;userid1, userid2, Joe Bloggs&quot;</span><span class="w"> </span><span class="na">created=</span><span class="s">&quot;1999-12-31&quot;</span>
 <span class="nt">&gt;</span>
 
-      <span class="cm">&lt;!-- Test titles should be concise but give a clear idea of what is in scope for this testcase.</span>
+<span class="w">      </span><span class="cm">&lt;!-- Test titles should be concise but give a clear idea of what is in scope for this testcase.</span>
 
 <span class="cm">      Good titles make it easy to find the test you need even when you have 100s/1000s of tests.</span>
 <span class="cm">      Tests can be sorted by title so try to use common prefixes (e.g. ``Category: Title``) to group related tests</span>
@@ -379,29 +396,29 @@ same capabilities described above for <code class="docutils literal notranslate"
 
 <span class="cm">      The title can also be specified without XML as: __pysystest_title__ = &quot;&quot;&quot; ... &quot;&quot;&quot;</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;title&gt;</span>My foobar tool - Argument parsing success and error cases<span class="nt">&lt;/title&gt;</span>
+<span class="w">      </span><span class="nt">&lt;title&gt;</span>My<span class="w"> </span>foobar<span class="w"> </span>tool<span class="w"> </span>-<span class="w"> </span>Argument<span class="w"> </span>parsing<span class="w"> </span>success<span class="w"> </span>and<span class="w"> </span>error<span class="w"> </span>cases<span class="nt">&lt;/title&gt;</span>
 
-      <span class="cm">&lt;!-- The purpose can also be specified without XML as: __pysystest_purpose__ = &quot;&quot;&quot; ... &quot;&quot;&quot;</span>
+<span class="w">      </span><span class="cm">&lt;!-- The purpose can also be specified without XML as: __pysystest_purpose__ = &quot;&quot;&quot; ... &quot;&quot;&quot;</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;purpose&gt;</span><span class="cp">&lt;![CDATA[</span>
+<span class="w">      </span><span class="nt">&lt;purpose&gt;</span><span class="cp">&lt;![CDATA[</span>
 <span class="cp">              This is a good place for a fuller description of what is in and</span>
 <span class="cp">              out of scope for this particular testcase.</span>
 
 <span class="cp">      ]]&gt;</span><span class="nt">&lt;/purpose&gt;</span>
 
-      <span class="cm">&lt;!-- Comment/uncomment this to mark this test as skipped, which will stop it from executing. --&gt;</span>
-      <span class="nt">&lt;skipped</span> <span class="na">reason=</span><span class="s">&quot;This test is skipped until Bug-1234 is fixed&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="cm">&lt;!-- Comment/uncomment this to mark this test as skipped, which will stop it from executing. --&gt;</span>
+<span class="w">      </span><span class="nt">&lt;skipped</span><span class="w"> </span><span class="na">reason=</span><span class="s">&quot;This test is skipped until Bug-1234 is fixed&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- Specify the groups that this test will be tagged with, allowing them to be selected</span>
+<span class="w">      </span><span class="cm">&lt;!-- Specify the groups that this test will be tagged with, allowing them to be selected</span>
 <span class="cm">      for inclusion/exclusion in test runs. Groups are usually named in camelCase.</span>
 <span class="cm">      These groups are in addition to any from parent pysysdirconfigs if inherit=true.</span>
 
 <span class="cm">      The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for</span>
 <span class="cm">      tests that are performance-critical.</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;groups</span> <span class="na">inherit=</span><span class="s">&quot;true&quot;</span> <span class="na">groups=</span><span class="s">&quot;performance, disableCoverage&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;groups</span><span class="w"> </span><span class="na">inherit=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">groups=</span><span class="s">&quot;performance, disableCoverage&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- Specify the list of modes this test can be run in.</span>
+<span class="w">      </span><span class="cm">&lt;!-- Specify the list of modes this test can be run in.</span>
 
 <span class="cm">      Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an ``_`` underscore,</span>
 <span class="cm">      e.g. ``CompressionGZip_AuthNone``.</span>
@@ -434,40 +451,42 @@ same capabilities described above for <code class="docutils literal notranslate"
 
 <span class="cm">      A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.</span>
 
+<span class="cm">      The specified Python code is invoked using `pysys.utils.safeeval.safeEval`.</span>
+
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;modes&gt;</span>
-              lambda helper: [
-                              mode for mode in
-                                      helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
-                                              helper.inheritedModes,
-                                              {
-                                                              &#39;CompressionNone&#39;: {&#39;compressionType&#39;:None, &#39;isPrimary&#39;:True},
-                                                              &#39;CompressionGZip&#39;: {&#39;compressionType&#39;:&#39;gzip&#39;},
-                                              },
-                                              [
-                                                      {&#39;auth&#39;:None}, # Mode name is optional
-                                                      {&#39;auth&#39;:&#39;OS&#39;}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-                                              ],
+<span class="w">      </span><span class="nt">&lt;modes&gt;</span>
+<span class="w">              </span>lambda<span class="w"> </span>helper:<span class="w"> </span>[
+<span class="w">                              </span>mode<span class="w"> </span>for<span class="w"> </span>mode<span class="w"> </span>in
+<span class="w">                                      </span>helper.createModeCombinations(<span class="w"> </span>#<span class="w"> </span>Takes<span class="w"> </span>any<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>mode<span class="w"> </span>lists<span class="w"> </span>as<span class="w"> </span>arguments<span class="w"> </span>and<span class="w"> </span>returns<span class="w"> </span>a<span class="w"> </span>single<span class="w"> </span>combined<span class="w"> </span>mode<span class="w"> </span>list
+<span class="w">                                              </span>helper.inheritedModes,
+<span class="w">                                              </span>{
+<span class="w">                                                              </span>&#39;CompressionNone&#39;:<span class="w"> </span>{&#39;compressionType&#39;:None,<span class="w"> </span>&#39;isPrimary&#39;:True},
+<span class="w">                                                              </span>&#39;CompressionGZip&#39;:<span class="w"> </span>{&#39;compressionType&#39;:&#39;gzip&#39;},
+<span class="w">                                              </span>},
+<span class="w">                                              </span>[
+<span class="w">                                                      </span>{&#39;auth&#39;:None},<span class="w"> </span>#<span class="w"> </span>Mode<span class="w"> </span>name<span class="w"> </span>is<span class="w"> </span>optional
+<span class="w">                                                      </span>{&#39;auth&#39;:&#39;OS&#39;},<span class="w"> </span>#<span class="w"> </span>In<span class="w"> </span>practice<span class="w"> </span>auth=OS<span class="w"> </span>modes<span class="w"> </span>will<span class="w"> </span>always<span class="w"> </span>be<span class="w"> </span>excluded<span class="w"> </span>since<span class="w"> </span>MyFunkyOS<span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>fictional<span class="w"> </span>OS
+<span class="w">                                              </span>],
 
-                                              # By default only the first mode in each list is &quot;primary&quot;, so the test will only run in that one mode by
-                                              # default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when
-                                              # using modes to validate the same behaviour/conditions in different execution environments e.g.
-                                              # browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing
-                                              # out different command line options) using a single PySysTest class, then you should have all your modes as
-                                              # &quot;primary&quot; as you want all of them to execute by default in a quick local test run.
-                                              helper.makeAllPrimary(
-                                                      {
-                                                              &#39;Usage&#39;:        {&#39;cmd&#39;: [&#39;--help&#39;], &#39;expectedExitStatus&#39;:&#39;==0&#39;},
-                                                              &#39;BadPort&#39;:      {&#39;cmd&#39;: [&#39;--port&#39;, &#39;-1&#39;],  &#39;expectedExitStatus&#39;:&#39;!=0&#39;},
-                                                              &#39;MissingPort&#39;:  {&#39;cmd&#39;: [],  &#39;expectedExitStatus&#39;:&#39;!=0&#39;},
-                                                      }),
-                                              )
-                              # This is Python list comprehension syntax for filtering the items in the list
-                              if (mode[&#39;auth&#39;] != &#39;OS&#39; or helper.import_module(&#39;sys&#39;).platform == &#39;MyFunkyOS&#39;)
-                      ]
-      <span class="nt">&lt;/modes&gt;</span>
+<span class="w">                                              </span>#<span class="w"> </span>By<span class="w"> </span>default<span class="w"> </span>only<span class="w"> </span>the<span class="w"> </span>first<span class="w"> </span>mode<span class="w"> </span>in<span class="w"> </span>each<span class="w"> </span>list<span class="w"> </span>is<span class="w"> </span>&quot;primary&quot;,<span class="w"> </span>so<span class="w"> </span>the<span class="w"> </span>test<span class="w"> </span>will<span class="w"> </span>only<span class="w"> </span>run<span class="w"> </span>in<span class="w"> </span>that<span class="w"> </span>one<span class="w"> </span>mode<span class="w"> </span>by
+<span class="w">                                              </span>#<span class="w"> </span>default<span class="w"> </span>during<span class="w"> </span>local<span class="w"> </span>development<span class="w"> </span>(unless<span class="w"> </span>you<span class="w"> </span>supply<span class="w"> </span>a<span class="w"> </span>``--modes``<span class="w"> </span>or<span class="w"> </span>``--ci``<span class="w"> </span>argument).<span class="w"> </span>This<span class="w"> </span>is<span class="w"> </span>optimal<span class="w"> </span>when
+<span class="w">                                              </span>#<span class="w"> </span>using<span class="w"> </span>modes<span class="w"> </span>to<span class="w"> </span>validate<span class="w"> </span>the<span class="w"> </span>same<span class="w"> </span>behaviour/conditions<span class="w"> </span>in<span class="w"> </span>different<span class="w"> </span>execution<span class="w"> </span>environments<span class="w"> </span>e.g.
+<span class="w">                                              </span>#<span class="w"> </span>browsers/databases<span class="w"> </span>etc.<span class="w"> </span>However<span class="w"> </span>when<span class="w"> </span>using<span class="w"> </span>modes<span class="w"> </span>to<span class="w"> </span>validate<span class="w"> </span>different<span class="w"> </span>*behaviours/conditions*<span class="w"> </span>(e.g.<span class="w"> </span>testing
+<span class="w">                                              </span>#<span class="w"> </span>out<span class="w"> </span>different<span class="w"> </span>command<span class="w"> </span>line<span class="w"> </span>options)<span class="w"> </span>using<span class="w"> </span>a<span class="w"> </span>single<span class="w"> </span>PySysTest<span class="w"> </span>class,<span class="w"> </span>then<span class="w"> </span>you<span class="w"> </span>should<span class="w"> </span>have<span class="w"> </span>all<span class="w"> </span>your<span class="w"> </span>modes<span class="w"> </span>as
+<span class="w">                                              </span>#<span class="w"> </span>&quot;primary&quot;<span class="w"> </span>as<span class="w"> </span>you<span class="w"> </span>want<span class="w"> </span>all<span class="w"> </span>of<span class="w"> </span>them<span class="w"> </span>to<span class="w"> </span>execute<span class="w"> </span>by<span class="w"> </span>default<span class="w"> </span>in<span class="w"> </span>a<span class="w"> </span>quick<span class="w"> </span>local<span class="w"> </span>test<span class="w"> </span>run.
+<span class="w">                                              </span>helper.makeAllPrimary(
+<span class="w">                                                      </span>{
+<span class="w">                                                              </span>&#39;Usage&#39;:<span class="w">        </span>{&#39;cmd&#39;:<span class="w"> </span>[&#39;--help&#39;],<span class="w"> </span>&#39;expectedExitStatus&#39;:&#39;==0&#39;},
+<span class="w">                                                              </span>&#39;BadPort&#39;:<span class="w">      </span>{&#39;cmd&#39;:<span class="w"> </span>[&#39;--port&#39;,<span class="w"> </span>&#39;-1&#39;],<span class="w">  </span>&#39;expectedExitStatus&#39;:&#39;!=0&#39;},
+<span class="w">                                                              </span>&#39;MissingPort&#39;:<span class="w">  </span>{&#39;cmd&#39;:<span class="w"> </span>[],<span class="w">  </span>&#39;expectedExitStatus&#39;:&#39;!=0&#39;},
+<span class="w">                                                      </span>}),
+<span class="w">                                              </span>)
+<span class="w">                              </span>#<span class="w"> </span>This<span class="w"> </span>is<span class="w"> </span>Python<span class="w"> </span>list<span class="w"> </span>comprehension<span class="w"> </span>syntax<span class="w"> </span>for<span class="w"> </span>filtering<span class="w"> </span>the<span class="w"> </span>items<span class="w"> </span>in<span class="w"> </span>the<span class="w"> </span>list
+<span class="w">                              </span>if<span class="w"> </span>(mode[&#39;auth&#39;]<span class="w"> </span>!=<span class="w"> </span>&#39;OS&#39;<span class="w"> </span>or<span class="w"> </span>helper.import_module(&#39;sys&#39;).platform<span class="w"> </span>==<span class="w"> </span>&#39;MyFunkyOS&#39;)
+<span class="w">                      </span>]
+<span class="w">      </span><span class="nt">&lt;/modes&gt;</span>
 
-      <span class="cm">&lt;!--</span>
+<span class="w">      </span><span class="cm">&lt;!--</span>
 <span class="cm">      NB: Older (pre-2.0) PySys projects used a more basic and limited syntax for specifying modes:</span>
 
 <span class="cm">              &lt;modes inherit=&quot;true&quot;&gt;</span>
@@ -476,58 +495,62 @@ same capabilities described above for <code class="docutils literal notranslate"
 <span class="cm">              &lt;/modes&gt;</span>
 <span class="cm">      --&gt;</span>
 
-      <span class="cm">&lt;!-- Specify as a floating point number an indicator of when to run the tests under</span>
+<span class="w">      </span><span class="cm">&lt;!-- Specify as a floating point number an indicator of when to run the tests under</span>
 <span class="cm">      this directory, relative to other tests/directories with a higher or lower hint.</span>
 <span class="cm">      Empty string hint=&quot;&quot; means inherit. The default priority is 0.0 so set the hint to a higher</span>
 <span class="cm">      value to execute tests later, or a negative value to execute tests earlier.</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;execution-order</span> <span class="na">hint=</span><span class="s">&quot;+100.0&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;execution-order</span><span class="w"> </span><span class="na">hint=</span><span class="s">&quot;+100.0&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- By convention the test class uses module=&quot;run.py&quot; located in the test directory, but</span>
-<span class="cm">      it is possible to use a different path (even an absolute path). If you want to use a single</span>
-<span class="cm">      Python class for lots of tests rather, omit the module= attribute and make sure it&#39;s available</span>
-<span class="cm">      on the project&#39;s &lt;pythonpath&gt; .</span>
+<span class="w">      </span><span class="cm">&lt;!-- By convention the test class uses module=&quot;run.py&quot; located in the test directory, but</span>
+<span class="cm">      it is possible to use a different path (even an absolute path). If you want to use</span>
+<span class="cm">      a single Python class for lots of tests, omit the module= attribute, ensure the class has at least one level of</span>
+<span class="cm">      Python package, and make sure it&#39;s available on the project&#39;s &lt;pythonpath&gt; .</span>
+
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;class</span> <span class="na">name=</span><span class="s">&quot;PySysTest&quot;</span> <span class="na">module=</span><span class="s">&quot;${testRootDir}/pysys-extensions/MySharedTestClass.py&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;class</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;PySysTest&quot;</span><span class="w"> </span><span class="na">module=</span><span class="s">&quot;${testRootDir}/pysys-extensions/MySharedTestClass.py&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute</span>
+<span class="w">      </span><span class="cm">&lt;!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute</span>
 <span class="cm">      paths if needed). These can also be specified using the older names &lt;output/input/reference&gt; with a path= attribute.</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;input-dir&gt;</span>${testRootDir}/pysys-extensions/my_shared_input_files<span class="nt">&lt;/input-dir&gt;</span>
-      <span class="nt">&lt;reference-dir&gt;</span>MyReference<span class="nt">&lt;/reference-dir&gt;</span>
-      <span class="nt">&lt;output-dir&gt;</span>MyOutput<span class="nt">&lt;/output-dir&gt;</span>
+<span class="w">      </span><span class="nt">&lt;input-dir&gt;</span>${testRootDir}/pysys-extensions/my_shared_input_files<span class="nt">&lt;/input-dir&gt;</span>
+<span class="w">      </span><span class="nt">&lt;reference-dir&gt;</span>MyReference<span class="nt">&lt;/reference-dir&gt;</span>
+<span class="w">      </span><span class="nt">&lt;output-dir&gt;</span>MyOutput<span class="nt">&lt;/output-dir&gt;</span>
 
-      <span class="nt">&lt;data&gt;</span>
-              <span class="cm">&lt;!-- The ability to add user-defined data to the test descriptor is mostly useful when using a</span>
+<span class="w">      </span><span class="nt">&lt;data&gt;</span>
+<span class="w">              </span><span class="cm">&lt;!-- The ability to add user-defined data to the test descriptor is mostly useful when using a</span>
 <span class="cm">              shared Python class for lots of tests.</span>
 
-<span class="cm">              Project properties (but not other user-data values) can be specified using ${...}, but only if the Python code</span>
-<span class="cm">              that&#39;s reading the user-data explicitly expands the properties (it&#39;s not automatic).</span>
+<span class="cm">              Project properties (but not other user-data values) can be substituted into the value using ${...},</span>
+<span class="cm">              and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables).</span>
+
+<span class="cm">              If a static field of the same name exists on the test class, it will be overridden with the associated user-data</span>
+<span class="cm">              value, with some basic type coersion to match the default value of the static field where possible.</span>
 <span class="cm">              --&gt;</span>
-              <span class="nt">&lt;user-data</span> <span class="na">name=</span><span class="s">&quot;myTestDescriptorData&quot;</span> <span class="na">value=</span><span class="s">&quot;foobar&quot;</span><span class="nt">/&gt;</span>
+<span class="w">              </span><span class="nt">&lt;user-data</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;myTestDescriptorData&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;foobar&quot;</span><span class="nt">/&gt;</span>
 
-              <span class="cm">&lt;!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the</span>
+<span class="w">              </span><span class="cm">&lt;!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the</span>
 <span class="cm">              value is to be converted to a list, newline and/or comma can be used as delimiters. --&gt;</span>
-              <span class="nt">&lt;user-data</span> <span class="na">name=</span><span class="s">&quot;myTestDescriptorPath&quot;</span><span class="nt">&gt;</span>
-                      foo/foo-${os_myThirdPartyLibraryVersion}
-                      foo/bar, foo/baz
-                      <span class="cm">&lt;!-- Comments and whitespace are ignored when converting a string to a list. --&gt;</span>
-                      foo/bosh
-              <span class="nt">&lt;/user-data&gt;</span>
+<span class="w">              </span><span class="nt">&lt;user-data</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;myTestDescriptorPath&quot;</span><span class="nt">&gt;</span>
+<span class="w">                      </span>foo/foo-${os_myThirdPartyLibraryVersion}
+<span class="w">                      </span>foo/bar,<span class="w"> </span>foo/baz
+<span class="w">                      </span><span class="cm">&lt;!-- Comments and whitespace are ignored when converting a string to a list. --&gt;</span>
+<span class="w">                      </span>foo/bosh
+<span class="w">              </span><span class="nt">&lt;/user-data&gt;</span>
 
-      <span class="nt">&lt;/data&gt;</span>
+<span class="w">      </span><span class="nt">&lt;/data&gt;</span>
 
-      <span class="cm">&lt;!-- Specify traceability requirements implemented by this test.</span>
+<span class="w">      </span><span class="cm">&lt;!-- Specify traceability requirements implemented by this test.</span>
 
 <span class="cm">      You can use this for whatever makes sense in your project, but typically they would be defect or user story ids;</span>
 <span class="cm">      see examples below.</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;UserRequirement_1a&quot;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;UserRequirement_2c&quot;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;Performance&quot;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;UserStory.XYZ-54321&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;UserRequirement_1a&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;UserRequirement_2c&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;Performance&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;UserStory.XYZ-54321&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- NB: Existing tests may nest some of the above elements under elements such as</span>
+<span class="w">      </span><span class="cm">&lt;!-- NB: Existing tests may nest some of the above elements under elements such as</span>
 <span class="cm">      description/classification/data/traceability rather than directly under the pysystest node, but these extra</span>
 <span class="cm">      elements are no longer required (or recommended).</span>
 <span class="cm">      --&gt;</span>
@@ -546,200 +569,223 @@ mistakes, and makes it easier to add new modes and other setting later as your p
 sense at the directory level, and also additional options for directories such as <code class="docutils literal notranslate"><span class="pre">id-prefix</span></code>.</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
 <span class="nt">&lt;pysysdirconfig&gt;</span>
-      <span class="cm">&lt;!-- This file provides default configuration for all tests under this directory.</span>
+<span class="w">      </span><span class="cm">&lt;!-- This file provides default configuration for all tests under this directory.</span>
 
 <span class="cm">      Settings are also inherited from pysysdirconfig.xml files in parent directories</span>
 <span class="cm">      (and the pysysdirconfig element from pysysproject.xml if present).</span>
 <span class="cm">      --&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="prefix">
+<h3>Prefix<a class="headerlink" href="#prefix" title="Permalink to this headline">¶</a></h3>
+<p>Specify a prefix to be added to the id of all tests under this directory.
+This is in addition to any defined by individual tests.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;id-prefix&gt;</span>MyServer.Performance.<span class="nt">&lt;/id-prefix&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="maker-templates">
+<h3>Maker templates<a class="headerlink" href="#maker-templates" title="Permalink to this headline">¶</a></h3>
+<p>Specify the templates that can be used by “pysys make” when creating new tests. You may wish to provide
+project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage
+test creators to follow best practices (rather than just copying from a random test which may not be a good example).</p>
+<p>Run “pysys make -h” to see which templates are available for creating tests under the current directory.</p>
+<p>The first template (in the lowest-level pysysdirconfig.xml file) is used by default, but that can be customized
+by using set-default-maker-template to name a different template (for example at project
+level or in another pysysdirconfig higher up the directory tree).</p>
+<p>Each template is defined by:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>name: A short name used to select this template on the command line (“lowercase-with-hyphens” naming convention).</p></li>
+<li><p>description: A brief summary describing what kind of test is created by this template. This text is displayed
+when running “pysys make -h”.</p></li>
+<li><p>copy: A comma-separated list of files and directories to be copied into the test directory, supporting <code class="docutils literal notranslate"><span class="pre">*</span></code>
+globs. Either specify a path relative to the directory containing this XML file, or an absolute path using
+project properties. To use files from the default PySys template use <code class="docutils literal notranslate"><span class="pre">${pysysTemplatesDir}/test/*</span></code>.
+You could store your directory-specific templates in a <code class="docutils literal notranslate"><span class="pre">_pysys_templates/</span></code> directory alongside this XML file
+(with a <code class="docutils literal notranslate"><span class="pre">.pysysignore</span></code> file to stop them being treated as test cases),
+or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic).</p></li>
+<li><p>mkdir: By default empty directories are created for the configured input, output and reference directories.
+Specify this attribute to define explicitly which empty directories should be created.</p></li>
+<li><p>replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to
+use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8).
+The replacement “with” expressions can include project properties using <code class="docutils literal notranslate"><span class="pre">${propname}</span></code> syntax, or
+the special strings <code class="docutils literal notranslate"><span class="pre">&#64;{DIR_NAME}</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;{USERNAME}</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;{DATE}</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;{DEFAULT_DESCRIPTOR}</span></code>.
+If no replace elements are explicitly provided, the following default replacements are used:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;&#64;DATE&#64;&#64;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&#64;{DATE}</span></code> (the current date)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;&#64;USERNAME&#64;&#64;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&#64;{USERNAME}</span></code> (the currently logged in user)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;&#64;DIR_NAME&#64;&#64;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&#64;{DIR_NAME}</span></code> (the basename of the directory being created, typically the test id)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;&#64;DEFAULT_DESCRIPTOR&#64;&#64;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&#64;{DEFAULT_DESCRIPTOR}</span></code> (the __pysys_title__ and other descriptor lines from the
+standard PySys default test template, after which you can add your customized Python test class)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;&#64;LINE_LENGTH_GUIDE&#64;&#64;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&#64;{LINE_LENGTH_GUIDE}</span></code> (80 underline characters to indicate to the user when they are
+exceeding the recommended maximum length for a test title; this string can be customized for different
+lengths etc using the pysystestTemplateLineLengthGuide project property)</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>By default PySys creates <code class="docutils literal notranslate"><span class="pre">.py</span></code> files with tabs for indentation (as in previous PySys releases). If you prefer spaces,
+just set the <code class="docutils literal notranslate"><span class="pre">pythonIndentationSpacesPerTab</span></code> project property to a string containing the required spaces per tab.</p>
+<p>See <a class="reference internal" href="UserGuide.html#create-new-test-templates-for-pysys-make"><span class="std std-ref">Create new test templates for pysys make</span></a> for more on how to create templates.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;maker-template</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;perf-test&quot;</span><span class="w"> </span><span class="na">description=</span><span class="s">&quot;a performance test including configuration for my fictional performance tool&quot;</span>
+<span class="w">        </span><span class="na">copy=</span><span class="s">&quot;${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- Specify a prefix to be added to the id of all tests under this directory.</span>
-<span class="cm">      This is in addition to any defined by individual tests.</span>
-<span class="cm">      --&gt;</span>
-      <span class="nt">&lt;id-prefix&gt;</span>MyServer.Performance.<span class="nt">&lt;/id-prefix&gt;</span>
+<span class="nt">&lt;maker-template</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;my-test&quot;</span><span class="w"> </span><span class="na">description=</span><span class="s">&quot;a test with the Python code pre-customized to get things started&quot;</span>
+<span class="w">        </span><span class="na">copy=</span><span class="s">&quot;./_pysys_templates/MyTemplateTest/*&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- Specify the templates that can be used by &quot;pysys make&quot; when creating new tests. You may wish to provide</span>
-<span class="cm">      project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage</span>
-<span class="cm">      test creators to follow best practices (rather than just copying from a random test which may not be a good example).</span>
+<span class="nt">&lt;maker-template</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;foobar-test&quot;</span><span class="w"> </span><span class="na">description=</span><span class="s">&quot;an advanced test based on the existing XXX test&quot;</span>
+<span class="w">        </span><span class="na">copy=</span><span class="s">&quot;./PySysDirConfigSample/*&quot;</span>
+<span class="w">        </span><span class="na">mkdir=</span><span class="s">&quot;ExtraDir1, ExtraDir2&quot;</span>
+<span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;replace</span><span class="w"> </span><span class="na">regex=</span><span class="s">&#39;__pysys_title__ *= r&quot;&quot;&quot;[^&quot;]*&quot;&quot;&quot;&#39;</span><span class="w"> </span><span class="na">with=</span><span class="s">&#39;__pysys_title__   = r&quot;&quot;&quot; Foobar - My new @{DIR_NAME} test title TODO &quot;&quot;&quot;&#39;</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;replace</span><span class="w"> </span><span class="na">regex=</span><span class="s">&#39;__pysys_authors__ *= &quot;[^&quot;]*&quot;&#39;</span><span class="w">    </span><span class="na">with=</span><span class="s">&#39;__pysys_authors__ = &quot;@{USERNAME}&quot;&#39;</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;replace</span><span class="w"> </span><span class="na">regex=</span><span class="s">&#39;__pysys_created__ *= &quot;[^&quot;]*&quot;&#39;</span><span class="w">    </span><span class="na">with=</span><span class="s">&#39;__pysys_created__ = &quot;@{DATE}&quot;&#39;</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;replace</span><span class="w"> </span><span class="na">regex=</span><span class="s">&#39;@@DIR_NAME@@&#39;</span><span class="w">                    </span><span class="na">with=</span><span class="s">&#39;@{DIR_NAME}&#39;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/maker-template&gt;</span>
 
-<span class="cm">      Run &quot;pysys make -h&quot; to see which templates are available for creating tests under the current directory.</span>
+<span class="nt">&lt;maker-template</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;pysys-xml-test&quot;</span><span class="w"> </span><span class="na">description=</span><span class="s">&quot;an old-style test with pysystest.xml and run.py&quot;</span>
+<span class="w">        </span><span class="na">copy=</span><span class="s">&quot;${pysysTemplatesDir}/pysystest-xml-test/*&quot;</span><span class="nt">/&gt;</span>
 
-<span class="cm">      The first template (in the lowest-level pysysdirconfig.xml file) is used by default.</span>
+<span class="nt">&lt;set-default-maker-template</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;my-test&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="groups">
+<h3>Groups<a class="headerlink" href="#groups" title="Permalink to this headline">¶</a></h3>
+<p>Specify the groups that all tests under this directory will be tagged with, allowing them to be selected
+for inclusion/exclusion in test runs. Groups are usually named in camelCase.
+These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs.</p>
+<p>The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for
+tests that are performance-critical.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;groups</span><span class="w"> </span><span class="na">inherit=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">groups=</span><span class="s">&quot;performance, disableCoverage&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="modes">
+<h3>Modes<a class="headerlink" href="#modes" title="Permalink to this headline">¶</a></h3>
+<p>Specify the list of modes tests under this directory can be run in.</p>
+<p>Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an <code class="docutils literal notranslate"><span class="pre">_</span></code> underscore,
+e.g. <code class="docutils literal notranslate"><span class="pre">CompressionGZip_AuthNone</span></code>.</p>
+<p>Test modes are configured with a Python lambda that returns a list of modes, using a single parameter which is
+an instance of <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper" title="pysys.config.descriptor.TestModesConfigHelper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper</span></code></a> providing access to the inherited modes (and other
+useful functions/fields). Each mode in the returned list is defined by a dictionary containing parameters to be set
+on the test object and/or a <code class="docutils literal notranslate"><span class="pre">mode</span></code> name. If the mode name is not explicitly provided, a default mode name is
+generated by concatenating the parameter values with <code class="docutils literal notranslate"><span class="pre">_</span></code> (with a <code class="docutils literal notranslate"><span class="pre">paramName=</span></code> prefix for any numeric/boolean
+values).</p>
+<p>In your Python lambda you can return a simple list of modes, or combine your own modes with inherited modes
+defined by parent pysysdirconfigs. You can also use the power of Python list comprehensions to exclude certain modes,
+perhaps based on dynamic information such as the operating system. Project properties can be accessed
+using <code class="docutils literal notranslate"><span class="pre">helper.project.PROPERTY_NAME</span></code>. Avoid expensive operations such as reading the file system from your lambda
+if possible.</p>
+<p>The first listed mode is the “primary” mode, which is the one that is used by default when executing tests with
+no <code class="docutils literal notranslate"><span class="pre">-m</span></code> argument.</p>
+<p>It’s often useful to combine multiple mode ‘dimensions’, for example all the combinations of a list of web browsers
+with a list of databases, or compression methods and authentication types. Rather than writing out every combination
+manually, you can use the function <code class="docutils literal notranslate"><span class="pre">helper.createModeCombinations</span></code> to automatically generate all combinations.</p>
+<p>A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.</p>
+<p>The specified Python code is invoked using <a class="reference internal" href="../autodocgen/pysys.utils.safeeval.html#pysys.utils.safeeval.safeEval" title="pysys.utils.safeeval.safeEval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.safeeval.safeEval</span></code></a>.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;modes&gt;</span>
+<span class="w">        </span>lambda<span class="w"> </span>helper:<span class="w"> </span>[
+<span class="w">                </span>mode<span class="w"> </span>for<span class="w"> </span>mode<span class="w"> </span>in
+<span class="w">                        </span>helper.createModeCombinations(<span class="w"> </span>#<span class="w"> </span>Takes<span class="w"> </span>any<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>mode<span class="w"> </span>lists<span class="w"> </span>as<span class="w"> </span>arguments<span class="w"> </span>and<span class="w"> </span>returns<span class="w"> </span>a<span class="w"> </span>single<span class="w"> </span>combined<span class="w"> </span>mode<span class="w"> </span>list
+<span class="w">                                </span>helper.inheritedModes,
+<span class="w">                                </span>{
+<span class="w">                                                </span>&#39;CompressionNone&#39;:<span class="w"> </span>{&#39;compressionType&#39;:None,<span class="w"> </span>&#39;isPrimary&#39;:True},
+<span class="w">                                                </span>&#39;CompressionGZip&#39;:<span class="w"> </span>{&#39;compressionType&#39;:&#39;gzip&#39;},
+<span class="w">                                </span>},
+<span class="w">                                </span>[
+<span class="w">                                        </span>{&#39;auth&#39;:None},<span class="w"> </span>#<span class="w"> </span>Mode<span class="w"> </span>name<span class="w"> </span>is<span class="w"> </span>optional
+<span class="w">                                        </span>{&#39;auth&#39;:&#39;OS&#39;},<span class="w"> </span>#<span class="w"> </span>In<span class="w"> </span>practice<span class="w"> </span>auth=OS<span class="w"> </span>modes<span class="w"> </span>will<span class="w"> </span>always<span class="w"> </span>be<span class="w"> </span>excluded<span class="w"> </span>since<span class="w"> </span>MyFunkyOS<span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>fictional<span class="w"> </span>OS
+<span class="w">                                </span>])
+<span class="w">                </span>#<span class="w"> </span>This<span class="w"> </span>is<span class="w"> </span>Python<span class="w"> </span>list<span class="w"> </span>comprehension<span class="w"> </span>syntax<span class="w"> </span>for<span class="w"> </span>filtering<span class="w"> </span>the<span class="w"> </span>items<span class="w"> </span>in<span class="w"> </span>the<span class="w"> </span>list
+<span class="w">                </span>if<span class="w"> </span>(mode[&#39;auth&#39;]<span class="w"> </span>!=<span class="w"> </span>&#39;OS&#39;<span class="w"> </span>or<span class="w"> </span>helper.import_module(&#39;sys&#39;).platform<span class="w"> </span>==<span class="w"> </span>&#39;MyFunkyOS&#39;)
+<span class="w">        </span>]
+<span class="nt">&lt;/modes&gt;</span>
 
-<span class="cm">      Each template is defined by:</span>
+<span class="cm">&lt;!--</span>
+<span class="cm">NB: Older (pre-2.0) PySys projects used a more basic and limited syntax for specifying modes:</span>
 
-<span class="cm">        - name: A short name used to select this template on the command line (&quot;lowercase-with-hyphens&quot; naming convention).</span>
-<span class="cm">        - description: A brief summary describing what kind of test is created by this template. This text is displayed</span>
-<span class="cm">          when running &quot;pysys make -h&quot;.</span>
-<span class="cm">        - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*``</span>
-<span class="cm">          globs. Either specify a path relative to the directory containing this XML file, or an absolute path using</span>
-<span class="cm">          project properties. To use files from the default PySys template use &quot;${pysysTemplatesDir}/test/*&quot;.</span>
-<span class="cm">          You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file</span>
-<span class="cm">          (with a ``.pysysignore`` file to stop them being treated as test cases),</span>
-<span class="cm">          or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic).</span>
-<span class="cm">        - mkdir: By default empty directories are created for the configured input, output and reference directories.</span>
-<span class="cm">          Specify this attribute to define explicitly which empty directories should be created.</span>
-<span class="cm">        - replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to</span>
-<span class="cm">          use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8).</span>
-<span class="cm">          The replacement &quot;with&quot; expressions can include project properties using ``${propname}`` syntax, or</span>
-<span class="cm">          the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``, ``@{DEFAULT_DESCRIPTOR}``.</span>
-<span class="cm">          If no replace elements are explicitly provided, the following default replacements are used:</span>
+<span class="cm">        &lt;modes inherit=&quot;true&quot;&gt;</span>
+<span class="cm">                &lt;mode&gt;CompressionNone&lt;/mode&gt;</span>
+<span class="cm">                &lt;mode&gt;CompressionGZip&lt;/mode&gt;</span>
+<span class="cm">        &lt;/modes&gt;</span>
+<span class="cm">--&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="execution-order">
+<h3>Execution order<a class="headerlink" href="#execution-order" title="Permalink to this headline">¶</a></h3>
+<p>Specify as a floating point number an indicator of when to run the tests under
+this directory, relative to other tests/directories with a higher or lower hint.
+Empty string hint=”” means inherit. The default priority is 0.0 so set the hint to a higher
+value to execute tests later, or a negative value to execute tests earlier.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;execution-order</span><span class="w"> </span><span class="na">hint=</span><span class="s">&quot;+100.0&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="skip">
+<h3>Skip<a class="headerlink" href="#skip" title="Permalink to this headline">¶</a></h3>
+<p>Comment/uncomment this to mark all tests under this directory as skipped.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;skipped</span><span class="w"> </span><span class="na">reason=</span><span class="s">&quot;These tests are skipped until Bug-1234 is fixed&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="advanced">
+<h3>Advanced<a class="headerlink" href="#advanced" title="Permalink to this headline">¶</a></h3>
+<p>By convention the test class uses the <code class="docutils literal notranslate"><span class="pre">pysystest.py</span></code> module if present or else module=”run.py” located
+in the test directory, but it is possible to use a different path (even an absolute path). If you want to use
+a single Python class for lots of tests, omit the module= attribute, ensure the class has at least one level of
+Python package, and make sure it’s available on the project’s &lt;pythonpath&gt; .</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">&lt;class</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;PySysTest&quot;</span><span class="w"> </span><span class="na">module=</span><span class="s">&quot;${testRootDir}/pysys-extensions/MySharedTestClass.py&quot;</span><span class="nt">/&gt;</span>
 
-<span class="cm">            @@DATE@@ -&gt; @{DATE} (the current date)</span>
-<span class="cm">            @@USERNAME@@ -&gt; @{USERNAME} (the currently logged in user)</span>
-<span class="cm">            @@DIR_NAME@@ -&gt; @{DIR_NAME} (the basename of the directory being created, typically the test id)</span>
-<span class="cm">            @@DEFAULT_DESCRIPTOR@@ -&gt; @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the</span>
-<span class="cm">                     standard PySys default test template, after which you can add your customized Python test class)</span>
-<span class="cm">            @@LINE_LENGTH_GUIDE@@ -&gt; @{LINE_LENGTH_GUIDE} (80 underline characters to indicate to the user when they are</span>
-<span class="cm">                     exceeding the recommended maximum length for a test title; this string can be customized for different</span>
-<span class="cm">                     lengths etc using the pysystestTemplateLineLengthGuide project property)</span>
-
-<span class="cm">      By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces,</span>
-<span class="cm">      just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.</span>
-
-<span class="cm">      --&gt;</span>
-      <span class="nt">&lt;maker-template</span> <span class="na">name=</span><span class="s">&quot;my-test&quot;</span> <span class="na">description=</span><span class="s">&quot;a test with the Python code pre-customized to get things started&quot;</span>
-              <span class="na">copy=</span><span class="s">&quot;./_pysys_templates/MyTemplateTest/*&quot;</span> <span class="nt">/&gt;</span>
-
-      <span class="nt">&lt;maker-template</span> <span class="na">name=</span><span class="s">&quot;perf-test&quot;</span> <span class="na">description=</span><span class="s">&quot;a performance test including configuration for my fictional performance tool&quot;</span>
-              <span class="na">copy=</span><span class="s">&quot;${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml&quot;</span><span class="nt">/&gt;</span>
-
-      <span class="nt">&lt;maker-template</span> <span class="na">name=</span><span class="s">&quot;foobar-test&quot;</span> <span class="na">description=</span><span class="s">&quot;an advanced test based on the existing XXX test&quot;</span>
-              <span class="na">copy=</span><span class="s">&quot;./PySysDirConfigSample/*&quot;</span>
-              <span class="na">mkdir=</span><span class="s">&quot;ExtraDir1, ExtraDir2&quot;</span>
-      <span class="nt">&gt;</span>
-              <span class="nt">&lt;replace</span> <span class="na">regex=</span><span class="s">&#39;__pysys_title__ *= r&quot;&quot;&quot;[^&quot;]*&quot;&quot;&quot;&#39;</span> <span class="na">with=</span><span class="s">&#39;__pysys_title__   = r&quot;&quot;&quot; Foobar - My new @{DIR_NAME} test title TODO &quot;&quot;&quot;&#39;</span><span class="nt">/&gt;</span>
-              <span class="nt">&lt;replace</span> <span class="na">regex=</span><span class="s">&#39;__pysys_authors__ *= &quot;[^&quot;]*&quot;&#39;</span>    <span class="na">with=</span><span class="s">&#39;__pysys_authors__ = &quot;@{USERNAME}&quot;&#39;</span><span class="nt">/&gt;</span>
-              <span class="nt">&lt;replace</span> <span class="na">regex=</span><span class="s">&#39;__pysys_created__ *= &quot;[^&quot;]*&quot;&#39;</span>    <span class="na">with=</span><span class="s">&#39;__pysys_created__ = &quot;@{DATE}&quot;&#39;</span><span class="nt">/&gt;</span>
-              <span class="nt">&lt;replace</span> <span class="na">regex=</span><span class="s">&#39;@@DIR_NAME@@&#39;</span>                    <span class="na">with=</span><span class="s">&#39;@{DIR_NAME}&#39;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;/maker-template&gt;</span>
-
-      <span class="nt">&lt;maker-template</span> <span class="na">name=</span><span class="s">&quot;pysys-xml-test&quot;</span> <span class="na">description=</span><span class="s">&quot;an old-style test with pysystest.xml and run.py&quot;</span>
-              <span class="na">copy=</span><span class="s">&quot;${pysysTemplatesDir}/pysystest-xml-test/*&quot;</span><span class="nt">/&gt;</span>
-
-      <span class="cm">&lt;!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected</span>
-<span class="cm">      for inclusion/exclusion in test runs. Groups are usually named in camelCase.</span>
-<span class="cm">      These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs.</span>
-
-<span class="cm">      The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for</span>
-<span class="cm">      tests that are performance-critical.</span>
-<span class="cm">      --&gt;</span>
-      <span class="nt">&lt;groups</span> <span class="na">inherit=</span><span class="s">&quot;true&quot;</span> <span class="na">groups=</span><span class="s">&quot;performance, disableCoverage&quot;</span><span class="nt">/&gt;</span>
-
-      <span class="cm">&lt;!-- Specify the list of modes tests under this directory can be run in.</span>
-
-<span class="cm">      Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an ``_`` underscore,</span>
-<span class="cm">      e.g. ``CompressionGZip_AuthNone``.</span>
-
-<span class="cm">      Test modes are configured with a Python lambda that returns a list of modes, using a single parameter which is</span>
-<span class="cm">      an instance of ``pysys.config.descriptor.TestModesConfigHelper`` providing access to the inherited modes (and other</span>
-<span class="cm">      useful functions/fields). Each mode in the returned list is defined by a dictionary containing parameters to be set</span>
-<span class="cm">      on the test object and/or a ``mode`` name. If the mode name is not explicitly provided, a default mode name is</span>
-<span class="cm">      generated by concatenating the parameter values with ``_`` (with a ``paramName=`` prefix for any numeric/boolean</span>
-<span class="cm">      values).</span>
-
-<span class="cm">      In your Python lambda you can return a simple list of modes, or combine your own modes with inherited modes</span>
-<span class="cm">      defined by parent pysysdirconfigs. You can also use the power of Python list comprehensions to exclude certain modes,</span>
-<span class="cm">      perhaps based on dynamic information such as the operating system. Project properties can be accessed</span>
-<span class="cm">      using ``helper.project.PROPERTY_NAME``. Avoid expensive operations such as reading the file system from your lambda</span>
-<span class="cm">      if possible.</span>
-
-<span class="cm">      The first listed mode is the &quot;primary&quot; mode, which is the one that is used by default when executing tests with</span>
-<span class="cm">      no ``-m`` argument.</span>
-
-<span class="cm">      It&#39;s often useful to combine multiple mode &#39;dimensions&#39;, for example all the combinations of a list of web browsers</span>
-<span class="cm">      with a list of databases, or compression methods and authentication types. Rather than writing out every combination</span>
-<span class="cm">      manually, you can use the function ``helper.createModeCombinations`` to automatically generate all combinations.</span>
-
-<span class="cm">      A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.</span>
-
-<span class="cm">      --&gt;</span>
-      <span class="nt">&lt;modes&gt;</span>
-              lambda helper: [
-                      mode for mode in
-                              helper.createModeCombinations( # Takes any number of mode lists as arguments and returns a single combined mode list
-                                      helper.inheritedModes,
-                                      {
-                                                      &#39;CompressionNone&#39;: {&#39;compressionType&#39;:None, &#39;isPrimary&#39;:True},
-                                                      &#39;CompressionGZip&#39;: {&#39;compressionType&#39;:&#39;gzip&#39;},
-                                      },
-                                      [
-                                              {&#39;auth&#39;:None}, # Mode name is optional
-                                              {&#39;auth&#39;:&#39;OS&#39;}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-                                      ])
-                      # This is Python list comprehension syntax for filtering the items in the list
-                      if (mode[&#39;auth&#39;] != &#39;OS&#39; or helper.import_module(&#39;sys&#39;).platform == &#39;MyFunkyOS&#39;)
-              ]
-      <span class="nt">&lt;/modes&gt;</span>
-
-      <span class="cm">&lt;!--</span>
-<span class="cm">      NB: Older (pre-2.0) PySys projects used a more basic and limited syntax for specifying modes:</span>
-
-<span class="cm">              &lt;modes inherit=&quot;true&quot;&gt;</span>
-<span class="cm">                      &lt;mode&gt;CompressionNone&lt;/mode&gt;</span>
-<span class="cm">                      &lt;mode&gt;CompressionGZip&lt;/mode&gt;</span>
-<span class="cm">              &lt;/modes&gt;</span>
-<span class="cm">      --&gt;</span>
-
-      <span class="cm">&lt;!-- Specify as a floating point number an indicator of when to run the tests under</span>
-<span class="cm">      this directory, relative to other tests/directories with a higher or lower hint.</span>
-<span class="cm">      Empty string hint=&quot;&quot; means inherit. The default priority is 0.0 so set the hint to a higher</span>
-<span class="cm">      value to execute tests later, or a negative value to execute tests earlier.</span>
-<span class="cm">      --&gt;</span>
-      <span class="nt">&lt;execution-order</span> <span class="na">hint=</span><span class="s">&quot;+100.0&quot;</span><span class="nt">/&gt;</span>
-
-      <span class="cm">&lt;!-- Comment/uncomment this to mark all tests under this directory as skipped. --&gt;</span>
-      <span class="nt">&lt;skipped</span> <span class="na">reason=</span><span class="s">&quot;These tests are skipped until Bug-1234 is fixed&quot;</span><span class="nt">/&gt;</span>
-
-      <span class="cm">&lt;!-- By convention the test class uses the ``pysystest.py` module if present or else module=&quot;run.py&quot; located</span>
-<span class="cm">      in the test directory, but it is possible to use a different path (even an absolute path). If you want to use</span>
-<span class="cm">      a single Python class for lots of tests rather, omit the module= attribute and make sure it&#39;s available</span>
-<span class="cm">      on the project&#39;s &lt;pythonpath&gt; .</span>
-<span class="cm">      --&gt;</span>
-      <span class="nt">&lt;class</span> <span class="na">name=</span><span class="s">&quot;PySysTest&quot;</span> <span class="na">module=</span><span class="s">&quot;${testRootDir}/pysys-extensions/MySharedTestClass.py&quot;</span><span class="nt">/&gt;</span>
-
-      <span class="cm">&lt;!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute</span>
+<span class="w">      </span><span class="cm">&lt;!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute</span>
 <span class="cm">      paths if needed). These can also be specified using the older names output/input/reference with a path= attribute.</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;output-dir&gt;</span>MyOutput<span class="nt">&lt;/output-dir&gt;</span>
-      <span class="nt">&lt;input-dir&gt;</span>${testRootDir}/pysys-extensions/my_shared_input_files<span class="nt">&lt;/input-dir&gt;</span>
-      <span class="nt">&lt;reference-dir&gt;</span>MyReference<span class="nt">&lt;/reference-dir&gt;</span>
+<span class="w">      </span><span class="nt">&lt;output-dir&gt;</span>MyOutput<span class="nt">&lt;/output-dir&gt;</span>
+<span class="w">      </span><span class="nt">&lt;input-dir&gt;</span>${testRootDir}/pysys-extensions/my_shared_input_files<span class="nt">&lt;/input-dir&gt;</span>
+<span class="w">      </span><span class="nt">&lt;reference-dir&gt;</span>MyReference<span class="nt">&lt;/reference-dir&gt;</span>
 
-      <span class="nt">&lt;data&gt;</span>
-              <span class="cm">&lt;!-- The ability to add user-defined data to the test descriptor is mostly useful when using a</span>
+<span class="w">      </span><span class="nt">&lt;data&gt;</span>
+<span class="w">              </span><span class="cm">&lt;!-- The ability to add user-defined data to the test descriptor is mostly useful when using a</span>
 <span class="cm">              shared Python class for lots of tests.</span>
 
 <span class="cm">              Project properties (but not other user-data values) can be substituted into the value using ${...},</span>
 <span class="cm">              and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables).</span>
+
+<span class="cm">              If a static field of the same name exists on the test class, it will be overridden with the associated user-data</span>
+<span class="cm">              value, with some basic type coersion to match the default value of the static field where possible.</span>
 <span class="cm">              --&gt;</span>
-              <span class="nt">&lt;user-data</span> <span class="na">name=</span><span class="s">&quot;myTestDescriptorData&quot;</span> <span class="na">value=</span><span class="s">&quot;foobar&quot;</span><span class="nt">/&gt;</span>
+<span class="w">              </span><span class="nt">&lt;user-data</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;myTestDescriptorData&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;foobar&quot;</span><span class="nt">/&gt;</span>
 
-              <span class="cm">&lt;!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the</span>
+<span class="w">              </span><span class="cm">&lt;!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the</span>
 <span class="cm">              value is to be converted to a list, newline and/or comma can be used as delimiters. --&gt;</span>
-              <span class="nt">&lt;user-data</span> <span class="na">name=</span><span class="s">&quot;myTestDescriptorPath&quot;</span><span class="nt">&gt;</span>
-                      foo/foo-${os_myThirdPartyLibraryVersion}
-                      foo/bar, foo/baz
-                      <span class="cm">&lt;!-- Comments and whitespace are ignored when converting a string to a list. --&gt;</span>
-                      foo/bosh
-              <span class="nt">&lt;/user-data&gt;</span>
-      <span class="nt">&lt;/data&gt;</span>
+<span class="w">              </span><span class="nt">&lt;user-data</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;myTestDescriptorPath&quot;</span><span class="nt">&gt;</span>
+<span class="w">                      </span>foo/foo-${os_myThirdPartyLibraryVersion}
+<span class="w">                      </span>foo/bar,<span class="w"> </span>foo/baz
+<span class="w">                      </span><span class="cm">&lt;!-- Comments and whitespace are ignored when converting a string to a list. --&gt;</span>
+<span class="w">                      </span>foo/bosh
+<span class="w">              </span><span class="nt">&lt;/user-data&gt;</span>
+<span class="w">      </span><span class="nt">&lt;/data&gt;</span>
 
-      <span class="cm">&lt;!-- Specify traceability requirements implemented by all tests under this directory.</span>
+<span class="w">      </span><span class="cm">&lt;!-- Specify traceability requirements implemented by all tests under this directory.</span>
 
 <span class="cm">      You can use this for whatever makes sense in your project, but typically they would be defect or user story ids;</span>
 <span class="cm">      see examples below.</span>
 <span class="cm">      --&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;UserRequirement_1a&quot;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;UserRequirement_2c&quot;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;Performance&quot;</span><span class="nt">/&gt;</span>
-      <span class="nt">&lt;requirement</span> <span class="na">id=</span><span class="s">&quot;UserStory.XYZ-54321&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;UserRequirement_1a&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;UserRequirement_2c&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;Performance&quot;</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;requirement</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;UserStory.XYZ-54321&quot;</span><span class="nt">/&gt;</span>
 
-      <span class="cm">&lt;!-- NB: Existing tests may nest some of the above elements under elements such as</span>
+<span class="w">      </span><span class="cm">&lt;!-- NB: Existing tests may nest some of the above elements under elements such as</span>
 <span class="cm">      description/classification/data/traceability rather than directly under the pysystest node, but these extra</span>
 <span class="cm">      elements are no longer required (or recommended).</span>
 <span class="cm">      --&gt;</span>
 
 <span class="nt">&lt;/pysysdirconfig&gt;</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -764,7 +810,7 @@ sense at the directory level, and also additional options for directories such a
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

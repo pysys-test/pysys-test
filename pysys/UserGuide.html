@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>User Guide &mdash; PySys v2.1  documentation</title>
+  <title>Guides &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,27 +85,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#platform-detection">Platform detection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skipping-tests">Skipping tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#customizing-pysys-make">Customizing pysys make</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#checking-for-error-messages-in-log-files">Checking for error messages in log files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sharing-logic-across-tests-using-plugins">Sharing logic across tests using plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#thread-safety">Thread-safety</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#producing-code-coverage-reports">Producing code coverage reports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#running-tests-in-multiple-modes">Running tests in multiple modes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#using-modes-for-parameterized-tests">Using modes for parameterized tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-modes-for-other-purposes">Using modes for other purposes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#executing-modes-with-pysys-run">Executing modes with pysys run</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-to">How to</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detect-the-platform">Detect the platform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skip-tests">Skip tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-for-error-messages-in-log-files">Check for error messages in log files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-new-test-templates-for-pysys-make">Create new test templates for pysys make</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#performance-tests-recording-results">Performance tests - recording results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#performance-tests-design-considerations">Performance tests - design considerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#performance-tests-running-them">Performance tests - running them</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#performance-tests-comparing-results">Performance tests - comparing results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#controlling-execution-order">Controlling execution order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#concepts-and-techniques">Concepts and techniques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sharing-logic-across-tests-using-helpers">Sharing logic across tests using helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-tests-in-multiple-modes">Running tests in multiple modes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#using-modes-for-parameterized-tests">Using modes for parameterized tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-modes-for-other-purposes">Using modes for other purposes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#executing-modes-with-pysys-run">Executing modes with pysys run</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-testing">Performance testing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#recording-results">Recording results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#designing-performance-tests">Designing performance tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-performance-tests">Running performance tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comparing-performance-results">Comparing performance results</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#controlling-execution-order">Controlling execution order</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runner-and-writer-plugins">Runner and writer plugins</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-safety">Thread-safety</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#producing-code-coverage-reports">Producing code coverage reports</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ProjectConfiguration.html">Project Configuration</a></li>
@@ -127,7 +137,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -158,7 +168,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>User Guide</li>
+      <li>Guides</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -177,10 +187,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="user-guide">
-<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="platform-detection">
-<h2>Platform detection<a class="headerlink" href="#platform-detection" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="guides">
+<h1>Guides<a class="headerlink" href="#guides" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="how-to">
+<h2>How to<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="detect-the-platform">
+<h3>Detect the platform<a class="headerlink" href="#detect-the-platform" title="Permalink to this headline">¶</a></h3>
 <p>It’s very common to have one set of logic for Windows and another for
 all non-Windows (Unix-based) platforms, and PySys has a dedicated constant <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.IS_WINDOWS" title="pysys.constants.IS_WINDOWS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.IS_WINDOWS</span></code></a> for
 that:</p>
@@ -190,8 +202,8 @@ that:</p>
 <p>For finer grained platform detection we recommend using the facilities built into Python, for example
 <code class="docutils literal notranslate"><span class="pre">sys.platform</span></code>, <code class="docutils literal notranslate"><span class="pre">platform.platform()</span></code> or <code class="docutils literal notranslate"><span class="pre">platform.uname()</span></code>.</p>
 </div>
-<div class="section" id="skipping-tests">
-<h2>Skipping tests<a class="headerlink" href="#skipping-tests" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="skip-tests">
+<h3>Skip tests<a class="headerlink" href="#skip-tests" title="Permalink to this headline">¶</a></h3>
 <p>If your tests’ <code class="docutils literal notranslate"><span class="pre">.py</span></code> logic detects that a test should not be executed for this
 platform or mode, simply use <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.skipTest" title="pysys.basetest.BaseTest.skipTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.skipTest(...)</span></code></a> near the top of the test’s
 <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.execute" title="pysys.basetest.BaseTest.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute()</span></code></a> method, specifying the reason for the skip:</p>
@@ -211,15 +223,30 @@ it is best to specify that statically in your <code class="xref py py-obj docuti
 </pre></div>
 </div>
 </div>
-<div class="section" id="customizing-pysys-make">
-<h2>Customizing pysys make<a class="headerlink" href="#customizing-pysys-make" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="check-for-error-messages-in-log-files">
+<h3>Check for error messages in log files<a class="headerlink" href="#check-for-error-messages-in-log-files" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrep</span></code></a> method is an easy way to check that there are no error
+messages in log files from processes started by PySys. Rather than checking for
+an expression such as <code class="xref py py-obj docutils literal notranslate"><span class="pre">'</span> <span class="pre">ERROR:</span> <span class="pre">'</span></code>, it is recommended to define your expression
+so that the error message itself is included, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myprocess.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39; ERROR: .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This approach ensures that the error message itself is included in the test’s
+console output, run.log and the summary of failed test outcomes, which avoids
+the need to open up the individual logs to find out what happened, and makes it
+much easier to triage test failures, especially if several tests fail for the
+same reason.</p>
+</div>
+<div class="section" id="create-new-test-templates-for-pysys-make">
+<h3>Create new test templates for pysys make<a class="headerlink" href="#create-new-test-templates-for-pysys-make" title="Permalink to this headline">¶</a></h3>
 <p>You can define templates that <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> will use to create new tests specific to your project, or even multiple
 templates for individual directories within your project. This helps to encourage teams to follow the latest best
 practice by ensuring new tests are copying known good patterns, and also saves looking up how to do common things when
 creating new tests.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code> command line comes with a <code class="docutils literal notranslate"><span class="pre">pysys-default-test</span></code> template for creating a simple PySys test, you can
 add your own by adding <code class="docutils literal notranslate"><span class="pre">&lt;maker-template&gt;</span></code> elements to <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> in any directory under your project,
-or to a <code class="docutils literal notranslate"><span class="pre">&lt;pysysdirconfig&gt;</span></code> element in your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file. Here are a couple of examples (taken from
+or to a <code class="docutils literal notranslate"><span class="pre">&lt;pysysdirconfig&gt;</span></code> element in your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file. Here are a few examples (taken from
 the cookbook sample):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pysysdirconfig</span><span class="o">&gt;</span>
 
@@ -248,7 +275,7 @@ values (this means your template will automatically benefit from any future chan
 <code class="docutils literal notranslate"><span class="pre">_pysys_templates/&lt;templatename&gt;</span></code> directory alongside the <code class="docutils literal notranslate"><span class="pre">pysystestdir.xml</span></code> file.
 The <code class="docutils literal notranslate"><span class="pre">_pysys_templates</span></code> directory should contain a file named <code class="docutils literal notranslate"><span class="pre">.pysysignore</span></code> file (which avoids the template being
 loaded as a real test).</p>
-<p>other options are possible (as above) e.g. copying files from an absolute location such as under your project’s
+<p>Other options are possible (as above) e.g. copying files from an absolute location such as under your project’s
 <code class="docutils literal notranslate"><span class="pre">${testRootDir}</span></code>, copying from PySys default templates directly (if you just want to <em>add</em> files) by
 using <code class="docutils literal notranslate"><span class="pre">${pysysTemplatesDir}/default-test/*</span></code>, or copying from a path relative to the XML file where the template is
 defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic).</p>
@@ -256,7 +283,13 @@ defined containing a real (but simple) test to copy from (with suitable regex re
 a <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code> file.</p>
 <p>When creating tests using <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">make</span></code>, by default the first template (from the most specific <code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>)
 is selected, but you can also specify any other template by name using the <code class="docutils literal notranslate"><span class="pre">-t</span></code> option, and get a list of available
-templates for the current directory using <code class="docutils literal notranslate"><span class="pre">--help</span></code>.</p>
+templates for the current directory using <code class="docutils literal notranslate"><span class="pre">--help</span></code>. You can also customize which is the default template for a
+given directory by naming a template defined at a higher level (for example in the project) like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pysysdirconfig</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nb">set</span><span class="o">-</span><span class="n">default</span><span class="o">-</span><span class="n">maker</span><span class="o">-</span><span class="n">template</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my-inherited-test-template&quot;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">pysysdirconfig</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>It is possible to subclass the <a class="reference internal" href="../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker" title="pysys.launcher.console_make.DefaultTestMaker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.launcher.console_make.DefaultTestMaker</span></code></a> responsible for this logic if needed.
 The main reason to do that is to provide a <a class="reference internal" href="../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.validateTestId" title="pysys.launcher.console_make.DefaultTestMaker.validateTestId"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.launcher.console_make.DefaultTestMaker.validateTestId</span></code></a> method
 to check that new test ids do not conflict with others used by others in a remote version control system (to avoid
@@ -264,248 +297,47 @@ merge conflicts).</p>
 <p>By default PySys creates <code class="docutils literal notranslate"><span class="pre">.py</span></code> files with tabs for indentation (as in previous PySys releases). If you prefer spaces,
 just set the <code class="docutils literal notranslate"><span class="pre">pythonIndentationSpacesPerTab</span></code> project property to a string containing the required spaces per tab.</p>
 </div>
-<div class="section" id="checking-for-error-messages-in-log-files">
-<h2>Checking for error messages in log files<a class="headerlink" href="#checking-for-error-messages-in-log-files" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertGrep()</span></code></a> method is an easy way to check that there are no error
-messages in log files from processes started by PySys. Rather than checking for
-an expression such as <code class="xref py py-obj docutils literal notranslate"><span class="pre">'</span> <span class="pre">ERROR:</span> <span class="pre">'</span></code>, it is recommended to define your expression
-so that the error message itself is included, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myprocess.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39; ERROR: .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
 </div>
-<p>This approach ensures that the error message itself is included in the test’s
-console output, run.log and the summary of failed test outcomes, which avoids
-the need to open up the individual logs to find out what happened, and makes it
-much easier to triage test failures, especially if several tests fail for the
-same reason.</p>
-</div>
-<div class="section" id="sharing-logic-across-tests-using-plugins">
-<h2>Sharing logic across tests using plugins<a class="headerlink" href="#sharing-logic-across-tests-using-plugins" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="concepts-and-techniques">
+<h2>Concepts and techniques<a class="headerlink" href="#concepts-and-techniques" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="sharing-logic-across-tests-using-helpers">
+<h3>Sharing logic across tests using helpers<a class="headerlink" href="#sharing-logic-across-tests-using-helpers" title="Permalink to this headline">¶</a></h3>
 <p>Often you will have some standard logic that needs to be used in the execute or validation
 of many/all testcases, such as starting the application you’re testing, or checking log files for errors.</p>
-<p>The recommended way to do that in PySys is to create one or more “plugins”. There are currently several kinds of plugin:</p>
-<ul>
-<li><p><strong>test plugins</strong>; instances of test plugins are created for each <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> that is instantiated, which allows them
-to operate independently of other tests, starting and stopping processes just like code in the <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> class
-would. Test plugins are configured with <code class="docutils literal notranslate"><span class="pre">&lt;test-plugin</span> <span class="pre">classname=&quot;...&quot;</span> <span class="pre">alias=&quot;...&quot;/&gt;</span></code> and can be any Python
-class provided it has a method <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">testobj)</span></code> (and no constructor arguments).
-As the plugins are instantiated just after the <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass, you can use them any time after (but not within)
-your test’s <code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__()</span></code> constructor (for example, in <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.setup" title="pysys.basetest.BaseTest.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.setup()</span></code></a>).</p></li>
-<li><p><strong>runner plugins</strong>; these are instantiated just once per invocation of PySys, by the BaseRunner,
-before <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> is called. Unlike test plugins, any processes or state they maintain are
-shared across all tests. These can be used to start servers/VMs that are shared across tests.
-Runner plugins are configured with <code class="docutils literal notranslate"><span class="pre">&lt;runner-plugin</span> <span class="pre">classname=&quot;...&quot;</span> <span class="pre">alias=&quot;...&quot;/&gt;</span></code> and can be any Python
-class provided it has a method <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">runner)</span></code> (and no constructor arguments).</p>
-<p>Runner plugins that generate output files/directories should by default put that output under either the
-<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence) the <code class="docutils literal notranslate"><span class="pre">runner.output+'/..'</span></code>
-directory (which is typically <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code> unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided).</p>
-</li>
-<li><p><strong>writer plugins</strong>: this kind of plugin has existed in PySys for many releases and are effectively a special kind of
-runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of
-destinations. Writers must implement a similar but different interface to other runner plugins; see <a class="reference internal" href="../autodocgen/pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a>
-for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to
-collecting files from each test output and using them to generate a code coverage report during cleanup at the end
-of the run.</p></li>
-</ul>
-<p>To make your plugin configurable, add a static field for each plugin property, which defines the default value
-and (implicitly) the type. After construction of each plugin, an attribute is assigned with the actual value
-of each plugin property so each property can be accessed using <code class="docutils literal notranslate"><span class="pre">self.propname</span></code> (by the time the plugin’s setup method
-is called). In addition to plugin properties, <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-Xkey=value</span></code> command line options for the plugin
-(if needed) can be accessed using the runner’s <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.getXArg()</span></code></a> method.</p>
-<p>A test plugin could look like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyTestPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-        <span class="n">myPluginProperty</span> <span class="o">=</span> <span class="s1">&#39;default value&#39;</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Example of a plugin configuration property. The value for this plugin instance can be overridden using ``&lt;property .../&gt;``.</span>
-<span class="sd">        Types such as boolean/list[str]/int/float will be automatically converted from string.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<p>The recommended way to do that in PySys is to create modular, independent helper classes that are included
+in the tests that need them using inheritance (via the “mix-in” pattern). A key constraint
+is that the helper classes themselves contain only a single field holding an instance that encapsulates all the
+real functionality - this avoid name clashes between different helpers, and with the PySys BaseTest class itself.</p>
+<p>The best way to add one is to copy from the <strong>getting-started</strong> sample where there is a <code class="docutils literal notranslate"><span class="pre">MyServerHelper</span></code> mix-in class
+that provides a field called <code class="docutils literal notranslate"><span class="pre">self.myserver</span></code> through which all of the real functionality is encapsulated and exposed
+to individual tests for reuse. To use it in a test all you need to do is inherit the helper in any tests that need it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">myorg.myserverhelper</span> <span class="kn">import</span> <span class="n">MyServerHelper</span>
+<span class="k">class</span> <span class="nc">PySysTest</span><span class="p">(</span><span class="n">MyServerHelper</span><span class="p">,</span> <span class="n">pysys</span><span class="o">.</span><span class="n">basetest</span><span class="o">.</span><span class="n">BaseTest</span><span class="p">):</span>
 
-        <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">owner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testObj</span> <span class="o">=</span> <span class="n">testObj</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.myorg.MyRunnerPlugin&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Created MyTestPlugin instance with myPluginProperty=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myPluginProperty</span><span class="p">)</span>
-
-                <span class="c1"># there is no standard cleanup() method, so do this if you need to execute something on cleanup:</span>
-                <span class="n">testObj</span><span class="o">.</span><span class="n">addCleanupFunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__myPluginCleanup</span><span class="p">)</span>
-
-        <span class="k">def</span> <span class="nf">__myPluginCleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Cleaning up MyTestPlugin instance&#39;</span><span class="p">)</span>
-
-        <span class="c1"># An example of providing a method that can be accessed from each test</span>
-        <span class="k">def</span> <span class="nf">getPythonVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">startProcess</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;--version&#39;</span><span class="p">],</span> <span class="n">stdouterr</span><span class="o">=</span><span class="s1">&#39;MyTestPlugin.pythonVersion&#39;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;MyTestPlugin.pythonVersion.out&#39;</span><span class="p">,</span> <span class="s1">&#39;(?P&lt;output&gt;.+)&#39;</span><span class="p">)[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="c1"># A common pattern is to create a helper method that you always call from your `BaseTest.validate()`</span>
-        <span class="c1"># That approach allows you to later customize the logic by changing just one single place, and also to omit</span>
-        <span class="c1"># it for specific tests where it is not wanted.</span>
-        <span class="k">def</span> <span class="nf">checkLogsForErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s2">&quot;my_server.log&quot;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s1">&#39; (ERROR|FATAL) .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myserver</span><span class="o">.</span><span class="n">startServer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_server&quot;</span><span class="p">)</span>
+  <span class="o">...</span>
 </pre></div>
 </div>
-<p>With configuration like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pysysproject</span><span class="o">&gt;</span>
-        <span class="o">&lt;</span><span class="n">test</span><span class="o">-</span><span class="n">plugin</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;myorg.testplugin.MyTestPlugin&quot;</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;myalias&quot;</span><span class="o">&gt;</span>
-                    <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myPluginProperty&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;my value&quot;</span><span class="o">/&gt;</span>
-        <span class="o">&lt;/</span><span class="n">test</span><span class="o">-</span><span class="n">plugin</span><span class="o">&gt;</span>
-<span class="o">&lt;/</span><span class="n">pysysproject</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>… you can now access methods defined by the plugin from your tests using <code class="docutils literal notranslate"><span class="pre">self.myalias.getPythonVersion()</span></code>.</p>
-<p>Alternatively, you can create a trivial <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass that instantiates plugins in code (rather than XML)
-which would allow code completion (if your editor of choice supports this) but still provide the benefits of
-the modular composition approach.</p>
-<p>You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific
-to your application, and third party PySys plugins supporting standard tools and languages.</p>
-<p>In addition to the alias-based lookup, plugins can get a list of the other plugin instances
-using <code class="docutils literal notranslate"><span class="pre">self.testPlugins</span></code> (from <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a>) or <code class="docutils literal notranslate"><span class="pre">self.runnerPlugins</span></code> (from <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>), which
-provides a way for plugins to reference each other without depending on the aliases that may be in use in a
-particular project configuration.</p>
-<p>When creating a runner plugin you may need somewhere to put output files, logs etc. Plugins that generate output
-files/directories should by default put that output in a dedicated directory either the
-<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence if it’s something users will
-look at a lot) a directory one level up e.g. <code class="docutils literal notranslate"><span class="pre">runner.output+'/../myplugin'</span></code> (which is typically under <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code>
-unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided) .
-A prefix of double underscore <code class="docutils literal notranslate"><span class="pre">__pysys</span></code> is recommended under testRootDir to distinguish dynamically created
-directories (ignored by version control) from the testcase directories (checked into version control).</p>
-<p>For examples of the project configuration, including how to set plugin-specific properties that will be passed to
-its constructor, see <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a>.</p>
-</div>
-<div class="section" id="configuring-and-overriding-test-options">
-<h2>Configuring and overriding test options<a class="headerlink" href="#configuring-and-overriding-test-options" title="Permalink to this headline">¶</a></h2>
-<p>PySys provides two mechanisms for specifying options such as credentials,
-hostnames, or test duration/iteration that you might want to change or
-override when running tests:</p>
-<ul>
-<li><p><em>Testcase attributes</em>, which are just variables on the Python testcase
-instance (or a <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass shared by many tests).
-Attributes can be overridden on the command line using <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-Xattr=value</span></code>.</p>
-<p>Attributes are useful for settings specific to an individual testcase such as
-the number of iterations or time duration to use for a performance test.
-A user running the test locally you might want to temporarily set to a lower
-iteration count while getting the test right, or perhaps try
-a higher value to get a more stable performance result.</p>
-</li>
-<li><p><em>Project properties</em>. The default value is specified in the <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>
-file or in a <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file referenced from it.</p>
-<p>Properties can be overridden using an environment variable.
-Project properties are useful for things like credentials and hostnames that
-are shared across many testcases, and where you might want to set up
-customizations in your shell so that you don’t need to keep specifying them
-every time you invoke <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code>.</p>
-</li>
-</ul>
-<p>To use a testcase attribute, set the default value on your test or basetest as a static attribute on the test
-class, for example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PySysTest</span><span class="p">(</span><span class="n">BaseTest</span><span class="p">):</span>
-
-        <span class="n">myIterationCount</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="mi">1000</span> <span class="c1"># can be overridden with -XmyIterationCount=</span>
-
-        <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using iterations=</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myIterationCount</span><span class="p">)</span>
-                <span class="o">...</span>
-</pre></div>
-</div>
-<p>Once the default value is defined with a static attribute, you can override the value
-when you run your test using the <code class="docutils literal notranslate"><span class="pre">-X</span></code> option:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">-</span><span class="n">XmyIterationCount</span><span class="o">=</span><span class="mi">10</span>
-</pre></div>
-</div>
-<p>If the attribute was defined with a default value of int, float, bool or list then
-the <code class="docutils literal notranslate"><span class="pre">-X</span></code> value will be automatically converted to that type; otherwise, it will
-be a string.</p>
-<p>If instead of setting a default for just one test you wish to set the default
-for many tests from your custom <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass, then you would do the same thing in the
-definition of that <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass. If you don’t have a custom BaseTest class, you can use
-<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.runner.getXArg()</span></code></a> from any plugin to get the value or default, with the same
-type conversion described above.</p>
-<p>The other mechanism that PySys supports for configurable test options is
-project properties.</p>
-<p>To use a project property that can be overridden with an environment variable,
-add a <code class="docutils literal notranslate"><span class="pre">property</span></code> element to your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myCredentials&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYORG_CREDENTIALS}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;testuser:testpassword&quot;</span><span class="o">/&gt;</span>
-</pre></div>
-</div>
-<p>This property can will take the value of the specified environment variable,
-or else the default if any undefined properties/env vars are included in value. Note that if the value contains
-unresolved variables and there is no valid default, the project will fail to load.</p>
-<p>You may want to set the attribute <code class="docutils literal notranslate"><span class="pre">pathMustExist=&quot;true&quot;</span></code> when defining properties that refer to a path such as a
-build output directory that should always be present.</p>
-<p>Another way to specify default project property values is to put them into a <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file. You can use
-properties to specify which file is loaded, so it would be possible to customize using environment variables:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myProjectPropertiesFile&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYORG_CUSTOM_PROJECT_PROPERTIES}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/default-config.properties&quot;</span><span class="o">/&gt;</span>
-<span class="o">&lt;</span><span class="nb">property</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{myProjectPropertiesFile}</span><span class="s2">&quot;</span> <span class="n">pathMustExist</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="o">/&gt;</span>
-</pre></div>
-</div>
-<p>To use projects properties in your testcase, just access the attributes on
-<a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.project</span></code></a> from either a test instance or a runner:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">username</span><span class="p">,</span> <span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">myCredentials</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using username=</span><span class="si">%s</span><span class="s1"> and password=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Project properties are always be of string type, but <a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project.getProperty" title="pysys.config.project.Project.getProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.project.Project.getProperty()</span></code></a> can be used to
-convert the value to other types when needed.</p>
-</div>
-<div class="section" id="thread-safety">
-<h2>Thread-safety<a class="headerlink" href="#thread-safety" title="Permalink to this headline">¶</a></h2>
-<p>As your testsuite grows, the ability to run tests in parallel will be increasingly important, so make sure your
-tests and any shared plugin code do not manipulate shared data structures or files in a way that could cause
-race conditions.</p>
-<p>Most Python library functions are safe to use, but you should avoid calling <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>
-(use <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.PREFERRED_ENCODING" title="pysys.constants.PREFERRED_ENCODING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.PREFERRED_ENCODING</span></code></a> instead) and <code class="docutils literal notranslate"><span class="pre">shutil.make_archive</span></code> which are not.</p>
-<p>It is also important not to change to the working directory of the PySys process or its environment (<code class="docutils literal notranslate"><span class="pre">os.environ</span></code>)
-while tests are executing. Any setup that might involve changing the environment - including initialization of
-some libraries (e.g. Matplotlib) must be performed before tests start in the <code class="docutils literal notranslate"><span class="pre">setup</span></code> of a runner plugin (or runner),
-so that everything is stable ready for tests to be executed.</p>
-<p>To avoid dangerous and hard-to-debug race conditions, PySys has built-in checking for changes to the working directory
-and os.environ and the test run will fail if either is detected.</p>
-</div>
-<div class="section" id="producing-code-coverage-reports">
-<h2>Producing code coverage reports<a class="headerlink" href="#producing-code-coverage-reports" title="Permalink to this headline">¶</a></h2>
-<p>PySys can be extended to produce code coverage reports for any language, by creating a writer plugin.</p>
-<p>There is an existing writer that produces coverage reports for programs written in Python called
-<a class="reference internal" href="../autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter" title="pysys.writer.coverage.PythonCoverageWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.coverage.PythonCoverageWriter</span></code></a>, which uses the <code class="docutils literal notranslate"><span class="pre">coverage.py</span></code> library. To use this you need to add the
-<code class="docutils literal notranslate"><span class="pre">&lt;writer&gt;</span></code> to your project (see the sample <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a> for an example) and make sure you’re starting
-your Python processes with coverage support enabled, by using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.startPython" title="pysys.basetest.BaseTest.startPython"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.startPython</span></code></a>.</p>
-<p>The usual way to enable code coverage (for all supported languages) is to set <code class="docutils literal notranslate"><span class="pre">-XcodeCoverage</span></code> when running your
-tests (or to run with <code class="docutils literal notranslate"><span class="pre">--ci</span></code> which does this automatically). Individual writers may additionally provide their own
-properties to allow fine-grained control e.g. <code class="docutils literal notranslate"><span class="pre">-XpythonCoverage=true/false</span></code>.</p>
-<p>Be sure to add the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group to any tests (or test directories) that should not use coverage,
-such as performance tests.</p>
-<p>If you wish to produce coverage reports using any other language, this is easy to achieve by following the same pattern:</p>
-<ul>
-<li><p>When your tests start the program(s) whose coverage is to be measured, add the required arguments or environment
-variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods
-for starting your application is in a custom test plugin class.</p>
-<p>When starting your process, you can detect whether to enable code coverage like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;mylanguageCoverage&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;codeCoverage&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disableCoverage</span><span class="p">:</span>
-      <span class="o">...</span>
-</pre></div>
-</div>
-<p>Often you will need to set an environment variable to indicate the filename that coverage should be generated under.
-Make sure to use a unique filename so that multiple processes started by the same test do not clash. Often you
-will need to ensure that your application is shutdown cleanly (rather than being automatically killed at the end of
-the test) so that it has a chance to write the code coverage information.</p>
-</li>
-<li><p>Create a custom writer class which collects coverage files (matching a specific regex pattern) from the output
-directory. The usual way to do this would be to subclass <a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a>. Configure
-default values for main configuration properties (by defining them as static variables in your class). Then implement
-<a class="reference internal" href="../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.isEnabled" title="pysys.writer.api.BaseResultsWriter.isEnabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.isEnabled()</span></code></a> to define when coverage reporting will happen, and run the
-required processes to combine coverage files and generate a report in the destDir in
-<a class="reference internal" href="../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.cleanup" title="pysys.writer.api.BaseResultsWriter.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.cleanup()</span></code></a>, which will execute after all tests have completed.</p>
-<p>Finally, add the new writer class to your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file.</p>
-</li>
-<li><p>Add the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group to any tests (or test directories) that should not use coverage,
-such as performance tests.</p></li>
-<li><p>If using a continuous integration system or centralized code coverage database, you could optionally upload the
-coverage data there from the directory PySys collected it into, so there is a permanent record of
-any changes in coverage over time. The artifact publishing capability of
-<a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a> will help with that.</p></li>
+<p>Since this approach uses standard Python, any IDE will be able to give assistance for the myserver methods (provided your extension
+classes are on its configured PYTHONPATH).</p>
+<p>Any number of helpers can be added to each test that needs them. Just ensure that the BaseTest class is listed last in the list of
+classes your test inherits from.</p>
+<p>This approach has significant advantages over these alternatives that were used in the past:</p>
+<ul class="simple">
+<li><p>Custom BaseTest subclasses. In this paradigm, PySys methods/fields exist in the same namespace as the custom ones, creating a
+risk of clashes and unexpected bugs and upgrade pain. Moreover as your project grows you will often end up with multiple
+BaseTest subclasses for different parts of your testing, and there is a high chance that functionality that seemed to belong
+in one place will one day be needed in a different sibling BaseTest, leading to a need to refactor or complex multiple
+inheritance headaches. Using the composition approach of the “helper” classes avoids this complexity and keeps your test
+extensions nice and clean.</p></li>
+<li><p>Test plugins. These were introduced in older PySys versions to solve the encapsulation problem, but it is now recommended to
+avoid them because Python IDEs are not able to resolve them, leading to errors or at least a lack of code assistance when
+interacting with the plugin in your tests.</p></li>
 </ul>
 </div>
 <div class="section" id="running-tests-in-multiple-modes">
-<h2>Running tests in multiple modes<a class="headerlink" href="#running-tests-in-multiple-modes" title="Permalink to this headline">¶</a></h2>
+<h3>Running tests in multiple modes<a class="headerlink" href="#running-tests-in-multiple-modes" title="Permalink to this headline">¶</a></h3>
 <p>One of the powerful features of PySys is the ability to run the same test in multiple modes from a single execution.
 This can be useful for both parameterized tests, where the same Python logic is invoked with multiple different
 parameters to test a range of scenarios, and for running tests against different databases, web browsers etc.</p>
@@ -521,7 +353,7 @@ in the example described later in this section). Separating dimensions cleanly i
 much easier to include/exclude the test modes you want. PySys will give an error if you use different
 capitalization for the same mode in different places, as this can result in test bugs.</p>
 <div class="section" id="using-modes-for-parameterized-tests">
-<h3>Using modes for parameterized tests<a class="headerlink" href="#using-modes-for-parameterized-tests" title="Permalink to this headline">¶</a></h3>
+<h4>Using modes for parameterized tests<a class="headerlink" href="#using-modes-for-parameterized-tests" title="Permalink to this headline">¶</a></h4>
 <p>Parameterized tests provide a convenient way to re-use the same Python logic to check multiple different testing
 scenarios. This avoids the maintenance headache of copy+pasted testcases, and provides faster and more granular test
 outcomes than combining all the different parameters into a single test with a big <code class="docutils literal notranslate"><span class="pre">for</span></code> loop.</p>
@@ -543,7 +375,7 @@ marking the parameterized modes as “primary” (so they will all run by defaul
 and combining them with any inherited modes (e.g. for different databases, browsers, etc).</p>
 </div>
 <div class="section" id="using-modes-for-other-purposes">
-<h3>Using modes for other purposes<a class="headerlink" href="#using-modes-for-other-purposes" title="Permalink to this headline">¶</a></h3>
+<h4>Using modes for other purposes<a class="headerlink" href="#using-modes-for-other-purposes" title="Permalink to this headline">¶</a></h4>
 <p>Modes can also be used for making your test run with different databases, web browsers, and other execution
 environments.</p>
 <p>Often for these use cases you will want more control than parameterized tests give, for example
@@ -649,7 +481,7 @@ during test setup:</p>
 </div>
 </div>
 <div class="section" id="executing-modes-with-pysys-run">
-<h3>Executing modes with pysys run<a class="headerlink" href="#executing-modes-with-pysys-run" title="Permalink to this headline">¶</a></h3>
+<h4>Executing modes with pysys run<a class="headerlink" href="#executing-modes-with-pysys-run" title="Permalink to this headline">¶</a></h4>
 <p>PySys provides a rich variety of <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> arguments to control
 which modes your tests will run with. By default it will run every test in its
 primary modes (for tests with no mode, the primary mode is <code class="docutils literal notranslate"><span class="pre">self.mode==None</span></code>) -
@@ -687,8 +519,10 @@ tests:</p>
 </div>
 </div>
 </div>
-<div class="section" id="performance-tests-recording-results">
-<h2>Performance tests - recording results<a class="headerlink" href="#performance-tests-recording-results" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="performance-testing">
+<h3>Performance testing<a class="headerlink" href="#performance-testing" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="recording-results">
+<h4>Recording results<a class="headerlink" href="#recording-results" title="Permalink to this headline">¶</a></h4>
 <p>PySys is a great tool for running performance tests, whether unit-level microbenchmarks or complex multi-process
 full system benchmarking.</p>
 <p>Often performance tests will produced detailed output files (XML/JSON/PDF/logs etc) that are worth capturing for
@@ -714,8 +548,8 @@ you’ll see closely related results next to each other. These keys must be uniq
 running in, otherwise PySys will raise an exception and not persist the result. See the samples for some examples of
 using this API.</p>
 </div>
-<div class="section" id="performance-tests-design-considerations">
-<h2>Performance tests - design considerations<a class="headerlink" href="#performance-tests-design-considerations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="designing-performance-tests">
+<h4>Designing performance tests<a class="headerlink" href="#designing-performance-tests" title="Permalink to this headline">¶</a></h4>
 <p>Often a performance test will run for a bit longer than a simple correctness test, for example it might have a set
 number of iterations or time duration. See the above section “Configuring and overriding test options” for an example
 of how to make it easy to customize the iteration count/duration at runtime e.g. <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-XmyIterationCount=10</span></code>.
@@ -729,13 +563,14 @@ tracking down test bugs or optimizing your application. Instead use the built-in
 perfect for the job. It can even generate a combinatoric product of various different parameter dimensions for you
 with <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.TestModesConfigHelper.createModeCombinations" title="pysys.config.descriptor.TestModesConfigHelper.createModeCombinations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.TestModesConfigHelper.createModeCombinations</span></code></a> as described above.</p>
 </div>
-<div class="section" id="performance-tests-running-them">
-<h2>Performance tests - running them<a class="headerlink" href="#performance-tests-running-them" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="running-performance-tests">
+<h4>Running performance tests<a class="headerlink" href="#running-performance-tests" title="Permalink to this headline">¶</a></h4>
 <p>When running performance tests from an automated job, it is important to ensure that you do not have multiple
 tests executing at once since this will usually invalidate the results. It is therefore best to run your performance
 tests in a separate <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code> invocation to your correctness testing, which does benefit from multi-threaded
-execution. You should also disable code coverage in a performance run to avoid artificially slowing your components
-down. So a typical automated performance run would need to modify the usual <code class="docutils literal notranslate"><span class="pre">--ci</span></code> default into something like:</p>
+execution. You should ensure code coverage is disabled in a performance run to avoid artificially slowing your components
+down by ensuring the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group is set on all performance tests (but the command line flag can be used
+too just to be safe). So a typical automated performance run would need to modify the usual <code class="docutils literal notranslate"><span class="pre">--ci</span></code> default into something like:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">performance</span><span class="o">/</span>
 <span class="n">pysys</span> <span class="n">run</span> <span class="o">--</span><span class="n">ci</span> <span class="o">--</span><span class="n">threads</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">XcodeCoverage</span><span class="o">=</span><span class="n">false</span>
 </pre></div>
@@ -756,8 +591,8 @@ will print a summary of the results, including a calculation of the sample stand
 which you can use to check your test is reliable and to decide whether measured increases/decreases are statistically
 significant or just random noise.</p>
 </div>
-<div class="section" id="performance-tests-comparing-results">
-<h2>Performance tests - comparing results<a class="headerlink" href="#performance-tests-comparing-results" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="comparing-performance-results">
+<h4>Comparing performance results<a class="headerlink" href="#comparing-performance-results" title="Permalink to this headline">¶</a></h4>
 <p>When using PySys tests to measure your application while you experiment with possible optimizations, consider
 listing the <code class="docutils literal notranslate"><span class="pre">.csv</span></code> (or <code class="docutils literal notranslate"><span class="pre">.json</span></code>) summary files containing your baselines (e.g. baseline before any changes, with
 optimization A, B, C etc…) in the <code class="docutils literal notranslate"><span class="pre">PYSYS_PERFORMANCE_BASELINES</span></code> environment variable. The
@@ -778,8 +613,9 @@ is - above <code class="docutils literal notranslate"><span class="pre">+/-</spa
 Results with less than 2 sigmas are not colour-coded since they typically don’t indicate a real change; anything with a
 red or green colour is a regression or improvement that is statistically significant and worth paying attention to.</p>
 </div>
+</div>
 <div class="section" id="test-ids-and-structuring-large-projects">
-<h2>Test ids and structuring large projects<a class="headerlink" href="#test-ids-and-structuring-large-projects" title="Permalink to this headline">¶</a></h2>
+<h3>Test ids and structuring large projects<a class="headerlink" href="#test-ids-and-structuring-large-projects" title="Permalink to this headline">¶</a></h3>
 <p>Firstly, try to have everything in a single PySys project if possible. Use subdirectories to structure your tests,
 but don’t separate into different PySys projects unless it’s for testing a totally different component with different
 testing needs. Keeping everything in the same project gives you the ability to run all your tests
@@ -880,7 +716,7 @@ if the test cannot execute in the current mode.</p>
 <p>See the <a class="reference internal" href="TestDescriptors.html#sample-pysysdirconfig-xml"><span class="std std-ref">Sample pysysdirconfig.xml</span></a> for a full example of a directory configuration file.</p>
 </div>
 <div class="section" id="controlling-execution-order">
-<h2>Controlling execution order<a class="headerlink" href="#controlling-execution-order" title="Permalink to this headline">¶</a></h2>
+<h3>Controlling execution order<a class="headerlink" href="#controlling-execution-order" title="Permalink to this headline">¶</a></h3>
 <p>In large projects where the test run takes several hours or days, you may wish
 to control the order that PySys executes different groups of tests - or tests
 with different modes, to maximize the chance of finding out quickly if
@@ -931,6 +767,201 @@ in all modes before moving on to the next test - then simply set
 <a class="reference internal" href="../autodocgen/pysys.config.descriptor.html#pysys.config.descriptor.DescriptorLoader" title="pysys.config.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.descriptor.DescriptorLoader</span></code></a> or in the constructor of a
 custom <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> class or plugin.</p>
 </div>
+<div class="section" id="runner-and-writer-plugins">
+<h3>Runner and writer plugins<a class="headerlink" href="#runner-and-writer-plugins" title="Permalink to this headline">¶</a></h3>
+<p>Plugins can be used to extend PySys with additional capabilities:</p>
+<ul>
+<li><p><strong>runner plugins</strong>; these are instantiated just once per invocation of PySys, by the BaseRunner,
+before <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a> is called. Unlike test plugins, any processes or state they maintain are
+shared across all tests. These can be used to start servers/VMs that are shared across tests.
+Runner plugins are configured with <code class="docutils literal notranslate"><span class="pre">&lt;runner-plugin</span> <span class="pre">classname=&quot;...&quot;</span> <span class="pre">alias=&quot;...&quot;/&gt;</span></code> and can be any Python
+class provided it has a method <code class="docutils literal notranslate"><span class="pre">setup(self,</span> <span class="pre">runner)</span></code> (and no constructor arguments).</p>
+<p>Runner plugins that generate output files/directories should by default put that output under either the
+<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence) the <code class="docutils literal notranslate"><span class="pre">runner.output+'/..'</span></code>
+directory (which is typically <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code> unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided).</p>
+</li>
+<li><p><strong>writer plugins</strong>: this kind of plugin has existed in PySys for many releases and are effectively a special kind of
+runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of
+destinations. Writers must implement a similar but different interface to other runner plugins; see <a class="reference internal" href="../autodocgen/pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a>
+for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to
+collecting files from each test output and using them to generate a code coverage report during cleanup at the end
+of the run.</p></li>
+</ul>
+<p>To make your plugin configurable, add a static field for each plugin property, which defines the default value
+and (implicitly) the type. After construction of each plugin, an attribute is assigned with the actual value
+of each plugin property so each property can be accessed using <code class="docutils literal notranslate"><span class="pre">self.propname</span></code> (by the time the plugin’s setup method
+is called). In addition to plugin properties, <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-Xkey=value</span></code> command line options for the plugin
+(if needed) can be accessed using the runner’s <a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.getXArg()</span></code></a> method.</p>
+<p>For an example of a runner plugin, see the cookbook sample. The configuration looks like this:</p>
+<p>With configuration like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pysysproject</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">test</span><span class="o">-</span><span class="n">plugin</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;myorg.testplugin.MyTestPlugin&quot;</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;myalias&quot;</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myPluginProperty&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;my value&quot;</span><span class="o">/&gt;</span>
+        <span class="o">&lt;/</span><span class="n">test</span><span class="o">-</span><span class="n">plugin</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">pysysproject</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>When creating a runner plugin you may need somewhere to put output files, logs etc. Plugins that generate output
+files/directories should by default put that output in a dedicated directory either the
+<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence if it’s something users will
+look at a lot) a directory one level up e.g. <code class="docutils literal notranslate"><span class="pre">runner.output+'/../myplugin'</span></code> (which is typically under <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code>
+unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided) .
+A prefix of double underscore <code class="docutils literal notranslate"><span class="pre">__pysys</span></code> is recommended under testRootDir to distinguish dynamically created
+directories (ignored by version control) from the testcase directories (checked into version control).</p>
+<p>For examples of the project configuration, including how to set plugin-specific properties that will be passed to
+its constructor, see <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a>.</p>
+<p>(Occasionally some user may wish to add their own custom writer that is not defined in the main <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file,
+and this can be achieved by putting the additional configuration into a user-specific XML file and setting its path in
+the environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_PROJECT_APPEND</span></code>).</p>
+</div>
+<div class="section" id="configuring-and-overriding-test-options">
+<h3>Configuring and overriding test options<a class="headerlink" href="#configuring-and-overriding-test-options" title="Permalink to this headline">¶</a></h3>
+<p>PySys provides two mechanisms for specifying options such as credentials,
+hostnames, or test duration/iteration that you might want to change or
+override when running tests:</p>
+<ul>
+<li><p><em>Testcase attributes</em>, which are just variables on the Python testcase
+instance (or a <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass shared by many tests).
+Attributes can be overridden on the command line using <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span> <span class="pre">-Xattr=value</span></code>.</p>
+<p>Attributes are useful for settings specific to an individual testcase such as
+the number of iterations or time duration to use for a performance test.
+A user running the test locally you might want to temporarily set to a lower
+iteration count while getting the test right, or perhaps try
+a higher value to get a more stable performance result.</p>
+</li>
+<li><p><em>Project properties</em>. The default value is specified in the <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>
+file or in a <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file referenced from it.</p>
+<p>Properties can be overridden using an environment variable.
+Project properties are useful for things like credentials and hostnames that
+are shared across many testcases, and where you might want to set up
+customizations in your shell so that you don’t need to keep specifying them
+every time you invoke <code class="docutils literal notranslate"><span class="pre">pysys</span> <span class="pre">run</span></code>.</p>
+</li>
+</ul>
+<p>To use a testcase attribute, set the default value on your test or basetest as a static attribute on the test
+class, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PySysTest</span><span class="p">(</span><span class="n">BaseTest</span><span class="p">):</span>
+
+        <span class="n">myIterationCount</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="mi">1000</span> <span class="c1"># can be overridden with -XmyIterationCount=</span>
+
+        <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using iterations=</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myIterationCount</span><span class="p">)</span>
+                <span class="o">...</span>
+</pre></div>
+</div>
+<p>Once the default value is defined with a static attribute, you can override the value
+when you run your test using the <code class="docutils literal notranslate"><span class="pre">-X</span></code> option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span> <span class="n">run</span> <span class="o">-</span><span class="n">XmyIterationCount</span><span class="o">=</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p>If the attribute was defined with a default value of int, float, bool or list then
+the <code class="docutils literal notranslate"><span class="pre">-X</span></code> value will be automatically converted to that type; otherwise, it will
+be a string.</p>
+<p>If instead of setting a default for just one test you wish to set the default
+for many tests from your custom <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass, then you would do the same thing in the
+definition of that <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> subclass. If you don’t have a custom BaseTest class, you can use
+<a class="reference internal" href="../autodocgen/pysys.baserunner.html#pysys.baserunner.BaseRunner.getXArg" title="pysys.baserunner.BaseRunner.getXArg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.runner.getXArg()</span></code></a> from any plugin to get the value or default, with the same
+type conversion described above.</p>
+<p>The other mechanism that PySys supports for configurable test options is
+project properties.</p>
+<p>To use a project property that can be overridden with an environment variable,
+add a <code class="docutils literal notranslate"><span class="pre">property</span></code> element to your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myCredentials&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYORG_CREDENTIALS}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;testuser:testpassword&quot;</span><span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p>This property can will take the value of the specified environment variable,
+or else the default if any undefined properties/env vars are included in value. Note that if the value contains
+unresolved variables and there is no valid default, the project will fail to load.</p>
+<p>You may want to set the attribute <code class="docutils literal notranslate"><span class="pre">pathMustExist=&quot;true&quot;</span></code> when defining properties that refer to a path such as a
+build output directory that should always be present.</p>
+<p>Another way to specify default project property values is to put them into a <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file. You can use
+properties to specify which file is loaded, so it would be possible to customize using environment variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myProjectPropertiesFile&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{env.MYORG_CUSTOM_PROJECT_PROPERTIES}</span><span class="s2">&quot;</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{testRootDir}</span><span class="s2">/default-config.properties&quot;</span><span class="o">/&gt;</span>
+<span class="o">&lt;</span><span class="nb">property</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{myProjectPropertiesFile}</span><span class="s2">&quot;</span> <span class="n">pathMustExist</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p>To use projects properties in your testcase, just access the attributes on
+<a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project" title="pysys.config.project.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.project</span></code></a> from either a test instance or a runner:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">username</span><span class="p">,</span> <span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">myCredentials</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using username=</span><span class="si">%s</span><span class="s1"> and password=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Project properties are always be of string type, but <a class="reference internal" href="../autodocgen/pysys.config.project.html#pysys.config.project.Project.getProperty" title="pysys.config.project.Project.getProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.config.project.Project.getProperty()</span></code></a> can be used to
+convert the value to other types when needed.</p>
+</div>
+<div class="section" id="thread-safety">
+<h3>Thread-safety<a class="headerlink" href="#thread-safety" title="Permalink to this headline">¶</a></h3>
+<p>As your test suite grows, the ability to run tests in parallel will be increasingly important, so make sure your
+tests and any shared plugin code do not manipulate shared data structures or files in a way that could cause
+race conditions.</p>
+<p>Most Python library functions are safe to use, but you should avoid calling <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>
+(use <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.PREFERRED_ENCODING" title="pysys.constants.PREFERRED_ENCODING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.PREFERRED_ENCODING</span></code></a> instead) and <code class="docutils literal notranslate"><span class="pre">shutil.make_archive</span></code> which are not.</p>
+<p>It is also important not to change to the working directory of the PySys process or its environment (<code class="docutils literal notranslate"><span class="pre">os.environ</span></code>)
+while tests are executing. Any setup that might involve changing the environment - including initialization of
+some libraries (e.g. Matplotlib) must be performed before tests start in the <code class="docutils literal notranslate"><span class="pre">setup</span></code> of a runner plugin (or runner),
+so that everything is stable ready for tests to be executed.</p>
+<p>To avoid dangerous and hard-to-debug race conditions, PySys has built-in checking for changes to the working directory
+and os.environ and the test run will fail if either is detected.</p>
+</div>
+<div class="section" id="producing-code-coverage-reports">
+<h3>Producing code coverage reports<a class="headerlink" href="#producing-code-coverage-reports" title="Permalink to this headline">¶</a></h3>
+<p>PySys can be extended to produce code coverage reports for any language, by creating a writer plugin.</p>
+<p>There is an existing writer that produces coverage reports for programs written in Python called
+<a class="reference internal" href="../autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter" title="pysys.writer.coverage.PythonCoverageWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.coverage.PythonCoverageWriter</span></code></a>, which uses the <code class="docutils literal notranslate"><span class="pre">coverage.py</span></code> library. To use this you need to add the
+<code class="docutils literal notranslate"><span class="pre">&lt;writer&gt;</span></code> to your project (see the sample <a class="reference internal" href="ProjectConfiguration.html"><span class="doc">Project Configuration</span></a> for an example) and make sure you’re starting
+your Python processes with coverage support enabled, by using <a class="reference internal" href="BaseTest.html#pysys.basetest.BaseTest.startPython" title="pysys.basetest.BaseTest.startPython"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.startPython</span></code></a>.</p>
+<p>The usual way to enable code coverage (for all supported languages) is to set <code class="docutils literal notranslate"><span class="pre">-XcodeCoverage</span></code> when running your
+tests (or to run with <code class="docutils literal notranslate"><span class="pre">--ci</span></code> which does this automatically). Individual writers may additionally provide their own
+properties to allow fine-grained control e.g. <code class="docutils literal notranslate"><span class="pre">-XpythonCoverage=true/false</span></code>.</p>
+<p>Be sure to add the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group to any tests (or test directories) that should not use coverage,
+such as performance tests.</p>
+<p>If you wish to produce coverage reports using any other language, this is easy to achieve by following the same pattern:</p>
+<ul>
+<li><p>When your tests start the program(s) whose coverage is to be measured, add the required arguments or environment
+variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods
+for starting your application is in a custom test plugin class.</p>
+<p>When starting your process, you can detect whether to enable code coverage like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;mylanguageCoverage&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;codeCoverage&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disableCoverage</span><span class="p">:</span>
+      <span class="o">...</span>
+</pre></div>
+</div>
+<p>Often you will need to set an environment variable to indicate the filename that coverage should be generated under.
+Make sure to use a unique filename so that multiple processes started by the same test do not clash. Often you
+will need to ensure that your application is shutdown cleanly (rather than being automatically killed at the end of
+the test) so that it has a chance to write the code coverage information.</p>
+</li>
+<li><p>Create a custom writer class which collects coverage files (matching a specific regex pattern) from the output
+directory. The usual way to do this would be to subclass <a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a>. Configure
+default values for main configuration properties (by defining them as static variables in your class). Then implement
+<a class="reference internal" href="../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.isEnabled" title="pysys.writer.api.BaseResultsWriter.isEnabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.isEnabled()</span></code></a> to define when coverage reporting will happen, and run the
+required processes to combine coverage files and generate a report in the destDir in
+<a class="reference internal" href="../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.cleanup" title="pysys.writer.api.BaseResultsWriter.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter.cleanup()</span></code></a>, which will execute after all tests have completed.</p>
+<p>Finally, add the new writer class to your <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code> file.</p>
+</li>
+<li><p>Add the <code class="docutils literal notranslate"><span class="pre">disableCoverage</span></code> group to any tests (or test directories) that should not use coverage,
+such as performance tests.</p></li>
+<li><p>If using a continuous integration system or centralized code coverage database, you could optionally upload the
+coverage data there from the directory PySys collected it into, so there is a permanent record of
+any changes in coverage over time. The artifact publishing capability of
+<a class="reference internal" href="../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a> will help with that.</p></li>
+<li><p>If you want to compare code coverage between branches/commits you will need to ensure the same set of tests is
+running for both comparison points. So if you have a full test run and a smaller set of unit or smoke tests that
+execute in pull requests it may be useful to generate two reports - one which includes all tests (for manual
+reviewing) and another that includes just the tests executed in the unit tests or in pull requests, for automated
+comparisons and quality gates.
+This can be achieved by adding an additional coverage writer that will ignore the generated coverage files
+from the non-unit/smoke tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;includeTestIf&quot;</span><span class="o">&gt;</span><span class="k">lambda</span> <span class="n">testObj</span><span class="p">:</span>
+        <span class="s1">&#39;unitTest&#39;</span> <span class="ow">in</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">groups</span>
+        <span class="ow">or</span> <span class="n">testObj</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;isLocalDeveloperTestRun&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+<span class="o">&lt;/</span><span class="nb">property</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
 </div>
 
 
@@ -953,7 +984,7 @@ custom <a class="reference internal" href="../autodocgen/pysys.baserunner.html#p
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

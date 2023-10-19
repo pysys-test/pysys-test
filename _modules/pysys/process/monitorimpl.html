@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.monitorimpl &mdash; PySys v2.1  documentation</title>
+  <title>pysys.process.monitorimpl &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -190,7 +190,7 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.processmonitor&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="WindowsProcessMonitor"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitorimpl.html#pysys.process.monitorimpl.WindowsProcessMonitor">[docs]</a><span class="k">class</span> <span class="nc">WindowsProcessMonitor</span><span class="p">(</span><span class="n">BaseProcessMonitor</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Windows implementation of a process monitor. </span>
 <span class="sd">	</span>
 <span class="sd">	Uses the `GetProcessMemoryInfo`, and `GetProcessTimes` APIs. </span>
@@ -205,7 +205,7 @@
 		<span class="k">return</span> <span class="n">BaseProcessMonitor</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="WindowsProcessMonitor._timer_ns"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitorimpl.html#pysys.process.monitorimpl.WindowsProcessMonitor._timer_ns">[docs]</a>	<span class="k">def</span> <span class="nf">_timer_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Return a monotonically incrementing clock value in nanoseconds (1000**3) that </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Return a monotonically incrementing clock value in nanoseconds (1000**3) that </span>
 <span class="sd">		can be used to calculate performance results. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetTickCount</span><span class="p">()</span><span class="o">*</span><span class="mi">1000000</span> <span class="c1"># millis-&gt;nanos.</span></div>
@@ -250,7 +250,7 @@
 		<span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="UnixProcessMonitor"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitorimpl.html#pysys.process.monitorimpl.UnixProcessMonitor">[docs]</a><span class="k">class</span> <span class="nc">UnixProcessMonitor</span><span class="p">(</span><span class="n">BaseProcessMonitor</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Unix implementation of a process monitor. </span>
 <span class="sd">	</span>
 <span class="sd">	Uses the `ps` command line tool, reading columns `pcpu`, `rss` and `vsz`. </span>
@@ -272,7 +272,7 @@
 			
 <span class="k">if</span> <span class="n">PLATFORM</span><span class="o">==</span><span class="s1">&#39;win32&#39;</span><span class="p">:</span>
 	<span class="n">DEFAULT_PROCESS_MONITOR</span> <span class="o">=</span> <span class="n">WindowsProcessMonitor</span>
-	<span class="sd">&quot;&quot;&quot;Specifies the default L{BaseProcessMonitor} subclass to be used for </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Specifies the default L{BaseProcessMonitor} subclass to be used for </span>
 <span class="sd">	monitoring OS-level process information on the current platform. &quot;&quot;&quot;</span>
 <span class="k">else</span><span class="p">:</span>
 	<span class="n">DEFAULT_PROCESS_MONITOR</span> <span class="o">=</span> <span class="n">UnixProcessMonitor</span>
@@ -288,7 +288,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

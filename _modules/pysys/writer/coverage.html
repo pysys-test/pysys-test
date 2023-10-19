@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.coverage &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.coverage &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -190,7 +190,7 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PythonCoverageWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.coverage.html#pysys.writer.coverage.PythonCoverageWriter">[docs]</a><span class="k">class</span> <span class="nc">PythonCoverageWriter</span><span class="p">(</span><span class="n">CollectTestOutputWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer that collects Python code coverage files in a single directory and writes a coverage report during </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer that collects Python code coverage files in a single directory and writes a coverage report during </span>
 <span class="sd">	runner cleanup. Requires the &quot;coverage.py&quot; library to be installed. </span>
 <span class="sd">	</span>
 <span class="sd">	To enable this, run with ``-XcodeCoverage`` (or ``-XpythonCoverage``) and configure the ``destDir`` plugin property </span>
@@ -201,14 +201,14 @@
 <span class="sd">	``destArchive`` property (see `CollectTestOutputWriter`), and published as &quot;PythonCoverageArchive&quot;. </span>
 
 <span class="sd">	Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ </span>
-<span class="sd">	added to the project if the ``pythonCoverageDirA`` project property is set and none is explicitly configured; but </span>
+<span class="sd">	added to the project if the ``pythonCoverageDir`` project property is set and none is explicitly configured; but </span>
 <span class="sd">	the automatic addition is deprecated so you should explicity add this writer to your project if you need it. </span>
 
 <span class="sd">	.. versionadded:: 1.6.0</span>
 
 <span class="sd">	The following properties can be set in the project configuration for this writer (and see also </span>
 <span class="sd">	`pysys.writer.testoutput.CollectTestOutputWriter` for inherited properties such as ``destArchive`` which produces </span>
-<span class="sd">	a .zip of the destDir):		</span>
+<span class="sd">	a .zip of the destDir and ``includeTestIf`` for limiting collection to only unit/smoke tests):		</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="c1"># override CollectTestOutputWriter property values</span>
@@ -219,7 +219,7 @@
 	<span class="n">publishArtifactArchiveCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageArchive&#39;</span>
 	
 	<span class="n">pythonCoverageArgs</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A string of command line arguments used to customize the ``coverage run`` and ``coverage html`` commands. </span>
 <span class="sd">	Use &quot;...&quot; double quotes around any arguments that contain spaces. </span>
 <span class="sd">	</span>
@@ -229,7 +229,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">includeCoverageFromPySysProcess</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Set this to True to enable measuring coverage for this process (i.e. PySys), rather than only child Python processes. </span>
 <span class="sd">	This is useful for testing PySys plugins. </span>
 <span class="sd">	</span>
@@ -279,12 +279,12 @@
 	
 		<span class="n">coverageDestDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span>
 		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">)</span> <span class="c1"># The base class is responsible for absolutizing this config property</span>
-		<span class="n">coverageDestDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">))</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">):</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No Python coverage files were generated.&#39;</span><span class="p">)</span>
 			<span class="k">return</span>
 			
-		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing Python coverage report in: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">coverageDestDir</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing Python coverage report from </span><span class="si">%d</span><span class="s1"> files in: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">))</span>
+		<span class="n">coverageDestDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">coverageDestDir</span><span class="p">))</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;combine&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
 			<span class="n">workingDir</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">coverageDestDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-combine&#39;</span><span class="p">,</span> 
@@ -327,7 +327,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.constants &mdash; PySys v2.1  documentation</title>
+  <title>pysys.constants &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -94,6 +94,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.constants</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hostname">HOSTNAME</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#platform">PLATFORM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#library-path-env-var">LIBRARY_PATH_ENV_VAR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#preferred-encoding">PREFERRED_ENCODING</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#is-windows">IS_WINDOWS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#python-exe">PYTHON_EXE</a></li>
@@ -146,7 +147,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -207,7 +208,7 @@ be referenced directly.</p>
 <h2>HOSTNAME<a class="headerlink" href="#hostname" title="Permalink to this headline">¶</a></h2>
 <dl class="py data">
 <dt id="pysys.constants.HOSTNAME">
-<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">HOSTNAME</code><em class="property"> = 'fv-az377-277.ap30g4v5sw5evmjtdmxdg2w53f.dx.internal.cloudapp.net'</em><a class="headerlink" href="#pysys.constants.HOSTNAME" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">HOSTNAME</code><em class="property"> = 'fv-az218-558.504nsmd0z0yevjmkhwbylkedie.jx.internal.cloudapp.net'</em><a class="headerlink" href="#pysys.constants.HOSTNAME" title="Permalink to this definition">¶</a></dt>
 <dd><p>The fully qualified name of this host.</p>
 </dd></dl>
 
@@ -219,6 +220,20 @@ be referenced directly.</p>
 <code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PLATFORM</code><em class="property"> = 'linux'</em><a class="headerlink" href="#pysys.constants.PLATFORM" title="Permalink to this definition">¶</a></dt>
 <dd><p>OS platform - current values are: <code class="xref py py-obj docutils literal notranslate"><span class="pre">linux</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">win32</span></code> (Windows), <code class="xref py py-obj docutils literal notranslate"><span class="pre">sunos</span></code> (Solaris), <code class="xref py py-obj docutils literal notranslate"><span class="pre">darwin</span></code> (Mac). 
 It is recommended to use standard Python functions such as <code class="docutils literal notranslate"><span class="pre">sys.platform</span></code> rather than this constant.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="library-path-env-var">
+<h2>LIBRARY_PATH_ENV_VAR<a class="headerlink" href="#library-path-env-var" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.LIBRARY_PATH_ENV_VAR">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">LIBRARY_PATH_ENV_VAR</code><em class="property"> = 'LD_LIBRARY_PATH'</em><a class="headerlink" href="#pysys.constants.LIBRARY_PATH_ENV_VAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the environment variable listing dynamic library paths on this operating system, for example 
+<code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code> on Linux or <code class="docutils literal notranslate"><span class="pre">PATH</span></code> on Windows. Use <code class="docutils literal notranslate"><span class="pre">os.pathsep</span></code> for joining the paths together.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">environs</span><span class="o">=</span><span class="p">{</span> <span class="n">LIBRARY_PATH_ENV_VAR</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="n">LIBRARY_PATH_ENV_VAR</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">mynewpath</span><span class="p">])</span> <span class="p">}</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -253,7 +268,7 @@ is usually not relevant for testing purposes.</p>
 <h2>PYTHON_EXE<a class="headerlink" href="#python-exe" title="Permalink to this headline">¶</a></h2>
 <dl class="py data">
 <dt id="pysys.constants.PYTHON_EXE">
-<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PYTHON_EXE</code><em class="property"> = '/opt/hostedtoolcache/Python/3.10.2/x64/bin/python'</em><a class="headerlink" href="#pysys.constants.PYTHON_EXE" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PYTHON_EXE</code><em class="property"> = '/opt/hostedtoolcache/Python/3.12.0/x64/bin/python'</em><a class="headerlink" href="#pysys.constants.PYTHON_EXE" title="Permalink to this definition">¶</a></dt>
 <dd><p>The path to the current Python executable (=``sys.executable``).</p>
 </dd></dl>
 
@@ -512,7 +527,7 @@ if it’s a failure outcome.</p>
 <h2>PrintLogs<a class="headerlink" href="#printlogs" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pysys.constants.PrintLogs">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PrintLogs</code><a class="reference internal" href="../_modules/pysys/constants.html#PrintLogs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.constants.PrintLogs" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PrintLogs</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/constants.html#PrintLogs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.constants.PrintLogs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
 <p>Enumeration constants that specify when run.log contents are printed to the stdout console.</p>
 <p>In all cases a summary of failures is printed at the end, and the user can always 
@@ -560,7 +575,7 @@ look at the run.log inside each output directory if they need more detail.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

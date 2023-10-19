@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process &mdash; PySys v2.1  documentation</title>
+  <title>pysys.process &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.1</a>
+          <a href="../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -204,7 +204,7 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.process&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Process"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process">[docs]</a><span class="k">class</span> <span class="nc">Process</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Represents a process that PySys has started (or can start).</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Represents a process that PySys has started (or can start).</span>
 <span class="sd">	</span>
 <span class="sd">	A platform-specific implementation subclass of this interface is returned </span>
 <span class="sd">	by `pysys.process.user.ProcessUser.startProcess`.</span>
@@ -225,6 +225,7 @@
 <span class="sd">		returned by the process is correct, for example &#39;==0&#39;.</span>
 
 <span class="sd">	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.</span>
+<span class="sd">	:ivar ProcessUser ~.owner: The owner object that is running this process. </span>
 <span class="sd">	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), </span>
 <span class="sd">		or None if it has not yet completed. </span>
 <span class="sd">	:ivar dict[str,obj] ~.info: A mutable dictionary of user-supplied information that was passed into startProcess, </span>
@@ -232,7 +233,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">environs</span><span class="p">,</span> <span class="n">workingDir</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-		<span class="n">expectedExitStatus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+		<span class="n">expectedExitStatus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">owner</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">displayName</span> <span class="k">if</span> <span class="n">displayName</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span>
@@ -247,6 +248,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">expectedExitStatus</span> <span class="o">=</span> <span class="n">expectedExitStatus</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span> <span class="c1"># nb: this CAN be initialzied to None, e.g. when test frameworks instantiate ProcessWrapper directly without calling startProcess</span>
 
 		<span class="c1"># &#39;publicly&#39; available data attributes set on execution</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="kc">None</span>
@@ -278,8 +280,12 @@
 		<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  stderr       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span> <span class="n">stderr</span><span class="p">)</span>
 		<span class="n">keys</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 		<span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+		<span class="n">defaultenv</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span> 
 			<span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">e</span><span class="p">]</span>
+			<span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span> <span class="c1"># having all the default env vars repeated for every process makes it hard to see what&#39;s what</span>
+				<span class="n">defaultenv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+				<span class="k">continue</span>
 			<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  environment  : </span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="n">e</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="p">)</span>
 			<span class="k">if</span> <span class="s1">&#39;PATH&#39;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PATHEXT&#39;</span><span class="p">]:</span>
 				<span class="c1"># it&#39;s worth paths/classpaths/pythonpaths as they&#39;re often long and quite hard to spot differences otherwise</span>
@@ -288,13 +294,15 @@
 					<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pathelement</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pathelements</span><span class="p">):</span>
 						<span class="c1">#                         : ABC=def</span>
 						<span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;                   #</span><span class="si">%-2d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pathelement</span><span class="p">))</span>
-				
+		<span class="k">if</span> <span class="n">defaultenv</span><span class="p">:</span> <span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  environment  : +inherited default environment variables: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">defaultenv</span><span class="p">))</span> <span class="p">)</span>
 		<span class="k">if</span> <span class="n">info</span><span class="p">:</span> <span class="n">debuginfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  info         : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span> <span class="n">info</span><span class="p">)</span>
 
 		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Process parameters for </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">debuginfo</span><span class="p">))</span>
 
 		<span class="c1"># private</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_pollWait</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">owner</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">pollWait</span>
 
 
 	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayName</span>
@@ -304,7 +312,7 @@
 	<span class="k">def</span> <span class="nf">setExitStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
 	<span class="k">def</span> <span class="nf">startBackgroundProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
 <div class="viewcode-block" id="Process.stop"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcessStop&#39;</span><span class="p">],</span> <span class="n">hard</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;Stop a running process and wait until it has finished.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Stop a running process and wait until it has finished.</span>
 <span class="sd">		</span>
 <span class="sd">		Does nothing if the process is not running. </span>
 <span class="sd">		</span>
@@ -318,13 +326,14 @@
 		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span></div>
 		
 <div class="viewcode-block" id="Process.signal"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.signal">[docs]</a>	<span class="k">def</span> <span class="nf">signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;Send a signal to a running process. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Send a signal to a running process. </span>
 <span class="sd">	</span>
 <span class="sd">		Typically this uses ``os.kill`` to send the signal. </span>
 <span class="sd">	</span>
 <span class="sd">		:param int signal: The integer signal to send to the process, e.g. ``process.signal(signal.SIGTERM)``.</span>
 <span class="sd">		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to signal the process</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Sending signal </span><span class="si">%s</span><span class="s1"> to process </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">signal</span><span class="p">)</span>
 		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -332,7 +341,7 @@
 
 
 <div class="viewcode-block" id="Process.write"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.write">[docs]</a>	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addNewLine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">closeStdinAfterWrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Write binary data to the stdin of the process.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Write binary data to the stdin of the process.</span>
 <span class="sd">		</span>
 <span class="sd">		Note that when the addNewLine argument is set to true, if a new line does not </span>
 <span class="sd">		terminate the input data string, a newline character will be added. If one </span>
@@ -389,16 +398,19 @@
 		<span class="k">if</span> <span class="n">closeStdinAfterWrite</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="c1"># None is a sentinel value for EOF</span></div>
 		
 <div class="viewcode-block" id="Process.running"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.running">[docs]</a>	<span class="k">def</span> <span class="nf">running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Check to see if a process is running.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Check to see if a process is running.</span>
 <span class="sd">		</span>
 <span class="sd">		:return: True if the process is currently running, False if not. </span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setExitStatus</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span></div>
+		<span class="c1"># check for pid=None in case start() got interrupted</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">setExitStatus</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Process.wait"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.wait">[docs]</a>	<span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait for a process to complete execution, raising an exception on timeout.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for a process to complete execution, raising an exception on timeout.</span>
 <span class="sd">		</span>
+<span class="sd">		Logs and info message if the process takes more than a few seconds to complete. </span>
+
 <span class="sd">		This method provides basic functionality but does not check the exit status or log any messages; </span>
 <span class="sd">		see `pysys.basetest.BaseTest.waitProcess` for a wrapper that adds additional functionality. </span>
 <span class="sd">		</span>
@@ -409,18 +421,26 @@
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">assert</span> <span class="n">timeout</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;timeout must always be specified&#39;</span>
-		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Waiting up to </span><span class="si">%d</span><span class="s2"> secs for process </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+		<span class="n">doneLongWaitLogging</span> <span class="o">=</span> <span class="kc">False</span>
+
 		<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
-			<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+			<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 			<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
 				<span class="k">raise</span> <span class="n">ProcessTimeout</span><span class="p">(</span><span class="s1">&#39;Waiting for completion of </span><span class="si">%r</span><span class="s1"> timed out after </span><span class="si">%d</span><span class="s1"> seconds&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeout</span><span class="p">)))</span>
-			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span></div>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_pollWaitUnlessProcessTerminated</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">doneLongWaitLogging</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="o">&gt;</span><span class="mi">4</span><span class="p">:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waiting up to </span><span class="si">%d</span><span class="s2"> secs for process </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="c1"># probably would be confusing to adjust this timeout based on time already waited</span>
+				<span class="n">doneLongWaitLogging</span> <span class="o">=</span> <span class="kc">True</span></div>
 		
-
+	<span class="k">def</span> <span class="nf">_pollWaitUnlessProcessTerminated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="c1"># Performs a short wait, but if the OS support it (e.g. Windows), abort waiting if the process is terminated</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_pollWait</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Process.start"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.start">[docs]</a>	<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Start a process using the runtime parameters set at instantiation.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Start a process using the runtime parameters set at instantiation.</span>
 <span class="sd">		</span>
 <span class="sd">		@raise pysys.exceptions.ProcessError: Raised if there is an error creating the process</span>
 <span class="sd">		@raise pysys.exceptions.ProcessTimeout: Raised in the process timed out (foreground process only)</span>
@@ -431,6 +451,9 @@
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">):</span>
 			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot start process </span><span class="si">%s</span><span class="s1"> as workingDir &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span><span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">))</span>
 		
+		<span class="c1"># unless we&#39;re performing some cleanup logic, don&#39;t permit new processes to begin after we&#39;ve been told to shutdown</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">owner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">isCleanupInProgress</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
+
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">FOREGROUND</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">startBackgroundProcess</span><span class="p">()</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
@@ -448,7 +471,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

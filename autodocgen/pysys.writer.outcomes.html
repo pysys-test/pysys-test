@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.outcomes &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.outcomes &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -133,7 +133,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -195,8 +195,9 @@
 <dl class="py class">
 <dt id="pysys.writer.outcomes.JSONResultsWriter">
 <em class="property">class </em><code class="sig-prename descclassname">pysys.writer.outcomes.</code><code class="sig-name descname">JSONResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/outcomes.html#JSONResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.outcomes.JSONResultsWriter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
-<p>Writer to log a summary of the test results to a single JSON file, along with <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> from the runner.</p>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a>, <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a></p>
+<p>Writer to log a summary of the test results to a single JSON file, along with <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> from the runner, 
+and a list of published <code class="docutils literal notranslate"><span class="pre">artifacts</span></code> (e.g. code coverage etc).</p>
 <p>The following fields are always included for each test result:</p>
 <blockquote>
 <div><ul class="simple">
@@ -213,6 +214,10 @@ test’s logic, e.g. <code class="docutils literal notranslate"><span class="pre
 <p>If applicable, some tests/runs may have additional fields such as <code class="docutils literal notranslate"><span class="pre">cycle</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code> and <code class="docutils literal notranslate"><span class="pre">outputDir</span></code>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 2.1.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.2: </span>Added <code class="docutils literal notranslate"><span class="pre">artifacts</span></code> dictionary recording artifact paths published during execution of the tests, for 
+example code coverage and performance reports. </p>
 </div>
 <dl class="py attribute">
 <dt id="pysys.writer.outcomes.JSONResultsWriter.includeTitle">
@@ -256,12 +261,25 @@ test’s logic, e.g. <code class="docutils literal notranslate"><span class="pre
 <dt id="pysys.writer.outcomes.TextResultsWriter">
 <em class="property">class </em><code class="sig-prename descclassname">pysys.writer.outcomes.</code><code class="sig-name descname">TextResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/outcomes.html#TextResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.outcomes.TextResultsWriter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
-<p>Writer to log a summary of the results to a logfile in .txt format.</p>
+<p>Writer to log a summary of the results to a log file in text format.</p>
+<p>Only enabled when the record flag is specified.</p>
+<p>Can be a useful way to view the current or final status of the current/latest test run. 
+The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
+to get a nice summary of all the failures.</p>
 <dl class="py attribute">
 <dt id="pysys.writer.outcomes.TextResultsWriter.outputDir">
 <code class="sig-name descname">outputDir</code><em class="property"> = None</em><a class="headerlink" href="#pysys.writer.outcomes.TextResultsWriter.outputDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>The directory to write the logfile, if an absolute path is not specified. The default is the working directory.</p>
-<p>Project <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties can be used in the path.</p>
+<p>Project <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties can be used in the path, for example <code class="docutils literal notranslate"><span class="pre">${eval:os.path.expanduser('~')}</span></code> for the current user’s home directory.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.outcomes.TextResultsWriter.verbose">
+<code class="sig-name descname">verbose</code><em class="property"> = False</em><a class="headerlink" href="#pysys.writer.outcomes.TextResultsWriter.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display more details in the output including the outcome reason and the test title.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -306,6 +324,36 @@ output format will usually be the easiest way to do it.</p>
 <p>Project <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties can be used in the path.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="pysys.writer.outcomes.JUnitXMLResultsWriter.testsuiteName">
+<code class="sig-name descname">testsuiteName</code><em class="property"> = None</em><a class="headerlink" href="#pysys.writer.outcomes.JUnitXMLResultsWriter.testsuiteName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides the content written to the <code class="docutils literal notranslate"><span class="pre">&lt;testsuite</span> <span class="pre">name=...&gt;</span></code> attribute (defaults to <code class="docutils literal notranslate"><span class="pre">&#64;TESTID&#64;</span></code>), 
+A recommended alternate value is <code class="docutils literal notranslate"><span class="pre">&#64;TESTID_PACKAGE&#64;</span></code> which represents the test id up to the final <code class="docutils literal notranslate"><span class="pre">.</span></code>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.outcomes.JUnitXMLResultsWriter.testcaseClassname">
+<code class="sig-name descname">testcaseClassname</code><em class="property"> = None</em><a class="headerlink" href="#pysys.writer.outcomes.JUnitXMLResultsWriter.testcaseClassname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides the content written to the <code class="docutils literal notranslate"><span class="pre">&lt;testcase</span> <span class="pre">classname=...&gt;</span></code> attribute (defaults to <code class="docutils literal notranslate"><span class="pre">&#64;CLASSNAME&#64;</span></code>), 
+A recommended alternate value is empty string, since the classname (typically “PySys”) is not very useful for most PySys tests.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.outcomes.JUnitXMLResultsWriter.testcaseName">
+<code class="sig-name descname">testcaseName</code><em class="property"> = None</em><a class="headerlink" href="#pysys.writer.outcomes.JUnitXMLResultsWriter.testcaseName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides the content written to the <code class="docutils literal notranslate"><span class="pre">&lt;testcase</span> <span class="pre">name=...&gt;</span></code> attribute (defaults to <code class="docutils literal notranslate"><span class="pre">&#64;TESTID&#64;</span></code>), 
+A recommended alternate value is <code class="docutils literal notranslate"><span class="pre">&#64;TESTID_NO_PACKAGE_OR_MODE&#64;~&#64;MODE&#64;</span></code> when using <code class="docutils literal notranslate"><span class="pre">testsuiteName</span></code> to hold the package part of the test id.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -346,7 +394,7 @@ project file using the nested &lt;property&gt; tag on the &lt;writer&gt; tag. Th
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

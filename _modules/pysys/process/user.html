@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.user &mdash; PySys v2.1  documentation</title>
+  <title>pysys.process.user &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -182,6 +182,7 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">concurrent.futures</span>
 
 <span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">process_lock</span>
 <span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
@@ -189,20 +190,20 @@
 <span class="kn">from</span> <span class="nn">pysys.utils.filegrep</span> <span class="kn">import</span> <span class="n">getmatches</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">BaseLogFormatter</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span>
 <span class="kn">from</span> <span class="nn">pysys.config.project</span> <span class="kn">import</span> <span class="n">Project</span>
-<span class="kn">from</span> <span class="nn">pysys.process.helper</span> <span class="kn">import</span> <span class="n">ProcessImpl</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.allocport</span> <span class="kn">import</span> <span class="n">TCPPortOwner</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">deletefile</span><span class="p">,</span> <span class="n">pathexists</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pysys.utils.threadutils</span>
 <span class="kn">import</span> <span class="nn">pysys.utils.safeeval</span>
 <span class="kn">from</span> <span class="nn">pysys.mappers</span> <span class="kn">import</span> <span class="n">applyMappers</span>
 
 <span class="k">if</span> <span class="n">IS_WINDOWS</span><span class="p">:</span>
-	<span class="kn">import</span> <span class="nn">win32api</span><span class="o">,</span> <span class="nn">win32con</span>
+	<span class="kn">import</span> <span class="nn">win32api</span><span class="o">,</span> <span class="nn">win32con</span><span class="o">,</span> <span class="nn">win32event</span>
 <span class="k">else</span><span class="p">:</span>
 	<span class="kn">import</span> <span class="nn">fcntl</span>
 
 <div class="viewcode-block" id="STDOUTERR_TUPLE"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.STDOUTERR_TUPLE">[docs]</a><span class="k">class</span> <span class="nc">STDOUTERR_TUPLE</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;stdouterr&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;stdout&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">])):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Returned by `ProcessUser.allocateUniqueStdOutErr` to hold a pair of ``(stdout,stderr)`` names.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
@@ -210,7 +211,7 @@
 	
 	<span class="nd">@property</span>
 	<span class="k">def</span> <span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns the key (the prefix without the ``.out`` or ``.err``), to which you can append your </span>
 <span class="sd">		own extension. For example to create a log file with the same base name as the stdout/err files::</span>
 <span class="sd">		</span>
@@ -223,7 +224,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser">[docs]</a><span class="k">class</span> <span class="nc">ProcessUser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	ProcessUser provides support for safely using processes in PySys, including starting processes (with an </span>
 <span class="sd">	appropriate output directory), waiting for them to do what they&#39;re supposed to do, and finally ensuring all </span>
 <span class="sd">	processes and ports are cleaned up when each test (or the overall runner) terminates. </span>
@@ -256,17 +257,49 @@
 <span class="sd">		The built-in Python code coverage functionality in L{startPython} checks this </span>
 <span class="sd">		flag. It is recommended that any other languages supporting code coverage </span>
 <span class="sd">		also check the self.disableCoverage flag. </span>
-<span class="sd">	</span>
+
+<span class="sd">	:ivar bool ~.isCleanupInProgress: Set to True after the cleanup phase for this object begins. </span>
+
 <span class="sd">	Additional variables that affect only the behaviour of a single method are documented in the associated method. </span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	
+
+	<span class="c1"># Runner abort status. The fields live here since we need to check this flag mostly from subclasses of ProcessUser </span>
+	<span class="c1"># and want to do that both efficiently and conveniently. </span>
+
+	<span class="n">isRunnerAborting</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; This static boolean field is set to True if this entire process/test run is in the process of terminating </span>
+<span class="sd">		early due to an interrupt from the keyboard or a signal. </span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">isRunnerAbortingEvent</span> <span class="o">=</span> <span class="n">win32event</span><span class="o">.</span><span class="n">CreateEvent</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">IS_WINDOWS</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; A Windows (pywin32) event that will be set/signalled when PySys is requested to terminate, or </span>
+<span class="sd">	``None`` if not supported on this platform. </span>
+
+<span class="sd">	Use this with the pywin32 function ``win32event.WaitForMultipleObjects`` to perform waits </span>
+<span class="sd">	that are aborted if a termination request happens. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">isRunnerAbortingHandle</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; A file handle that will have bytes available for reading when PySys is requested to terminate, or </span>
+<span class="sd">	``None`` if not supported on this platform. Not available on Windows. </span>
+
+<span class="sd">	Use this with ``select`` to perform waits that are aborted if a termination request happens. </span>
+<span class="sd">	Do not under any circumstances actually read from this handle. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
-		<span class="sd">&quot;&quot;&quot;The logger instance that should be used to log from this class. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The logger instance that should be used to log from this class. &quot;&quot;&quot;</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
-		<span class="sd">&quot;&quot;&quot;The L{pysys.config.project.Project} instance containing settings for this PySys project.&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The `pysys.config.project.Project` instance containing settings for this PySys project.&quot;&quot;&quot;</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="k">assert</span> <span class="s1">&#39;doctest&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;Project was not loaded yet&#39;</span> <span class="c1"># allow it only during doctest-ing</span>
@@ -292,16 +325,39 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">disableCoverage</span> <span class="o">=</span> <span class="kc">False</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		A recursive lock that can be used for protecting the fields of this instance </span>
 <span class="sd">		from access by background threads, as needed. </span>
+
+<span class="sd">		Do NOT hold this lock while performing long operations or acquiring other locks. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		
+		<span class="bp">self</span><span class="o">.</span><span class="n">isCleanupInProgress</span> <span class="o">=</span> <span class="kc">False</span>
+
 		<span class="c1"># variables affecting a specific method (documented there rather than above)</span>
+
 		<span class="bp">self</span><span class="o">.</span><span class="n">logFileContentsDefaultExcludes</span> <span class="o">=</span> <span class="p">[]</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">threadPoolMaxWorkers</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># real initialization happens in _initThreadPoolMaxWorkers after runner __init__ has been called, unless a value is overridden here</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">grepWarnIfLineLongerThan</span> <span class="o">=</span> <span class="mi">10000</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">grepTruncateIfLineLongerThan</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Set this to a number of characters to automatically truncate long lines during `waitForGrep` (after all mappers have completed) to the specified length. </span>
+<span class="sd">		This prevents warnings or slow regular expression in large/long log files. </span>
+<span class="sd">		</span>
+<span class="sd">		.. versionadded:: 2.2</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">_initThreadPoolMaxWorkers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pysysThreads</span><span class="p">):</span>
+		<span class="c1"># In theory allow this to be influenced by pysysThreads, but for now we pick a single value since regardless of the number of pysys threads </span>
+		<span class="c1"># a smaller number of threads make the pooling useless for I/O bound operations like HTTP requests (the main use case) and </span>
+		<span class="c1"># a larger (or more machine-scalable) number could cause an explosive overload to the machine or Python GIL if many/all of the PySys workers/tests </span>
+		<span class="c1"># each had their own pool</span>
+		<span class="k">return</span> <span class="mi">6</span>
 		
 <div class="viewcode-block" id="ProcessUser.allocateUniqueStdOutErr"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.allocateUniqueStdOutErr">[docs]</a>	<span class="k">def</span> <span class="nf">allocateUniqueStdOutErr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processKey</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Allocate unique filenames of the form ``processKey[.n].out/.err`` </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Allocate unique filenames of the form ``processKey[.n].out/.err`` </span>
 <span class="sd">		which can be used for the `startProcess` ``stdouterr`` parameter. </span>
 <span class="sd">		</span>
 <span class="sd">		The first time this is called it will return names like </span>
@@ -325,7 +381,7 @@
 			<span class="p">)</span>	</div>
 
 <div class="viewcode-block" id="ProcessUser.getInstanceCount"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getInstanceCount">[docs]</a>	<span class="k">def</span> <span class="nf">getInstanceCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">displayName</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;(Deprecated) Return the number of processes started within the testcase matching the supplied displayName.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;(Deprecated) Return the number of processes started within the testcase matching the supplied displayName.</span>
 
 <span class="sd">		:deprecated: The recommended way to allocate unique names is now L{allocateUniqueStdOutErr}</span>
 
@@ -346,7 +402,7 @@
 			<span class="k">return</span> <span class="mi">0</span></div>
 		
 	<span class="k">def</span> <span class="nf">setKeywordArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Set the xargs as data attributes of the class. For internal use by BaseTest/BaseRunner only. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Set the xargs as data attributes of the class. For internal use by BaseTest/BaseRunner only. </span>
 <span class="sd">	</span>
 <span class="sd">		:meta private:</span>
 <span class="sd">				</span>
@@ -357,7 +413,7 @@
 <span class="sd">		runTest.py launch executable.</span>
 <span class="sd">		</span>
 <span class="sd">		If an existing attribute is present on this test class (typically a </span>
-<span class="sd">		static class variable) and it has a type of bool, int or float, then </span>
+<span class="sd">		static class variable) and it has a type of bool, int, float or list, then </span>
 <span class="sd">		any -X options will be automatically converted from string to that type. </span>
 <span class="sd">		This facilitates providing default values for parameters such as </span>
 <span class="sd">		iteration count or timeouts as static class variables with the </span>
@@ -369,7 +425,7 @@
 		<span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">setInstanceVariablesFromDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xargs</span><span class="p">)</span>
 	
 <div class="viewcode-block" id="ProcessUser.getBoolProperty"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getBoolProperty">[docs]</a>	<span class="k">def</span> <span class="nf">getBoolProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyName</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Get a True/False indicating whether the specified attribute is set </span>
 <span class="sd">		on this object (typically as a result of specifying -X on the command </span>
 <span class="sd">		line), or else from the project configuration. </span>
@@ -386,14 +442,14 @@
 		<span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span></div>
 
 <div class="viewcode-block" id="ProcessUser.startPython"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.startPython">[docs]</a>	<span class="k">def</span> <span class="nf">startPython</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">disableCoverage</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Start a Python process with the specified arguments. </span>
 <span class="sd">		</span>
 <span class="sd">		Uses the same Python process the tests are running under. </span>
 <span class="sd">		</span>
 <span class="sd">		If PySys was run with the argument ``-XcodeCoverage`` or ``-XpythonCoverage`` then </span>
 <span class="sd">		`startPython` will add the necessary arguments to enable generation of </span>
-<span class="sd">		code coverage. Note that this requried the coverage.py library to be </span>
+<span class="sd">		code coverage. Note that this required the coverage.py library to be </span>
 <span class="sd">		installed. If a project property called `pythonCoverageArgs` exists </span>
 <span class="sd">		then its value will be added as (space-delimited) arguments to the </span>
 <span class="sd">		coverage tool. </span>
@@ -428,8 +484,8 @@
 <div class="viewcode-block" id="ProcessUser.startProcess"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.startProcess">[docs]</a>	<span class="k">def</span> <span class="nf">startProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">environs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">workingDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcess&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expectedExitStatus</span><span class="o">=</span><span class="s1">&#39;==0&#39;</span><span class="p">,</span> <span class="n">ignoreExitStatus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-			<span class="n">background</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">processFactory</span><span class="o">=</span><span class="n">pysys</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">ProcessImpl</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Start a process running in the foreground or background, and return </span>
+			<span class="n">background</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">processFactory</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Start a process running in the foreground or background, and return </span>
 <span class="sd">		the `pysys.process.Process` object.</span>
 <span class="sd">		</span>
 <span class="sd">		Typical use is::</span>
@@ -598,12 +654,13 @@
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">environs</span><span class="p">:</span> <span class="c1"># a truly empty env isn&#39;t really usable, so populate it with a minimal default environment instead</span>
 			<span class="n">environs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultEnvirons</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">)</span>
 		
-		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 		
 		<span class="c1"># pass everything as a named parameter, which makes life easier for custom factory methods</span>
+		<span class="k">if</span> <span class="n">processFactory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">processFactory</span> <span class="o">=</span> <span class="n">pysys</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">ProcessImpl</span>
 		<span class="n">process</span> <span class="o">=</span> <span class="n">processFactory</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="n">arguments</span><span class="p">,</span> <span class="n">environs</span><span class="o">=</span><span class="n">environs</span><span class="p">,</span> <span class="n">workingDir</span><span class="o">=</span><span class="n">workingDir</span><span class="p">,</span> 
 			<span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">stderr</span><span class="p">,</span> 
-			<span class="n">displayName</span><span class="o">=</span><span class="n">displayName</span><span class="p">,</span> <span class="n">expectedExitStatus</span><span class="o">=</span><span class="n">expectedExitStatus</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
+			<span class="n">displayName</span><span class="o">=</span><span class="n">displayName</span><span class="p">,</span> <span class="n">expectedExitStatus</span><span class="o">=</span><span class="n">expectedExitStatus</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">owner</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 		
 		<span class="k">def</span> <span class="nf">handleErrorAndGetOutcomeSuffix</span><span class="p">(</span><span class="n">process</span><span class="p">):</span>
 			<span class="k">if</span> <span class="n">onError</span><span class="p">:</span> 
@@ -625,7 +682,7 @@
 				<span class="n">logmethod</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="n">correctExitStatus</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">warning</span>
 				<span class="k">if</span> <span class="n">quiet</span><span class="p">:</span> <span class="n">logmethod</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span>
 				<span class="n">logmethod</span><span class="p">(</span><span class="s2">&quot;Executed </span><span class="si">%s</span><span class="s2">, exit status </span><span class="si">%d%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">displayName</span><span class="p">,</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span><span class="p">,</span>
-					<span class="s2">&quot;, duration </span><span class="si">%d</span><span class="s2"> secs&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+					<span class="s2">&quot;, duration </span><span class="si">%d</span><span class="s2"> secs&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 				
 				<span class="k">if</span> <span class="ow">not</span> <span class="n">ignoreExitStatus</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">correctExitStatus</span><span class="p">:</span>
 					<span class="k">if</span> <span class="ow">not</span> <span class="n">stderr</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Process </span><span class="si">%s</span><span class="s1"> has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed&#39;</span><span class="p">,</span> <span class="n">process</span><span class="p">)</span>
@@ -648,6 +705,11 @@
 			<span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s2">&quot;Process </span><span class="si">%r</span><span class="s2"> timed out after </span><span class="si">%d</span><span class="s2"> seconds, stopping process&quot;</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TIMEOUTS</span><span class="p">))</span>
 			<span class="n">process</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> timed out after </span><span class="si">%d</span><span class="s1"> seconds</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">handleErrorAndGetOutcomeSuffix</span><span class="p">(</span><span class="n">process</span><span class="p">)),</span> <span class="n">printReason</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span> 
+			<span class="c1"># if we don&#39;t do this then we can&#39;t cleanup foreground processes interrupted by serious failures like KeyboardInterrupt</span>
+			<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">processList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+			<span class="k">raise</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">processList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
@@ -659,7 +721,7 @@
 		<span class="k">return</span> <span class="n">process</span>	</div>
 
 <div class="viewcode-block" id="ProcessUser.getDefaultEnvirons"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getDefaultEnvirons">[docs]</a>	<span class="k">def</span> <span class="nf">getDefaultEnvirons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Create a new dictionary of environment variables, suitable for passing to </span>
 <span class="sd">		L{startProcess()}, with a minimal clean set of environment variables </span>
 <span class="sd">		for this platform, unaffected (as much as possible) by the </span>
@@ -807,7 +869,7 @@
 		<span class="k">return</span> <span class="n">e</span></div>
 
 <div class="viewcode-block" id="ProcessUser.createEnvirons"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.createEnvirons">[docs]</a>	<span class="k">def</span> <span class="nf">createEnvirons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">addToLibPath</span><span class="o">=</span><span class="p">[],</span> <span class="n">addToExePath</span><span class="o">=</span><span class="p">[],</span> <span class="n">command</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Create a new customized dictionary of environment variables suitable </span>
 <span class="sd">		for passing to L{startProcess()}&#39;s ``environs=`` argument. </span>
 <span class="sd">		</span>
@@ -879,7 +941,7 @@
 		<span class="k">return</span> <span class="n">e</span></div>
 
 <div class="viewcode-block" id="ProcessUser.stopProcess"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.stopProcess">[docs]</a>	<span class="k">def</span> <span class="nf">stopProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Stops the specified process, if it is currently running.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Stops the specified process, if it is currently running.</span>
 
 <span class="sd">		Does nothing if the process is not running. </span>
 <span class="sd">		</span>
@@ -904,7 +966,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.signalProcess"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.signalProcess">[docs]</a>	<span class="k">def</span> <span class="nf">signalProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Send a signal to a running process.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Send a signal to a running process.</span>
 
 <span class="sd">		This method uses the `pysys.process.Process.signal` method to send a signal to a </span>
 <span class="sd">		running process. </span>
@@ -930,7 +992,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.waitProcess"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.waitProcess">[docs]</a>	<span class="k">def</span> <span class="nf">waitProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcess&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkExitStatus</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait for a background process to terminate.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for a background process to terminate.</span>
 
 <span class="sd">		For a convenient way to wait for all remaining background processes to complete, see `waitForBackgroundProcesses`. </span>
 
@@ -951,15 +1013,14 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">abortOnError</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span> <span class="n">abortOnError</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultAbortOnError</span>
 		<span class="k">try</span><span class="p">:</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waiting up to </span><span class="si">%d</span><span class="s2"> secs for process </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">process</span><span class="p">)</span>
-			<span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-			<span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
-			<span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">)</span> <span class="ow">or</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Process </span><span class="si">%s</span><span class="s2"> terminated after </span><span class="si">%d</span><span class="s2"> secs with exit status </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span><span class="p">)</span>
+			<span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+			<span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span> <span class="c1"># this will log if it takes more than a few seconds</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">)</span> <span class="ow">or</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Process </span><span class="si">%s</span><span class="s2"> terminated after </span><span class="si">%d</span><span class="s2"> secs with exit status </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span><span class="p">)</span>
 				
 		<span class="k">except</span> <span class="n">ProcessTimeout</span><span class="p">:</span>
 			<span class="k">if</span> <span class="ow">not</span> <span class="n">abortOnError</span><span class="p">:</span>
-				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Ignoring timeout waiting for process </span><span class="si">%r</span><span class="s2"> after </span><span class="si">%d</span><span class="s2"> secs (as abortOnError=False)&quot;</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TIMEOUTS</span><span class="p">))</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Ignoring timeout waiting for process </span><span class="si">%r</span><span class="s2"> after </span><span class="si">%d</span><span class="s2"> secs (as abortOnError=False)&quot;</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TIMEOUTS</span><span class="p">))</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="s1">&#39;Timed out waiting for process </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%d</span><span class="s1"> secs&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">timeout</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callRecord</span><span class="p">())</span>
 
@@ -975,7 +1036,7 @@
 		<span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span></div>
 
 <div class="viewcode-block" id="ProcessUser.pollWait"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.pollWait">[docs]</a>	<span class="k">def</span> <span class="nf">pollWait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sleeps the current thread for the specified number of seconds, between polling/checking for some condition </span>
 <span class="sd">		to be met. </span>
 <span class="sd">		</span>
@@ -983,16 +1044,28 @@
 <span class="sd">		log anything. </span>
 <span class="sd">		</span>
 <span class="sd">		Use this method instead of ``time.sleep`` as it provides PySys the chance to abort test execution early when </span>
-<span class="sd">		requested. </span>
+<span class="sd">		requested, for example as a result of a keyboard interrupt or signal. </span>
 <span class="sd">		</span>
 <span class="sd">		:param float secs: The time to sleep for, typically a few hundred milliseconds. Do not use this method for </span>
-<span class="sd">			really long waits. </span>
+<span class="sd">			really long waits. Cannot be negative. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="n">secs</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;pollWait </span><span class="si">%s</span><span class="s1"> secs&#39;</span><span class="p">,</span> <span class="n">secs</span><span class="p">)</span>
-		<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">secs</span><span class="p">)</span> <span class="c1"># no-op if secs == 0</span></div>
+		<span class="c1"># This implementation is designed to be fast for the common case as it&#39;s executed frequently on multiple threads</span>
+
+		<span class="k">if</span> <span class="n">secs</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># special (and rare) case: break longer sleeps into smaller chunks in case case someone polls for a long time</span>
+			<span class="n">MAX_SLEEP</span> <span class="o">=</span> <span class="mi">2</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;pollWait </span><span class="si">%s</span><span class="s1"> secs&#39;</span><span class="p">,</span> <span class="n">secs</span><span class="p">)</span>
+			<span class="k">while</span> <span class="n">secs</span> <span class="o">&gt;</span> <span class="n">MAX_SLEEP</span><span class="p">:</span> 
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCleanupInProgress</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
+				<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">MAX_SLEEP</span><span class="p">)</span> 
+				<span class="n">secs</span> <span class="o">-=</span> <span class="n">MAX_SLEEP</span>
+		
+		<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">secs</span><span class="p">)</span> 
+		<span class="c1"># Perform an early abort if we&#39;re terminating, but not once we enter cleanup code for each test since that </span>
+		<span class="c1"># may need to execute processes</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCleanupInProgress</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ProcessUser.waitForBackgroundProcesses"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.waitForBackgroundProcesses">[docs]</a>	<span class="k">def</span> <span class="nf">waitForBackgroundProcesses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">includes</span><span class="o">=</span><span class="p">[],</span> <span class="n">excludes</span><span class="o">=</span><span class="p">[],</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcess&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkExitStatus</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait for any running background processes to terminate, then check that all background processes </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for any running background processes to terminate, then check that all background processes </span>
 <span class="sd">		completed with the expected exit status.</span>
 <span class="sd">		</span>
 <span class="sd">		This can be useful for speeding up a test that needs to run many processes, by executing all its subprocesses </span>
@@ -1018,14 +1091,14 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="k">assert</span> <span class="n">timeout</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;timeout must be specified&#39;</span>
-		<span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 		<span class="n">includes</span> <span class="o">=</span> <span class="n">includes</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">processList</span>
 		
 		<span class="n">running</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">includes</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">state</span><span class="o">==</span><span class="n">BACKGROUND</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">running</span><span class="p">()</span> <span class="ow">and</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludes</span><span class="p">]</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Waiting up to </span><span class="si">%d</span><span class="s1"> secs for </span><span class="si">%d</span><span class="s1"> background process(es) to complete&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">running</span><span class="p">))</span>
 		<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">running</span><span class="p">:</span>
 			<span class="k">try</span><span class="p">:</span>
-				<span class="n">thistimeout</span> <span class="o">=</span> <span class="n">starttime</span><span class="o">+</span><span class="n">timeout</span><span class="o">-</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+				<span class="n">thistimeout</span> <span class="o">=</span> <span class="n">starttime</span><span class="o">+</span><span class="n">timeout</span><span class="o">-</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 				<span class="k">if</span> <span class="n">thistimeout</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># we&#39;ve run out of time</span>
 					<span class="k">raise</span> <span class="n">ProcessTimeout</span><span class="p">(</span><span class="s1">&#39;waitForBackgroundProcesses timed out&#39;</span><span class="p">)</span>
 				<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> 
@@ -1048,10 +1121,10 @@
 					<span class="n">failures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> returned exit status </span><span class="si">%s</span><span class="s1"> (expected </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span><span class="p">,</span> <span class="n">process</span><span class="o">.</span><span class="n">expectedExitStatus</span><span class="p">))</span>
 			<span class="k">if</span> <span class="n">failures</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> processes failed: &#39;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;Process &#39;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">failures</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
-		<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s1">&#39;All processes completed, after waiting </span><span class="si">%d</span><span class="s1"> secs&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span><span class="p">))</span></div>
+		<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s1">&#39;All processes completed, after waiting </span><span class="si">%d</span><span class="s1"> secs&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="ProcessUser.writeProcess"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.writeProcess">[docs]</a>	<span class="k">def</span> <span class="nf">writeProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addNewLine</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Write binary data to the stdin of a process.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Write binary data to the stdin of a process.</span>
 
 <span class="sd">		This method uses `pysys.process.Process.write` to write binary data to the stdin of a process. This</span>
 <span class="sd">		wrapper around the write method of the process helper only adds checking of the process running status prior</span>
@@ -1076,7 +1149,7 @@
 
 <div class="viewcode-block" id="ProcessUser.waitForSocket"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.waitForSocket">[docs]</a>	<span class="k">def</span> <span class="nf">waitForSocket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForSocket&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">process</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait until it is possible to establish a socket connection to a </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait until it is possible to establish a socket connection to a </span>
 <span class="sd">		server running on the specified local or remote port. </span>
 <span class="sd">		</span>
 <span class="sd">		This method blocks until connection to a particular host:port pair can be established. This is useful for</span>
@@ -1104,7 +1177,7 @@
 
 		<span class="n">s</span> <span class="o">=</span> <span class="kc">None</span>
 		<span class="k">try</span><span class="p">:</span>
-			<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+			<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 			<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
 				<span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 					<span class="k">with</span> <span class="n">process_lock</span><span class="p">:</span>
@@ -1123,8 +1196,8 @@
 					<span class="n">s</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SHUT_RDWR</span><span class="p">)</span>
 					
 					<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Wait for socket creation completed successfully&quot;</span><span class="p">)</span>
-					<span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">:</span>
-						<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Wait for socket creation completed after </span><span class="si">%d</span><span class="s2"> secs&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">:</span>
+						<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Wait for socket creation completed after </span><span class="si">%d</span><span class="s2"> secs&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">)</span>
 					<span class="k">return</span> <span class="kc">True</span>
 				<span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
 					<span class="k">if</span> <span class="n">process</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
@@ -1136,9 +1209,9 @@
 						<span class="k">return</span> <span class="kc">False</span>
 
 					<span class="k">if</span> <span class="n">timeout</span><span class="p">:</span>
-						<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+						<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 						<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
-							<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Timed out waiting for creation of socket after </span><span class="si">%d</span><span class="s2"> secs: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+							<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Timed out waiting for creation of socket after </span><span class="si">%d</span><span class="s2"> secs: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
 							<span class="k">if</span> <span class="n">abortOnError</span><span class="p">:</span>
 								<span class="bp">self</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callRecord</span><span class="p">())</span>
 							<span class="k">else</span><span class="p">:</span>
@@ -1154,7 +1227,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.waitForFile"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.waitForFile">[docs]</a>	<span class="k">def</span> <span class="nf">waitForFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForFile&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait for a file to exist on disk.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for a file to exist on disk.</span>
 <span class="sd">		</span>
 <span class="sd">		This method blocks until a file is created on disk. This is useful for test timing where </span>
 <span class="sd">		a component under test creates a file (e.g. for logging) indicating it has performed all </span>
@@ -1174,13 +1247,13 @@
 		
 		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Performing wait for file creation: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 		
-		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 		<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">timeout</span><span class="p">:</span>
-				<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+				<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 				<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
 
-					<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Timed out waiting for creation of file </span><span class="si">%s</span><span class="s2"> after </span><span class="si">%d</span><span class="s2"> secs&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">)</span>
+					<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Timed out waiting for creation of file </span><span class="si">%s</span><span class="s2"> after </span><span class="si">%d</span><span class="s2"> secs&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">startTime</span><span class="p">)</span>
 					<span class="k">if</span> <span class="n">abortOnError</span><span class="p">:</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callRecord</span><span class="p">())</span>
 					<span class="k">else</span><span class="p">:</span>
@@ -1193,7 +1266,7 @@
 				<span class="k">return</span></div>
 
 <div class="viewcode-block" id="ProcessUser.waitForSignal"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.waitForSignal">[docs]</a>	<span class="k">def</span> <span class="nf">waitForSignal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">waitForGrepArgs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Old alias for `waitForGrep`; please use `waitForGrep` in new tests.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Old alias for `waitForGrep`; please use `waitForGrep` in new tests.</span>
 <span class="sd">		</span>
 <span class="sd">		All parameters are the same, except that in waitForSignal the (rarely used) ``filedir`` argument can be </span>
 <span class="sd">		specified as the 2nd positional argument (after ``file`` and before ``expr``) whereas in waitForGrep it can </span>
@@ -1202,9 +1275,9 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="n">filedir</span><span class="p">,</span> <span class="o">**</span><span class="n">waitForGrepArgs</span><span class="p">)</span></div>
 			
 <div class="viewcode-block" id="ProcessUser.waitForGrep"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.waitForGrep">[docs]</a>	<span class="k">def</span> <span class="nf">waitForGrep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="s2">&quot;&gt;=1&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForSignal&#39;</span><span class="p">],</span> <span class="n">poll</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> 
-			<span class="n">ignores</span><span class="o">=</span><span class="p">[],</span> <span class="n">process</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorExpr</span><span class="o">=</span><span class="p">[],</span> <span class="n">errorIf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailMessage</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+			<span class="n">ignores</span><span class="o">=</span><span class="p">[],</span> <span class="n">process</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorExpr</span><span class="o">=</span><span class="p">[],</span> <span class="n">errorIf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">detailMessage</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filedir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
 			<span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Wait for a regular expression line to be seen (one or more times) in a text file in the output </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Wait for a regular expression line to be seen (one or more times) in a text file in the output </span>
 <span class="sd">		directory (waitForGrep was formerly known as `waitForSignal`).</span>
 <span class="sd">		</span>
 <span class="sd">		This method provides some parameters that give helpful fail-fast behaviour with a descriptive outcome reason; </span>
@@ -1221,10 +1294,10 @@
 <span class="sd">		</span>
 <span class="sd">		Example::</span>
 <span class="sd">		</span>
-<span class="sd">			self.waitForGrep(&#39;myprocess.log&#39;, expr=&#39;INFO .*Started successfully&#39;, encoding=&#39;utf-8&#39;,</span>
+<span class="sd">			self.waitForGrep(&#39;myprocess.log&#39;, &#39;INFO .*Started successfully&#39;, encoding=&#39;utf-8&#39;,</span>
 <span class="sd">				process=myprocess, errorExpr=[&#39; (ERROR|FATAL) &#39;, &#39;Failed to start&#39;])</span>
 <span class="sd">			</span>
-<span class="sd">			self.waitForGrep(&#39;myoutput.log&#39;, expr=&#39;My message&#39;, encoding=&#39;utf-8&#39;,</span>
+<span class="sd">			self.waitForGrep(&#39;myoutput.log&#39;, &#39;My message&#39;, encoding=&#39;utf-8&#39;,</span>
 <span class="sd">				process=myprocess, errorIf=lambda: self.grepOrNone(&#39;myprocess.err&#39;, &#39; ERROR .*&#39;))</span>
 <span class="sd">			</span>
 <span class="sd">		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, </span>
@@ -1237,7 +1310,14 @@
 <span class="sd">		example::</span>
 
 <span class="sd">			self.assertThat(&#39;username == expected&#39;, expected=&#39;myuser&#39;,</span>
-<span class="sd">				**self.waitForGrep(&#39;myserver.log&#39;, expr=r&#39;Successfully authenticated user &quot;(?P&lt;username&gt;[^&quot;]*)&quot;&#39;))</span>
+<span class="sd">				**self.waitForGrep(&#39;myserver.log&#39;, r&#39;Successfully authenticated user &quot;(?P&lt;username&gt;[^&quot;]*)&quot;&#39;))</span>
+
+<span class="sd">		If the file is large or contains long lines, it can take a long time for the regular expressions to be </span>
+<span class="sd">		evaluated over each line. It is important to avoid the possibility that data is written to the file faster </span>
+<span class="sd">		than Python can read it, which would lead to the PySys process running very slowly and likely a timeout. </span>
+<span class="sd">		To help detect this situation, this method will log warnings if dangerously long lines are detected. If needed </span>
+<span class="sd">		the threshold for these can be configured by setting the ``self.grepWarnIfLineLongerThan`` field. </span>
+<span class="sd">		If reading from a file that has long lines, consider adding `pysys.mappers.TruncateLongLines` to the mappers list. </span>
 
 <span class="sd">		.. versionadded:: 1.5.1</span>
 
@@ -1291,6 +1371,9 @@
 <span class="sd">			The default value is None which indicates that the decision will be delegated </span>
 <span class="sd">			to the L{getDefaultFileEncoding()} method. </span>
 
+<span class="sd">		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. </span>
+<span class="sd">			Added in PySys 2.2.</span>
+<span class="sd">		</span>
 <span class="sd">		:param str detailMessage: An extra string to add to the start of the message logged when waiting to provide extra </span>
 <span class="sd">			information about the wait condition. e.g. ``detailMessage=&#39;Wait for server startup: &#39;``. </span>
 <span class="sd">			</span>
@@ -1327,7 +1410,6 @@
 		<span class="k">if</span> <span class="n">errorExpr</span><span class="p">:</span> <span class="k">assert</span> <span class="ow">not</span> <span class="n">isstring</span><span class="p">(</span><span class="n">errorExpr</span><span class="p">),</span> <span class="s1">&#39;errorExpr must be a list of strings not a string&#39;</span>
 		
 		<span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
-		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 		<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Waiting for </span><span class="si">{expr}</span><span class="s2"> </span><span class="si">{condition}</span><span class="s2">in </span><span class="si">{file}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
 			<span class="n">expr</span><span class="o">=</span><span class="n">quotestring</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="c1"># performs escaping of embedded quotes, newlines, etc</span>
 			<span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39; &#39;</span> <span class="k">if</span> <span class="n">condition</span><span class="o">!=</span><span class="s1">&#39;&gt;=1&#39;</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="c1"># only include if non-default</span>
@@ -1352,35 +1434,61 @@
 		<span class="n">compiled</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">)</span>
 		<span class="n">namedGroupsMode</span> <span class="o">=</span> <span class="n">compiled</span><span class="o">.</span><span class="n">groupindex</span> <span class="ow">and</span> <span class="n">condition</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;&gt;=1&#39;</span>
 
-		<span class="n">timetaken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-		<span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
-			<span class="k">if</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-				<span class="n">matches</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">)</span>
+		<span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+		<span class="n">lineno</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># use an array to hold the line counter so we can update this value inside the function</span>
+		<span class="k">def</span> <span class="nf">watchdogMapper</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>		
+			<span class="n">linelen</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="c1"># minus one for the (likely) newline, to make the numbers round</span>
+			<span class="k">if</span> <span class="n">linelen</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grepTruncateIfLineLongerThan</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">linelen</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">grepTruncateIfLineLongerThan</span><span class="p">:</span>
+					<span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">grepTruncateIfLineLongerThan</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+					<span class="n">linelen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
 
-				<span class="k">if</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">safeeval</span><span class="o">.</span><span class="n">safeEval</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">),</span> <span class="n">condition</span><span class="p">),</span> <span class="n">extraNamespace</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;self&#39;</span><span class="p">:</span><span class="bp">self</span><span class="p">}):</span>
-					<span class="n">timetaken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">timetaken</span>
-					<span class="c1"># Old-style/non-verbose behaviour is to log only after complete, </span>
-					<span class="c1"># new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time</span>
-					<span class="c1"># (this helps people debug tests that sometimes timeout and sometimes &quot;nearly&quot; timeout)</span>
-					<span class="k">if</span> <span class="n">verboseWaitForSignal</span><span class="p">:</span>
-						<span class="p">(</span><span class="n">loginfo</span> <span class="k">if</span> <span class="n">timetaken</span> <span class="o">&gt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s2">&quot;   ... found </span><span class="si">%d</span><span class="s2"> matches in </span><span class="si">%s</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">timetaken</span><span class="p">))</span>
-					<span class="k">else</span><span class="p">:</span>
-						<span class="c1"># We use the phrase &quot;grep signal&quot; to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal</span>
-						<span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Wait for grep signal in </span><span class="si">%s</span><span class="s2"> completed successfully&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-					<span class="k">break</span>
-				
-				<span class="k">if</span> <span class="n">errorExpr</span><span class="p">:</span>
-					<span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errorExpr</span><span class="p">:</span>
-						<span class="n">errmatches</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">err</span><span class="o">+</span><span class="s1">&#39;.*&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">)</span> <span class="c1"># add .* to capture entire err msg for a better outcome reason</span>
-						<span class="k">if</span> <span class="n">errmatches</span><span class="p">:</span>
-							<span class="n">err</span> <span class="o">=</span> <span class="n">errmatches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-							<span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> found while </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">quotestring</span><span class="p">(</span><span class="n">err</span><span class="p">),</span> <span class="n">msg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">+</span><span class="n">msg</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-							<span class="c1"># always report outcome for this case; additionally abort if requested to</span>
-							<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__callRecord</span><span class="p">())</span>
-							<span class="k">return</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">namedGroupsMode</span> <span class="k">else</span> <span class="n">matches</span>
-				
-			<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-			<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">linelen</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">grepWarnIfLineLongerThan</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;   very long line of </span><span class="si">%s</span><span class="s1"> characters detected in </span><span class="si">%s</span><span class="s1"> during waitForGrep; be careful as some regular expressions take a very long time to run on long input strings: </span><span class="si">%s</span><span class="s1"> ...&#39;</span><span class="p">,</span> 
+						<span class="n">linelen</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">line</span><span class="p">[:</span><span class="mi">1000</span><span class="p">])</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">grepWarnIfLineLongerThan</span> <span class="o">*=</span> <span class="mi">5</span> <span class="c1"># increase exponentially (for this test)</span>
+
+			<span class="n">lineno</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="n">lineno</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">10000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="c1"># periodically check for interruption or timeout; not too often or we might slow down the normal case</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRunnerAborting</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCleanupInProgress</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;waitForGrep watchdog signalled timeout after handling </span><span class="si">%s</span><span class="s1"> lines&#39;</span><span class="p">,</span> <span class="n">lineno</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+					<span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="s2">&quot;Timed out during waitForGrep watchdog&quot;</span><span class="p">)</span>
+
+			<span class="k">return</span> <span class="n">line</span>
+		<span class="n">mappers</span> <span class="o">=</span> <span class="n">mappers</span><span class="o">+</span><span class="p">[</span><span class="n">watchdogMapper</span><span class="p">]</span> <span class="c1"># putting the watchdog later allows custom mappers that remove long lines if desired </span>
+
+		<span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+					<span class="n">matches</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="n">encodingReplaceOnError</span><span class="p">)</span>
+
+					<span class="k">if</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">safeeval</span><span class="o">.</span><span class="n">safeEval</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">),</span> <span class="n">condition</span><span class="p">),</span> <span class="n">extraNamespace</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;self&#39;</span><span class="p">:</span><span class="bp">self</span><span class="p">}):</span>
+						<span class="n">timetaken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span>
+						<span class="c1"># Old-style/non-verbose behaviour is to log only after complete, </span>
+						<span class="c1"># new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time</span>
+						<span class="c1"># (this helps people debug tests that sometimes timeout and sometimes &quot;nearly&quot; timeout)</span>
+						<span class="k">if</span> <span class="n">verboseWaitForSignal</span><span class="p">:</span>
+							<span class="p">(</span><span class="n">loginfo</span> <span class="k">if</span> <span class="n">timetaken</span> <span class="o">&gt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s2">&quot;   ... found </span><span class="si">%d</span><span class="s2"> matches in </span><span class="si">%s</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">timetaken</span><span class="p">))</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="c1"># We use the phrase &quot;grep signal&quot; to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal</span>
+							<span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Wait for grep signal in </span><span class="si">%s</span><span class="s2"> completed successfully&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+						<span class="k">break</span>
+					
+					<span class="k">if</span> <span class="n">errorExpr</span><span class="p">:</span>
+						<span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errorExpr</span><span class="p">:</span>
+							<span class="n">errmatches</span> <span class="o">=</span> <span class="n">getmatches</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">err</span><span class="o">+</span><span class="s1">&#39;.*&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="n">ignores</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="n">encodingReplaceOnError</span><span class="p">)</span> <span class="c1"># add .* to capture entire err msg for a better outcome reason</span>
+							<span class="k">if</span> <span class="n">errmatches</span><span class="p">:</span>
+								<span class="n">err</span> <span class="o">=</span> <span class="n">errmatches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+								<span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> found while </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">quotestring</span><span class="p">(</span><span class="n">err</span><span class="p">),</span> <span class="n">msg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">+</span><span class="n">msg</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+								<span class="c1"># always report outcome for this case; additionally abort if requested to</span>
+								<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__callRecord</span><span class="p">())</span>
+								<span class="k">return</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">namedGroupsMode</span> <span class="k">else</span> <span class="n">matches</span>
+				<span class="c1"># end of if exists</span>
+				<span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">starttime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">()</span>
+
+			<span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span> <span class="c1"># may come from the above check outside the loop, or from the check every 10k lines within the watchdog</span>
 				<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> timed out after </span><span class="si">%d</span><span class="s2"> secs, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> 
 					<span class="p">(</span><span class="s2">&quot;with </span><span class="si">%d</span><span class="s2"> matches&quot;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">))</span> <span class="k">if</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;file does not exist&#39;</span><span class="p">)</span>
 				
@@ -1389,7 +1497,7 @@
 				<span class="k">else</span><span class="p">:</span>
 					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TIMEOUTS</span><span class="p">))</span>
 				<span class="k">break</span>
-			
+
 			<span class="k">if</span> <span class="n">errorIf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="n">errmsg</span> <span class="o">=</span> <span class="n">errorIf</span><span class="p">()</span>
 				<span class="k">if</span> <span class="n">errmsg</span><span class="p">:</span>
@@ -1415,7 +1523,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.addCleanupFunction"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.addCleanupFunction">[docs]</a>	<span class="k">def</span> <span class="nf">addCleanupFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">ignoreErrors</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Registers a function that will be called as part of the `cleanup` of this object.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Registers a function that will be called as part of the `cleanup` of this object.</span>
 <span class="sd">		</span>
 <span class="sd">		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and</span>
 <span class="sd">		before the automatic termination of any remaining processes associated with this object.</span>
@@ -1438,7 +1546,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Tear down function that frees resources managed by this object, for example terminating processes it has </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Tear down function that frees resources managed by this object, for example terminating processes it has </span>
 <span class="sd">		started. </span>
 
 <span class="sd">		Should be called exactly once by the owner of this object when is no longer needed. </span>
@@ -1451,6 +1559,8 @@
 			<span class="c1"># although we don&#39;t yet state this method is thread-safe, make it </span>
 			<span class="c1"># as thread-safe as possible by using swap operations</span>
 			<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">isCleanupInProgress</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># lock probably not required for this assignment but might as well</span>
+
 				<span class="n">cleanupfunctions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cleanupFunctions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cleanupFunctions</span><span class="p">,</span> <span class="p">[]</span>
 			<span class="k">if</span> <span class="n">cleanupfunctions</span><span class="p">:</span>
 				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -1468,7 +1578,9 @@
 				<span class="n">processes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processList</span><span class="p">,</span> <span class="p">[]</span>
 			<span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
 				<span class="k">try</span><span class="p">:</span>
-					<span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> <span class="n">process</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+					<span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> 
+						<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Stopping process during cleanup: </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">process</span><span class="p">)</span>
+						<span class="n">process</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c1"># this is pretty unlikely to fail, but we&#39;d like to know if it does</span>
 					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">exc_info</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 					<span class="n">exceptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Failed to stop process </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
@@ -1478,9 +1590,46 @@
 		<span class="k">if</span> <span class="n">exceptions</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cleanup failed</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39; with </span><span class="si">%d</span><span class="s1"> errors&#39;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">exceptions</span><span class="p">),</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">exceptions</span><span class="p">)))</span></div>
 		
+<div class="viewcode-block" id="ProcessUser.handleRunnerAbort"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.handleRunnerAbort">[docs]</a>	<span class="k">def</span> <span class="nf">handleRunnerAbort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Called from a background thread when the entire test run is aborting, to perform </span>
+<span class="sd">		quick operations to help this test to terminate as quickly as possible. </span>
 
+<span class="sd">		The default implementation attempts to immediately stop any currently running processes </span>
+<span class="sd">		(in case they are holding open resources such as server sockets that the test may be blocking on). </span>
+
+<span class="sd">		Subclasses may override this method, either to perform additional steps (such as closing server sockets </span>
+<span class="sd">		that clients may be blocking on) or to avoid stopping processes that need to be terminated in a more orderly way. </span>
+
+<span class="sd">		Unlike the `cleanup` method, this will be called from a background thread so avoid using methods that are </span>
+<span class="sd">		not thread-safe. </span>
+<span class="sd">		</span>
+<span class="sd">		NB: Logging performed during this method will NOT be included in the test&#39;s ``run.log`` output. </span>
+
+<span class="sd">		The test&#39;s `cleanup` method will usually be called to perform a fuller cleanup (later, or concurrently). </span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+			<span class="n">processes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processList</span><span class="p">)</span>
+			<span class="c1"># we leave the final checking to cleanup(), so do NOT remove these from process list</span>
+
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCleanupInProgress</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+				<span class="c1"># This should prevent us trying to stop processes started during cleanup() which may be important </span>
+				<span class="c1"># for performing orderly cleanup</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;handleRunnerAbort is skipping </span><span class="si">%s</span><span class="s1"> because cleanup is already in progress&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+				<span class="k">return</span>
+
+		<span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> 
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stopping </span><span class="si">%s</span><span class="s2"> process during runner abort: </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">)</span>
+					<span class="n">process</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">hard</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c1"># pragma: no cover - this is pretty unlikely to fail, but we&#39;d like to know if it does</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed to stop </span><span class="si">%s</span><span class="s2"> process </span><span class="si">%r</span><span class="s2"> during runner abort </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+		
 <div class="viewcode-block" id="ProcessUser.addOutcome"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.addOutcome">[docs]</a>	<span class="k">def</span> <span class="nf">addOutcome</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">printReason</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Add a validation outcome (and optionally a reason string) to the validation list.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Add a validation outcome (and optionally a reason string) to the validation list.</span>
 <span class="sd">		</span>
 <span class="sd">		The method provides the ability to add a validation outcome to the internal data structure </span>
 <span class="sd">		storing the list of validation outcomes. Multiple validations may be performed, the current</span>
@@ -1506,7 +1655,7 @@
 <span class="sd">			False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for </span>
 <span class="sd">			operations that involve waiting. </span>
 <span class="sd">		</span>
-<span class="sd">		:param list[str] callRecord: An array of strings of the form path:lineno indicating the call stack that lead </span>
+<span class="sd">		:param list[str] callRecord: An array of strings of the form absolutepath:lineno indicating the call stack that lead </span>
 <span class="sd">			to this outcome. This will be appended to the log output for better test triage.</span>
 <span class="sd">		</span>
 <span class="sd">		:param bool override: Remove any existing test outcomes when adding this one, ensuring </span>
@@ -1551,33 +1700,43 @@
 						<span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">loc</span> <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">locations</span> <span class="k">if</span> <span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="p">]</span>
 						<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">parseLocation</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span> <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">callRecord</span><span class="p">]</span>
 					<span class="n">loc</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">__outcomeLocation</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">__outcomeLocation</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">testDir</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]))),</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 			<span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">and</span> <span class="n">abortOnError</span><span class="p">:</span>
 				<span class="k">if</span> <span class="n">callRecord</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">callRecord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callRecord</span><span class="p">()</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span><span class="p">)</span>
 
 			<span class="k">if</span> <span class="n">outcomeReason</span> <span class="ow">and</span> <span class="n">printReason</span><span class="p">:</span>
 				<span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span>
-					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ... </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="sa">u</span><span class="s1">&#39;[</span><span class="si">%s</span><span class="s1">]&#39;</span><span class="o">%</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-						<span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="n">parseLocation</span><span class="p">,</span><span class="n">callRecord</span><span class="p">))</span> <span class="k">if</span> <span class="n">callRecord</span><span class="o">!=</span><span class="kc">None</span> <span class="k">else</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+					<span class="k">def</span> <span class="nf">maybebasename</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+						<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pysysLogAbsolutePaths&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span> <span class="k">return</span> <span class="n">p</span>
+						<span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+					<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ... </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="sa">u</span><span class="s1">&#39;[</span><span class="si">%s</span><span class="s1">]&#39;</span><span class="o">%</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+						<span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">maybebasename</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="n">parseLocation</span><span class="p">,</span><span class="n">callRecord</span><span class="p">))</span> <span class="k">if</span> <span class="n">callRecord</span><span class="o">!=</span><span class="kc">None</span> <span class="k">else</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
 							 <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span><span class="mi">1</span><span class="p">))</span>
 				<span class="k">else</span><span class="p">:</span>
 					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ... </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span><span class="mi">1</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="ProcessUser.abort"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.abort">[docs]</a>	<span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Raise an AbortException with the specified outcome and reason.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Raise an AbortExecution exception with the specified outcome and reason, to abort the current test.</span>
 <span class="sd">		</span>
 <span class="sd">		See also L{skipTest}. </span>
 
-<span class="sd">		:param outcome: The outcome, which will override any existing outcomes previously recorded.</span>
+<span class="sd">		:param outcome: The outcome, which will NOT override any existing outcomes previously recorded, unless </span>
+<span class="sd">			the abort outcome is a non-failure (such as SKIPPED). </span>
+<span class="sd">			If you want overriding behaviour for failure outcomes, instead of this function use::</span>
+
+<span class="sd">				self.addOutcome(outcome, outcomeReason, abortOnError=True, override=True)</span>
+
 <span class="sd">		:param outcomeReason: A string summarizing the reason for the outcome.</span>
 <span class="sd">		</span>
+<span class="sd">		.. versionchanged:: 2.2 Previous outcomes are no longer overridden when aborting. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">raise</span> <span class="n">AbortExecution</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProcessUser.skipTest"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.skipTest">[docs]</a>	<span class="k">def</span> <span class="nf">skipTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Raise an AbortException that will set the test outcome to SKIPPED and </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Raise an AbortException that will set the test outcome to SKIPPED and </span>
 <span class="sd">		ensure that the rest of the execute() and validate() methods do not execute. </span>
 <span class="sd">		</span>
 <span class="sd">		This is useful when a test should not be executed in the current mode or platform. </span>
@@ -1588,7 +1747,7 @@
 		<span class="k">raise</span> <span class="n">AbortExecution</span><span class="p">(</span><span class="n">SKIPPED</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">callRecord</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProcessUser.getOutcome"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getOutcome">[docs]</a>	<span class="k">def</span> <span class="nf">getOutcome</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Get the final outcome for this test, based on the precedence order defined in `pysys.constants.OUTCOMES`.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Get the final outcome for this test, based on the precedence order defined in `pysys.constants.OUTCOMES`.</span>
 <span class="sd">		</span>
 <span class="sd">		To find out whether this test has failed::</span>
 <span class="sd">		</span>
@@ -1604,7 +1763,7 @@
 
 
 <div class="viewcode-block" id="ProcessUser.getOutcomeReason"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getOutcomeReason">[docs]</a>	<span class="k">def</span> <span class="nf">getOutcomeReason</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Get the reason string for the current overall outcome (if specified).</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Get the reason string for the current overall outcome (if specified).</span>
 <span class="sd">				</span>
 <span class="sd">		:return: The overall test outcome reason or &#39;&#39; if not specified</span>
 <span class="sd">		:rtype:  string</span>
@@ -1616,7 +1775,7 @@
 			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__outcomeReason</span></div>
 
 <div class="viewcode-block" id="ProcessUser.getOutcomeLocation"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getOutcomeLocation">[docs]</a>	<span class="k">def</span> <span class="nf">getOutcomeLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Get the location in the Python source file where this location was added. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Get the location in the Python source file where this outcome was added. </span>
 <span class="sd">		</span>
 <span class="sd">		.. versionadded:: 1.6.0</span>
 <span class="sd">		</span>
@@ -1627,7 +1786,7 @@
 			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__outcomeLocation</span></div>
 
 <div class="viewcode-block" id="ProcessUser.getNextAvailableTCPPort"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getNextAvailableTCPPort">[docs]</a>	<span class="k">def</span> <span class="nf">getNextAvailableTCPPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hosts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">],</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Allocate a free TCP port which can be used for starting a server on this machine.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Allocate a free TCP port which can be used for starting a server on this machine.</span>
 <span class="sd">		</span>
 <span class="sd">		The port is taken from the pool of available server (non-ephemeral) ports on this machine, and will not </span>
 <span class="sd">		be available for use by any other code in the current PySys process until this object&#39;s `cleanup` method is </span>
@@ -1661,7 +1820,7 @@
 
 
 	<span class="k">def</span> <span class="nf">__callRecord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Retrieve a call record outside of this module, up to the execute or validate method of the test case.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Retrieve a call record outside of this module, up to the execute or validate method of the test case.</span>
 
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">stack</span><span class="o">=</span><span class="p">[]</span>
@@ -1678,7 +1837,7 @@
 
 
 	<span class="k">def</span> <span class="nf">__skipFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Private method to check if a file is that for a particular class.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Private method to check if a file is that for a particular class.</span>
 
 <span class="sd">		:param file: The filepatch to check</span>
 <span class="sd">		:param clazz: The class to check against</span>
@@ -1687,7 +1846,7 @@
 		<span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">clazz</span><span class="o">.</span><span class="vm">__module__</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 <div class="viewcode-block" id="ProcessUser.grep"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.grep">[docs]</a>	<span class="k">def</span> <span class="nf">grep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns the first occurrence of a regular expression in the specified file, or raises an exception if not found. </span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns the first occurrence of a regular expression in the specified file, or raises an exception if not found. </span>
 
 <span class="sd">		See also `grepOrNone` and `grepAll` or no-error-on-missing and return-all behaviour. </span>
 
@@ -1740,8 +1899,8 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">returnAll</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
 			<span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProcessUser.grepOrNone"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.grepOrNone">[docs]</a>	<span class="k">def</span> <span class="nf">grepOrNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns the first occurrence of a regular expression in the specified file, or None if not found. </span>
+<div class="viewcode-block" id="ProcessUser.grepOrNone"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.grepOrNone">[docs]</a>	<span class="k">def</span> <span class="nf">grepOrNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">mustExist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns the first occurrence of a regular expression in the specified file, or None if not found. </span>
 
 <span class="sd">		See also `grep` and `grepAll` for error-on-missing and return-all behaviour. </span>
 
@@ -1784,6 +1943,9 @@
 <span class="sd">			</span>
 <span class="sd">			Added in PySys 1.6.0.</span>
 
+<span class="sd">		:param bool mustExist: Set this to False to tolerate the file not existing and treat a missing file like an empty file. </span>
+<span class="sd">			Added in PySys 2.2.</span>
+
 <span class="sd">		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, </span>
 <span class="sd">			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. </span>
 <span class="sd">			</span>
@@ -1795,10 +1957,10 @@
 <span class="sd">			a dict[str,str] is returned where the keys are the groupNames. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">returnAll</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-			<span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+			<span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="n">mustExist</span><span class="o">=</span><span class="n">mustExist</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProcessUser.grepAll"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.grepAll">[docs]</a>	<span class="k">def</span> <span class="nf">grepAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a list of all the occurrences of a regular expression in the specified file. </span>
+<div class="viewcode-block" id="ProcessUser.grepAll"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.grepAll">[docs]</a>	<span class="k">def</span> <span class="nf">grepAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">mustExist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a list of all the occurrences of a regular expression in the specified file. </span>
 
 <span class="sd">		See also `grep` and `grepOrNone` for return-first-only behaviour. </span>
 
@@ -1834,6 +1996,9 @@
 <span class="sd">			</span>
 <span class="sd">			Added in PySys 1.6.0.</span>
 
+<span class="sd">		:param bool mustExist: Set this to False to tolerate the file not existing and treat a missing file like an empty file. </span>
+<span class="sd">			Added in PySys 2.2.</span>
+
 <span class="sd">		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, </span>
 <span class="sd">			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. </span>
 <span class="sd">			</span>
@@ -1844,10 +2009,10 @@
 <span class="sd">			``(?P&lt;groupName&gt;...)`` named groups each item is a dict[str,str] where the keys are the groupNames. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">returnAll</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-			<span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+			<span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="n">reFlags</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="n">mappers</span><span class="p">,</span> <span class="n">mustExist</span><span class="o">=</span><span class="n">mustExist</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProcessUser.getExprFromFile"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getExprFromFile">[docs]</a>	<span class="k">def</span> <span class="nf">getExprFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">returnAll</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[]):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot; Searches for a regular expression in the specified file, and returns it. </span>
+<div class="viewcode-block" id="ProcessUser.getExprFromFile"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getExprFromFile">[docs]</a>	<span class="k">def</span> <span class="nf">getExprFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">returnAll</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mustExist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[]):</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; Searches for a regular expression in the specified file, and returns it. </span>
 <span class="sd">		</span>
 <span class="sd">		Use of this function is discouraged - consider using `grep` / `grepOrNone` / `grepAll` instead. </span>
 
@@ -1891,10 +2056,14 @@
 <span class="sd">		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.</span>
 <span class="sd">		:param bool returnNoneIfMissing: True to return None instead of raising an exception</span>
 <span class="sd">			if the regex is not found in the file (not needed when returnAll is used). </span>
+<span class="sd">		:param bool mustExist: Set to False to tolerate the file not existing and treat a missing file like an empty file. </span>
 <span class="sd">			</span>
 <span class="sd">		:param str encoding: The encoding to use to open the file. </span>
 <span class="sd">			The default value is None which indicates that the decision will be delegated </span>
 <span class="sd">			to the L{getDefaultFileEncoding()} method. </span>
+
+<span class="sd">		:param bool encodingReplaceOnError: Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. </span>
+<span class="sd">			Added in PySys 2.2.</span>
 
 <span class="sd">		:param List[callable[str]-&gt;str] mappers: A list of filter functions that will be used to pre-process each </span>
 <span class="sd">			line from the file (returning None if the line is to be filtered out). This provides a very powerful </span>
@@ -1925,23 +2094,26 @@
 		
 		<span class="k">assert</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;Cannot grep directory: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">path</span>
 
-		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-			<span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
-			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">applyMappers</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mappers</span><span class="p">):</span>
-			
-				<span class="n">match</span> <span class="o">=</span> <span class="n">compiled</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span> <span class="k">continue</span>
-				<span class="k">if</span> <span class="n">namedGroupsMode</span><span class="p">:</span>
-					<span class="n">val</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
-				<span class="k">elif</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">():</span>
-					<span class="n">val</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="o">*</span><span class="n">groups</span><span class="p">)</span>
-				<span class="k">else</span><span class="p">:</span>
-					<span class="n">val</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-					
-				<span class="k">if</span> <span class="n">returnAll</span><span class="p">:</span> 
-					<span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-				<span class="k">else</span><span class="p">:</span> 
-					<span class="k">return</span> <span class="n">val</span>
+		<span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">if</span> <span class="n">mustExist</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+			<span class="k">pass</span>
+		<span class="k">else</span><span class="p">:</span> 
+			<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;backslashreplace&#39;</span> <span class="k">if</span> <span class="n">encodingReplaceOnError</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">applyMappers</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mappers</span><span class="p">):</span>
+				
+					<span class="n">match</span> <span class="o">=</span> <span class="n">compiled</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span> <span class="k">continue</span>
+					<span class="k">if</span> <span class="n">namedGroupsMode</span><span class="p">:</span>
+						<span class="n">val</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+					<span class="k">elif</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">():</span>
+						<span class="n">val</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="o">*</span><span class="n">groups</span><span class="p">)</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">val</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+						
+					<span class="k">if</span> <span class="n">returnAll</span><span class="p">:</span> 
+						<span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+					<span class="k">else</span><span class="p">:</span> 
+						<span class="k">return</span> <span class="n">val</span>
 
 		<span class="k">if</span> <span class="n">returnAll</span><span class="p">:</span> <span class="k">return</span> <span class="n">matches</span>
 		<span class="k">if</span> <span class="n">returnNoneIfMissing</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
@@ -1951,8 +2123,8 @@
 
 
 <div class="viewcode-block" id="ProcessUser.logFileContents"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.logFileContents">[docs]</a>	<span class="k">def</span> <span class="nf">logFileContents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">includes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">excludes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-			<span class="n">logFunction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stripWhitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Logs some or all of the lines from the specified file.</span>
+			<span class="n">logFunction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reFlags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stripWhitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Logs some or all of the lines from the specified file.</span>
 <span class="sd">		</span>
 <span class="sd">		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key</span>
 <span class="sd">		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or</span>
@@ -1984,6 +2156,8 @@
 <span class="sd">		:param str encoding: The encoding to use to open the file. </span>
 <span class="sd">			The default value is None which indicates that the decision will be delegated </span>
 <span class="sd">			to the L{getDefaultFileEncoding()} method. </span>
+
+<span class="sd">			Any character encoding errors will result in backslash escape sequences being logged instead. </span>
 <span class="sd">			</span>
 <span class="sd">		:param Callable[[line],None] logFunction: The function that will be used to log individual lines from the file. </span>
 <span class="sd">			Usually this is ``self.log.info(u&#39;  %s&#39;, line, extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))``	</span>
@@ -2003,6 +2177,10 @@
 <span class="sd">		</span>
 <span class="sd">		:param bool color: By default logged lines are colored blue to distinguish from the rest of the log contents. </span>
 <span class="sd">			Set this to False to disable coloring. Added in PySys 2.1. </span>
+<span class="sd">		</span>
+<span class="sd">		:param str message: The introductory message to log before the file content, with ``@PATH@`` as a placeholder for the path. </span>
+<span class="sd">			If not specified the default is equivalent to ``&quot;Contents of @PATH@: &quot;``. </span>
+<span class="sd">			Added in PySys 2.2</span>
 
 <span class="sd">		:return: True if anything was logged, False if not.</span>
 <span class="sd">		</span>
@@ -2012,7 +2190,7 @@
 		<span class="n">actualpath</span><span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="c1"># always open with a specific encoding not in bytes mode, since otherwise we can&#39;t reliably pass the read lines to the logger</span>
-			<span class="n">f</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">actualpath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">actualpath</span><span class="p">)</span> <span class="ow">or</span> <span class="n">PREFERRED_ENCODING</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span>
+			<span class="n">f</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">actualpath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">actualpath</span><span class="p">)</span> <span class="ow">or</span> <span class="n">PREFERRED_ENCODING</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;backslashreplace&#39;</span><span class="p">)</span>
 		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;logFileContents cannot open file &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">actualpath</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 			<span class="k">return</span> <span class="kc">False</span>
@@ -2062,7 +2240,9 @@
 
 		<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">):</span> <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;Contents of </span><span class="si">%s%s</span><span class="s1">: &#39;</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39; (filtered)&#39;</span> <span class="k">if</span> <span class="n">includes</span> <span class="ow">or</span> <span class="n">excludes</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+			<span class="n">message</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@PATH@&#39;</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="n">message</span> <span class="k">else</span>
+			<span class="sa">u</span><span class="s1">&#39;Contents of </span><span class="si">%s%s</span><span class="s1">: &#39;</span><span class="o">%</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39; (filtered)&#39;</span> <span class="k">if</span> <span class="n">includes</span> <span class="ow">or</span> <span class="n">excludes</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> 
 			<span class="n">extra</span><span class="o">=</span><span class="n">BaseLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FILE_CONTENTS</span><span class="p">,</span> <span class="n">suppress_prefix</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 		<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">tolog</span><span class="p">:</span>
 			<span class="n">logFunction</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
@@ -2070,8 +2250,30 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">logextra</span><span class="p">)</span>
 		<span class="k">return</span> <span class="kc">True</span></div>
 
+<div class="viewcode-block" id="ProcessUser.listDirContents"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.listDirContents">[docs]</a>	<span class="k">def</span> <span class="nf">listDirContents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">recurse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable </span>
+<span class="sd">		for diffing. </span>
+<span class="sd">		</span>
+<span class="sd">		The contents are returned in a normalized form suitable for diffing: relative to the scanned path, with forward </span>
+<span class="sd">		slashes on all platforms, a trailing slash for directories, and sorted to ensure deterministic results. </span>
+<span class="sd">		Symbolic links are not searched. </span>
+<span class="sd">		</span>
+<span class="sd">		For example this can be used with `pysys.basetest.BaseTest.assertDiff` like this::</span>
+<span class="sd">		</span>
+<span class="sd">			self.assertDiff(</span>
+<span class="sd">				self.write_text(&#39;MyDir-contents.txt&#39;, &#39;\\n&#39;.join( self.listDirContents(&#39;MyDir&#39;) )))</span>
+<span class="sd">		</span>
+<span class="sd">		:param str path: The path to search, either absolute or relative to the output directory.</span>
+<span class="sd">		:param bool recurse: Set this to False to just include the specified directory but not any children. </span>
+<span class="sd">		:return: A list of strings with the relative paths found, e.g. ``[&quot;mysubdir/myfile.txt&quot;, &quot;mysubdir/mysubsubdir/&quot;]``. </span>
+<span class="sd">		</span>
+<span class="sd">		.. versionadded:: 2.2</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fileutils</span><span class="o">.</span><span class="n">listDirContents</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">path</span><span class="p">),</span> <span class="n">recurse</span><span class="o">=</span><span class="n">recurse</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="ProcessUser.mkdir"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.mkdir">[docs]</a>	<span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Create a directory, with recursive creation of any parent directories.</span>
 <span class="sd">		</span>
 <span class="sd">		This function does nothing (does not raise an except) if the directory already exists. </span>
@@ -2088,7 +2290,7 @@
 	<span class="k">def</span> <span class="nf">deletedir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleteDir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProcessUser.deleteDir"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.deleteDir">[docs]</a>	<span class="k">def</span> <span class="nf">deleteDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Recursively delete the specified directory. </span>
 <span class="sd">		</span>
 <span class="sd">		Does nothing if it does not exist. Raises an exception if the deletion fails. </span>
@@ -2102,7 +2304,7 @@
 		<span class="k">return</span> <span class="n">deletedir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">path</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProcessUser.deleteFile"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.deleteFile">[docs]</a>	<span class="k">def</span> <span class="nf">deleteFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Delete the specified file, with optional retries and ignoring of errors. </span>
 <span class="sd">		</span>
 <span class="sd">		Does nothing if it does not exist. Raises an exception if the deletion fails. </span>
@@ -2116,7 +2318,7 @@
 		<span class="k">return</span> <span class="n">deletefile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">path</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 		
 <div class="viewcode-block" id="ProcessUser.getDefaultFileEncoding"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.getDefaultFileEncoding">[docs]</a>	<span class="k">def</span> <span class="nf">getDefaultFileEncoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">xargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Specifies what encoding should be used to read or write the specified </span>
 <span class="sd">		text file.</span>
 <span class="sd">		</span>
@@ -2156,7 +2358,7 @@
 	
 <div class="viewcode-block" id="ProcessUser.compareVersions"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.compareVersions">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">compareVersions</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Compares two alphanumeric dotted version strings to see which is more recent. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Compares two alphanumeric dotted version strings to see which is more recent. </span>
 <span class="sd">		</span>
 <span class="sd">		Example usage::</span>
 <span class="sd">		</span>
@@ -2217,7 +2419,7 @@
 		<span class="k">return</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">compareVersions</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProcessUser.write_text"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.write_text">[docs]</a>	<span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Writes the specified characters to a file in the output directory. </span>
 <span class="sd">		</span>
 <span class="sd">		:param file: The path of the file to write, either an absolute path or </span>
@@ -2243,7 +2445,7 @@
 	
 <div class="viewcode-block" id="ProcessUser.disableLogging"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.disableLogging">[docs]</a>	<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 	<span class="k">def</span> <span class="nf">disableLogging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Temporarily stops logging for the current thread. </span>
 <span class="sd">		</span>
 <span class="sd">		For example::</span>
@@ -2270,7 +2472,7 @@
 			<span class="n">pysys</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">initlogging</span><span class="o">.</span><span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">(</span><span class="n">saved</span><span class="p">)</span></div>
 	
 <div class="viewcode-block" id="ProcessUser.unpackArchive"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.unpackArchive">[docs]</a>	<span class="k">def</span> <span class="nf">unpackArchive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">autoCleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Unpacks the specified file(s) from an archive to a directory. Supports archive format such as zip/tar.gz/gz/tar.xz/xz. </span>
 <span class="sd">		</span>
 <span class="sd">		It is a good idea to store large textual Input/ assets (such as log files, which usually compress very well) </span>
@@ -2328,11 +2530,18 @@
 		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">samefile</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">)):</span> <span class="n">dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">archive</span><span class="p">)[:</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">archive</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)])</span>
 		<span class="k">if</span> <span class="n">autoCleanup</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">addCleanupFunction</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleteDir</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 		<span class="c1"># this takes care of multi-file archives such as tar.XXX/zip etc</span>
-		<span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+		<span class="n">unpackargs</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;.zip&#39;</span> <span class="ow">in</span> <span class="n">archive</span><span class="p">:</span>
+			<span class="c1"># avoid deprecation warning in 3.12 by explicitly requesting safe tar unpacking; unfortunately not accepted by .zip</span>
+			<span class="c1"># see https://github.com/python/cpython/issues/102950#issuecomment-1745101949</span>
+			<span class="c1"># for 3.13+ we may have to extend this hack, but maybe there will be a better fix by then</span>
+			<span class="n">unpackargs</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
+
+		<span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="o">**</span><span class="n">unpackargs</span><span class="p">)</span>
 		<span class="k">return</span> <span class="n">dest</span></div>
 
 <div class="viewcode-block" id="ProcessUser.copy"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.copy">[docs]</a>	<span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[],</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignoreIf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skipMappersIf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. </span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. </span>
 <span class="sd">		</span>
 <span class="sd">		If any `pysys.mappers` are provided, the file is copied in text mode and </span>
 <span class="sd">		each mapper is given the chance to modify or omit each line, or even reorder the lines of the file. </span>
@@ -2523,8 +2732,70 @@
 				<span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span>
 			<span class="k">return</span> <span class="n">src</span>
 			
-		<span class="k">return</span> <span class="n">dest</span></div></div>
-		
+		<span class="k">return</span> <span class="n">dest</span></div>
+	
+<div class="viewcode-block" id="ProcessUser.createThreadPoolExecutor"><a class="viewcode-back" href="../../../autodocgen/pysys.process.user.html#pysys.baserunner.ProcessUser.createThreadPoolExecutor">[docs]</a>	<span class="k">def</span> <span class="nf">createThreadPoolExecutor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWorkers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Create a PySys-friendly instance of Python&#39;s ThreadPoolExecutor, configured with support for PySys loggers,  </span>
+<span class="sd">		cleanup, and a recommended default number of workers. </span>
+
+<span class="sd">		During cleanup, the thread pool is shutdown, with any unstarted futures cancelled (requires Python 3.9+), and a wait </span>
+<span class="sd">		until all in-progress futures have completed.</span>
+<span class="sd">		</span>
+<span class="sd">		This is useful for tests that need to perform many latency-bound operations such as making HTTP requests. </span>
+<span class="sd">		Do not use it for starting lots of processes in parallel and waiting for them, since that is more easily achieved </span>
+<span class="sd">		using `waitForBackgroundProcesses()`. </span>
+<span class="sd">		</span>
+<span class="sd">		If you use ``submit`` (rather than ``map``), then any exceptions during the submitted job will not be logged anywhere </span>
+<span class="sd">		unless you you wait for the submitted job (or add an exception handler). </span>
+<span class="sd">		Note that this class is not thread-safe (apart from ``addOutcome``, ``startProcess`` and the reading of fields </span>
+<span class="sd">		like ``self.output`` that don&#39;t change) so if you need to use its fields or methods from background threads, </span>
+<span class="sd">		be sure to add your own locking to the foreground and background threads in your test, including any custom cleanup </span>
+<span class="sd">		functions. </span>
+
+<span class="sd">		Example usage::</span>
+<span class="sd">		</span>
+<span class="sd">			tp = self.createThreadPoolExecutor()</span>
+<span class="sd">			results = tp.map(items, makeHTTPRequest)</span>
+
+<span class="sd">			# Or for more complex use cases:</span>
+<span class="sd">			submittedFutures = []</span>
+<span class="sd">			submittedFutures.append(tp.submit(...))</span>
+<span class="sd">			concurrent.futures.wait(submittedFutures)</span>
+
+<span class="sd">		.. versionadded:: 2.2</span>
+
+<span class="sd">		:param int maxWorkers: Overrides the maximum number of worker threads that can be created by this pool. </span>
+<span class="sd">			Only override this if needed. The default maxWorkers is configured in ``self.threadPoolMaxWorkers`` and is </span>
+<span class="sd">			currently set at 6 since a higher number might overload a machine (or Python, due to the GIL) if pools are used by</span>
+<span class="sd">			many/all of the PySys workers/tests running in parallel. The default may change in future. </span>
+
+<span class="sd">			If overriding this value, use a small number of workers for Python-based logic that will hold the Python </span>
+<span class="sd">			Global Interpreter Lock, or a larger/more scalable number of workers for heavily I/O-bound operations with little Python logic. </span>
+<span class="sd">		</span>
+<span class="sd">		:return: A ``concurrent.futures.ThreadPoolExecutor`` instance.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">maxWorkers</span><span class="p">:</span> <span class="n">maxWorkers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threadPoolMaxWorkers</span>
+
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Created thread pool with </span><span class="si">%s</span><span class="s1"> workers&#39;</span><span class="p">,</span> <span class="n">maxWorkers</span><span class="p">)</span> <span class="c1"># be explicit, since number of workers could affect test race conditions</span>
+		<span class="n">pool</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">maxWorkers</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">threadutils</span><span class="o">.</span><span class="n">createThreadInitializer</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+		<span class="k">def</span> <span class="nf">cleanupThreadPool</span><span class="p">():</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Shutting down thread pool&#39;</span><span class="p">)</span>
+
+			<span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
+				<span class="n">pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cancel_futures</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+			<span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span><span class="o">&gt;</span><span class="mi">5</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s1">&#39;Completed shutdown of thread pool after </span><span class="si">%0.1f</span><span class="s1"> seconds&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">addCleanupFunction</span><span class="p">(</span><span class="n">cleanupThreadPool</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">pool</span></div></div>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">IS_WINDOWS</span><span class="p">:</span>
+	<span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAbortingHandle</span><span class="p">,</span> <span class="n">ProcessUser</span><span class="o">.</span><span class="n">_isRunnerAbortingWriteHandle</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pipe</span><span class="p">()</span>
+<span class="kn">import</span> <span class="nn">pysys.process.helper</span>
 </pre></div>
 
            </div>
@@ -2537,7 +2808,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

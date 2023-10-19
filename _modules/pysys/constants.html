@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.constants &mdash; PySys v2.1  documentation</title>
+  <title>pysys.constants &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PySys v2.1</a>
+          <a href="../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -191,7 +191,7 @@
 
 <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;win32&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">):</span>
 	<span class="n">PLATFORM</span><span class="o">=</span><span class="s1">&#39;win32&#39;</span>
-	<span class="sd">&quot;&quot;&quot;OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). </span>
 <span class="sd">	It is recommended to use standard Python functions such as ``sys.platform`` rather than this constant. &quot;&quot;&quot;</span>
 	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;windows&#39;</span>
 	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;nul&#39;</span>
@@ -199,7 +199,17 @@
 	<span class="n">PATH</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">;</span><span class="si">%s</span><span class="s1">\system32;</span><span class="si">%s</span><span class="s1">\System32\Wbem&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">WINDIR</span><span class="p">,</span> <span class="n">WINDIR</span><span class="p">,</span> <span class="n">WINDIR</span><span class="p">)</span>
 	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	
 	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;PATH&#39;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The name of the environment variable listing dynamic library paths on this operating system, for example </span>
+<span class="sd">	``LD_LIBRARY_PATH`` on Linux or ``PATH`` on Windows. Use ``os.pathsep`` for joining the paths together. </span>
+<span class="sd">	</span>
+<span class="sd">	For example::</span>
+<span class="sd">	</span>
+<span class="sd">		environs={ LIBRARY_PATH_ENV_VAR: os.path.join([os.getenv(LIBRARY_PATH_ENV_VAR,&#39;&#39;), mynewpath]) }</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
 	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;Lib&quot;</span><span class="p">,</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
 	
 <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;sunos&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
@@ -288,7 +298,7 @@
 
 <span class="c1"># outcomes</span>
 <div class="viewcode-block" id="Outcome"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.Outcome">[docs]</a><span class="k">class</span> <span class="nc">Outcome</span><span class="p">:</span>
-	<span class="sd">&quot;&quot;&quot;Represents a PySys test outcome that can be reported using `pysys.basetest.BaseTest.addOutcome()`. </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Represents a PySys test outcome that can be reported using `pysys.basetest.BaseTest.addOutcome()`. </span>
 <span class="sd">	</span>
 <span class="sd">	The possible outcomes are listed in `OUTCOMES`. </span>
 <span class="sd">	</span>
@@ -304,7 +314,7 @@
 	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__id</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isFailure</span> <span class="k">else</span> <span class="s1">&#39;(non-failure)&#39;</span><span class="p">))</span> <span class="c1"># use the constant id for this __repr__ string that shows in the doc</span>
 	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
 <div class="viewcode-block" id="Outcome.isFailure"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.Outcome.isFailure">[docs]</a>	<span class="k">def</span> <span class="nf">isFailure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;:return bool: True if this outcome is classed as failure, or False if not (e.g. `SKIPPED` and `NOTVERIFIED` are not failures).&quot;&quot;&quot;</span> 
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;:return bool: True if this outcome is classed as failure, or False if not (e.g. `SKIPPED` and `NOTVERIFIED` are not failures).&quot;&quot;&quot;</span> 
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isFailure</span></div></div>
 
 <span class="n">PASSED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;PASSED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -431,17 +441,17 @@
 <span class="n">LOG_END</span> <span class="o">=</span> <span class="s1">&#39;end&#39;</span>
 
 <div class="viewcode-block" id="PrintLogs"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.PrintLogs">[docs]</a><span class="k">class</span> <span class="nc">PrintLogs</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Enumeration constants that specify when run.log contents are printed to the stdout console.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Enumeration constants that specify when run.log contents are printed to the stdout console.</span>
 <span class="sd">	</span>
 <span class="sd">	In all cases a summary of failures is printed at the end, and the user can always </span>
 <span class="sd">	look at the run.log inside each output directory if they need more detail. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.NONE&#39;</span>
-	<span class="sd">&quot;&quot;&quot;Detailed run.log output is not printed to the stdout console. &quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Detailed run.log output is not printed to the stdout console. &quot;&quot;&quot;</span>
 	<span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.ALL&#39;</span>
-	<span class="sd">&quot;&quot;&quot;Detailed run.log output is always printed to the stdout console, for both passed and failed testcases. &quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Detailed run.log output is always printed to the stdout console, for both passed and failed testcases. &quot;&quot;&quot;</span>
 	<span class="n">FAILURES</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.FAILURES&#39;</span>
-	<span class="sd">&quot;&quot;&quot;Detailed run.log output is only printed to the stdout console for failed testcases. &quot;&quot;&quot;</span></div>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Detailed run.log output is only printed to the stdout console for failed testcases. &quot;&quot;&quot;</span></div>
 
 <span class="c1"># Prior to v2.1 the &quot;Project&quot; class and &quot;PROJECT&quot; constant were imported here; the former was removed to avoid circular </span>
 <span class="c1"># dependencies during initialization but for compatibility when using &#39;from constants import *&#39; in testcases both are </span>
@@ -460,7 +470,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

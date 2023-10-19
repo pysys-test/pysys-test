@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.threadutils &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils.threadutils &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -108,11 +108,13 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.osutils.html">pysys.utils.osutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.threadutils</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#backgroundthread">BackgroundThread</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#createthreadinitializer">createThreadInitializer</a></li>
 </ul>
 </li>
 </ul>
@@ -136,7 +138,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -192,7 +194,7 @@
             
   <div class="section" id="module-pysys.utils.threadutils">
 <span id="pysys-utils-threadutils"></span><h1>pysys.utils.threadutils<a class="headerlink" href="#module-pysys.utils.threadutils" title="Permalink to this headline">¶</a></h1>
-<p>Contains the <a class="reference internal" href="#pysys.utils.threadutils.BackgroundThread" title="pysys.utils.threadutils.BackgroundThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BackgroundThread</span></code></a> class.</p>
+<p>Contains the <a class="reference internal" href="#pysys.utils.threadutils.BackgroundThread" title="pysys.utils.threadutils.BackgroundThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BackgroundThread</span></code></a> class and other utilities for working with threads.</p>
 <div class="section" id="backgroundthread">
 <h2>BackgroundThread<a class="headerlink" href="#backgroundthread" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -277,6 +279,22 @@ outcome but does not raise an exception.</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="createthreadinitializer">
+<h2>createThreadInitializer<a class="headerlink" href="#createthreadinitializer" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.threadutils.createThreadInitializer">
+<code class="sig-prename descclassname">pysys.utils.threadutils.</code><code class="sig-name descname">createThreadInitializer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">owner</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/threadutils.html#createThreadInitializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.threadutils.createThreadInitializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a no-args initializer function that should be called at the start of a new thread created outside the PySys 
+framework to configure logging and thread name for the specified test/runner owner.</p>
+<p>This function is needed because if a new thread is created without PySys helper methods (such as 
+<a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.BaseTest.startBackgroundThread" title="pysys.basetest.BaseTest.startBackgroundThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startBackgroundThread</span></code></a>) then logging from that thread will not go to the test’s run.log 
+output file which can make debugging quite difficult.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -299,7 +317,7 @@ outcome but does not raise an exception.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

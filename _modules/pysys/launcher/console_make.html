@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.launcher.console_make &mdash; PySys v2.1  documentation</title>
+  <title>pysys.launcher.console_make &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -190,7 +190,7 @@
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span><span class="p">,</span> <span class="n">mkdir</span>
 
 <div class="viewcode-block" id="DefaultTestMaker"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker">[docs]</a><span class="k">class</span> <span class="nc">DefaultTestMaker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The default implementation of ``pysys.py make``, which creates tests and other assets using templates configurable </span>
 <span class="sd">	on a per-directory basis using ``&lt;maker-template&gt;`` configuration in ``pysysdirconfig.xml`` (and project) files.</span>
 <span class="sd">	</span>
@@ -239,6 +239,7 @@
 		<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">_XMLDescriptorParser</span><span class="o">.</span><span class="n">DEFAULT_DESCRIPTOR</span>
 		
 		<span class="k">def</span> <span class="nf">expandAndValidateTemplate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">defaults</span><span class="p">):</span>
+			<span class="k">if</span> <span class="s1">&#39;set-default-maker-template&#39;</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span> <span class="k">return</span> <span class="n">t</span> <span class="c1"># it&#39;s special</span>
 			<span class="n">source</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;unknown source&gt;&#39;</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">defaults</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span>
 
@@ -298,6 +299,12 @@
 						<span class="n">newtemplates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deftmpl</span><span class="p">)</span> 
 				<span class="n">templates</span> <span class="o">=</span> <span class="n">newtemplates</span>
 
+		<span class="c1"># if we have a designated default, move it to the start of the list</span>
+		<span class="n">deftmpl</span> <span class="o">=</span>   <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;set-default-maker-template&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">deftmpl</span><span class="p">:</span>
+			<span class="n">deftmpl</span> <span class="o">=</span> <span class="n">deftmpl</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;set-default-maker-template&#39;</span><span class="p">]</span>
+			<span class="n">templates</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">deftmpl</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">templates</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">deftmpl</span><span class="p">,</span> <span class="s1">&#39;set-default-maker-template&#39;</span><span class="p">)]</span>
+
 		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded templates: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">templates</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;  &#39;</span><span class="p">))</span>
 		<span class="k">return</span> <span class="n">templates</span>
 		
@@ -326,13 +333,14 @@
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   (more customized templates for new tests in this project/directory can be configured using pysysdirconfig)&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DefaultTestMaker.printUsage"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.printUsage">[docs]</a>	<span class="k">def</span> <span class="nf">printUsage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
 		<span class="c1">#######                                                                                                                        |</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PySys System Test Framework (version </span><span class="si">%s</span><span class="s2">): Makes PySys tests using configurable templates&quot;</span> <span class="o">%</span> <span class="n">__version__</span><span class="p">)</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">printOptions</span><span class="p">()</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TEST_DIR_NAME is the test directory to be created, which should consist of letters, numbers and underscores, &quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TEST_DIR_NAME is the test directory to be created which should consist of letters, numbers and underscores, &quot;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;e.g. MyApp_perf_001 (&#39;numeric&#39; style) or InvalidFooBarProducesError (&#39;test that XXX&#39; long string style).&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is possible to provide a parent directory before the test id. &quot;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;If TEST_DIR_NAME is not specified and existing tests follow the pattern PREFIX_NUMBER PySys will &quot;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;auto-generate a numeric test id using a free number. &quot;</span><span class="p">)</span>
@@ -349,7 +357,7 @@
 		<span class="k">return</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="DefaultTestMaker.validateTestId"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.validateTestId">[docs]</a>	<span class="k">def</span> <span class="nf">validateTestId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentDir</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">numericSuffix</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		This method can be overridden to provide customized validation of a proposed new test directory name, for example </span>
 <span class="sd">		to prevent clashes with existing tests committed to version control.</span>
 <span class="sd">		</span>
@@ -373,7 +381,7 @@
 		<span class="k">pass</span></div>
 
 <div class="viewcode-block" id="DefaultTestMaker.parseArgs"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.parseArgs">[docs]</a>	<span class="k">def</span> <span class="nf">parseArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">optlist</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">gnu_getopt</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">supportedArgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">supportedArgs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -450,7 +458,7 @@
 			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DefaultTestMaker.copy"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.copy">[docs]</a>	<span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">replace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Copies the specified source file/dir to the specified dest file/dir. </span>
 <span class="sd">		</span>
 <span class="sd">		Can be overridden if any advanced post-processing is required. </span>
@@ -493,7 +501,7 @@
 			<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DefaultTestMaker.makeTest"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.DefaultTestMaker.makeTest">[docs]</a>	<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Uses the previously parsed arguments to create a new test (or related asset) on disk in ``self.dest``. </span>
 <span class="sd">		</span>
 <span class="sd">		Can be overridden if additional post-processing steps are required for some templates. </span>
@@ -561,7 +569,8 @@
 			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
 				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot copy to </span><span class="si">%s</span><span class="s1"> as it already exists&#39;</span><span class="o">%</span><span class="n">target</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
-			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Copied </span><span class="si">%s%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+			<span class="c1"># abs path is useful so you can open it in an ide</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Copied to </span><span class="si">%s%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
 		<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;mkdir&#39;</span><span class="p">]:</span>	
 			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
@@ -572,7 +581,7 @@
 		<span class="k">return</span> <span class="n">dest</span></div></div>
 
 <div class="viewcode-block" id="ProposeNewTestIdNumericSuffixException"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ProposeNewTestIdNumericSuffixException">[docs]</a><span class="k">class</span> <span class="nc">ProposeNewTestIdNumericSuffixException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	This exception should be thrown by `DefaultTestMaker.validateTestId` if the specific test id cannot be used but </span>
 <span class="sd">	the validator can propose an acceptable numeric suffix to use instead, typically with a higher number to avoid </span>
 <span class="sd">	conflicts with tests committed to version control elsewhere. </span>
@@ -585,15 +594,15 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">newNumericSuffix</span> <span class="o">=</span> <span class="n">newNumericSuffix</span></div>
 
 <div class="viewcode-block" id="LegacyConsoleMakeTestHelper"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper">[docs]</a><span class="k">class</span> <span class="nc">LegacyConsoleMakeTestHelper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The legacy and deprecated implementation of ``pysys.py make`` - used only by existing custom subclasses.</span>
 <span class="sd">	</span>
 <span class="sd">	Also known by its alias ``ConsoleMakeTestHelper``. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">TEST_TEMPLATE</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;import pysys</span>
-<span class="si">%s</span><span class="s1"></span>
-<span class="si">%s</span><span class="s1"></span>
+<span class="si">%s</span>
+<span class="si">%s</span>
 
 <span class="s1">class </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">):</span>
 <span class="s1">	def execute(self):</span>
@@ -645,7 +654,7 @@
 
 
 <div class="viewcode-block" id="LegacyConsoleMakeTestHelper.printUsage"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.printUsage">[docs]</a>	<span class="k">def</span> <span class="nf">printUsage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
 		<span class="n">_PYSYS_SCRIPT_NAME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;pysys.py&#39;</span>
 		<span class="c1">#######                                                                                                                        |</span>
 		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PySys System Test Framework (version </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">): Customized (legacy) test maker </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
@@ -661,7 +670,7 @@
 
 
 <div class="viewcode-block" id="LegacyConsoleMakeTestHelper.parseArgs"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.parseArgs">[docs]</a>	<span class="k">def</span> <span class="nf">parseArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">optlist</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">gnu_getopt</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s1">&#39;ha:d:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;help&quot;</span><span class="p">,</span><span class="s2">&quot;type=&quot;</span><span class="p">,</span><span class="s2">&quot;dir=&quot;</span><span class="p">]</span> <span class="p">)</span>
@@ -698,7 +707,7 @@
 
 <div class="viewcode-block" id="LegacyConsoleMakeTestHelper.makeTest"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.LegacyConsoleMakeTestHelper.makeTest">[docs]</a>	<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testclass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 				 <span class="n">group</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">constantsImport</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basetestImport</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basetest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">teststring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Makes a new test on disk. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="nb">input</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="nb">input</span> <span class="o">=</span> <span class="n">DEFAULT_INPUT</span>
@@ -767,7 +776,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.config.descriptor &mdash; PySys v2.1  documentation</title>
+  <title>pysys.config.descriptor &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -129,7 +129,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -253,11 +253,24 @@ low values. The default is 0.0.</p></li>
 <li><p><strong>isDirConfig</strong> (<em>bool</em>) – True if this is a directory configuration, or False if 
 it’s a normal testcase.</p></li>
 <li><p><strong>userData</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>obj</em><em>]</em>) – A Python dictionary that can be used for storing user-defined data 
-in the descriptor. In a pysystest.xml, this can be populated by one or more <code class="docutils literal notranslate"><span class="pre">user-data</span></code> elements, e.g. 
-<code class="docutils literal notranslate"><span class="pre">&lt;data&gt;&lt;user-data</span> <span class="pre">name=&quot;key&quot;</span> <span class="pre">value=&quot;val</span> <span class="pre">${projectProperty}&quot;&lt;/user-data&gt;&lt;/data&gt;</span></code>.</p></li>
+in the descriptor. In a pysystest.py, this can be populated by a <code class="docutils literal notranslate"><span class="pre">__pysys_user_data__</span></code> dictionary, e.g. 
+<code class="docutils literal notranslate"><span class="pre">__pysys_user_data__</span> <span class="pre">=</span> <span class="pre">{&quot;key&quot;:</span> <span class="pre">&quot;val</span> <span class="pre">${projectProperty}&quot;}</span></code> or <code class="docutils literal notranslate"><span class="pre">__pysys_user_data.key__</span> <span class="pre">=</span> <span class="pre">&quot;val&quot;</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt id="pysys.config.descriptor.TestDescriptor.setId">
+<code class="sig-name descname">setId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/descriptor.html#TestDescriptor.setId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.descriptor.TestDescriptor.setId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the id of this descriptor.</p>
+<p>This can be used by <a class="reference internal" href="#pysys.config.descriptor.DescriptorLoader" title="pysys.config.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DescriptorLoader</span></code></a> or a loader plugin to modify the id of a descriptor just after it has been parsed.</p>
+<p>Use this insteaad of assigning directly to the id field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns <code class="docutils literal notranslate"><span class="pre">self</span></code> to allow fluent usage.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="pysys.config.descriptor.TestDescriptor.toDict">
 <code class="sig-name descname">toDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/descriptor.html#TestDescriptor.toDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.descriptor.TestDescriptor.toDict" title="Permalink to this definition">¶</a></dt>
@@ -276,7 +289,7 @@ in the descriptor. In a pysystest.xml, this can be populated by one or more <cod
 <p>A helper class that is passed to the lambda which defines test modes in a pysystest configuration. It provides access to 
 the list of inherited modes, to project properties and also helper functions for combining multiple mode lists into 
 one and for configuring a collection of modes as primary modes.</p>
-<p>See <a class="reference internal" href="../pysys/UserGuide.html"><span class="doc">User Guide</span></a> for detailed information about what you can do with PySys modes.</p>
+<p>See <a class="reference internal" href="../pysys/UserGuide.html"><span class="doc">Guides</span></a> for detailed information about what you can do with PySys modes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
@@ -496,11 +509,11 @@ must be thread-safe.</p>
 <dl class="py method">
 <dt id="pysys.config.descriptor.DescriptorLoader.loadDescriptors">
 <code class="sig-name descname">loadDescriptors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dir</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/config/descriptor.html#DescriptorLoader.loadDescriptors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.config.descriptor.DescriptorLoader.loadDescriptors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find all descriptors located under the specified directory, and 
+<dd><p>Find all descriptors located under the specified directory (including its children), and 
 return them as a list.</p>
 <p>Subclasses may change the returned descriptors and/or add additional 
 instances of their own to the list after calling the super implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">descriptors</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">CustomDescriptorLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">loadDescriptors</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">descriptors</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">loadDescriptors</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 <span class="o">...</span>
 <span class="k">return</span> <span class="n">descriptors</span>
 </pre></div>
@@ -624,7 +637,7 @@ The exception message must contain the path of the descriptorfile.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.pycompat &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils.pycompat &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -191,15 +191,17 @@
 <span class="n">binary_type</span> <span class="o">=</span> <span class="nb">bytes</span>
 
 <div class="viewcode-block" id="isstring"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.pycompat.html#pysys.utils.pycompat.isstring">[docs]</a><span class="k">def</span> <span class="nf">isstring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> 
-	<span class="sd">&quot;&quot;&quot; Returns True if the specified object is a python string. </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Returns True if the specified object is a python string. </span>
 <span class="sd">	</span>
 <span class="sd">	Deprecated - use ``isinstance(s, str)`` instead.</span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span></div>
 
-<span class="k">def</span> <span class="nf">quotestring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Adds double quotation marks around the specified character or byte string, </span>
+<span class="kn">from</span> <span class="nn">pysys.utils.misc</span> <span class="kn">import</span> <span class="n">quoteString</span> <span class="k">as</span> <span class="n">__quotestring</span> <span class="c1"># for pre-2.0 compatibility</span>
+
+<div class="viewcode-block" id="quotestring"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.pycompat.html#pysys.utils.pycompat.quotestring">[docs]</a><span class="k">def</span> <span class="nf">quotestring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Adds double quotation marks around the specified character or byte string, </span>
 <span class="sd">	and additional escaping only if needed to make the meaning clear, but trying to </span>
 <span class="sd">	avoid double-slashes unless actually needed since it makes paths harder to read</span>
 <span class="sd">	</span>
@@ -209,23 +211,10 @@
 <span class="sd">	Deprecated - use `pysys.utils.misc.quoteString` instead. </span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="c1"># this function exists primarily to provide the same quoting behaviour </span>
-	<span class="c1"># for str/unicode in Python 2 and str in Python 3, but avoiding </span>
-	<span class="c1"># the confusing &quot;b&#39;valuehere&#39;&quot; representation that &quot;%s&quot; would </span>
-	<span class="c1"># produce for python 3 bytes objects</span>
-	<span class="n">r</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-	<span class="k">if</span> <span class="ow">not</span> <span class="n">isstring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="k">return</span> <span class="n">r</span>
-	
-	<span class="k">if</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="c1"># if it contains escape sequences like \n to \&quot; we&#39;d better just use repr so it&#39;s unambiguous</span>
-		<span class="k">return</span> <span class="n">r</span>
-	
-	<span class="c1"># repr uses single quotes, so using double quotes is a good way to make it distinguishable </span>
-	<span class="c1"># (the other option would be using r&#39;...&#39; since essentially this is like a Python raw string</span>
-
-	<span class="k">return</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">s</span>
+	<span class="k">return</span> <span class="n">__quotestring</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
 	
 <div class="viewcode-block" id="openfile"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.pycompat.html#pysys.utils.pycompat.openfile">[docs]</a><span class="k">def</span> <span class="nf">openfile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Opens the specified file, following the default </span>
 <span class="sd">	&quot;open()&quot; semantics for this Python version unless an encoding is </span>
 <span class="sd">	explicitly specified, in which case a file stream </span>
@@ -289,7 +278,6 @@
 		<span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 		<span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span> <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
-<span class="kn">from</span> <span class="nn">pysys.utils.misc</span> <span class="kn">import</span> <span class="n">quoteString</span> <span class="k">as</span> <span class="n">quotestring</span> <span class="c1"># for pre-2.0 compatibility</span>
 </pre></div>
 
            </div>
@@ -302,7 +290,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

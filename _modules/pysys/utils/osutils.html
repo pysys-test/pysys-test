@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.osutils &mdash; PySys v2.2  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v2.2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.osutils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.osutils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2023 M.B.Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains operating system helper utilities such as the `getUsableCPUCount` function. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;getUsableCPUCount&#39;</span><span class="p">]</span>
+
+
+<span class="n">__USABLE_CPU_COUNT</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="getUsableCPUCount"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.osutils.html#pysys.utils.osutils.getUsableCPUCount">[docs]</a><span class="k">def</span> <span class="nf">getUsableCPUCount</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The number of CPUs that are usable from this PySys process, as a floating point number. </span>
+
+<span class="sd">	This may be less than the total number of CPUs due to restrictions from the operating system </span>
+<span class="sd">	such as the process affinity mask and container cgroup (``cpu.cfs_quota_us`` / ``cpu.max``) limits. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">__USABLE_CPU_COUNT</span><span class="p">:</span> <span class="k">return</span> <span class="n">__USABLE_CPU_COUNT</span>
+	<span class="k">return</span> <span class="n">_initUsableCPUCount</span><span class="p">()</span></div>
+	
+
+<span class="k">def</span> <span class="nf">_initUsableCPUCount</span><span class="p">():</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Internal, do not use. </span>
+
+<span class="sd">	Called after importing BaseRunner (not when this module is imported) so that it&#39;s possible to monkey-patch </span>
+<span class="sd">	it in user code (e.g. when the custom runner is imported) if required e.g. for a new platform. </span>
+
+<span class="sd">	:meta private: Not public API</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.initUsableCPUCount&#39;</span><span class="p">)</span>
+
+	<span class="k">global</span> <span class="n">__USABLE_CPU_COUNT</span>
+	<span class="k">if</span> <span class="n">__USABLE_CPU_COUNT</span><span class="p">:</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Calling _initUsableCPUCount when it was previously called and returned </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">__USABLE_CPU_COUNT</span><span class="p">)</span>
+
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">cpus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sched_getaffinity</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="c1"># as recommended in Python docs, use the allocated CPUs for current process multiprocessing.cpu_count()</span>
+	<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="c1"># no always available, e.g. on Windows</span>
+		<span class="n">cpus</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+	<span class="k">assert</span> <span class="n">cpus</span><span class="p">,</span> <span class="n">cpus</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">IS_WINDOWS</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_IGNORE_CGROUPS&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">!=</span><span class="s1">&#39;true&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;/proc/self/cgroup&#39;</span><span class="p">):</span> 
+		<span class="c1"># if https://github.com/python/cpython/issues/80235 is implemented we can defer to Python to calculate this</span>
+	
+		<span class="n">cgroupslog</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.cgroups&#39;</span><span class="p">)</span>
+		<span class="n">cgroups</span> <span class="o">=</span> <span class="n">CgroupConfig</span><span class="p">()</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">cfs_quota_us</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cgroups</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="s1">&#39;cpu.cfs_quota_us&#39;</span><span class="p">,</span> <span class="n">v1Controller</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
+			<span class="n">cfs_period_us</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cgroups</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="s1">&#39;cpu.cfs_period_us&#39;</span><span class="p">,</span> <span class="n">v1Controller</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
+			<span class="n">shares</span>        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cgroups</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="s1">&#39;cpu.shares&#39;</span><span class="p">,</span> <span class="n">v1Controller</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span> <span class="c1"># just for information</span>
+			<span class="n">cgroupsLimits</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="k">if</span> <span class="n">cfs_quota_us</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">cfs_period_us</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> 
+				<span class="n">cgroupsLimits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cfs_quota_us</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfs_period_us</span><span class="p">))</span> <span class="c1"># quota is per CPU, i.e. quota&gt;period if multiple CPUs permitted</span>
+
+			<span class="n">cpuMax</span> <span class="o">=</span> <span class="n">cgroups</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="s1">&#39;cpu.max&#39;</span><span class="p">,</span> <span class="n">v1Controller</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cpuMax</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">cpuMax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">!=</span><span class="s1">&#39;max&#39;</span><span class="p">:</span>
+				<span class="n">cgroupsLimits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cpuMax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">cpuMax</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="c1"># seems to work the same as the v1 quota and period</span>
+			
+			<span class="c1"># do NOT use cpu.shares as it&#39;s not possible to do reliably (e.g. cf https://bugs.openjdk.org/browse/JDK-8281181)</span>
+				
+			<span class="n">cgroupsLimits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cpus</span><span class="p">)</span> <span class="c1"># don&#39;t ever use more than the total CPUs in the machine so add that to the list of limits</span>
+			<span class="n">cgroupslog</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Read cgroups configuration: v1 cpu.cfs_quota_us/cfs_period_us=</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> (ignored: cpu.shares=</span><span class="si">%s</span><span class="s1">), v2 cpu.max=</span><span class="si">%s</span><span class="s1">; limiting to min of: </span><span class="si">%s</span><span class="s1"> CPUs&#39;</span><span class="p">,</span> 
+				<span class="n">cfs_quota_us</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">cfs_period_us</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">shares</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> 
+				<span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cpuMax</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> 
+				<span class="n">cgroupsLimits</span><span class="p">)</span>
+			<span class="n">reducedCPUs</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">cgroupsLimits</span><span class="p">)</span> <span class="c1"># use whatever limit is lowest</span>
+			<span class="k">if</span> <span class="n">reducedCPUs</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span> <span class="n">reducedCPUs</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># should not happen, just a failsafe in case of weird cgroup config</span>
+			<span class="k">if</span> <span class="n">reducedCPUs</span><span class="o">&lt;</span><span class="n">cpus</span><span class="p">:</span>
+				<span class="n">cgroupslog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Reduced usable CPU count from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> due to Cgroups configuration&#39;</span><span class="p">,</span> <span class="n">cpus</span><span class="p">,</span> <span class="n">reducedCPUs</span><span class="p">)</span>
+			<span class="n">cpus</span> <span class="o">=</span> <span class="n">reducedCPUs</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">cgroupslog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Failed to read cgroups configuration to determine available CPUs: </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="c1"># </span>
+			<span class="n">cgroupslog</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to read cgroups information due to:&#39;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+	<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Usable CPU count for process = </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">cpus</span><span class="p">)</span>
+
+	<span class="n">__USABLE_CPU_COUNT</span> <span class="o">=</span> <span class="n">cpus</span>
+	<span class="k">return</span> <span class="n">cpus</span>
+
+
+<span class="k">class</span> <span class="nc">CgroupConfig</span><span class="p">:</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Helper class for reading cgroups configuration for the current process, supporting both cgroups v1 and v2. </span>
+<span class="sd">	</span>
+<span class="sd">	This is a minimal implementation, and assumes the  mount point is &quot;/sys/fs/cgroup&quot;. Consider using a dedicated </span>
+<span class="sd">	library if you need something more advanced. </span>
+<span class="sd">	</span>
+<span class="sd">	:meta private: This API is not yet stable enough for general use, and may change at any time. </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mountRoot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;self&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">controllers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Maps a controller name (in v1, or &quot;&quot; for v2) to the full path of that controller. &quot;&quot;&quot;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">mountRoot</span> <span class="o">=</span> <span class="n">mountRoot</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_CGROUPS_ROOT_MOUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;/sys/fs/cgroup&#39;</span><span class="p">)</span> <span class="c1"># Would be more correct to look this up from /proc/self/mountinfo, but probably not necessary as almost everyone has it mounted in the standard location</span>
+		<span class="k">if</span> <span class="n">IS_WINDOWS</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">mountRoot</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mountRoot</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_debuglog</span><span class="p">(</span><span class="s1">&#39;No cgroup root is mounted at </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">mountRoot</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">mountRoot</span> <span class="o">=</span> <span class="kc">None</span>
+	
+	<span class="k">def</span> <span class="nf">__getControllerDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cgroupsv1Controller</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mountRoot</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+		<span class="n">d</span> <span class="o">=</span> <span class="n">mountRoot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mountRoot</span>
+		
+		<span class="k">if</span> <span class="n">cgroupsv1Controller</span><span class="p">:</span> 
+			<span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">cgroupsv1Controller</span>
+		<span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mountRoot</span><span class="o">+</span><span class="s1">&#39;/cgroup.controllers&#39;</span><span class="p">):</span>
+			<span class="k">return</span> <span class="kc">None</span> <span class="c1"># can&#39;t be cgroups v2 if there is no controllers file</span>
+		
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/proc/&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="o">+</span><span class="s1">&#39;/cgroup&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="c1"># should always exist</span>
+			<span class="c1"># Get the PATH from a matching HIERARCHY:CONTROLLER_LIST:PATH line, where CONTROLLER_LIST is a comma-separated list</span>
+			<span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+:</span><span class="si">%s</span><span class="s1">:(.*)&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">cgroupsv1Controller</span> <span class="k">else</span> <span class="s2">&quot;([^:]+,)?&quot;</span><span class="o">+</span><span class="n">cgroupsv1Controller</span><span class="o">+</span><span class="s2">&quot;(,[^:]+)?&quot;</span><span class="p">),</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span> <span class="c1"># return and log nothing if the relevant cgroup</span>
+		<span class="n">cgroup_path</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="c1"># if it&#39;s &quot;/&quot; convert to &quot;&quot;</span>
+		
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="n">cgroup_path</span><span class="p">):</span> 
+			<span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">+</span><span class="n">cgroup_path</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_debuglog</span><span class="p">(</span><span class="s1">&#39;Reading cgroup configuration for </span><span class="si">%s</span><span class="s1"> controller from &quot;</span><span class="si">%s</span><span class="s1">&quot; as given by /proc/self/cgroup file&#39;</span><span class="p">,</span> 
+		  		<span class="n">cgroupsv1Controller</span> <span class="ow">or</span> <span class="s1">&#39;&lt;cgroup v2&gt;&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1"># seems to often not exist in docker containers, as it&#39;s a path in the docker host that the container can&#39;t see</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_debuglog</span><span class="p">(</span><span class="s1">&#39;Reading cgroup configuration for </span><span class="si">%s</span><span class="s1"> controller from root dir &quot;</span><span class="si">%s</span><span class="s1">&quot; since the path &quot;</span><span class="si">%s</span><span class="s1">&quot; given by /proc/self/cgroup file was not found under the root dir&#39;</span><span class="p">,</span>
+		 	 	<span class="n">cgroupsv1Controller</span> <span class="ow">or</span> <span class="s1">&#39;&lt;cgroup v2&gt;&#39;</span><span class="p">,</span>  <span class="n">d</span><span class="p">,</span> <span class="n">cgroup_path</span><span class="p">)</span>
+		
+		<span class="k">return</span> <span class="n">d</span>
+
+	<span class="k">def</span> <span class="nf">readFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">v1Controller</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Return as a string the first line of the specified cgroups filename belonging to the specified controller (always &quot;&quot; for cgroups v2). </span>
+<span class="sd">		</span>
+<span class="sd">		:param str filename: The base filename within the controller, e.g. &quot;cpu.max&quot;</span>
+<span class="sd">		:param str v1controller: To read cgroups v2 this should be None, for cgroups v1 this is the controller name, e.g. &quot;cpu&quot;. </span>
+<span class="sd">		:return: A string containing the first line of the specified cgroups file, or empty string &#39;&#39; if the file or controller is missing. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">v1Controller</span> <span class="o">=</span> <span class="n">v1Controller</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+		<span class="k">assert</span> <span class="s1">&#39;,&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v1Controller</span><span class="p">,</span> <span class="n">v1Controller</span>
+		<span class="k">if</span> <span class="n">v1Controller</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">:</span> <span class="c1"># cache this where possible</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">v1Controller</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getControllerDir</span><span class="p">(</span><span class="n">v1Controller</span><span class="p">)</span>
+		<span class="n">dirname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">v1Controller</span><span class="p">]</span>
+		
+		<span class="k">if</span> <span class="n">dirname</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirname</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">filename</span><span class="p">):</span>
+			<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dirname</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+		
+		<span class="k">return</span> <span class="s1">&#39;&#39;</span>
+	
+	<span class="k">def</span> <span class="nf">_debuglog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.cgroups&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

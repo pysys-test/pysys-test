@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.perf.api &mdash; PySys v2.1  documentation</title>
+  <title>pysys.perf.api &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -187,7 +187,7 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.perfreporter&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PerformanceUnit"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.PerformanceUnit">[docs]</a><span class="k">class</span> <span class="nc">PerformanceUnit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Class which identifies the unit in which a performance result is measured.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Class which identifies the unit in which a performance result is measured.</span>
 <span class="sd">	</span>
 <span class="sd">	Every unit encodes whether big numbers are better or worse (which can be used </span>
 <span class="sd">	to calculate the improvement or regression when results are compared), e.g. </span>
@@ -218,7 +218,7 @@
 <span class="n">PerformanceUnit</span><span class="o">.</span><span class="n">PER_SECOND</span> <span class="o">=</span> <span class="n">PerformanceUnit</span><span class="p">(</span><span class="s1">&#39;/s&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BasePerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">BasePerformanceReporter</span><span class="p">:</span>
-	<span class="sd">&quot;&quot;&quot;API base class for creating a reporter that handles or stores performance results for later analysis.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;API base class for creating a reporter that handles or stores performance results for later analysis.</span>
 <span class="sd">	</span>
 <span class="sd">	Each performance result consists of a value, a result key (which must </span>
 <span class="sd">	be unique across all test cases and modes, and also stable across different </span>
@@ -269,7 +269,7 @@
 			<span class="p">}</span>
 			
 <div class="viewcode-block" id="BasePerformanceReporter.setup"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.setup">[docs]</a>	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called before any tests begin to prepare the performance writer for use, once the runner is setup, and any project </span>
 <span class="sd">		configuration properties for this performance reporter have been assigned to this instance. </span>
 <span class="sd">		</span>
@@ -280,7 +280,7 @@
 		<span class="k">pass</span> <span class="c1"># pragma: no cover</span></div>
 		
 <div class="viewcode-block" id="BasePerformanceReporter.getRunDetails"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.getRunDetails">[docs]</a>	<span class="k">def</span> <span class="nf">getRunDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Return an dictionary of information about this test run (e.g. hostname, start time, etc).</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return an dictionary of information about this test run (e.g. hostname, start time, etc).</span>
 <span class="sd">		</span>
 <span class="sd">		Overriding this method is discouraged; customization of the run details should usually be performed by changing </span>
 <span class="sd">		the ``runner.runDetails`` dictionary from the `pysys.baserunner.BaseRunner.setup()` method. </span>
@@ -295,7 +295,7 @@
 	
 <div class="viewcode-block" id="BasePerformanceReporter.valueToDisplayString"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.valueToDisplayString">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">valueToDisplayString</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Pretty-print an integer or float value to a moderate number of significant figures.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Pretty-print an integer or float value to a moderate number of significant figures.</span>
 
 <span class="sd">		The method additionally adds a &quot;,&quot; grouping for large numbers.</span>
 <span class="sd">		</span>
@@ -312,7 +312,7 @@
 			<span class="k">return</span> <span class="n">valtostr</span></div>
 
 <div class="viewcode-block" id="BasePerformanceReporter.getRunSummaryFile"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.getRunSummaryFile">[docs]</a>	<span class="k">def</span> <span class="nf">getRunSummaryFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Return the fully substituted location of the file to which summary performance results will be written.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return the fully substituted location of the file to which summary performance results will be written.</span>
 
 <span class="sd">		This may include the following substitutions: ``@OUTDIR@`` (=``${outDirName}``, the basename of the output directory for this run,</span>
 <span class="sd">		e.g. &quot;linux&quot;), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. </span>
@@ -339,7 +339,7 @@
 		<span class="k">return</span> <span class="n">summaryfile</span></div>
 
 <div class="viewcode-block" id="BasePerformanceReporter.reportResult"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.reportResult">[docs]</a>	<span class="k">def</span> <span class="nf">reportResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resultDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Report a performance result, with an associated unique key that identifies it.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Report a performance result, with an associated unique key that identifies it.</span>
 <span class="sd">		</span>
 <span class="sd">		This method must be implemented by performance reporters. However do not ever call it directly - always use </span>
 <span class="sd">		`pysys.basetest.BaseTest.reportPerformanceResult` which performs some critical input validations before calling </span>
@@ -357,7 +357,7 @@
 		
 
 <div class="viewcode-block" id="BasePerformanceReporter.cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Called when PySys has finished executing tests.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Called when PySys has finished executing tests.</span>
 <span class="sd">		</span>
 <span class="sd">		This is where any file footer and other I/O finalization can be written to the end of performance log files, and </span>
 <span class="sd">		is also a good time to do any required aggregation, printing of summaries or artifact publishing. </span>
@@ -366,7 +366,7 @@
 	
 <div class="viewcode-block" id="BasePerformanceReporter.tryDeserializePerformanceFile"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.BasePerformanceReporter.tryDeserializePerformanceFile">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">tryDeserializePerformanceFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Advanced method which allows performance reporters to deserialize the files they write to allow them to be used </span>
 <span class="sd">		as comparison baselines. </span>
 <span class="sd">		</span>
@@ -380,7 +380,7 @@
 		<span class="k">return</span> <span class="kc">None</span> <span class="c1"># pragma: no cover</span></div></div>
 
 <div class="viewcode-block" id="PerformanceRunData"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.PerformanceRunData">[docs]</a><span class="k">class</span> <span class="nc">PerformanceRunData</span><span class="p">:</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Holds performance data for a single test run, consisting of runDetails and a list of performance results covering </span>
 <span class="sd">	one or more cycles. </span>
 <span class="sd">	</span>
@@ -409,7 +409,7 @@
 
 <div class="viewcode-block" id="PerformanceRunData.aggregate"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.PerformanceRunData.aggregate">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">runs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Aggregate a list of multiple runs and/or cycles into a single performance run data object with a single </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Aggregate a list of multiple runs and/or cycles into a single performance run data object with a single </span>
 <span class="sd">		entry for each unique resultKey with the value given as a mean of all the observed samples.</span>
 
 <span class="sd">		:param list[PerformanceRunData] files: the list of run objects to aggregate.</span>
@@ -459,7 +459,7 @@
 			
 		
 <div class="viewcode-block" id="CSVPerformanceFile"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile">[docs]</a><span class="k">class</span> <span class="nc">CSVPerformanceFile</span><span class="p">(</span><span class="n">PerformanceRunData</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Holds performance data for a single test run in a CSV performance file.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Holds performance data for a single test run in a CSV performance file.</span>
 
 <span class="sd">	If this file contains aggregated results the number of &quot;samples&quot; may be greater than 1 and the &quot;value&quot;</span>
 <span class="sd">	will specify the mean result.</span>
@@ -484,7 +484,7 @@
 
 <div class="viewcode-block" id="CSVPerformanceFile.aggregate"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.aggregate">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Aggregate a list of performance file objects into a single CSVPerformanceFile object.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Aggregate a list of performance file objects into a single CSVPerformanceFile object.</span>
 
 <span class="sd">		Takes a list of one or more CSVPerformanceFile objects and returns a single aggregated</span>
 <span class="sd">		CSVPerformanceFile with a single row for each resultKey (with the &quot;value&quot; set to the</span>
@@ -505,7 +505,7 @@
 
 <div class="viewcode-block" id="CSVPerformanceFile.load"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.load">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Read the runDetails and results from the specified .csv file on disk.</span>
 <span class="sd">		</span>
 <span class="sd">		:param str src: The path to read. </span>
@@ -517,7 +517,7 @@
 			<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">src</span><span class="p">)</span></div>
 				
 <div class="viewcode-block" id="CSVPerformanceFile.dump"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.dump">[docs]</a>	<span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Dump the runDetails and results from this object to a CSV at the specified location. </span>
 <span class="sd">		</span>
 <span class="sd">		Any existing file is overwritten. </span>
@@ -540,7 +540,7 @@
 
 <div class="viewcode-block" id="CSVPerformanceFile.toCSVLine"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.api.html#pysys.perf.api.CSVPerformanceFile.toCSVLine">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">toCSVLine</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Convert a list or dictionary of input values into a CSV string.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Convert a list or dictionary of input values into a CSV string.</span>
 
 <span class="sd">		Note that no new line character is return in the CSV string. The input values can either be</span>
 <span class="sd">		a list (any nested dictionaries are expanded into KEY=VALUE entries), or a dictionary (or OrderedDict)</span>
@@ -640,7 +640,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

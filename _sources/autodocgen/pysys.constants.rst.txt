@@ -20,6 +20,12 @@ PLATFORM
 .. autodata:: PLATFORM
 
 
+LIBRARY\_PATH\_ENV\_VAR
+=======================
+
+.. autodata:: LIBRARY_PATH_ENV_VAR
+
+
 PREFERRED\_ENCODING
 ===================
 

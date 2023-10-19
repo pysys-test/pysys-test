@@ -133,8 +133,9 @@ Each descriptor value is populated with a ``__pysys_KEY__ = VALUE`` line.
   __pysys_execution_order_hint__ = +100.0
   	
   # By default the test class uses this pysystest.py module, but it is possible to use a different path for the test 
-  # (even an absolute path). If you want to use a single Python class for lots of tests, set the module 
-  # to the special string "PYTHONPATH" and make sure it's available on the project's <pythonpath>. 
+  # (even an absolute path). If you want to use a single Python class for lots of tests, use a class with at least one 
+  # Python package in it (or set the module to the special string "PYTHONPATH"), and make sure it's available on the
+  # project's <pythonpath>. 
   __pysys_python_class__     = "PySysTest"
   __pysys_python_module__    = "${testRootDir}/pysys-extensions/MySharedTestClass.py" # or "PYTHONPATH"
   
@@ -153,10 +154,14 @@ Each descriptor value is populated with a ``__pysys_KEY__ = VALUE`` line.
   	
   		'myTestDescriptorData': 'foobar', 
   
+          # If a static field of the same name exists on the test class, it will be overridden with the associated user-data
+          # value, with some basic type coersion to match the default value of the static field where possible.
+  
   		# For long values such as paths if the value is to be converted to a list, newline and/or comma can be used as 
-  		# delimiters, however it is up to the Python code that's processing the user data to handle. 
-  		# Similarly, you can use project property syntax (e.g. ${propName} or ${eval: xxx}) if the code that reads 
-  		# the user data expands them (but this does not happen automatically). 
+  		# delimiters and will be automatically converted.
+  		
+  		# You can use project property syntax (e.g. ${propName} or ${eval: xxx}) and these will be expanded 
+  		# automatically. 
   		'myTestDescriptorPath': '''
   			foo/foo-${os_myThirdPartyLibraryVersion}
   			foo/bar, foo/baz
@@ -164,6 +169,9 @@ Each descriptor value is populated with a ``__pysys_KEY__ = VALUE`` line.
   			foo/bosh
   		'''
   	}
+  # You can also specify items for the user data dictionary with separate items as follows. For non-Python pysystest.* files 
+  # you can optionally use dot syntax instead of underscore e.g. "__pysys_user_data.myOtherUserData__".
+  __pysys_user_data_myOtherUserData__ = "foo/foo-${os_myThirdPartyLibraryVersion}, foo/bar, foo/baz"
   
   # It is also possible to provide the descriptor values using XML embedded in this file as follows. Note that parsing 
   # XML is relatively slow, so add this value only if you have a good reason. 
@@ -287,6 +295,8 @@ same capabilities described above for ``pysystest.py``.
   
   	A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
   	
+  	The specified Python code is invoked using `pysys.utils.safeeval.safeEval`.
+  	
   	-->
   	<modes>
   		lambda helper: [
@@ -337,9 +347,10 @@ same capabilities described above for ``pysystest.py``.
   	<execution-order hint="+100.0"/>
   	
   	<!-- By convention the test class uses module="run.py" located in the test directory, but 
-  	it is possible to use a different path (even an absolute path). If you want to use a single 
-  	Python class for lots of tests rather, omit the module= attribute and make sure it's available 
-  	on the project's <pythonpath> . 
+  	it is possible to use a different path (even an absolute path). If you want to use 
+  	a single Python class for lots of tests, omit the module= attribute, ensure the class has at least one level of 
+  	Python package, and make sure it's available on the project's <pythonpath> . 
+  
   	-->
   	<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
   
@@ -354,8 +365,11 @@ same capabilities described above for ``pysystest.py``.
   		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 
   		shared Python class for lots of tests. 
   		
-  		Project properties (but not other user-data values) can be specified using ${...}, but only if the Python code 
-  		that's reading the user-data explicitly expands the properties (it's not automatic). 
+  		Project properties (but not other user-data values) can be substituted into the value using ${...}, 
+  		and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables). 
+  
+  		If a static field of the same name exists on the test class, it will be overridden with the associated user-data 
+  		value, with some basic type coersion to match the default value of the static field where possible. 
   		-->
   		<user-data name="myTestDescriptorData" value="foobar"/>
   		
@@ -400,6 +414,7 @@ mistakes, and makes it easier to add new modes and other setting later as your p
 Most of the directory-level options are the same as ``pysystest.xml`` but there are a few options that don't make 
 sense at the directory level, and also additional options for directories such as ``id-prefix``. 
 
+
 .. code-block:: xml
 
   <?xml version="1.0" encoding="utf-8"?>
@@ -410,56 +425,68 @@ sense at the directory level, and also additional options for directories such a
   	(and the pysysdirconfig element from pysysproject.xml if present). 
   	-->
   
-  	<!-- Specify a prefix to be added to the id of all tests under this directory.
-  	This is in addition to any defined by individual tests. 
-  	-->
+Prefix
+~~~~~~
+Specify a prefix to be added to the id of all tests under this directory.
+This is in addition to any defined by individual tests. 
+
+.. code-block:: xml
+
   	<id-prefix>MyServer.Performance.</id-prefix>
   	
-  	<!-- Specify the templates that can be used by "pysys make" when creating new tests. You may wish to provide 
-  	project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage 
-  	test creators to follow best practices (rather than just copying from a random test which may not be a good example). 
-  	
-  	Run "pysys make -h" to see which templates are available for creating tests under the current directory. 
-  	
-  	The first template (in the lowest-level pysysdirconfig.xml file) is used by default. 
-  	
-  	Each template is defined by:
-  	
-  	  - name: A short name used to select this template on the command line ("lowercase-with-hyphens" naming convention).
-  	  - description: A brief summary describing what kind of test is created by this template. This text is displayed 
-  	    when running "pysys make -h". 
-  	  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
-  	    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
-  	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/test/*".
-  	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file
-  	    (with a ``.pysysignore`` file to stop them being treated as test cases), 
-  	    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
-  	  - mkdir: By default empty directories are created for the configured input, output and reference directories.  
-  	    Specify this attribute to define explicitly which empty directories should be created. 
-  	  - replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to 
-  	    use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8). 
-  	    The replacement "with" expressions can include project properties using ``${propname}`` syntax, or 
-  	    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``, ``@{DEFAULT_DESCRIPTOR}``. 
-  	    If no replace elements are explicitly provided, the following default replacements are used:
-  	    
-  	      @@DATE@@ -> @{DATE} (the current date)
-  	      @@USERNAME@@ -> @{USERNAME} (the currently logged in user)
-  	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
-  	      @@DEFAULT_DESCRIPTOR@@ -> @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the 
-  	               standard PySys default test template, after which you can add your customized Python test class)
-  	      @@LINE_LENGTH_GUIDE@@ -> @{LINE_LENGTH_GUIDE} (80 underline characters to indicate to the user when they are 
-  	               exceeding the recommended maximum length for a test title; this string can be customized for different 
-  	               lengths etc using the pysystestTemplateLineLengthGuide project property)
-  	
-  	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
-  	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
   
-  	-->
-  	<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
-  		copy="./_pysys_templates/MyTemplateTest/*" />
-  
+Maker templates
+~~~~~~~~~~~~~~~
+Specify the templates that can be used by "pysys make" when creating new tests. You may wish to provide 
+project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage 
+test creators to follow best practices (rather than just copying from a random test which may not be a good example). 
+
+Run "pysys make -h" to see which templates are available for creating tests under the current directory. 
+
+The first template (in the lowest-level pysysdirconfig.xml file) is used by default, but that can be customized 
+by using set-default-maker-template to name a different template (for example at project 
+level or in another pysysdirconfig higher up the directory tree). 
+
+Each template is defined by:
+
+  - name: A short name used to select this template on the command line ("lowercase-with-hyphens" naming convention).
+  - description: A brief summary describing what kind of test is created by this template. This text is displayed 
+    when running "pysys make -h". 
+  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
+    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
+    project properties. To use files from the default PySys template use ``${pysysTemplatesDir}/test/*``.
+    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file
+    (with a ``.pysysignore`` file to stop them being treated as test cases), 
+    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
+  - mkdir: By default empty directories are created for the configured input, output and reference directories.  
+    Specify this attribute to define explicitly which empty directories should be created. 
+  - replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to 
+    use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8). 
+    The replacement "with" expressions can include project properties using ``${propname}`` syntax, or 
+    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``, ``@{DEFAULT_DESCRIPTOR}``. 
+    If no replace elements are explicitly provided, the following default replacements are used:
+    
+    - ``@@DATE@@`` -> ``@{DATE}`` (the current date)
+    - ``@@USERNAME@@`` -> ``@{USERNAME}`` (the currently logged in user)
+    - ``@@DIR_NAME@@`` -> ``@{DIR_NAME}`` (the basename of the directory being created, typically the test id)
+    - ``@@DEFAULT_DESCRIPTOR@@`` -> ``@{DEFAULT_DESCRIPTOR}`` (the __pysys_title__ and other descriptor lines from the 
+      standard PySys default test template, after which you can add your customized Python test class)
+    - ``@@LINE_LENGTH_GUIDE@@`` -> ``@{LINE_LENGTH_GUIDE}`` (80 underline characters to indicate to the user when they are 
+      exceeding the recommended maximum length for a test title; this string can be customized for different 
+      lengths etc using the pysystestTemplateLineLengthGuide project property)
+
+By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
+just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
+
+See :ref:`pysys/UserGuide:Create new test templates for pysys make` for more on how to create templates. 
+
+.. code-block:: xml
+
   	<maker-template name="perf-test" description="a performance test including configuration for my fictional performance tool" 
   		copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+  
+  	<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
+  		copy="./_pysys_templates/MyTemplateTest/*" />
   
   	<maker-template name="foobar-test" description="an advanced test based on the existing XXX test" 
   		copy="./PySysDirConfigSample/*" 
@@ -474,43 +501,56 @@ sense at the directory level, and also additional options for directories such a
   	<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
   		copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
   
-  	<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
-  	for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
-  	These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
-  	
-  	The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for 
-  	tests that are performance-critical. 
-  	-->
+  	<set-default-maker-template name="my-test"/>
+  
+  
+Groups
+~~~~~~
+Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
+for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
+These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
+
+The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for 
+tests that are performance-critical. 
+
+.. code-block:: xml
+
   	<groups inherit="true" groups="performance, disableCoverage"/>
   
-  	<!-- Specify the list of modes tests under this directory can be run in. 
-  	
-  	Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an ``_`` underscore, 
-  	e.g. ``CompressionGZip_AuthNone``.
-  	
-  	Test modes are configured with a Python lambda that returns a list of modes, using a single parameter which is 
-  	an instance of ``pysys.config.descriptor.TestModesConfigHelper`` providing access to the inherited modes (and other 
-  	useful functions/fields). Each mode in the returned list is defined by a dictionary containing parameters to be set 
-  	on the test object and/or a ``mode`` name. If the mode name is not explicitly provided, a default mode name is 
-  	generated by concatenating the parameter values with ``_`` (with a ``paramName=`` prefix for any numeric/boolean 
-  	values).
-  	
-  	In your Python lambda you can return a simple list of modes, or combine your own modes with inherited modes 
-  	defined by parent pysysdirconfigs. You can also use the power of Python list comprehensions to exclude certain modes, 
-  	perhaps based on dynamic information such as the operating system. Project properties can be accessed 
-  	using ``helper.project.PROPERTY_NAME``. Avoid expensive operations such as reading the file system from your lambda 
-  	if possible. 
-  	
-  	The first listed mode is the "primary" mode, which is the one that is used by default when executing tests with 
-  	no ``-m`` argument. 
-  	
-  	It's often useful to combine multiple mode 'dimensions', for example all the combinations of a list of web browsers 
-  	with a list of databases, or compression methods and authentication types. Rather than writing out every combination 
-  	manually, you can use the function ``helper.createModeCombinations`` to automatically generate all combinations. 
-  	
-  	A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
   
-  	-->
+Modes
+~~~~~
+Specify the list of modes tests under this directory can be run in. 
+
+Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an ``_`` underscore, 
+e.g. ``CompressionGZip_AuthNone``.
+
+Test modes are configured with a Python lambda that returns a list of modes, using a single parameter which is 
+an instance of `pysys.config.descriptor.TestModesConfigHelper` providing access to the inherited modes (and other 
+useful functions/fields). Each mode in the returned list is defined by a dictionary containing parameters to be set 
+on the test object and/or a ``mode`` name. If the mode name is not explicitly provided, a default mode name is 
+generated by concatenating the parameter values with ``_`` (with a ``paramName=`` prefix for any numeric/boolean 
+values).
+
+In your Python lambda you can return a simple list of modes, or combine your own modes with inherited modes 
+defined by parent pysysdirconfigs. You can also use the power of Python list comprehensions to exclude certain modes, 
+perhaps based on dynamic information such as the operating system. Project properties can be accessed 
+using ``helper.project.PROPERTY_NAME``. Avoid expensive operations such as reading the file system from your lambda 
+if possible. 
+
+The first listed mode is the "primary" mode, which is the one that is used by default when executing tests with 
+no ``-m`` argument. 
+
+It's often useful to combine multiple mode 'dimensions', for example all the combinations of a list of web browsers 
+with a list of databases, or compression methods and authentication types. Rather than writing out every combination 
+manually, you can use the function ``helper.createModeCombinations`` to automatically generate all combinations. 
+
+A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
+
+The specified Python code is invoked using `pysys.utils.safeeval.safeEval`.
+
+.. code-block:: xml
+
   	<modes>
   		lambda helper: [
   			mode for mode in 
@@ -538,21 +578,37 @@ sense at the directory level, and also additional options for directories such a
   		</modes>
   	-->
   
-  	<!-- Specify as a floating point number an indicator of when to run the tests under 
-  	this directory, relative to other tests/directories with a higher or lower hint. 
-  	Empty string hint="" means inherit. The default priority is 0.0 so set the hint to a higher 
-  	value to execute tests later, or a negative value to execute tests earlier. 
-  	-->
+Execution order
+~~~~~~~~~~~~~~~
+Specify as a floating point number an indicator of when to run the tests under 
+this directory, relative to other tests/directories with a higher or lower hint. 
+Empty string hint="" means inherit. The default priority is 0.0 so set the hint to a higher 
+value to execute tests later, or a negative value to execute tests earlier. 
+
+.. code-block:: xml
+
   	<execution-order hint="+100.0"/>
   
-  	<!-- Comment/uncomment this to mark all tests under this directory as skipped. -->
+  
+Skip
+~~~~
+Comment/uncomment this to mark all tests under this directory as skipped. 
+
+.. code-block:: xml
+
   	<skipped reason="These tests are skipped until Bug-1234 is fixed"/>
   	
-  	<!-- By convention the test class uses the ``pysystest.py` module if present or else module="run.py" located 
-  	in the test directory, but it is possible to use a different path (even an absolute path). If you want to use 
-  	a single Python class for lots of tests rather, omit the module= attribute and make sure it's available 
-  	on the project's <pythonpath> . 
-  	-->
+  
+Advanced
+~~~~~~~~
+
+By convention the test class uses the ``pysystest.py`` module if present or else module="run.py" located 
+in the test directory, but it is possible to use a different path (even an absolute path). If you want to use 
+a single Python class for lots of tests, omit the module= attribute, ensure the class has at least one level of 
+Python package, and make sure it's available on the project's <pythonpath> . 
+
+.. code-block:: xml
+
   	<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
   
   	<!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute 
@@ -568,6 +624,9 @@ sense at the directory level, and also additional options for directories such a
   		
   		Project properties (but not other user-data values) can be substituted into the value using ${...}, 
   		and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables). 
+  
+  		If a static field of the same name exists on the test class, it will be overridden with the associated user-data 
+  		value, with some basic type coersion to match the default value of the static field where possible. 
   		-->
   		<user-data name="myTestDescriptorData" value="foobar"/>
   		

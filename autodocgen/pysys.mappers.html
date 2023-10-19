@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.mappers &mdash; PySys v2.1  documentation</title>
+  <title>pysys.mappers &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -98,8 +98,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#regexreplace">RegexReplace</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#includelinesbetween">IncludeLinesBetween</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#joinlines">JoinLines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#includematches">IncludeMatches</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#includelinesmatching">IncludeLinesMatching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#excludelinesmatching">ExcludeLinesMatching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#truncatelonglines">TruncateLongLines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sortlines">SortLines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#applymappers">applyMappers</a></li>
 </ul>
@@ -127,7 +129,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -190,32 +192,38 @@ and <a class="reference internal" href="../pysys/BaseTest.html#pysys.basetest.Ba
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.RegexReplace" title="pysys.mappers.RegexReplace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RegexReplace</span></code></a>(regex, replacement)</p></td>
-<td><p>Mapper that transforms lines by replacing all character sequences matching the specified regular expression.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.IncludeMatches" title="pysys.mappers.IncludeMatches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeMatches</span></code></a>(regex[, repl])</p></td>
+<td><p>Mapper that returns only text matching the specified regular expression.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.IncludeLinesBetween" title="pysys.mappers.IncludeLinesBetween"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeLinesBetween</span></code></a>([startAt, stopAfter, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.IncludeLinesMatching" title="pysys.mappers.IncludeLinesMatching"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeLinesMatching</span></code></a>(regex)</p></td>
+<td><p>Mapper that filters lines by returning only lines matching the specified regular expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.IncludeLinesBetween" title="pysys.mappers.IncludeLinesBetween"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeLinesBetween</span></code></a>([startAt, stopAfter, …])</p></td>
 <td><p>Mapper that filters out all lines except those within a range of expressions.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.IncludeLinesMatching" title="pysys.mappers.IncludeLinesMatching"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeLinesMatching</span></code></a>(regex)</p></td>
-<td><p>Mapper that filters lines by including only lines matching the specified regular expression.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.ExcludeLinesMatching" title="pysys.mappers.ExcludeLinesMatching"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExcludeLinesMatching</span></code></a>(regex)</p></td>
 <td><p>Mapper that filters lines by excluding/ignoring lines matching the specified regular expression.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines" title="pysys.mappers.JoinLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines</span></code></a>([startAt, continueWhile, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.RegexReplace" title="pysys.mappers.RegexReplace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RegexReplace</span></code></a>(regex, replacement)</p></td>
+<td><p>Mapper that substitutes all character sequences matching the specified regular expression with something different.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines" title="pysys.mappers.JoinLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines</span></code></a>([startAt, continueWhile, …])</p></td>
 <td><p>Mapper that joins/concatenates consecutive related lines together into a single line.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.PythonTraceback" title="pysys.mappers.JoinLines.PythonTraceback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.PythonTraceback</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.PythonTraceback" title="pysys.mappers.JoinLines.PythonTraceback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.PythonTraceback</span></code></a>()</p></td>
 <td><p>Mapper that joins the lines of a typical Python traceback (starting <code class="docutils literal notranslate"><span class="pre">Traceback</span> <span class="pre">(most</span> <span class="pre">recent</span> <span class="pre">call</span> <span class="pre">last):</span></code>)  into a single line, for easier grepping and self-contained test outcome failure reasons.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.JavaStackTrace" title="pysys.mappers.JoinLines.JavaStackTrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.JavaStackTrace</span></code></a>([combiner, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.JavaStackTrace" title="pysys.mappers.JoinLines.JavaStackTrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.JavaStackTrace</span></code></a>([combiner, …])</p></td>
 <td><p>Mapper that joins the lines of a typical Java(R) stack trace (from stderr or a log file) into a single line,  for easier grepping and self-contained test outcome failure reasons.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.AntBuildFailure" title="pysys.mappers.JoinLines.AntBuildFailure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.AntBuildFailure</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.JoinLines.AntBuildFailure" title="pysys.mappers.JoinLines.AntBuildFailure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JoinLines.AntBuildFailure</span></code></a>()</p></td>
 <td><p>Mapper that joins the lines of an ant’s stderr BUILD FAILED output to actually include the failure message(s),  for easier grepping and self-contained test outcome failure reasons.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.SortLines" title="pysys.mappers.SortLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SortLines</span></code></a>([key])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.SortLines" title="pysys.mappers.SortLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SortLines</span></code></a>([key])</p></td>
 <td><p>Mapper that sorts all lines.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.mappers.TruncateLongLines" title="pysys.mappers.TruncateLongLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TruncateLongLines</span></code></a>([maxLineLength])</p></td>
+<td><p>Mapper that truncates any excessively long lines, to avoid regular expression matching taking  an unreasonable amount of time.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pysys.mappers.applyMappers" title="pysys.mappers.applyMappers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">applyMappers</span></code></a>(iterator, mappers)</p></td>
 <td><p>A generator function that applies zero or more mappers to each line from an iterator and yields each fully mapped line.</p></td>
@@ -239,17 +247,19 @@ Mappers must always preserve the final <code class="docutils literal notranslate
 <dt id="pysys.mappers.RegexReplace">
 <em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">RegexReplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">regex</span></em>, <em class="sig-param"><span class="n">replacement</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#RegexReplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.RegexReplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Mapper that transforms lines by replacing all character sequences matching the specified regular expression.</p>
+<p>Mapper that substitutes all character sequences matching the specified regular expression with something different.</p>
 <p>For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;myfile.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;myfile-processed.txt&#39;</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[</span><span class="n">RegexReplace</span><span class="p">(</span><span class="n">RegexReplace</span><span class="o">.</span><span class="n">DATETIME_REGEX</span><span class="p">,</span> <span class="s1">&#39;&lt;timestamp&gt;&#39;</span><span class="p">)])</span>
 </pre></div>
 </div>
+<p>This mapper returns all lines whether or not any substitutions occur. To return only the parts of lines that match 
+a regular expression, use <a class="reference internal" href="#pysys.mappers.IncludeMatches" title="pysys.mappers.IncludeMatches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeMatches</span></code></a> instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>regex</strong> (<em>str|compiled_regex</em>) – The regular expression to search for.</p></li>
 <li><p><strong>replacement</strong> (<em>str</em>) – The string to replace it with. This can contain backslash references to groups in the 
-regex; see <code class="docutils literal notranslate"><span class="pre">re.sub()</span></code> in the Python documentation for more information.</p></li>
+regex such as <code class="docutils literal notranslate"><span class="pre">\1</span></code> for the first <code class="docutils literal notranslate"><span class="pre">(...)</span></code> group (see <code class="docutils literal notranslate"><span class="pre">re.sub()</span></code> in the Python documentation for more information).</p></li>
 </ul>
 </dd>
 </dl>
@@ -500,18 +510,56 @@ for easier grepping and self-contained test outcome failure reasons.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="includematches">
+<h2>IncludeMatches<a class="headerlink" href="#includematches" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.mappers.IncludeMatches">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">IncludeMatches</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">regex</span></em>, <em class="sig-param"><span class="n">repl</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#IncludeMatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.IncludeMatches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mapper that returns only text matching the specified regular expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regex</strong> (<em>str|compiled_regex</em>) – The regular expression to match (this is a match not a search, so 
+use <code class="docutils literal notranslate"><span class="pre">.*</span></code> at the beginning if you want to allow extra characters at the start of the line).  
+Multiple expressions can be combined (efficiently) using <code class="docutils literal notranslate"><span class="pre">(expr1|expr2)</span></code> syntax.</p></li>
+<li><p><strong>repl</strong> (<em>str</em>) – By default this mapper returns the entire match, but instead set this to a replacement 
+string such as <code class="docutils literal notranslate"><span class="pre">\1</span> <span class="pre">\2</span></code> to return only the specified <code class="docutils literal notranslate"><span class="pre">(...)</span></code> groups from the match (see the Python MatchObject 
+<code class="docutils literal notranslate"><span class="pre">expand</span></code> method).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeMatches</span><span class="p">(</span><span class="s1">&#39;F..&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39;Foo\n&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeMatches</span><span class="p">(</span><span class="s1">&#39;F..&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar&#39;</span><span class="p">)</span>
+<span class="go">&#39;Foo&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeMatches</span><span class="p">(</span><span class="s1">&#39;.*(oo) *(.*)&#39;</span><span class="p">,</span> <span class="n">repl</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">1-</span><span class="se">\\</span><span class="s1">2&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39;oo-bar\n&#39;</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+</div>
 <div class="section" id="includelinesmatching">
 <h2>IncludeLinesMatching<a class="headerlink" href="#includelinesmatching" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pysys.mappers.IncludeLinesMatching">
 <em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">IncludeLinesMatching</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">regex</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#IncludeLinesMatching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.IncludeLinesMatching" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Mapper that filters lines by including only lines matching the specified regular expression.</p>
+<p>Mapper that filters lines by returning only lines matching the specified regular expression.</p>
+<p>To return only the matching parts of the lines, use <a class="reference internal" href="#pysys.mappers.IncludeMatches" title="pysys.mappers.IncludeMatches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IncludeMatches</span></code></a> instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>regex</strong> (<em>str|compiled_regex</em>) – The regular expression to match (this is a match not a search, so 
 use <code class="docutils literal notranslate"><span class="pre">.*</span></code> at the beginning if you want to allow extra characters at the start of the line).  
-Multiple expressions can be combined using <code class="docutils literal notranslate"><span class="pre">(expr1|expr2)</span></code> syntax.</p>
+Multiple expressions can be combined (efficiently) using <code class="docutils literal notranslate"><span class="pre">(expr1|expr2)</span></code> syntax.</p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IncludeLinesMatching</span><span class="p">(</span><span class="s1">&#39;Foo.*&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -546,6 +594,41 @@ characters at the start of the line).  Multiple expressions can be combined usin
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ExcludeLinesMatching</span><span class="p">(</span><span class="s1">&#39;bar.*&#39;</span><span class="p">)(</span><span class="s1">&#39;Foo bar&#39;</span><span class="p">)</span>
 <span class="go">&#39;Foo bar&#39;</span>
 </pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="truncatelonglines">
+<h2>TruncateLongLines<a class="headerlink" href="#truncatelonglines" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.mappers.TruncateLongLines">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.mappers.</code><code class="sig-name descname">TruncateLongLines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">maxLineLength</span><span class="o">=</span><span class="default_value">5000</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/mappers.html#TruncateLongLines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.mappers.TruncateLongLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mapper that truncates any excessively long lines, to avoid regular expression matching taking 
+an unreasonable amount of time.</p>
+<p>Occasionally log files can contain lines with a large dump of debugging data, which typically 
+don’t need to be checked when grepping the logs but unfortunately can cause debilitating slowness 
+in Python since some regular expressions take an extremely long time to evaluate against long 
+strings. This mapper can be added to avoid this problem by truncating log lines to a reasonable length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>maxLineLength</strong> (<em>int</em>) – The maximum number of characters per line.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">TruncateLongLines</span><span class="p">()</span> <span class="p">(</span><span class="s1">&#39;Short line</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39;Short line\n&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">TruncateLongLines</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span> <span class="p">(</span><span class="s1">&#39;Long line AAAAAAAAAAA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39;Long line AAA &lt;truncated by PySys&gt;\n&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">TruncateLongLines</span><span class="p">()</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="o">*</span><span class="mi">20000</span><span class="p">)</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="o">+</span><span class="mi">30</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
 </div>
 </dd></dl>
 
@@ -640,7 +723,7 @@ simply ignored.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

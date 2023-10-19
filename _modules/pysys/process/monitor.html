@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.process.monitor &mdash; PySys v2.1  documentation</title>
+  <title>pysys.process.monitor &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -192,7 +192,7 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.processmonitor&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProcessMonitorKey"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.ProcessMonitorKey">[docs]</a><span class="k">class</span> <span class="nc">ProcessMonitorKey</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Contains constants for supported process monitor keys. </span>
 <span class="sd">	</span>
 <span class="sd">	Some of these keys are not currently returned on all platforms. </span>
@@ -205,7 +205,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">CPU_CORE_UTILIZATION</span> <span class="o">=</span> <span class="s1">&#39;CPU core %&#39;</span>
-	<span class="sd">&quot;&quot;&quot;CPU utilization % scaled by the number of cores so that 100% indicates </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;CPU utilization % scaled by the number of cores so that 100% indicates </span>
 <span class="sd">	full use of one core, 200% indicates full use of two cores, etc. </span>
 <span class="sd">	</span>
 <span class="sd">	The maximum value is 100 multiplied by the number of CPU cores </span>
@@ -215,7 +215,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">CPU_TOTAL_UTILIZATION</span> <span class="o">=</span> <span class="s1">&#39;CPU total %&#39;</span>
-	<span class="sd">&quot;&quot;&quot;Total utilization % of all available CPU cores, with a maximum value of 100%.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Total utilization % of all available CPU cores, with a maximum value of 100%.</span>
 <span class="sd">	</span>
 <span class="sd">	If you have 2 cores and one of them is 50% utilized, the value would be 25%.</span>
 <span class="sd">	</span>
@@ -223,7 +223,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">MEMORY_RESIDENT_KB</span> <span class="o">=</span> <span class="s1">&#39;Resident memory kB&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Resident / working set memory usage. </span>
 <span class="sd">	</span>
 <span class="sd">	This is the non-swapped physical memory, and is usually a good statistic to </span>
@@ -236,7 +236,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">MEMORY_VIRTUAL_KB</span> <span class="o">=</span> <span class="s1">&#39;Virtual memory kB&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Virtual memory of the process including memory that is swapped out. </span>
 <span class="sd">	</span>
 <span class="sd">	On Unix it is equivalent to `vsz`/`VIRT`, and on Windows to the </span>
@@ -246,12 +246,12 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">DATE_TIME</span> <span class="o">=</span> <span class="s1">&#39;Time&#39;</span>
-	<span class="sd">&quot;&quot;&quot;String representation of the date and local time for this sample </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;String representation of the date and local time for this sample </span>
 <span class="sd">	in yyyy-mm-dd HH:MM:SS format. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">DATE_TIME_LEGACY</span> <span class="o">=</span> <span class="s1">&#39;Time (legacy)&#39;</span>
-	<span class="sd">&quot;&quot;&quot;String representation of the date and local time for this sample in </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;String representation of the date and local time for this sample in </span>
 <span class="sd">	a format compatible with v1.3.0 and earlier versions of PySys. </span>
 <span class="sd">	</span>
 <span class="sd">	This is %d/%m/%y %H:%M:%S on Windows and %m/%d/%y %H:%M:%S on Unix. </span>
@@ -260,7 +260,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">SAMPLE</span> <span class="o">=</span> <span class="s1">&#39;Sample&#39;</span>
-	<span class="sd">&quot;&quot;&quot;A counter starting from 1 and incrementing with each new set of </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;A counter starting from 1 and incrementing with each new set of </span>
 <span class="sd">	sample data.</span>
 <span class="sd">	</span>
 <span class="sd">	The type is C{int}. </span>
@@ -268,12 +268,12 @@
 	
 
 <div class="viewcode-block" id="BaseProcessMonitorHandler"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitorHandler">[docs]</a><span class="k">class</span> <span class="nc">BaseProcessMonitorHandler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Interface to be implemented to provide a custom handler that records </span>
 <span class="sd">	or processes data from a L{BaseProcessMonitor}. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 <div class="viewcode-block" id="BaseProcessMonitorHandler.handleData"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitorHandler.handleData">[docs]</a>	<span class="k">def</span> <span class="nf">handleData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called on a background thread each time a new sample of monitoring </span>
 <span class="sd">		data is available. </span>
 <span class="sd">		</span>
@@ -286,14 +286,14 @@
 		<span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Not implemented yet&#39;</span><span class="p">)</span></div>
 	
 <div class="viewcode-block" id="BaseProcessMonitorHandler.cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitorHandler.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called on a background thread to perform cleanup for this handler, </span>
 <span class="sd">		for example closing file handles. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">pass</span></div></div>
 
 <div class="viewcode-block" id="ProcessMonitorTextFileHandler"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.ProcessMonitorTextFileHandler">[docs]</a><span class="k">class</span> <span class="nc">ProcessMonitorTextFileHandler</span><span class="p">(</span><span class="n">BaseProcessMonitorHandler</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Handles process monitor data by writing the data as delimited values to </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Handles process monitor data by writing the data as delimited values to </span>
 <span class="sd">	a file, usually with tab separated values (.tsv). </span>
 <span class="sd">	</span>
 <span class="sd">	A new line is written every time the process monitor polls for a new sample </span>
@@ -329,7 +329,7 @@
 		<span class="n">ProcessMonitorKey</span><span class="o">.</span><span class="n">MEMORY_RESIDENT_KB</span><span class="p">,</span>
 		<span class="n">ProcessMonitorKey</span><span class="o">.</span><span class="n">MEMORY_VIRTUAL_KB</span><span class="p">,</span>
 		<span class="p">]</span>
-	<span class="sd">&quot;&quot;&quot;The default columns to write to the file.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;The default columns to write to the file.</span>
 <span class="sd">	</span>
 <span class="sd">	If using a process monitor that comes with PySys, the values are from </span>
 <span class="sd">	L{ProcessMonitorKey}.</span>
@@ -341,7 +341,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">DEFAULT_WRITE_HEADER_LINE</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Determines whether a header line prefixed </span>
 <span class="sd">	by `#` will be written at the start of the file.</span>
 
@@ -349,7 +349,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">DEFAULT_DELIMITER</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The delimiter used between each column. Usually a tab character. </span>
 
 <span class="sd">	See L{setDefaults}.</span>
@@ -357,7 +357,7 @@
 	
 <div class="viewcode-block" id="ProcessMonitorTextFileHandler.setDefaults"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults">[docs]</a>	<span class="nd">@staticmethod</span>
 	<span class="k">def</span> <span class="nf">setDefaults</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">writeHeaderLine</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Static helper method for setting the default columns or </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Static helper method for setting the default columns or </span>
 <span class="sd">		C{writeHeaderLine} setting for all tests that use the </span>
 <span class="sd">		C{ProcessMonitorTextFileHandler}. </span>
 <span class="sd">		</span>
@@ -414,7 +414,7 @@
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__closeStream</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseProcessMonitor"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor">[docs]</a><span class="k">class</span> <span class="nc">BaseProcessMonitor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Process monitor for gathering statistics such as CPU and memory usage </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Process monitor for gathering statistics such as CPU and memory usage </span>
 <span class="sd">	from a running process using a background thread. </span>
 <span class="sd">	</span>
 <span class="sd">	For detail on the statistic keys available from the standard </span>
@@ -466,31 +466,31 @@
 		<span class="k">assert</span> <span class="ow">not</span> <span class="n">pmargs</span><span class="p">,</span> <span class="s1">&#39;Unknown process monitor options: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">pmargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">process</span>
-		<span class="sd">&quot;&quot;&quot;The process object. Can be None if a pid was passed directly. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The process object. Can be None if a pid was passed directly. &quot;&quot;&quot;</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">process</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">process</span><span class="o">.</span><span class="n">pid</span>
-		<span class="sd">&quot;&quot;&quot;The pid to be monitored. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The pid to be monitored. &quot;&quot;&quot;</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span>
-		<span class="sd">&quot;&quot;&quot;The test object that owns this monitor. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The test object that owns this monitor. &quot;&quot;&quot;</span>
 		
 		<span class="k">assert</span> <span class="n">handlers</span><span class="p">,</span> <span class="s1">&#39;Must have at least one handler for the data generated by the process monitor&#39;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="n">handlers</span>
-		<span class="sd">&quot;&quot;&quot;The list of handlers that will be notified each time the process </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The list of handlers that will be notified each time the process </span>
 <span class="sd">		is polled for new data. &quot;&quot;&quot;</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">thread</span> <span class="o">=</span> <span class="kc">None</span>
-		<span class="sd">&quot;&quot;&quot; The background thread that responsible for monitoring the process. &quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; The background thread that responsible for monitoring the process. &quot;&quot;&quot;</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">_stopping</span> <span class="o">=</span> <span class="kc">None</span>
-		<span class="sd">&quot;&quot;&quot;The C{threading.Event} that is set when the background thread </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;The C{threading.Event} that is set when the background thread </span>
 <span class="sd">		should begin stopping. Call C{wait} on this object instead of sleeping </span>
 <span class="sd">		to get fast wake-ups during cleanup. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		
 		<span class="k">try</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_cpuCount</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
-			<span class="sd">&quot;&quot;&quot;The count of available CPU cores on this host, used </span>
+<span class="w">			</span><span class="sd">&quot;&quot;&quot;The count of available CPU cores on this host, used </span>
 <span class="sd">			for scaling up the CPU_TOTAL_UTILIZATION. </span>
 <span class="sd">			&quot;&quot;&quot;</span>
 		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
@@ -498,7 +498,7 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">_cpuCount</span> <span class="o">=</span> <span class="mi">1</span>
 		
 <div class="viewcode-block" id="BaseProcessMonitor.start"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor.start">[docs]</a>	<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called on the main test thread to start monitoring in the background. </span>
 <span class="sd">		</span>
 <span class="sd">		Performs any required initialization of data structures then </span>
@@ -515,7 +515,7 @@
 	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;ProcessMonitor&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> pid=</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 	
 <div class="viewcode-block" id="BaseProcessMonitor._preprocessData"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor._preprocessData">[docs]</a>	<span class="k">def</span> <span class="nf">_preprocessData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Called in the background thread with the data dictionary from </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Called in the background thread with the data dictionary from </span>
 <span class="sd">		each poll of the process, to allow OS-agnostic pre-processing and </span>
 <span class="sd">		addition of derived data keys such as the date and time. </span>
 <span class="sd">		</span>
@@ -566,7 +566,7 @@
 				<span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
 
 <div class="viewcode-block" id="BaseProcessMonitor.running"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor.running">[docs]</a>	<span class="k">def</span> <span class="nf">running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Return the running status of the process monitor.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return the running status of the process monitor.</span>
 <span class="sd">		</span>
 <span class="sd">		:return: True if the process monitor background thread is still running. </span>
 <span class="sd">		:rtype: bool</span>
@@ -575,7 +575,7 @@
 
 	
 <div class="viewcode-block" id="BaseProcessMonitor.stop"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Request the process monitor thread to terminate.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Request the process monitor thread to terminate.</span>
 <span class="sd">		</span>
 <span class="sd">		Waits for the termination to complete if possible, but does not throw an exception if it fails. </span>
 <span class="sd">		</span>
@@ -589,7 +589,7 @@
 	<span class="c1"># for implementation by subclasses</span>
 
 <div class="viewcode-block" id="BaseProcessMonitor._getData"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor._getData">[docs]</a>	<span class="k">def</span> <span class="nf">_getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Implement gathering of latest monitoring data. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Implement gathering of latest monitoring data. </span>
 <span class="sd">		</span>
 <span class="sd">		Called on the background monitoring thread regularly.</span>
 <span class="sd">		</span>
@@ -603,7 +603,7 @@
 		<span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;_getData must be implemented by subclass&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseProcessMonitor._cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor._cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform implementation-specific cleanup. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform implementation-specific cleanup. </span>
 <span class="sd">		</span>
 <span class="sd">		Called on the background monitoring thread when the monitor is stopping. </span>
 <span class="sd">		</span>
@@ -621,7 +621,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

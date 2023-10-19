@@ -27,10 +27,10 @@ Header
   	-->
   	<!-- Specify a minimum required PySys version to run these tests. Update this each time you upgrade your project 
   	so that everyone gets a clear message if accidentally running tests using an old version. -->
-  	<requires-pysys>2.1</requires-pysys>
+  	<requires-pysys>2.2</requires-pysys>
   
   	<!-- Specify a minimum required python version to run these tests. -->
-  	<requires-python>3.6</requires-python>
+  	<requires-python>3.8</requires-python>
   
   
 Project properties
@@ -66,6 +66,8 @@ also contains undefined properties the project will fail to load.
 The ``pathMustExist=true`` attribute can be used to stop the project loading if the property specifies a  
 path that does not exist.
 
+Use ``path=`` instead of ``value=`` if the value is a path, to automatically normalize ``/`` and ``.`` characters.
+
 .. code-block:: xml
 
   	<!-- Property identifying the home directory of the application build being tested. 
@@ -75,7 +77,7 @@ path that does not exist.
   	
   	Tests can be run against a different directory by setting the environment variable PYSYS_APP_HOME. 
   	-->
-  	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
+  	<property name="appHome" path="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
   
   	<!-- This is an example of putting connection credentials into a project property, which can be overridden 
   	using an environment variable if desired. -->
@@ -145,12 +147,32 @@ Special project properties
   	to encourage a limit of 120 characters for the test title (rather than the default of 80), 
   	-->
   	<property name="pysystestTemplateLineLengthGuide" value="${eval: 120 * '-' }"/>
+  	
+  	<!-- 
+  	Override the default upper limit on the number of PySys worker threads used by threads=auto. Due to the 
+  	Python Global Interpreter Lock, allowing a worker per CPU on very wide servers is typically pointless or 
+  	even counter-productive. 
+  	-->
+  	<property name="pysysMaxWorkerThreads" value="30"/>
+  
+  
+Override this to change the default behaviour for when PySys will log absolute rather than current dir relative 
+paths in situations such as failure outcomes and test outcome summary. 
+
+It is often more useful to get absolute paths when running tests within an IDE that supports clicking on failures 
+to jump to them. If the ``PYSYS_LOG_ABSOLUTE_PATHS`` environment variable is set it will override any value set 
+using the project property. 
+
+.. code-block:: xml
+
+  	<property name="pysysLogAbsolutePaths" value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"/>
+  
   
   
 Configuring plugins
 ~~~~~~~~~~~~~~~~~~~
 
-See also :ref:`pysys/UserGuide:Sharing logic across tests using plugins`.
+See also :ref:`pysys/UserGuide:Runner and writer plugins`.
 If you want to provide some custom plugins/extensions you need to add them to the PYTHONPATH used by PySys 
 as shown below. Usually the specified directory should contain a Python module named after your organization and 
 containing an empty __init__.py file to mark it as a Python package (such as ``pysys-extensions/myorg/__init__.py``). 
@@ -159,26 +181,6 @@ containing an empty __init__.py file to mark it as a Python package (such as ``p
 
   	<pythonpath value="${testRootDir}/pysys-extensions" />
   
-  
-Test plugins are additional classes instantiated when each test's BaseTest is instantiated, and accessible 
-to testcases (using the specified alias) as a field of the BaseTest. They provide a way to expose extra 
-functionality for use by your testcases, for example support for additional languages and technologies. 
-
-Each plugin class must provide a ``setup(self, testObj)`` method that accepts the owner testObj (BaseTest instance) 
-as a parameter. Any configuration properties are assigned as attributes before setup is called.
-
-Each plugin class must provide a constructor that accepts the parent testObj (BaseTest instance) as a parameter.
-The plugin instance is assigned as a field of the test object using the specified "alias" so that its 
-methods and fields are available for use. The alias can be any valid Python identifier but must not conflict 
-with other plugins or fields that PySys sets on the BaseTest; usually a brief lowercase name 
-identifying your organization or the purpose of the plugin is best. 
-
-.. code-block:: xml
-
-  	<test-plugin classname="myorg.mytestplugin.MyTestPlugin" alias="mytestplugin">
-  		<!-- <property name="myProp" value="..."/> -->
-  	</test-plugin>
-  	
   
 Runner plugins are classes that are instantiated when the BaseRunner performs its setup() at 
 the beginning of a test run. They can provide extra functionality both at the beginning of a test 
@@ -199,7 +201,7 @@ identifying your organization or the purpose of the plugin is best.
   	<runner-plugin classname="myorg.myrunnerplugin.MyRunnerPlugin" alias="myrunnerplugin">
   		<property name="myPluginProperty" value="true"/>
   	</runner-plugin>
-  	
+  
   
 For advanced cases it is possible to provide a custom `pysys.baserunner.BaseRunner` subclass. However, in most 
 cases this isn't necessary so always consider whether the composition "runner-plugin" approach would do the job 
@@ -208,15 +210,30 @@ before using runner inheritance.
 .. code-block:: xml
 
   	<runner classname="myorg.myrunner.MyRunner"/>
+  	
   
-  
-Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
-`pysys.launcher.console_make.DefaultTestMaker` class in order to customize details such as the automatic 
-validation of new test ids. 
+WARNING: The "test-plugin" paradigm is no longer recommended - instead use a "helper" class inherited in the 
+individual tests that need the functionality rather than in the project XML. 
+
+Test plugins are additional classes instantiated when each test's BaseTest is instantiated, and accessible 
+to testcases (using the specified alias) as a field of the BaseTest. They provide a way to expose extra 
+functionality for use by your testcases, for example support for additional languages and technologies. 
+
+Each plugin class must provide a ``setup(self, testObj)`` method that accepts the owner testObj (BaseTest instance) 
+as a parameter. Any configuration properties are assigned as attributes before setup is called.
+
+Each plugin class must provide a constructor that accepts the parent testObj (BaseTest instance) as a parameter.
+The plugin instance is assigned as a field of the test object using the specified "alias" so that its 
+methods and fields are available for use. The alias can be any valid Python identifier but must not conflict 
+with other plugins or fields that PySys sets on the BaseTest; usually a brief lowercase name 
+identifying your organization or the purpose of the plugin is best. 
 
 .. code-block:: xml
 
-  	<maker classname="myorg.mymaker.MyTestMaker"/>
+  	<test-plugin classname="myorg.mytestplugin.MyTestPlugin" alias="mytestplugin">
+  		<!-- <property name="myProp" value="..."/> -->
+  	</test-plugin>
+  
   
   
 Writers
@@ -245,6 +262,7 @@ Each writer element specifies the classname (which should be available on the py
   			<property name="maxArchives" value="50"/>
   			<property name="archiveAtEndOfRun" value="true"/>
   			<property name="includeNonFailureOutcomes" value="REQUIRES INSPECTION, NOT VERIFIED"/>
+  			<property name="format" value="tar.gz"/>
   		</writer>
   
   		<!-- This writer is useful for collecting output files (e.g. logs, graphs, etc) from all tests into a 
@@ -277,6 +295,11 @@ Each writer element specifies the classname (which should be available on the py
   			test root dir (or the outdir if specified on the pysys run command).
   			-->
   			<property name="outputDir" value="__pysys_junit_xml"/>
+  
+  			<!-- Specify how to map PySys test id/mode to JUnit testsuite/case concepts -->
+  			<property name="testsuiteName" value="@TESTID_PACKAGE@"/>
+  			<property name="testcaseName" value="@TESTID_NO_PACKAGE_OR_MODE@~@MODE@"/>
+  			<property name="testcaseClassname" value=""/>
   		</writer>
   		
   		<!-- Writes all outcomes (or just the failure outcomes) to a .json file suitable for machine parsing.
@@ -305,9 +328,17 @@ Each writer element specifies the classname (which should be available on the py
   			<property name="useFileURL" value="true"/>
   		</writer>
   		
-  		<!-- Writes all outcomes to a text file; only enabled when the record flag is specified. -->
-  		<writer classname="pysys.writer.outcomes.TextResultsWriter">
-  			<property name="file" value="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log"/>
+  		<!-- Writes all outcomes to a text file; only enabled when the record flag is specified.
+  			Can be a useful way to view the current or final status of the current/latest test run. 
+  			The file is written incrementally as each test completes, but can be sorted (using standard command line tools) 
+  			to get a useful summary of all the failures. 
+  			Specifying an alias allows this writer configuration to be enabled on a per-user basis using the "writer" 
+  			command line argument. 
+  		-->
+  		<writer classname="pysys.writer.outcomes.TextResultsWriter" alias="verboseTextResultsWriter">
+  			<property name="file" value="${testRootDir}/__pysys_results.${outDirName}.log"/>
+  			<!-- Included detailed information like outcome reasons and test titles -->
+  			<property name="verbose" value="true"/>
   		</writer>
   
   		<!-- Writes all outcomes to a CSV file; only enabled when the record flag is specified. 
@@ -316,10 +347,22 @@ Each writer element specifies the classname (which should be available on the py
   			<property name="file" value="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv"/>
   		</writer>
   		
-  		<!-- Write a code coverage report for .py files; enabled by -XcodeCoverage. -->
+  		<!-- Write a code coverage report for .py files. Coverage is enabled by -XcodeCoverage. -->
   		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
   			<property name="destDir" value="__coverage_python.${outDirName}"/>
   			<property name="destArchive" value="coverage_python.${outDirName}.zip"/>
+  			<property name="pythonCoverageArgs" value=""/>
+  		</writer>
+  
+  		<!-- Write a second code coverage report limited to output from a small subset of tests 
+  			(such as unit tests, or tests that executed in pull requests). 
+  		-->
+  		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
+  			<property name="includeTestIf">lambda testObj: 
+  				'unitTest' in testObj.descriptor.groups
+  				or testObj.project.getProperty('isLocalDeveloperTestRun',False)
+  			</property>
+  			<property name="destDir" value="__coverage_python_unit_tests.${outDirName}"/>
   			<property name="pythonCoverageArgs" value=""/>
   		</writer>
   
@@ -413,28 +456,41 @@ Test descriptor defaults
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 A project file can contain a ``pysysdirconfig`` element to configure directory-level defaults that will apply to 
-all test descriptors. See the :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml` documentation for more information about the available options, 
-including how to customize how new tests are created using maker templates. 
+all test descriptors. See the :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml` documentation for more 
+information about the available options, including how to customize how new tests are created using maker templates. 
 
 .. code-block:: xml
 
   	<pysysdirconfig>
   	
-  			<!-- Recommended to specify this for new projects - input files are stored in the testDir alongside pysystest.py -->
-  			<input-dir>.</input-dir> 
+  		<!-- Recommended to specify this for new projects - input files are stored in the testDir alongside pysystest.py -->
+  		<input-dir>.</input-dir> 
   
-  			<!-- The default for PySys projects created before 2.0 -->
-  			<!-- <input-dir>Input</input-dir> -->
-  			<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
-  				without the need to update or potentially create bugs in existing tests
-  			-->
-  			<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
+  		<!-- The default for PySys projects created before 2.0 -->
+  		<!-- <input-dir>Input</input-dir> -->
+  		<!-- Special option that auto-detects based on presence of an Input/ dir; useful for getting the new behaviour 
+  			without the need to update or potentially create bugs in existing tests
+  		-->
+  		<!-- <input-dir>!INPUT_DIR_IF_PRESENT_ELSE_TEST_DIR!</input-dir> -->
   		<!-- Could optionally override the default directory names for reference and output too. The following are the 
   			default values and do not need to be specified explicitly. 
   		-->
   		<output-dir>Output</output-dir>
   		<reference-dir>Reference</reference-dir>
+  		
+  		<maker-template name="my-project-test" description="a test template that can be used anywhere in this project" 
+  			copy="${pysysTemplatesDir}/default-test/*" />
+  
   	</pysysdirconfig>
+  
+  
+For advanced cases, use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
+`pysys.launcher.console_make.DefaultTestMaker` class in order to customize details such as the automatic 
+validation of new test ids. 
+
+.. code-block:: xml
+
+  	<maker classname="myorg.mymaker.MyTestMaker"/>
   
   
 PySys run.log and console formatters

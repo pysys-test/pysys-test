@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.api &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.api &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -250,11 +250,13 @@
 <span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span><span class="p">,</span> <span class="n">stdoutPrint</span>
 <span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
 <span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+<span class="kn">import</span> <span class="nn">pysys.config.project</span>
+<span class="kn">import</span> <span class="nn">pysys.process.user</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BaseResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">BaseResultsWriter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Base class for all writers that get notified as and when test results are available.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Base class for all writers that get notified as and when test results are available.</span>
 <span class="sd">	</span>
 <span class="sd">	Writer can additionally subclass `ArtifactPublisher` to be notified of artifacts produced by other writers </span>
 <span class="sd">	that they wish to publish, or `TestOutputVisitor` to be notified of each file in the test output directory. If you </span>
@@ -276,7 +278,7 @@
 	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__writerRepr&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BaseResultsWriter.isEnabled"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.isEnabled">[docs]</a>	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot; Determines whether this writer can be used in the current environment. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Determines whether this writer can be used in the current environment. </span>
 <span class="sd">		</span>
 <span class="sd">		If set to False then after construction none of the other methods </span>
 <span class="sd">		(including L{setup})) will be called. </span>
@@ -294,7 +296,7 @@
 		<span class="k">return</span> <span class="n">record</span> <span class="o">==</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="BaseResultsWriter.setup"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.setup">[docs]</a>	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testoutdir</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Called before any tests begin. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Called before any tests begin. </span>
 <span class="sd">		</span>
 <span class="sd">		Before this method is called, for each property &quot;PROP&quot; specified for this </span>
 <span class="sd">		writer in the project configuration file, the configured value will be </span>
@@ -320,7 +322,7 @@
 		<span class="k">if</span> <span class="n">runner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span></div>
 
 <div class="viewcode-block" id="BaseResultsWriter.cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Called after all tests have finished executing (or been cancelled). </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Called after all tests have finished executing (or been cancelled). </span>
 <span class="sd">		</span>
 <span class="sd">		This is where file headers can be written, and open handles should be closed. </span>
 
@@ -330,7 +332,7 @@
 		<span class="k">pass</span></div>
 
 <div class="viewcode-block" id="BaseResultsWriter.processResult"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.processResult">[docs]</a>	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testStart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Called when each test has completed. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Called when each test has completed. </span>
 <span class="sd">		</span>
 <span class="sd">		This method is always invoked under a lock that prevents multiple concurrent invocations so additional </span>
 <span class="sd">		locking is not usually necessary.  </span>
@@ -350,7 +352,7 @@
 		<span class="k">pass</span></div>
 
 <div class="viewcode-block" id="BaseResultsWriter.processTestStarting"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseResultsWriter.processTestStarting">[docs]</a>	<span class="k">def</span> <span class="nf">processTestStarting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Called when a test is just about to begin executing. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Called when a test is just about to begin executing. </span>
 
 <span class="sd">		Note on thread-safety: unlike the other methods on this interface, this is usually executed on a</span>
 <span class="sd">		worker thread, so any data structures accessed in this method and others on this class must be</span>
@@ -367,7 +369,7 @@
 
 
 <div class="viewcode-block" id="BaseRecordResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">BaseRecordResultsWriter</span><span class="p">(</span><span class="n">BaseResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Base class for writers that record the results of tests, and are enabled only when the ``--record`` flag is specified.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Base class for writers that record the results of tests, and are enabled only when the ``--record`` flag is specified.</span>
 <span class="sd">	</span>
 <span class="sd">	For compatibility reasons writers that do not subclass BaseSummaryResultsWriter or BaseProgressResultsWriter are</span>
 <span class="sd">	treated as &quot;record&quot; writers even if they do not inherit from this class.</span>
@@ -377,7 +379,7 @@
 
 
 <div class="viewcode-block" id="BaseSummaryResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseSummaryResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">BaseSummaryResultsWriter</span><span class="p">(</span><span class="n">BaseResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Base class for writers that display a summary of test results.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Base class for writers that display a summary of test results.</span>
 <span class="sd">	</span>
 <span class="sd">	Summary writers are always enabled (regardless of whether ``--progress`` or ``--record`` are specified). If</span>
 <span class="sd">	no &quot;summary&quot; writers are configured, a default ConsoleSummaryResultsWriter instance will be added</span>
@@ -391,7 +393,7 @@
 
 
 <div class="viewcode-block" id="BaseProgressResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.BaseProgressResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">BaseProgressResultsWriter</span><span class="p">(</span><span class="n">BaseResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Base class for writers that display progress information while tests are running.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Base class for writers that display progress information while tests are running.</span>
 
 <span class="sd">	Progress writers are only enabled if the ``--progress`` flag is specified.</span>
 
@@ -401,7 +403,7 @@
 
 
 <div class="viewcode-block" id="ArtifactPublisher"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.ArtifactPublisher">[docs]</a><span class="k">class</span> <span class="nc">ArtifactPublisher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Interface implemented by writers that implement publishing of file/directory artifacts. </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Interface implemented by writers that implement publishing of file/directory artifacts. </span>
 <span class="sd">	</span>
 <span class="sd">	For example, a writer for a CI provider that supports artifact uploading can subclass this interface to </span>
 <span class="sd">	be notified when another writer (or performance reporter) produces an artifact. If implementing this interface, </span>
@@ -419,7 +421,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ArtifactPublisher.publishArtifact"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.ArtifactPublisher.publishArtifact">[docs]</a>	<span class="k">def</span> <span class="nf">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called when a file or directory artifact has been written and is ready to be published (e.g. by another writer).</span>
 <span class="sd">		</span>
 <span class="sd">		:param str path: Absolute path of the file or directory, using forward slashes as the path separator. </span>
@@ -432,7 +434,7 @@
 
 
 <div class="viewcode-block" id="TestOutputVisitor"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutputVisitor">[docs]</a><span class="k">class</span> <span class="nc">TestOutputVisitor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Interface implemented by writers that wish to be notified of each file in the test output directory. </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Interface implemented by writers that wish to be notified of each file in the test output directory. </span>
 <span class="sd">	</span>
 <span class="sd">	Implementing this interface is a lot more efficient than explicitly walking the directory tree. </span>
 <span class="sd">	Note that in the interests of performance empty (zero byte) files are ignored. </span>
@@ -441,7 +443,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TestOutputVisitor.visitTestOutputFile"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutputVisitor.visitTestOutputFile">[docs]</a>	<span class="k">def</span> <span class="nf">visitTestOutputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Called after execution of each test (and before purging of files) for each file found in the output </span>
 <span class="sd">		directory. </span>
 <span class="sd">		</span>
@@ -454,7 +456,7 @@
 		<span class="k">pass</span></div></div>
 
 <div class="viewcode-block" id="TestOutcomeSummaryGenerator"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutcomeSummaryGenerator">[docs]</a><span class="k">class</span> <span class="nc">TestOutcomeSummaryGenerator</span><span class="p">(</span><span class="n">BaseResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Mix-in helper class that can be inherited by any writer to allow (configurable) generation of a textual </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Mix-in helper class that can be inherited by any writer to allow (configurable) generation of a textual </span>
 <span class="sd">	summary of the test outcomes. </span>
 
 <span class="sd">	If subclasses provide their own implementation of `setup` and `processResult` they must ensure this class&#39;s </span>
@@ -463,39 +465,41 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">showOutcomeReason</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes the reason for each failure.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes the reason for each failure.&quot;&quot;&quot;</span>
 	
 	<span class="n">showOutputDir</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes the (relative) path to the output directory for each failure. &quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes the path to the output directory for each failure. </span>
+<span class="sd">	This is relative to the current working directory unless project property ``pysysLogAbsolutePaths`` is True.&quot;&quot;&quot;</span>
 
 	<span class="n">showTestDir</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes the (relative) path to the test directory for each failure, </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes the path to the test directory for each failure, </span>
 <span class="sd">	unless the output dir is displayed and the test dir is a parent of it. </span>
-<span class="sd">	This is useful if you run tests with an absolute --outdir. &quot;&quot;&quot;</span>
+<span class="sd">	This is useful if you run tests with an absolute --outdir. </span>
+<span class="sd">	This path is logged relative to the current working directory unless project property ``pysysLogAbsolutePaths`` is True.&quot;&quot;&quot;</span>
 
 	<span class="n">showTestTitle</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes the test title for each failure. &quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes the test title for each failure. &quot;&quot;&quot;</span>
 	
 	<span class="n">showOutcomeStats</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes a count of the number of each outcomes.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes a count of the number of each outcomes.&quot;&quot;&quot;</span>
 	
 	<span class="n">showDuration</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes the total duration of all tests.&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes the total duration of all tests.&quot;&quot;&quot;</span>
 
 	<span class="n">showRunDetails</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes the ``runDetails`` from the `pysys.baserunner.BaseRunner`, </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes the ``runDetails`` from the `pysys.baserunner.BaseRunner`, </span>
 <span class="sd">	such as ``outDirName`` and ``hostname``.&quot;&quot;&quot;</span>
 
 	<span class="n">showInspectSummary</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes a summary of INSPECT outcomes (if any). 	</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes a summary of INSPECT outcomes (if any). 	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">showNotVerifiedSummary</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes a summary of NOTVERIFIED outcomes (if any). 	</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes a summary of NOTVERIFIED outcomes (if any). 	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">showTestIdList</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="sd">&quot;&quot;&quot;Configures whether the summary includes a short list of the failing test ids in a form that&#39;s easy to paste onto the </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Configures whether the summary includes a short list of the failing test ids in a form that&#39;s easy to paste onto the </span>
 <span class="sd">	command line to re-run the failed tests. &quot;&quot;&quot;</span>
 
 	
@@ -518,7 +522,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">+</span> <span class="n">testTime</span>
 
 <div class="viewcode-block" id="TestOutcomeSummaryGenerator.getSummaryText"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutcomeSummaryGenerator.getSummaryText">[docs]</a>	<span class="k">def</span> <span class="nf">getSummaryText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Get the textual summary as a single string (with no coloring). </span>
 <span class="sd">		</span>
 <span class="sd">		To customize what is included in the summary (rather than letting it be user-configurable), </span>
@@ -533,7 +537,7 @@
 		<span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TestOutcomeSummaryGenerator.logSummary"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.TestOutcomeSummaryGenerator.logSummary">[docs]</a>	<span class="k">def</span> <span class="nf">logSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">showDuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">showOutcomeStats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">showTestIdList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">showFailureSummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">showRunDetails</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Writes a textual summary using the specified log function, with colored output if enabled.</span>
 <span class="sd">		</span>
 <span class="sd">		The keyword arguments can be used to disable sections of the output (overriding the settings) if needed by </span>
@@ -584,6 +588,9 @@
 			<span class="n">log</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
 		<span class="k">def</span> <span class="nf">logForOutcome</span><span class="p">(</span><span class="n">decider</span><span class="p">):</span>
+			<span class="n">mayberelpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span>
+			<span class="k">if</span> <span class="n">pysys</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">Project</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pysysLogAbsolutePaths&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span> <span class="n">mayberelpath</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">p</span>
+
 			<span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
 				<span class="n">cyclestr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">cyclestr</span> <span class="o">=</span> <span class="s1">&#39;[CYCLE </span><span class="si">%d</span><span class="s1">] &#39;</span><span class="o">%</span><span class="p">(</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -601,8 +608,8 @@
 							<span class="n">log</span><span class="p">(</span><span class="s2">&quot;      </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_OUTCOMES</span><span class="p">))</span>
 							
 						<span class="k">try</span><span class="p">:</span>
-							<span class="n">outputdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">outputdir</span><span class="p">)))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
-							<span class="n">testDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testDir</span><span class="p">)))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
+							<span class="n">outputdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">mayberelpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">outputdir</span><span class="p">)))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
+							<span class="n">testDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">mayberelpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testDir</span><span class="p">)))</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span>
 						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># relpath can fail if on different Windows drives</span>
 							<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to generate relative paths for &quot;</span><span class="si">%s</span><span class="s1">&quot; and &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">outputdir</span><span class="p">,</span> <span class="n">testDir</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
 							
@@ -629,9 +636,13 @@
 				<span class="k">for</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">tests</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">cycle</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 					<span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span> <span class="n">fails</span> <span class="o">=</span> <span class="n">fails</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tests</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">fails</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-				<span class="n">log</span><span class="p">(</span><span class="s2">&quot;	THERE WERE NO FAILURES&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_PASSES</span><span class="p">))</span>
+				<span class="n">log</span><span class="p">(</span><span class="s2">&quot;  THERE WERE NO FAILURES&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_PASSES</span><span class="p">))</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="n">logForOutcome</span><span class="p">(</span><span class="k">lambda</span> <span class="n">outcome</span><span class="p">:</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">())</span>
+
+			<span class="k">if</span> <span class="n">pysys</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">ProcessUser</span><span class="o">.</span><span class="n">isRunnerAborting</span><span class="p">:</span>
+				<span class="n">didNotStart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numTests</span><span class="o">-</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+				<span class="n">log</span><span class="p">(</span><span class="s2">&quot;  TEST RUN ABORTED</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;; </span><span class="si">%d</span><span class="s1"> TESTS DID NOT START&#39;</span><span class="o">%</span><span class="n">didNotStart</span> <span class="k">if</span> <span class="n">didNotStart</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FAILURES</span><span class="p">))</span>
 			<span class="n">log</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="n">showTestIdList</span><span class="p">:</span>
@@ -656,7 +667,7 @@
 				<span class="n">log</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">failedids</span><span class="p">))</span></div></div>
 
 <div class="viewcode-block" id="replaceIllegalXMLCharacters"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.api.html#pysys.writer.api.replaceIllegalXMLCharacters">[docs]</a><span class="k">def</span> <span class="nf">replaceIllegalXMLCharacters</span><span class="p">(</span><span class="n">unicodeString</span><span class="p">,</span> <span class="n">replaceWith</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;?&#39;</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Utility function that takes a unicode character string and replaces all characters </span>
 <span class="sd">	that are not permitted to appear in an XML document. </span>
 <span class="sd">	</span>
@@ -688,7 +699,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

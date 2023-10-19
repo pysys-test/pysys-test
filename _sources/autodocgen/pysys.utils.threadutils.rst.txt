@@ -13,3 +13,9 @@ BackgroundThread
 
 .. autoclass:: BackgroundThread
    :members:
+
+
+createThreadInitializer
+=======================
+
+.. autofunction:: createThreadInitializer

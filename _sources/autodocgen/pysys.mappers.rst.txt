@@ -29,6 +29,13 @@ JoinLines
    :members:
 
 
+IncludeMatches
+==============
+
+.. autoclass:: IncludeMatches
+   :members:
+
+
 IncludeLinesMatching
 ====================
 
@@ -40,6 +47,13 @@ ExcludeLinesMatching
 ====================
 
 .. autoclass:: ExcludeLinesMatching
+   :members:
+
+
+TruncateLongLines
+=================
+
+.. autoclass:: TruncateLongLines
    :members:
 
 

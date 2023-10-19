@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.unit.pyunit &mdash; PySys v2.1  documentation</title>
+  <title>pysys.unit.pyunit &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -182,7 +182,7 @@
 <span class="kn">import</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">unittest</span>
 
 <div class="viewcode-block" id="PyUnitTest"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest">[docs]</a><span class="k">class</span> <span class="nc">PyUnitTest</span><span class="p">(</span><span class="n">BaseTest</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Class for running PyUnit tests (standard Python unittest module). The</span>
 <span class="sd">	execute method will execute all the .py files, find all the</span>
 <span class="sd">	unittest.TestCase classes within those files and run the test methods</span>
@@ -193,14 +193,14 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PyUnitTest.execute"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Implementation of the execute() abstract method which simply</span>
 <span class="sd">		calls executePyUnitTests()</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">executePyUnitTests</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyUnitTest.executePyUnitTests"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest.executePyUnitTests">[docs]</a>	<span class="k">def</span> <span class="nf">executePyUnitTests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Run all the PyUnit tests in the Input directory.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">pyfiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findPythonFiles</span><span class="p">()</span>
@@ -235,7 +235,7 @@
 				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
 
 <div class="viewcode-block" id="PyUnitTest.getPythonPath"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest.getPythonPath">[docs]</a>	<span class="k">def</span> <span class="nf">getPythonPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Override this method to return a sequence of paths to put</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Override this method to return a sequence of paths to put</span>
 <span class="sd">		at the beginning of the PYTHONPATH when running the PyUnit</span>
 <span class="sd">		tests. See PyUnit_test_002 for an example of this.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -257,7 +257,8 @@
 		<span class="c1"># Use globals dictionary for locals as well because we</span>
 		<span class="c1"># want to treat this like it is being run in a global</span>
 		<span class="c1"># (file scope) context)</span>
-		<span class="n">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span><span class="p">),</span> <span class="nb">globals</span><span class="p">,</span> <span class="nb">globals</span><span class="p">)</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span><span class="p">),</span> <span class="nb">globals</span><span class="p">,</span> <span class="nb">globals</span><span class="p">)</span>
 		<span class="n">testClasses</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">globals</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
 			<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">)):</span>
@@ -314,7 +315,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

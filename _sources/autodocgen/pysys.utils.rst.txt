@@ -19,6 +19,7 @@ pysys.utils
   pysys.utils.linecount
   pysys.utils.logutils
   pysys.utils.misc
+  pysys.utils.osutils
   pysys.utils.perfreporter
   pysys.utils.pycompat
   pysys.utils.safeeval

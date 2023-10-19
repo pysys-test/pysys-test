@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.perf.reporters &mdash; PySys v2.1  documentation</title>
+  <title>pysys.perf.reporters &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -189,7 +189,7 @@
 
 
 <div class="viewcode-block" id="CSVPerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.CSVPerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">CSVPerformanceReporter</span><span class="p">(</span><span class="n">BasePerformanceReporter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Performance reporter which writes to a CSV file.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Performance reporter which writes to a CSV file.</span>
 <span class="sd">	</span>
 <span class="sd">	This reporter writes to a UTF-8 file of </span>
 <span class="sd">	comma-separated values that is both machine and human readable and </span>
@@ -208,7 +208,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">summaryFile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. </span>
 <span class="sd">	</span>
 <span class="sd">	For compatibility purposes, if not specified explicitly, the summary file for the CSVPerformanceReporter can be </span>
@@ -219,7 +219,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">aggregateCycles</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Enable this if you want PySys to rewrite the summary file at the end of a multi-cycle test with an aggregated </span>
 <span class="sd">	file containing the mean and standard deviation for all the cycles, rather than a separate line for each cycle. </span>
 <span class="sd">	This may be easier to consume when triaging performance results and looking for regressions. </span>
@@ -228,14 +228,14 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">publishArtifactCategory</span> <span class="o">=</span> <span class="s1">&#39;CSVPerformanceReport&#39;</span> 
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	If specified, the output file will be published as an artifact using the specified category name. </span>
 
 <span class="sd">	.. versionadded:: 2.1</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">DEFAULT_SUMMARY_FILE</span> <span class="o">=</span> <span class="s1">&#39;__pysys_performance/$</span><span class="si">{outDirName}</span><span class="s1">_$</span><span class="si">{hostname}</span><span class="s1">/perf_$</span><span class="si">{startDate}</span><span class="s1">_$</span><span class="si">{startTime}</span><span class="s1">.$</span><span class="si">{outDirName}</span><span class="s1">.csv&#39;</span>
-	<span class="sd">&quot;&quot;&quot;The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or </span>
 <span class="sd">	the ``summaryFile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+&#39;/..&#39; directory </span>
 <span class="sd">	(typically testRootDir, unless ``--outdir`` is overridden).</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -249,7 +249,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">__summaryFilesWritten</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
 	<span class="k">def</span> <span class="nf">getRunHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Return the header string to the CSV file.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return the header string to the CSV file.</span>
 <span class="sd">		</span>
 <span class="sd">		There should usually be no reason to override this method. </span>
 <span class="sd">		</span>
@@ -279,7 +279,7 @@
 							<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Rewriting CSV to aggregate results across all </span><span class="si">%d</span><span class="s1"> cycles&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycles</span><span class="p">)</span>
 							<span class="n">perfFile</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 				
-					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performance results were written to: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">))</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performance results were written to: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="c1"># absolute path is easiest to deal with</span>
 					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;  (add the above path to env </span><span class="si">%s</span><span class="s1"> to show a comparison against that baseline on future test runs)&#39;</span><span class="p">,</span> <span class="n">PrintSummaryPerformanceReporter</span><span class="o">.</span><span class="n">BASELINES_ENV_VAR</span><span class="p">)</span>
 					
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactCategory</span><span class="p">:</span>
@@ -290,7 +290,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">recordResult</span><span class="p">(</span><span class="n">formatted</span><span class="p">,</span> <span class="n">testobj</span><span class="p">)</span>
 
 	<span class="k">def</span> <span class="nf">formatResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testobj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">resultKey</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">toleranceStdDevs</span><span class="p">,</span> <span class="n">resultDetails</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).</span>
 
 <span class="sd">		:meta private:</span>
 
@@ -315,7 +315,7 @@
 		<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">toCSVLine</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
 	<span class="k">def</span> <span class="nf">recordResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formatted</span><span class="p">,</span> <span class="n">testobj</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Record results to the performance summary file.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Record results to the performance summary file.</span>
 
 <span class="sd">		:meta private:</span>
 
@@ -357,7 +357,7 @@
 		<span class="k">return</span> <span class="n">CSVPerformanceFile</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="JSONPerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.JSONPerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">JSONPerformanceReporter</span><span class="p">(</span><span class="n">BasePerformanceReporter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Performance reporter which writes to a JSON file.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Performance reporter which writes to a JSON file.</span>
 <span class="sd">	</span>
 <span class="sd">	After tests have run, the summary file is published with category ``JSONPerformanceReport`` </span>
 <span class="sd">	using the `pysys.writer.api.ArtifactPublisher` interface. </span>
@@ -369,17 +369,17 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">summaryFile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The ``.json`` filename pattern used for the summary file(s); see `DEFAULT_SUMMARY_FILE`. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">publishArtifactCategory</span> <span class="o">=</span> <span class="s1">&#39;JSONPerformanceReport&#39;</span> 
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	If specified, the output file will be published as an artifact using the specified category name. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">DEFAULT_SUMMARY_FILE</span> <span class="o">=</span> <span class="s1">&#39;__pysys_performance/$</span><span class="si">{outDirName}</span><span class="s1">_$</span><span class="si">{hostname}</span><span class="s1">/perf_$</span><span class="si">{startDate}</span><span class="s1">_$</span><span class="si">{startTime}</span><span class="s1">.$</span><span class="si">{outDirName}</span><span class="s1">.json&#39;</span>
-	<span class="sd">&quot;&quot;&quot;The default summary file if not overridden by the ``summaryFile=`` attribute. See `getRunSummaryFile()`. </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;The default summary file if not overridden by the ``summaryFile=`` attribute. See `getRunSummaryFile()`. </span>
 <span class="sd">	This is relative to the runner output+&#39;/..&#39; directory (typically testRootDir, unless ``--outdir`` is overridden).</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
@@ -434,7 +434,7 @@
 			<span class="k">return</span> <span class="n">PerformanceRunData</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;runDetails&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="PrintSummaryPerformanceReporter"><a class="viewcode-back" href="../../../autodocgen/pysys.perf.reporters.html#pysys.perf.reporters.PrintSummaryPerformanceReporter">[docs]</a><span class="k">class</span> <span class="nc">PrintSummaryPerformanceReporter</span><span class="p">(</span><span class="n">BasePerformanceReporter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Performance reporter which logs a human-friendly summary of all performance results to the console at the end of </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Performance reporter which logs a human-friendly summary of all performance results to the console at the end of </span>
 <span class="sd">	the test run. </span>
 
 <span class="sd">	By setting the `BASELINES_ENV_VAR` environment variable, this reporter will also print out an </span>
@@ -446,7 +446,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">BASELINES_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;PYSYS_PERFORMANCE_BASELINES&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Set this environment variable to a comma-separated list of performance (e.g. ``.csv``) files to print out an </span>
 <span class="sd">	automatic comparison from the baseline file(s) to the results from the current test run. </span>
 <span class="sd">	</span>
@@ -525,7 +525,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

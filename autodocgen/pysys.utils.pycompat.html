@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.pycompat &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils.pycompat &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -108,9 +108,11 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.osutils.html">pysys.utils.osutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.pycompat</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#isstring">isstring</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quotestring">quotestring</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#openfile">openfile</a></li>
 </ul>
 </li>
@@ -137,7 +139,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -206,6 +208,20 @@
 </dd></dl>
 
 </div>
+<div class="section" id="quotestring">
+<h2>quotestring<a class="headerlink" href="#quotestring" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.pycompat.quotestring">
+<code class="sig-prename descclassname">pysys.utils.pycompat.</code><code class="sig-name descname">quotestring</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/pycompat.html#quotestring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.pycompat.quotestring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds double quotation marks around the specified character or byte string, 
+and additional escaping only if needed to make the meaning clear, but trying to 
+avoid double-slashes unless actually needed since it makes paths harder to read</p>
+<p>If a byte string is provided then the 
+<code class="docutils literal notranslate"><span class="pre">repr()</span></code> representation is used instead.</p>
+<p>Deprecated - use <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.quoteString" title="pysys.utils.misc.quoteString"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.quoteString</span></code></a> instead.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="openfile">
 <h2>openfile<a class="headerlink" href="#openfile" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -266,7 +282,7 @@ This stream should be closed when no longer required.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

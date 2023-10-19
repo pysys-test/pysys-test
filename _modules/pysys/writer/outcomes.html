@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.writer.outcomes &mdash; PySys v2.1  documentation</title>
+  <title>pysys.writer.outcomes &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -200,14 +200,14 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">flushfile</span><span class="p">():</span> 
-	<span class="sd">&quot;&quot;&quot;Utility class to flush on each write operation - for internal use only.  </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Utility class to flush on each write operation - for internal use only.  </span>
 <span class="sd">	</span>
 <span class="sd">	:meta private:</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">fp</span><span class="o">=</span><span class="kc">None</span> 
 	
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;Create an instance of the class. </span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Create an instance of the class. </span>
 <span class="sd">		</span>
 <span class="sd">		:param fp: The file object</span>
 <span class="sd">		</span>
@@ -215,7 +215,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">fp</span>
 	
 	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a write to the file object.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a write to the file object.</span>
 <span class="sd">		</span>
 <span class="sd">		:param msg: The string message to write. </span>
 <span class="sd">		</span>
@@ -225,19 +225,20 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span> 
 	
 	<span class="k">def</span> <span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Perform a seek on the file objet.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Perform a seek on the file objet.</span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 	
 	<span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;Close the file objet.</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Close the file objet.</span>
 <span class="sd">		</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<div class="viewcode-block" id="JSONResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">JSONResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner.</span>
+<div class="viewcode-block" id="JSONResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">JSONResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">ArtifactPublisher</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer to log a summary of the test results to a single JSON file, along with ``runDetails`` from the runner, </span>
+<span class="sd">	and a list of published ``artifacts`` (e.g. code coverage etc).</span>
 <span class="sd">	</span>
 <span class="sd">	The following fields are always included for each test result:</span>
 <span class="sd">	</span>
@@ -253,18 +254,21 @@
 <span class="sd">	If applicable, some tests/runs may have additional fields such as ``cycle``, ``title`` and ``outputDir``. </span>
 
 <span class="sd">	.. versionadded:: 2.1</span>
+
+<span class="sd">	.. versionchanged:: 2.2 Added ``artifacts`` dictionary recording artifact paths published during execution of the tests, for </span>
+<span class="sd">	    example code coverage and performance reports. </span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">includeTitle</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	By default the title of each test is included in the output. </span>
 <span class="sd">	</span>
 <span class="sd">	To save disk space you can set this to False if it is not needed. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	In addition to failure outcomes, any outcomes listed here (as comma-separated display names, e.g. </span>
 <span class="sd">	``&quot;NOT VERIFIED, INSPECT&quot;``) will be included. To include all non-failure outcomes, set this to the special value ``&quot;*&quot;``. </span>
 <span class="sd">	</span>
@@ -272,7 +276,7 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">outputDir</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The directory to write the logfile, if an absolute path is not specified. The default is the working directory. </span>
 
 <span class="sd">	Project ``${...}`` properties can be used in the path. </span>
@@ -283,6 +287,7 @@
 		<span class="c1"># substitute into the filename template</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># category: [paths]</span>
 
 	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span>
@@ -306,9 +311,19 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;, &quot;results&quot;:[</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 
+	<span class="k">def</span> <span class="nf">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="c1"># to keep the file readable, store artifacts and put them all at the end</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
 	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span> <span class="k">return</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">]}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">],&#39;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&quot;artifacts&quot;: &#39;</span><span class="p">)</span>
+		<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="kc">None</span>
 		
@@ -317,7 +332,7 @@
 
 
 <div class="viewcode-block" id="JSONResultsWriter.createTestResultDict"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JSONResultsWriter.createTestResultDict">[docs]</a>	<span class="k">def</span> <span class="nf">createTestResultDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Creates the dict that will be output for each test result.</span>
 <span class="sd">		</span>
 <span class="sd">		@returns: The dict, or ``None`` if this result should not be included/ </span>
@@ -332,12 +347,12 @@
 			<span class="s1">&#39;outcomeReason&#39;</span><span class="p">:</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">(),</span>
 			<span class="s1">&#39;startTime&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;testStart&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="p">)),</span>
 			<span class="s1">&#39;durationSecs&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;testTime&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-			<span class="s1">&#39;testDir&#39;</span><span class="p">:</span> <span class="n">testDir</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">),</span>
-			<span class="s1">&#39;testFile&#39;</span><span class="p">:</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">_getTestFile</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">),</span>
+			<span class="s1">&#39;testDir&#39;</span><span class="p">:</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testDir</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">),</span>
+			<span class="s1">&#39;testFile&#39;</span><span class="p">:</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">_getTestFile</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">),</span>
 		<span class="p">}</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 			<span class="n">data</span><span class="p">[</span><span class="s1">&#39;cycle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
-		<span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">output</span> <span class="o">!=</span> <span class="s1">&#39;Output&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outputDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">output</span> <span class="o">!=</span> <span class="s1">&#39;Output&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outputDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeTitle</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">title</span>
 		
@@ -360,15 +375,27 @@
 
 
 <div class="viewcode-block" id="TextResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.TextResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">TextResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer to log a summary of the results to a logfile in .txt format.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer to log a summary of the results to a log file in text format.</span>
 <span class="sd">	</span>
+<span class="sd">	Only enabled when the record flag is specified.</span>
+
+<span class="sd">	Can be a useful way to view the current or final status of the current/latest test run. </span>
+<span class="sd">	The file is written incrementally as each test completes, but can be sorted (using standard command line tools) </span>
+<span class="sd">	to get a nice summary of all the failures. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">outputDir</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The directory to write the logfile, if an absolute path is not specified. The default is the working directory. </span>
 
-<span class="sd">	Project ``${...}`` properties can be used in the path. </span>
+<span class="sd">	Project ``${...}`` properties can be used in the path, for example ``${eval:os.path.expanduser(&#39;~&#39;)}`` for the current user&#39;s home directory. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Display more details in the output including the outcome reason and the test title. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -382,37 +409,65 @@
 		<span class="c1"># platform and test host. </span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;TextResultsWriter is recording results at: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">flushfile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DATE:       </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S (%Z)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span> <span class="p">))</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PLATFORM:   </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">PLATFORM</span><span class="p">))</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TEST HOST:  </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">HOSTNAME</span><span class="p">))</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">flushfile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;backslashreplace&#39;</span><span class="p">))</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="c1"># these are a bit ugly; keep them for compat, but for people using the new verbose mode don&#39;t bother</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DATE:       </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S (%Z)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span> <span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PLATFORM:   </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">PLATFORM</span><span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TEST HOST:  </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">HOSTNAME</span><span class="p">))</span>
 		<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">runDetails</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-			<span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;startTime&#39;</span><span class="p">,</span> <span class="s1">&#39;hostname&#39;</span><span class="p">}:</span> <span class="k">continue</span> <span class="c1"># don&#39;t duplicate the above</span>
+			<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;startTime&#39;</span><span class="p">,</span> <span class="s1">&#39;hostname&#39;</span><span class="p">}:</span> <span class="k">continue</span> <span class="c1"># don&#39;t duplicate the above</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%-20s%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;: &#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">failureIds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">executed</span> <span class="o">=</span> <span class="mi">0</span>
 
 	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="c1"># Flushes and closes the file handle to the logfile.  </span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span> 
-			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Completed execution of </span><span class="si">%d</span><span class="s1"> tests</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executed</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;, and found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failureIds</span><span class="p">)</span><span class="si">}</span><span class="s1"> failures:&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureIds</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureIds</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failureIds</span><span class="p">))))</span>
+
 			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="kc">None</span>
 
-	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="c1"># Writes the test id and outcome to the logfile. </span>
 		
-		<span class="k">if</span> <span class="s2">&quot;cycle&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> 
-			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">!=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]:</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cycle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">threads</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycles</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># only makes sense to group by cycles if single-threaded</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">!=</span> <span class="n">cycle</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">cycle</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">[Cycle </span><span class="si">%d</span><span class="s1">]:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-		
-		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">(),</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">))</span></div>
+
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">executed</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">failureIds</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+			<span class="c1"># This is designed to permit sorting the entire file such that similar &quot;reasons&quot; grouped together</span>
+			<span class="c1"># Providing the absolute path of the output dir allows jumping to the relevant files in an editor</span>
+			<span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;* &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">title</span> <span class="ow">and</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">title</span> <span class="o">!=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">idWithoutMode</span><span class="p">:</span> <span class="n">text</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; | </span><span class="si">{</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span>
+			<span class="c1"># use ! vs + to ensure failures are all sorted together</span>
+			<span class="n">text</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  </span><span class="si">{</span><span class="s1">&#39;! &#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;+ &#39;</span><span class="si">}{</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="si">}{</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="s2">&quot;</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">(),</span> 
+				<span class="c1"># Use str() which includes cycle if a) we need to and b) we haven&#39;t already displayed it above</span>
+				<span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">cycles</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">threads</span><span class="o">&gt;</span><span class="mi">1</span>
+				<span class="k">else</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="XMLResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.XMLResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">XMLResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer to log results to logfile in a single XML file.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer to log results to logfile in a single XML file.</span>
 <span class="sd">	</span>
 <span class="sd">	The class creates a DOM document to represent the test output results and writes the DOM to the </span>
 <span class="sd">	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can </span>
@@ -440,6 +495,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">numTests</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;numTests&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;numTests&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mi">0</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;runner&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
 		
+		<span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">))</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>
 	
 		<span class="n">impl</span> <span class="o">=</span> <span class="n">getDOMImplementation</span><span class="p">()</span>
@@ -570,7 +626,7 @@
 
 	
 <div class="viewcode-block" id="JUnitXMLResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.JUnitXMLResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">JUnitXMLResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer to log test results in the widely-used Apache Ant JUnit XML format (one output file per test per cycle). </span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer to log test results in the widely-used Apache Ant JUnit XML format (one output file per test per cycle). </span>
 <span class="sd">	</span>
 <span class="sd">	If you need to integrate with any CI provider that doesn&#39;t have built-in support (e.g. Jenkins) this standard </span>
 <span class="sd">	output format will usually be the easiest way to do it. </span>
@@ -579,12 +635,34 @@
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">outputDir</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	The directory to write the XML files to, as an absolute path, or relative to the testRootDir. </span>
 
 <span class="sd">	Project ``${...}`` properties can be used in the path. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	
+
+	<span class="n">testsuiteName</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Overrides the content written to the ``&lt;testsuite name=...&gt;`` attribute (defaults to ``@TESTID@``), </span>
+<span class="sd">	A recommended alternate value is ``@TESTID_PACKAGE@`` which represents the test id up to the final ``.``. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">testcaseClassname</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Overrides the content written to the ``&lt;testcase classname=...&gt;`` attribute (defaults to ``@CLASSNAME@``), </span>
+<span class="sd">	A recommended alternate value is empty string, since the classname (typically &quot;PySys&quot;) is not very useful for most PySys tests. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">testcaseName</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># default is @TESTID@</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Overrides the content written to the ``&lt;testcase name=...&gt;`` attribute (defaults to ``@TESTID@``), </span>
+<span class="sd">	A recommended alternate value is ``@TESTID_NO_PACKAGE_OR_MODE@~@MODE@`` when using ``testsuiteName`` to hold the package part of the test id. </span>
+
+<span class="sd">	.. versionadded:: 2.2</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
@@ -595,6 +673,23 @@
 		<span class="n">deletedir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span><span class="p">)</span>
 		<span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputDir</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cycles&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">substitute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configured</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">configured</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">default</span> <span class="c1"># but not if it&#39;s empty!</span>
+		<span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">configured</span><span class="p">:</span> <span class="k">return</span> <span class="n">configured</span>
+
+		<span class="nb">id</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">idWithoutMode</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+		<span class="n">TESTID_PACKAGE</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">id</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+		<span class="n">TESTID_NO_PACKAGE_OR_MODE</span> <span class="o">=</span> <span class="nb">id</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+		<span class="k">return</span> <span class="p">(</span><span class="n">configured</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@TESTID_NO_PACKAGE_OR_MODE@&#39;</span><span class="p">,</span> <span class="n">TESTID_NO_PACKAGE_OR_MODE</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@TESTID_PACKAGE@&#39;</span><span class="p">,</span> <span class="n">TESTID_PACKAGE</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@TESTID@&#39;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@MODE@&#39;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@CLASSNAME@&#39;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">classname</span><span class="p">)</span>
+		<span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span> <span class="c1"># stripping leading . helps cover cases where there is sometimes no package</span>
+		
 
 	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="c1"># Creates a test summary file in the Apache Ant JUnit XML format. </span>
@@ -609,7 +704,7 @@
 		<span class="n">document</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">createDocument</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;testsuite&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>		
 		<span class="n">rootElement</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">documentElement</span>
 		<span class="n">attr1</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
-		<span class="n">attr1</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span>
+		<span class="n">attr1</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testsuiteName</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="p">)</span>
 		<span class="n">attr2</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;tests&#39;</span><span class="p">)</span>
 		<span class="n">attr2</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="s1">&#39;1&#39;</span>
 		<span class="n">attr3</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;failures&#39;</span><span class="p">)</span>
@@ -629,13 +724,17 @@
 
 		<span class="c1"># add the testcase information</span>
 		<span class="n">testcase</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;testcase&#39;</span><span class="p">)</span>
-		<span class="n">attr1</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;classname&#39;</span><span class="p">)</span>
-		<span class="n">attr1</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">classname</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testcaseClassname</span> <span class="o">!=</span> <span class="s1">&#39;@OMIT@&#39;</span><span class="p">:</span> <span class="c1"># probably not needed since empty string seems to work better, but useful to have the option (crrently undocumented)</span>
+			<span class="n">attr1</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;classname&#39;</span><span class="p">)</span>
+			<span class="n">attr1</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testcaseClassname</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">classname</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="p">)</span>
+			<span class="n">testcase</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr1</span><span class="p">)</span>
 		<span class="n">attr2</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
-		<span class="n">attr2</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span>		   	
-		<span class="n">testcase</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr1</span><span class="p">)</span>
+		<span class="n">attr2</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testcaseName</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="p">)</span>
 		<span class="n">testcase</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr2</span><span class="p">)</span>
-		
+		<span class="n">attr5</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createAttribute</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>	
+		<span class="n">attr5</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;testTime&#39;</span><span class="p">]</span>
+		<span class="n">testcase</span><span class="o">.</span><span class="n">setAttributeNode</span><span class="p">(</span><span class="n">attr5</span><span class="p">)</span>
+
 		<span class="c1"># add in failure information if the test has failed</span>
 		<span class="k">if</span> <span class="p">(</span><span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">or</span> <span class="n">outcome</span> <span class="o">==</span> <span class="n">SKIPPED</span><span class="p">):</span>
 			<span class="n">failure</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;skipped&#39;</span> <span class="k">if</span> <span class="n">outcome</span><span class="o">==</span><span class="n">SKIPPED</span> <span class="k">else</span> <span class="s1">&#39;failure&#39;</span><span class="p">)</span>
@@ -676,7 +775,7 @@
 
 
 <div class="viewcode-block" id="CSVResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.outcomes.html#pysys.writer.outcomes.CSVResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">CSVResultsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Writer to log results to logfile in CSV format.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Writer to log results to logfile in CSV format.</span>
 
 <span class="sd">	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys</span>
 <span class="sd">	project file using the nested &lt;property&gt; tag on the &lt;writer&gt; tag. The CSV column output is in the form::</span>
@@ -735,7 +834,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

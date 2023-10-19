@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils.fileutils &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils.fileutils &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../../../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -83,7 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PySys v2.1</a>
+          <a href="../../../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -176,6 +176,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -187,7 +188,7 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.fileutils&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="toLongPathSafe"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.toLongPathSafe">[docs]</a><span class="k">def</span> <span class="nf">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onlyIfNeeded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Converts the specified path string to a form suitable for passing to API </span>
 <span class="sd">	calls if it exceeds the maximum path length on this OS. </span>
 <span class="sd">	</span>
@@ -197,11 +198,11 @@
 <span class="sd">	letters so they are always upper case regardless of OS version and current </span>
 <span class="sd">	working directory. </span>
 <span class="sd">	</span>
-<span class="sd">	:param str path: A path. Must not be a relative path. Can be None/empty. Can </span>
+<span class="sd">	:param str path: An absolute (not relative) path. Can be None/empty. Can </span>
 <span class="sd">		contain &quot;..&quot; sequences. Note that no normalization of &quot;..&quot; </span>
-<span class="sd">		sequences and slashes is performed if the OS starts with ``\\?\`` already </span>
+<span class="sd">		sequences and slashes is performed if the path starts with ``\\?\`` already </span>
 <span class="sd">		or is non-Windows so if in doubt run the path through ``os.path.normpath`` </span>
-<span class="sd">		before calling this method on it (``\\?\`` paths with incorrect slashes or .. sequences </span>
+<span class="sd">		before calling this method on it (``\\?\`` paths with incorrect slashes and ``..`` sequences </span>
 <span class="sd">		are not permitted by Windows). </span>
 <span class="sd">	</span>
 <span class="sd">	:param bool onlyIfNeeded: Set to True to only adds the long path support if this </span>
@@ -210,8 +211,8 @@
 <span class="sd">		returned string. </span>
 <span class="sd">	</span>
 <span class="sd">	:return: The passed-in path, possibly with a ``\\?\`` prefix added, </span>
-<span class="sd">		forward slashes converted to backslashes on Windows, and converted to </span>
-<span class="sd">		a unicode string. Trailing slashes may be removed. </span>
+<span class="sd">		forward slashes converted to backslashes on Windows, and drive letter capitalized. </span>
+<span class="sd">		Trailing slashes may be removed. </span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">IS_WINDOWS</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">path</span><span class="p">):</span> <span class="k">return</span> <span class="n">path</span>
@@ -238,12 +239,8 @@
 	<span class="k">return</span> <span class="n">path</span></div>
 
 <div class="viewcode-block" id="fromLongPathSafe"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.fromLongPathSafe">[docs]</a><span class="k">def</span> <span class="nf">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Strip off ``\\?\`` prefixes added by L{toLongPathSafe}. </span>
-<span class="sd">	</span>
-<span class="sd">	Note that this function does not convert unicode strings back to byte </span>
-<span class="sd">	strings, so if you want a complete reversal of toLongPathSafe you will </span>
-<span class="sd">	additionally have to call C{result.encode(PREFERRED_ENCODING)}.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span> <span class="k">return</span> <span class="n">path</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">?</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="n">path</span>
@@ -254,7 +251,7 @@
 	<span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="pathexists"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.pathexists">[docs]</a><span class="k">def</span> <span class="nf">pathexists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot; Returns True if the specified path is an existing file or directory, </span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; Returns True if the specified path is an existing file or directory, </span>
 <span class="sd">	as returned by C{os.path.exists}. </span>
 <span class="sd">	</span>
 <span class="sd">	This method is safe to call on paths that may be over the Windows 256 </span>
@@ -265,7 +262,7 @@
 	<span class="k">return</span> <span class="n">path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="mkdir"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.mkdir">[docs]</a><span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Create a directory, with recursive creation of any parent directories.</span>
 <span class="sd">	</span>
 <span class="sd">	This function is a no-op (does not throw) if the directory already exists. </span>
@@ -286,8 +283,14 @@
 			<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 	<span class="k">return</span> <span class="n">origpath</span></div>
 
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">):</span> <span class="c1"># cope with deprecation of onerror in v3.12. We don&#39;t use the third parameter of onerror/onexc anyway so can just pass it through</span>
+	<span class="k">def</span> <span class="nf">__rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onexc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="n">onexc</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+	<span class="n">__rmtree</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span>
+
 <div class="viewcode-block" id="deletedir"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.deletedir">[docs]</a><span class="k">def</span> <span class="nf">deletedir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Recursively delete the specified directory, with optional retries. </span>
 <span class="sd">	</span>
 <span class="sd">	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), </span>
@@ -300,14 +303,16 @@
 <span class="sd">	</span>
 <span class="sd">	:param ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. </span>
 <span class="sd">	</span>
-<span class="sd">	:param onerror: A callable that with arguments (function, path, excinfo), called when an error occurs while </span>
-<span class="sd">		deleting. See the documentation for ``shutil.rmtree`` for more information. </span>
+<span class="sd">	:param onerror: A callable with arguments (function, path, excinfo), called when an error occurs while </span>
+<span class="sd">		deleting. See the documentation of ``onexc`` /  ``onerror`` for ``shutil.rmtree`` for more information. </span>
+<span class="sd">		On Python 3.12+ ``excinfo`` holds the exception object, in earlier versions it holds </span>
+<span class="sd">		the tuple returned from ``sys.exc_info()``. </span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="n">ignore_errors</span><span class="p">:</span> <span class="k">assert</span> <span class="n">onerror</span><span class="o">==</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;cannot set onerror and also ignore_errors&#39;</span>
 	
 	<span class="n">path</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 	<span class="k">try</span><span class="p">:</span>
-		<span class="k">def</span> <span class="nf">pysysOnError</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">excinfo</span><span class="p">):</span>
+		<span class="k">def</span> <span class="nf">pysysOnError</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
 			<span class="k">try</span><span class="p">:</span> <span class="c1"># helps with both Windows &quot;readonly&quot; attribute and linux permissions issues</span>
 				<span class="n">perms</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWRITE</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IREAD</span>
 				<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="n">perms</span> <span class="o">=</span> <span class="n">perms</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IEXEC</span>
@@ -317,16 +322,17 @@
 				<span class="k">else</span><span class="p">:</span>
 					<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
-				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;deletedir failed to update permissions and delete </span><span class="si">%s</span><span class="s1"> on this attempt: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;deletedir failed to update permissions and delete </span><span class="si">%s</span><span class="s1"> on this attempt: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
 				<span class="k">pass</span>
 
 		<span class="c1"># delete as many files as we can first, so if there&#39;s an error deleting some files (e.g. due to windows file </span>
 		<span class="c1"># locking) we don&#39;t use any more disk space than we need to. This is ignores errors BUT attempts to change permissions first</span>
-		<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="n">pysysOnError</span><span class="p">)</span>
+		<span class="n">__rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onexc</span><span class="o">=</span><span class="n">pysysOnError</span><span class="p">)</span>
 		
 		<span class="c1"># then try again, being more careful</span>
 		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_errors</span><span class="p">:</span>					
-			<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="n">onerror</span><span class="p">)</span>
+			<span class="n">__rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onexc</span><span class="o">=</span><span class="n">onerror</span><span class="p">)</span>
 	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="k">return</span> <span class="c1"># nothing to do</span>
 		<span class="k">if</span> <span class="n">retries</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -337,7 +343,7 @@
 		<span class="n">deletedir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="n">onerror</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="deletefile"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.deletefile">[docs]</a><span class="k">def</span> <span class="nf">deletefile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Delete the specified file, with optional retries. </span>
 <span class="sd">	</span>
 <span class="sd">	Does nothing if it does not exist. </span>
@@ -365,7 +371,7 @@
 		<span class="n">deletefile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="n">ignore_errors</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="listDirContents"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.listDirContents">[docs]</a><span class="k">def</span> <span class="nf">listDirContents</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">recurse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable </span>
 <span class="sd">	for diffing. </span>
 <span class="sd">	</span>
@@ -403,7 +409,7 @@
 	<span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">listRecursively</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="loadProperties"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.loadProperties">[docs]</a><span class="k">def</span> <span class="nf">loadProperties</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Reads keys and values from the specified ``.properties`` file. </span>
 <span class="sd">	</span>
 <span class="sd">	Support ``#`` and ``!`` comments but does not perform any special handling of backslash ``\\`` characters </span>
@@ -430,7 +436,7 @@
 
 
 <div class="viewcode-block" id="loadJSON"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileutils.html#pysys.utils.fileutils.loadJSON">[docs]</a><span class="k">def</span> <span class="nf">loadJSON</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-	<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Reads JSON from the specified path. </span>
 <span class="sd">	</span>
 <span class="sd">	This is a small wrapper around Python&#39;s ``json.load()`` function. </span>
@@ -456,7 +462,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

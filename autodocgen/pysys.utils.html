@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.utils &mdash; PySys v2.1  documentation</title>
+  <title>pysys.utils &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/BaseTest.html">The BaseTest Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pysys/UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pysys/TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
@@ -108,6 +108,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.osutils.html">pysys.utils.osutils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
@@ -133,7 +134,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -224,17 +225,20 @@ that would do the job first, before resorting to these lower-level functions.</p
 <tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.misc.html#module-pysys.utils.misc" title="pysys.utils.misc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc</span></code></a></p></td>
 <td><p>Miscellanous utilities such as <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.compareVersions" title="pysys.utils.misc.compareVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.compareVersions</span></code></a>, <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.setInstanceVariablesFromDict" title="pysys.utils.misc.setInstanceVariablesFromDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.setInstanceVariablesFromDict</span></code></a>,  and <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.quoteString" title="pysys.utils.misc.quoteString"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.quoteString</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.perfreporter.html#module-pysys.utils.perfreporter" title="pysys.utils.perfreporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.osutils.html#module-pysys.utils.osutils" title="pysys.utils.osutils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.osutils</span></code></a></p></td>
+<td><p>Contains operating system helper utilities such as the <code class="xref py py-obj docutils literal notranslate"><span class="pre">getUsableCPUCount</span></code> function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.perfreporter.html#module-pysys.utils.perfreporter" title="pysys.utils.perfreporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter</span></code></a></p></td>
 <td><p>Old module for performance reporter - deprecated in favour of <a class="reference internal" href="pysys.perf.html#module-pysys.perf" title="pysys.perf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.perf</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.pycompat.html#module-pysys.utils.pycompat" title="pysys.utils.pycompat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.pycompat</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.pycompat.html#module-pysys.utils.pycompat" title="pysys.utils.pycompat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.pycompat</span></code></a></p></td>
 <td><p>Compatibility utilities for older Python versions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.safeeval.html#module-pysys.utils.safeeval" title="pysys.utils.safeeval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.safeeval</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.safeeval.html#module-pysys.utils.safeeval" title="pysys.utils.safeeval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.safeeval</span></code></a></p></td>
 <td><p>Contains the <code class="xref py py-obj docutils literal notranslate"><span class="pre">safeEval</span></code> function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.threadutils.html#module-pysys.utils.threadutils" title="pysys.utils.threadutils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.threadutils</span></code></a></p></td>
-<td><p>Contains the <code class="xref py py-obj docutils literal notranslate"><span class="pre">BackgroundThread</span></code> class.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.threadutils.html#module-pysys.utils.threadutils" title="pysys.utils.threadutils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.threadutils</span></code></a></p></td>
+<td><p>Contains the <code class="xref py py-obj docutils literal notranslate"><span class="pre">BackgroundThread</span></code> class and other utilities for working with threads.</p></td>
 </tr>
 </tbody>
 </table>
@@ -260,7 +264,7 @@ that would do the job first, before resorting to these lower-level functions.</p
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>

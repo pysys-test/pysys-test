@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pysys.unit &mdash; PySys v2.2  documentation</title>
+  <title>pysys.utils.osutils &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pysys.unit.pyunit" href="pysys.unit.pyunit.html" />
-    <link rel="prev" title="pysys.process.user" href="pysys.process.user.html" /> 
+    <link rel="next" title="pysys.utils.perfreporter" href="pysys.utils.perfreporter.html" />
+    <link rel="prev" title="pysys.utils.misc" href="pysys.utils.misc.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -97,11 +97,27 @@
 <li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.perf.html">pysys.perf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.unit</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pysys.unit.pyunit.html">pysys.unit.pyunit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.utils.html">pysys.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.allocport.html">pysys.utils.allocport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filediff.html">pysys.utils.filediff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filegrep.html">pysys.utils.filegrep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filereplace.html">pysys.utils.filereplace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileunzip.html">pysys.utils.fileunzip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileutils.html">pysys.utils.fileutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.osutils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#getusablecpucount">getUsableCPUCount</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.safeeval.html">pysys.utils.safeeval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
 </ul>
 </li>
@@ -154,13 +170,15 @@
         
           <li><a href="pysys.html">API Reference</a> &raquo;</li>
         
-      <li>pysys.unit</li>
+          <li><a href="pysys.utils.html">pysys.utils</a> &raquo;</li>
+        
+      <li>pysys.utils.osutils</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/autodocgen/pysys.unit.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autodocgen/pysys.utils.osutils.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -173,20 +191,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pysys.unit">
-<span id="pysys-unit"></span><h1>pysys.unit<a class="headerlink" href="#module-pysys.unit" title="Permalink to this headline">¶</a></h1>
-<p>Unit test support (currently just PyUnit).</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysys.unit.pyunit.html#module-pysys.unit.pyunit" title="pysys.unit.pyunit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.unit.pyunit</span></code></a></p></td>
-<td><p>Contains the test class used to run PyUnit tests.</p></td>
-</tr>
-</tbody>
-</table>
+  <div class="section" id="module-pysys.utils.osutils">
+<span id="pysys-utils-osutils"></span><h1>pysys.utils.osutils<a class="headerlink" href="#module-pysys.utils.osutils" title="Permalink to this headline">¶</a></h1>
+<p>Contains operating system helper utilities such as the <a class="reference internal" href="#pysys.utils.osutils.getUsableCPUCount" title="pysys.utils.osutils.getUsableCPUCount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getUsableCPUCount</span></code></a> function.</p>
+<div class="section" id="getusablecpucount">
+<h2>getUsableCPUCount<a class="headerlink" href="#getusablecpucount" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.osutils.getUsableCPUCount">
+<code class="sig-prename descclassname">pysys.utils.osutils.</code><code class="sig-name descname">getUsableCPUCount</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/pysys/utils/osutils.html#getUsableCPUCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.osutils.getUsableCPUCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of CPUs that are usable from this PySys process, as a floating point number.</p>
+<p>This may be less than the total number of CPUs due to restrictions from the operating system 
+such as the process affinity mask and container cgroup (<code class="docutils literal notranslate"><span class="pre">cpu.cfs_quota_us</span></code> / <code class="docutils literal notranslate"><span class="pre">cpu.max</span></code>) limits.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -197,10 +218,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pysys.unit.pyunit.html" class="btn btn-neutral float-right" title="pysys.unit.pyunit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pysys.utils.perfreporter.html" class="btn btn-neutral float-right" title="pysys.utils.perfreporter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pysys.process.user.html" class="btn btn-neutral float-left" title="pysys.process.user" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pysys.utils.misc.html" class="btn btn-neutral float-left" title="pysys.utils.misc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

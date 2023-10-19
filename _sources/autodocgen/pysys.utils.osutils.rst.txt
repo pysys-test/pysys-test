@@ -1,0 +1,14 @@
+
+pysys.utils.osutils
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.osutils
+
+.. currentmodule:: pysys.utils.osutils
+
+
+
+getUsableCPUCount
+=================
+
+.. autofunction:: getUsableCPUCount

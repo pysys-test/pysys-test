@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The BaseTest Class &mdash; PySys v2.1  documentation</title>
+  <title>The BaseTest Class &mdash; PySys v2.2  documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="User Guide" href="UserGuide.html" />
+    <link rel="next" title="Guides" href="UserGuide.html" />
     <link rel="prev" title="Getting Started" href="../GettingStarted.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> PySys v2.1
+            <a href="../index.html" class="icon icon-home"> PySys v2.2
           
 
           
@@ -95,7 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#all-basetest-members">All BaseTest members</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ProjectConfiguration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TestDescriptors.html">Test Descriptors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../autodocgen/pysys.html">API Reference</a></li>
@@ -115,7 +115,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PySys v2.1</a>
+          <a href="../index.html">PySys v2.2</a>
         
       </nav>
 
@@ -201,6 +201,8 @@ Sometimes you may also need to provide <a class="reference internal" href="#pysy
 <p>At the end of each test, PySys automatically terminates all processes it
 started, in the <a class="reference internal" href="#pysys.basetest.BaseTest.cleanup" title="pysys.basetest.BaseTest.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a> method. If any additional custom cleanup steps are required, these can be added by calling
 <a class="reference internal" href="#pysys.basetest.BaseTest.addCleanupFunction" title="pysys.basetest.BaseTest.addCleanupFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanupFunction</span></code></a>.</p>
+<p>(For advanced users, it is also possible to customize the process of aborting a test run
+in response to a signal or Ctrl+C by overriding the <a class="reference internal" href="#pysys.basetest.BaseTest.handleRunnerAbort" title="pysys.basetest.BaseTest.handleRunnerAbort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">handleRunnerAbort</span></code></a> method`)</p>
 <p>NB: Do not ever override the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> constructor of a test class; instead use <a class="reference internal" href="#pysys.basetest.BaseTest.setup" title="pysys.basetest.BaseTest.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a> for any initialization,
 which ensures orderly cleanup if an exception occurs during the setup process.</p>
 </div>
@@ -257,6 +259,7 @@ for example if you want to have multiple tests share use of a single server, VM,
 configuration of this PySys test project as defined by <code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>.
 The project can be used to access information such as the project properties which are shared across all tests
 (e.g. for hosts and credentials).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.testStartTime</span></code> <em>(float)</em>: The time when this test object was constructed (as returned by <code class="docutils literal notranslate"><span class="pre">time.time()</span></code>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">self.testPlugins</span></code> <em>(list[object])</em>: A list of any configured test plugin instances. This allows plugins
 to access the functionality of other plugins if needed (for example looking them up by type in this list).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">self.disableCoverage</span></code> <em>(bool)</em>: Set this to True to request that no code coverage is generated for this test
@@ -266,6 +269,17 @@ a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Ba
 <li><p><code class="docutils literal notranslate"><span class="pre">self.disablePerformanceReporting</span></code> <em>(bool)</em>: Set this to True to request that no performance figures are recorded.
 For example you might dynamically set this to True when a test is using options such as profiling or code coverage
 that would make the results meaningless.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.isRunnerAborting</span></code> <em>(bool)</em>: Check this while performing long-running operations to
+ensure your test exits quickly and does not hang if PySys needs to abort the test run e.g. due to a keyboard interruption signal.
+Alternatively, consider using <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.pollWait</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.isRunnerAbortingEvent</span></code> <em>(win32event.Event)</em>: A Windows event object that is signalled when
+<code class="docutils literal notranslate"><span class="pre">isRunnerAborting</span></code> changes to True, for use with <code class="docutils literal notranslate"><span class="pre">win32event.WaitForMultipleObjects</span></code>.
+Only available on Windows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.isRunnerAbortingHandle</span></code> <em>(int)</em>: A linux file handle that receives a write when
+<code class="docutils literal notranslate"><span class="pre">isRunnerAborting</span></code> changes to True, for use with <code class="docutils literal notranslate"><span class="pre">select.select</span></code>.
+Only available on Linux. You should never read or write this handle, it is provided only for use with <code class="docutils literal notranslate"><span class="pre">select</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.isCleanupInProgress</span></code> <em>(bool)</em>: Check this for advanced cases where you need different behaviour if
+the current test/runner is performing its post-execution cleanup phase.</p></li>
 </ul>
 <p>Additional variables that affect only the behaviour of a single method are documented in the associated method.</p>
 <p>There is also a field for each test plugin listed in the project configuration. Plugins provide additional
@@ -291,48 +305,51 @@ bool/int/float.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThatGrep</span></code></a>(file, grepRegex[, …])</p></td>
-<td><p>Perform a validation by using a regular expression to extract a “value” from a text file and then check  the extracted value using an <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a> conditionstring.</p></td>
+<td><p>Perform a validation by using a regular expression to extract the first matching value from a text file and then check  the extracted string value is correct using an <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a> conditionstring.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrep</span></code></a>(file[, _expr, _unused, contains, …])</p></td>
 <td><p>Perform a validation by checking for the presence or absence of a regular expression in the specified text file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertLineCount" title="pysys.basetest.BaseTest.assertLineCount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLineCount</span></code></a>(file[, _expr, _unused, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrepOfGrep</span></code></a>(file, grepRegex, expectedRegex)</p></td>
+<td><p>Perform a validation by using a regular expression “(…)” group to extract the first matching value from a text file  and then use a second regex to validate that the extracted value is as expected.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertLineCount" title="pysys.basetest.BaseTest.assertLineCount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLineCount</span></code></a>(file[, _expr, _unused, …])</p></td>
 <td><p>Perform a validation assert on the count of lines in a text file matching a specific regular expression.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertDiff</span></code></a>(file1[, file2, filedir1, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertDiff</span></code></a>(file1[, file2, filedir1, …])</p></td>
 <td><p>Perform a validation by comparing the contents of two text files, typically a file from the  output directory against a file in the <code class="docutils literal notranslate"><span class="pre">&lt;testdir&gt;/Reference/</span></code> directory containing the expected output.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a>(conditionstring, …)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a>(conditionstring, …)</p></td>
 <td><p>Performs equality/range tests or any general-purpose validation by evaluating a Python <code class="docutils literal notranslate"><span class="pre">eval()</span></code> expression  in the context of some named values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertLastGrep" title="pysys.basetest.BaseTest.assertLastGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLastGrep</span></code></a>(file[, _expr, _unused, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertLastGrep" title="pysys.basetest.BaseTest.assertLastGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLastGrep</span></code></a>(file[, _expr, _unused, …])</p></td>
 <td><p>Perform a validation assert on a regular expression occurring in the last line of a text file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertOrderedGrep" title="pysys.basetest.BaseTest.assertOrderedGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertOrderedGrep</span></code></a>(file[, _exprList, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertOrderedGrep" title="pysys.basetest.BaseTest.assertOrderedGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertOrderedGrep</span></code></a>(file[, _exprList, …])</p></td>
 <td><p>Perform a validation assert on a list of regular expressions occurring in specified order in a text file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertPathExists" title="pysys.basetest.BaseTest.assertPathExists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertPathExists</span></code></a>(path[, exists, abortOnError])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.assertPathExists" title="pysys.basetest.BaseTest.assertPathExists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertPathExists</span></code></a>(path[, exists, abortOnError])</p></td>
 <td><p>Perform a validation that the specified file or directory path exists  (or does not exist).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.abort" title="pysys.basetest.BaseTest.abort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abort</span></code></a>(outcome, outcomeReason[, callRecord])</p></td>
-<td><p>Raise an AbortException with the specified outcome and reason.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.abort" title="pysys.basetest.BaseTest.abort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abort</span></code></a>(outcome, outcomeReason[, callRecord])</p></td>
+<td><p>Raise an AbortExecution exception with the specified outcome and reason, to abort the current test.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.skipTest" title="pysys.basetest.BaseTest.skipTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skipTest</span></code></a>(outcomeReason[, callRecord])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.skipTest" title="pysys.basetest.BaseTest.skipTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skipTest</span></code></a>(outcomeReason[, callRecord])</p></td>
 <td><p>Raise an AbortException that will set the test outcome to SKIPPED and  ensure that the rest of the execute() and validate() methods do not execute.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.addOutcome" title="pysys.basetest.BaseTest.addOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addOutcome</span></code></a>(outcome[, outcomeReason, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.addOutcome" title="pysys.basetest.BaseTest.addOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addOutcome</span></code></a>(outcome[, outcomeReason, …])</p></td>
 <td><p>Add a validation outcome (and optionally a reason string) to the validation list.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getOutcome" title="pysys.basetest.BaseTest.getOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOutcome</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getOutcome" title="pysys.basetest.BaseTest.getOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOutcome</span></code></a>()</p></td>
 <td><p>Get the final outcome for this test, based on the precedence order defined in <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.OUTCOMES" title="pysys.constants.OUTCOMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants.OUTCOMES</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getOutcomeReason" title="pysys.basetest.BaseTest.getOutcomeReason"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOutcomeReason</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getOutcomeReason" title="pysys.basetest.BaseTest.getOutcomeReason"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOutcomeReason</span></code></a>()</p></td>
 <td><p>Get the reason string for the current overall outcome (if specified).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getOutcomeLocation" title="pysys.basetest.BaseTest.getOutcomeLocation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOutcomeLocation</span></code></a>()</p></td>
-<td><p>Get the location in the Python source file where this location was added.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getOutcomeLocation" title="pysys.basetest.BaseTest.getOutcomeLocation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOutcomeLocation</span></code></a>()</p></td>
+<td><p>Get the location in the Python source file where this outcome was added.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reportPerformanceResult</span></code></a>(value, resultKey, unit)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reportPerformanceResult</span></code></a>(value, resultKey, unit)</p></td>
 <td><p>Reports a new performance number to the configured performance reporters, with an associated unique string key  that identifies it for comparison purposes.</p></td>
 </tr>
 </tbody>
@@ -473,16 +490,19 @@ of which the most commonly used is <a class="reference internal" href="#pysys.ba
 <tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.grepOrNone" title="pysys.basetest.BaseTest.grepOrNone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepOrNone</span></code></a>(path, expr[, encoding, reFlags, …])</p></td>
 <td><p>Returns the first occurrence of a regular expression in the specified file, or None if not found.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.grepAll" title="pysys.basetest.BaseTest.grepAll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepAll</span></code></a>(path, expr[, encoding, reFlags, mappers])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.grepAll" title="pysys.basetest.BaseTest.grepAll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepAll</span></code></a>(path, expr[, encoding, reFlags, …])</p></td>
 <td><p>Returns a list of all the occurrences of a regular expression in the specified file.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.logFileContents" title="pysys.basetest.BaseTest.logFileContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logFileContents</span></code></a>(path[, includes, excludes, …])</p></td>
 <td><p>Logs some or all of the lines from the specified file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.write_text" title="pysys.basetest.BaseTest.write_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_text</span></code></a>(file, text[, encoding])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.listDirContents" title="pysys.basetest.BaseTest.listDirContents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">listDirContents</span></code></a>(path[, recurse])</p></td>
+<td><p>Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable  for diffing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.write_text" title="pysys.basetest.BaseTest.write_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_text</span></code></a>(file, text[, encoding])</p></td>
 <td><p>Writes the specified characters to a file in the output directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding</span></code></a>(file, **xargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding</span></code></a>(file, **xargs)</p></td>
 <td><p>Specifies what encoding should be used to read or write the specified  text file.</p></td>
 </tr>
 </tbody>
@@ -502,28 +522,31 @@ see the <a class="reference internal" href="../autodocgen/pysys.utils.fileutils.
 <tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.compareVersions" title="pysys.basetest.BaseTest.compareVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compareVersions</span></code></a>(v1, v2)</p></td>
 <td><p>Compares two alphanumeric dotted version strings to see which is more recent.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.logValueDiff" title="pysys.basetest.BaseTest.logValueDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logValueDiff</span></code></a>([actual, expected, logFunction])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.logValueDiff" title="pysys.basetest.BaseTest.logValueDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logValueDiff</span></code></a>([actual, expected, …])</p></td>
 <td><p>Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.disableLogging" title="pysys.basetest.BaseTest.disableLogging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disableLogging</span></code></a>()</p></td>
 <td><p>Temporarily stops logging for the current thread.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.startBackgroundThread" title="pysys.basetest.BaseTest.startBackgroundThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startBackgroundThread</span></code></a>(name, target[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.createThreadPoolExecutor" title="pysys.basetest.BaseTest.createThreadPoolExecutor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createThreadPoolExecutor</span></code></a>([maxWorkers])</p></td>
+<td><p>Create a PySys-friendly instance of Python’s ThreadPoolExecutor, configured with support for PySys loggers,   cleanup, and a recommended default number of workers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.startBackgroundThread" title="pysys.basetest.BaseTest.startBackgroundThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startBackgroundThread</span></code></a>(name, target[, …])</p></td>
 <td><p>Start a new background thread that will invoke the specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">target</span></code>  function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.pythonDocTest" title="pysys.basetest.BaseTest.pythonDocTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pythonDocTest</span></code></a>(pythonFile[, pythonPath, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.pythonDocTest" title="pysys.basetest.BaseTest.pythonDocTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pythonDocTest</span></code></a>(pythonFile[, pythonPath, …])</p></td>
 <td><p>Execute the Python doctests that exist in the specified python file;  adds a FAILED outcome if any do not pass.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.startManualTester" title="pysys.basetest.BaseTest.startManualTester"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startManualTester</span></code></a>(file[, filedir, state, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.startManualTester" title="pysys.basetest.BaseTest.startManualTester"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startManualTester</span></code></a>(file[, filedir, state, …])</p></td>
 <td><p>Start the manual tester, which provides a UI to guide a human through the tests needed to implement this testcase.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.stopManualTester" title="pysys.basetest.BaseTest.stopManualTester"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stopManualTester</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.stopManualTester" title="pysys.basetest.BaseTest.stopManualTester"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stopManualTester</span></code></a>()</p></td>
 <td><p>Stop the manual tester if running.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.waitManualTester" title="pysys.basetest.BaseTest.waitManualTester"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waitManualTester</span></code></a>([timeout])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.waitManualTester" title="pysys.basetest.BaseTest.waitManualTester"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waitManualTester</span></code></a>([timeout])</p></td>
 <td><p>Wait for the manual tester to be stopped via user interaction.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getBoolProperty" title="pysys.basetest.BaseTest.getBoolProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getBoolProperty</span></code></a>(propertyName[, default])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.basetest.BaseTest.getBoolProperty" title="pysys.basetest.BaseTest.getBoolProperty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getBoolProperty</span></code></a>(propertyName[, default])</p></td>
 <td><p>Get a True/False indicating whether the specified attribute is set  on this object (typically as a result of specifying -X on the command  line), or else from the project configuration.</p></td>
 </tr>
 </tbody>
@@ -533,13 +556,19 @@ see the <a class="reference internal" href="../autodocgen/pysys.utils.fileutils.
 <h2>All BaseTest members<a class="headerlink" href="#all-basetest-members" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pysys.basetest.BaseTest">
-<em class="property">class </em><code class="sig-prename descclassname">pysys.basetest.</code><code class="sig-name descname">BaseTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">descriptor</span></em>, <em class="sig-param"><span class="n">outsubdir</span></em>, <em class="sig-param"><span class="n">runner</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pysys.basetest.</code><code class="sig-name descname">BaseTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">descriptor</span></em>, <em class="sig-param"><span class="n">outsubdir</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">runner</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser" title="pysys.process.user.ProcessUser"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser</span></code></a></p>
 <p>BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
 test logic and then to validate the results against the expected behaviour.</p>
 <p>Apart from the <a class="reference internal" href="#pysys.basetest.BaseTest.addOutcome" title="pysys.basetest.BaseTest.addOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addOutcome</span></code></a> method this class is not thread-safe, so if 
 you need to access it from multiple threads be sure to add your own locking 
 around use of its fields and methods, including any cleanup functions.</p>
+<dl class="py attribute">
+<dt id="pysys.basetest.BaseTest.testStartTime">
+<code class="sig-name descname">testStartTime</code><em class="property"> = None</em><a class="headerlink" href="#pysys.basetest.BaseTest.testStartTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time when this test object was constructed (as returned by <code class="docutils literal notranslate"><span class="pre">time.time()</span></code>).</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.setup">
 <code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.setup" title="Permalink to this definition">¶</a></dt>
@@ -670,6 +699,7 @@ unwanted spikes and noise in the last few samples of the data.</p>
 <code class="sig-name descname">startBackgroundThread</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">kwargsForTarget</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.startBackgroundThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.startBackgroundThread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start a new background thread that will invoke the specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">target</span></code> 
 function.</p>
+<p>See also <a class="reference internal" href="#pysys.basetest.BaseTest.createThreadPoolExecutor" title="pysys.basetest.BaseTest.createThreadPoolExecutor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createThreadPoolExecutor</span></code></a>.</p>
 <p>The target function will be invoked with the specified keyword 
 arguments, preceded by the special keyword arguments <code class="xref py py-obj docutils literal notranslate"><span class="pre">stopping</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code>. 
 The <code class="xref py py-obj docutils literal notranslate"><span class="pre">stopping</span></code> argument is a Python <code class="xref py py-obj docutils literal notranslate"><span class="pre">threading.Event</span></code> instance that 
@@ -696,8 +726,8 @@ waiting when the thread is meant to be finishing.</p>
                 <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Note that <a class="reference internal" href="#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest</span></code></a> is not thread-safe (apart from <a class="reference internal" href="#pysys.basetest.BaseTest.addOutcome" title="pysys.basetest.BaseTest.addOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addOutcome</span></code></a>, 
-<a class="reference internal" href="#pysys.basetest.BaseTest.startProcess" title="pysys.basetest.BaseTest.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startProcess</span></code></a> and the reading of fields like <code class="docutils literal notranslate"><span class="pre">self.output</span></code> that don’t 
+<p>Note that <code class="docutils literal notranslate"><span class="pre">BaseTest`</span></code> is not thread-safe (apart from <code class="docutils literal notranslate"><span class="pre">addOutcome</span></code>, 
+<code class="docutils literal notranslate"><span class="pre">startProcess</span></code> and the reading of fields like <code class="docutils literal notranslate"><span class="pre">self.output</span></code> that don’t 
 change) so if you need to use its fields or methods from 
 background threads, be sure to add your own locking to the foreground 
 and background threads in your test, including any custom cleanup 
@@ -911,9 +941,9 @@ namespace of the calling code, for example:</p>
 <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s2">&quot;actual == expected&quot;</span><span class="p">,</span> <span class="n">actual__eval</span><span class="o">=</span><span class="s2">&quot;myDataStructure[&#39;item3&#39;][-1].getId()&quot;</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="s2">&quot;baz&quot;</span><span class="p">)</span>
 
 <span class="c1"># Produces self-describing log messages like this:</span>
-<span class="c1">#  Assert that (actual == expected) with actual (myDataStructure[&#39;item1&#39;][-1].getId()) =&#39;foo&#39;, expected=&#39;foo&#39; ... passed</span>
-<span class="c1">#  Assert that (actual == expected) with actual (myDataStructure[&#39;item2&#39;][-1].getId()) =&#39;bar&#39;, expected=&#39;bar&#39; ... passed</span>
-<span class="c1">#  Assert that (actual == expected) with actual (myDataStructure[&#39;item3&#39;][-1].getId()) =&#39;baZaar&#39;, expected=&#39;baz&#39; ... failed</span>
+<span class="c1"># Assert that {actual == expected} with actual{=myDataStructure[&#39;item1&#39;][-1].getId()} =&quot;foo&quot; expected=&quot;foo&quot; ... passed</span>
+<span class="c1"># Assert that {actual == expected} with actual{=myDataStructure[&#39;item2&#39;][-1].getId()} =&quot;bar&quot; expected=&quot;bar&quot; ... passed</span>
+<span class="c1"># Assert that {actual == expected} with actual{=myDataStructure[&#39;item3&#39;][-1].getId()} =&quot;baZaar&quot; expected=&quot;baz&quot; ... failed [pysystest.py:123]</span>
 <span class="c1">#       actual: &#39;baZaar&#39;</span>
 <span class="c1">#     expected: &#39;baz&#39;</span>
 <span class="c1">#                 ^</span>
@@ -936,13 +966,13 @@ as a boolean expression, for example <code class="docutils literal notranslate">
 what value is being tested.</p>
 <p>It’s best to put expected values into a separate named parameter (rather than using literals inside the 
 conditionstring), since this will produce more informative messages if there is a failure.</p>
-<p>Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
+<p>Do not be tempted to use a Python f-string here, as that would deprive this method of the 
 opportunity to provide a self-describing message and outcome reason.</p>
 </p></li>
 <li><p><strong>**kwargs</strong> – All additional keyword arguments are treated as values which will be made available 
 when evaluating the condition string. Any keyword ending in the special suffix <code class="docutils literal notranslate"><span class="pre">__eval</span></code> will be treated 
 as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
-containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.</p></li>
+containing the local variables of the calling code and any preceding named parameters.</p></li>
 <li><p><strong>*positional_arguments</strong> – (deprecated) Unnamed positional arguments will be 
 substituted into the condition string using the old <code class="docutils literal notranslate"><span class="pre">%</span></code> format string mechanism, before it is evaluated. 
 This feature is deprecated as it provides poor diagnostic information, requires string parameters to be 
@@ -967,7 +997,7 @@ a string value with an extra keyword argument e.g. <code class="docutils literal
 
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.logValueDiff">
-<code class="sig-name descname">logValueDiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expected</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logFunction</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">namedvalues</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.logValueDiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.logValueDiff" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">logValueDiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expected</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logFunction</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stringsAlreadyEscaped</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">namedvalues</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.logValueDiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.logValueDiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a>).</p>
 <p>Special handling is provided for common types such as strings, lists and dicts (note that this isn’t intended 
 for use with data structures whose string representation is too big to display on the console).</p>
@@ -978,6 +1008,9 @@ for use with data structures whose string representation is too big to display o
 Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead.</p></li>
 <li><p><strong>expected</strong> (<em>obj</em>) – The baseline/expected value from which a diff will be computed to the actual value. 
 Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead.</p></li>
+<li><p><strong>stringsAlreadyEscaped</strong> (<em>bool</em>) – Usually any str values will be quoted and escaped (possibly using <code class="docutils literal notranslate"><span class="pre">repr()</span></code>), however in cases 
+where you want to compare values which have already been converted to strings using your own quoting rules this 
+option can be used to avoid doubling up on the quotes and escaping.</p></li>
 <li><p><strong>logFunction</strong> (<em>function</em>) – By default each line is logged at INFO level using <code class="docutils literal notranslate"><span class="pre">log.info()</span></code>, but an alternative 
 log function with the same signature can be provided if desired.</p></li>
 </ul>
@@ -1079,7 +1112,7 @@ particular, make sure you have committed all reference files to version control 
 the afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
 committing. To use 
 this feature, run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="o">-</span><span class="n">XautoUpdateAssertDiffReferences</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pysys</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="o">-</span><span class="n">XupdateDiffReferences</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -1118,12 +1151,31 @@ Used in log messages and the outcome reason.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="pysys.basetest.BaseTest.assertGrepOfGrep">
+<code class="sig-name descname">assertGrepOfGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">grepRegex</span></em>, <em class="sig-param"><span class="n">expectedRegex</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.assertGrepOfGrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.assertGrepOfGrep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a validation by using a regular expression “(…)” group to extract the first matching value from a text file 
+and then use a second regex to validate that the extracted value is as expected.</p>
+<p>Using this method to separate out the extraction and validation stages is clearer 
+and produces more easily debuggable messages than combining both into a single <a class="reference internal" href="#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrep</span></code></a>. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrepOfGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Successfully authenticated user .*in ([^ ]+) seconds&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;[0-9.]+$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is equivalent to <a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThatGrep</span></code></a> with a conditionstring of ‘re.match(expectedRegex, value)’. For details on 
+the command line arguments, see that method.</p>
+<p>Regular expressions aren’t the solution for every problem, and for cases where you need to match a literal 
+or check a value is within a range, use <a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThatGrep</span></code></a> instead.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pysys.basetest.BaseTest.assertThatGrep">
-<code class="sig-name descname">assertThatGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">grepRegex</span></em>, <em class="sig-param"><span class="n">conditionstring</span><span class="o">=</span><span class="default_value">'value == expected'</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargsForAssertThat</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.assertThatGrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.assertThatGrep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform a validation by using a regular expression to extract a “value” from a text file and then check 
-the extracted value using an <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a> conditionstring.</p>
+<code class="sig-name descname">assertThatGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">grepRegex</span></em>, <em class="sig-param"><span class="n">conditionstring</span><span class="o">=</span><span class="default_value">'value == expected'</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargsForAssertThat</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.assertThatGrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.assertThatGrep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a validation by using a regular expression to extract the first matching value from a text file and then check 
+the extracted string value is correct using an <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a> conditionstring.</p>
 <p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is the typical case - &quot;value&quot; is assigned to the first (...) regex group, and keyword parameters </span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is the typical case - the string &quot;value&quot; is assigned to the first (...) regex group, and keyword parameters </span>
 <span class="c1"># (e.g. &quot;expected=&quot;) are used to validate that the &quot;value&quot; is correct</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">assertThatGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Successfully authenticated user &quot;([^&quot;]*)&quot;&#39;</span><span class="p">,</span> 
         <span class="s2">&quot;value == expected&quot;</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="s1">&#39;myuser&#39;</span><span class="p">)</span>
@@ -1133,6 +1185,14 @@ the extracted value using an <a class="reference internal" href="#pysys.basetest
         <span class="s2">&quot;0.0 &lt;= float(value) &lt;= 60.0&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>When your validation on the extracted value is itself to be performed with another regular expression, 
+separating out the extraction and validation stages is still clearer and produces more easily debuggable messages than 
+combining both into a single <a class="reference internal" href="#pysys.basetest.BaseTest.assertGrep" title="pysys.basetest.BaseTest.assertGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrep</span></code></a>. You can use the <a class="reference internal" href="#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrepOfGrep</span></code></a> method to save 
+having to enter <code class="docutils literal notranslate"><span class="pre">conditionstring=&quot;re.match(expectedRegex,</span> <span class="pre">value)&quot;</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrepOfGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Successfully authenticated user &quot;.*&quot; in ([^ ]+) seconds&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;[0-9.]+$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See also the <a class="reference internal" href="#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrepOfGrep</span></code></a> method which is an alias for the above.</p>
 <p>This method is implemented using <a class="reference internal" href="#pysys.basetest.BaseTest.grep" title="pysys.basetest.BaseTest.grep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grep</span></code></a> and <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThat</span></code></a>, so see those methods for more detailed 
 information on the parameters.</p>
 <div class="versionadded">
@@ -1142,9 +1202,13 @@ information on the parameters.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file</strong> – The name or relative/absolute path of the file to be searched.</p></li>
-<li><p><strong>grepRegex</strong> (<em>str</em>) – The regular expression to use for extracting the value of interest from the file. 
+<li><p><strong>grepRegex</strong> (<em>str</em>) – <p>The regular expression to use for extracting the value of interest from the file. 
 Typically this will use a <code class="docutils literal notranslate"><span class="pre">(...)</span></code> regular expression group to identify the part of the expression 
-containing the value; alternatively a single <code class="docutils literal notranslate"><span class="pre">(?P&lt;value&gt;...)</span></code> named group may be used.</p></li>
+containing the value; alternatively a single <code class="docutils literal notranslate"><span class="pre">(?P&lt;value&gt;...)</span></code> named group may be used.</p>
+<p>Only the first line matching this expression will be considered, so ensure the <code class="docutils literal notranslate"><span class="pre">grepRegex</span></code> should 
+be “just specific enough” to uniquely identify the required line, but without duplicating the verification 
+to be performed with the conditionstring assertion.</p>
+</p></li>
 <li><p><strong>conditionstring</strong> (<em>str</em>) – <p>A string containing Python code that will be evaluated using <code class="docutils literal notranslate"><span class="pre">eval()</span></code> 
 to validate that “value” is correct. For example <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">==</span> <span class="pre">expected</span></code>.</p>
 <p>It’s best to put expected values into a separate named parameter (rather than using literals inside the 
@@ -1161,6 +1225,8 @@ provides the ability to filter in/out sections of a file.</p>
 <li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to open the file. 
 The default value is None which indicates that the decision will be delegated 
 to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p></li>
+<li><p><strong>encodingReplaceOnError</strong> (<em>bool</em>) – Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+Added in PySys 2.2.</p></li>
 <li><p><strong>reFlags</strong> (<em>int</em>) – <p>Zero or more flags controlling how the behaviour of regular expression matching, 
 combined together using the <code class="docutils literal notranslate"><span class="pre">|</span></code> operator, for example <code class="docutils literal notranslate"><span class="pre">reFlags=re.VERBOSE</span> <span class="pre">|</span> <span class="pre">re.IGNORECASE</span></code>.</p>
 <p>For details see the <code class="docutils literal notranslate"><span class="pre">re</span></code> module in the Python standard library. Note that <code class="docutils literal notranslate"><span class="pre">re.MULTILINE</span></code> cannot 
@@ -1176,7 +1242,7 @@ a string value with an extra keyword argument e.g. <code class="docutils literal
 <li><p><strong>**kwargs</strong> – All additional keyword arguments are treated as values which will be made available 
 when evaluating the condition string. Any keyword ending in the special suffix <code class="docutils literal notranslate"><span class="pre">__eval</span></code> will be treated 
 as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
-containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.</p></li>
+containing the local variables of the calling code and any preceding named parameters.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1187,40 +1253,44 @@ containing the local variables of the calling code and (on Python 3.6+) any prec
 
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.assertGrep">
-<code class="sig-name descname">assertGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">_expr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">_unused</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">contains</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">literal</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">abortOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">assertMessage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">expr</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">filedir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.assertGrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.assertGrep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">assertGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">_expr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">_unused</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">contains</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">literal</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">abortOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">assertMessage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">expr</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">filedir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.assertGrep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.assertGrep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a validation by checking for the presence or absence of a regular expression in the specified text file.</p>
-<p>Note that if your goal is to check that a value in the file matches some criteria, it is better to 
-use <a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThatGrep</span></code></a> instead of this function, as assertThatGrep can produce better messages on failure, and 
-also allows for more powerful matching using a full Python expression 
-(e.g. numeric range checks, pre-processing strings to normalize case, etc). If you need to extract a string for 
-further processing without updating the test outcome, consider using <a class="reference internal" href="#pysys.basetest.BaseTest.grep" title="pysys.basetest.BaseTest.grep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grep</span></code></a> instead.</p>
 <p>The assertGrep method is good for checking in a log to confirm that something happened, or to check that 
-there are no error messages. 
-When contains=True it adds a <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.PASSED" title="pysys.constants.PASSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PASSED</span></code></a> outcome if found or a 
+there are no error messages.</p>
+<p>Note that if your goal is to check that a value in the file matches some criteria, it is better to 
+use <a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThatGrep</span></code></a> or <a class="reference internal" href="#pysys.basetest.BaseTest.assertGrepOfGrep" title="pysys.basetest.BaseTest.assertGrepOfGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGrepOfGrep</span></code></a> instead of this function, as these methods indicate the intention 
+more clearly, produce better messages on failure, and in the case of <a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertThatGrep</span></code></a> 
+also allow for more powerful matching using a full Python expression 
+(e.g. numeric range checks, pre-processing strings to normalize case or path separators, etc).</p>
+<p>When contains=True this method adds a <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.PASSED" title="pysys.constants.PASSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PASSED</span></code></a> outcome if found or a 
 <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.FAILED" title="pysys.constants.FAILED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FAILED</span></code></a> outcome if not found (except when where are named groups in the expression 
 in which case <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.BLOCKED" title="pysys.constants.BLOCKED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BLOCKED</span></code></a> is used to indicate that the return value is not valid).
 When contains=False this is inverted so a <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.PASSED" title="pysys.constants.PASSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PASSED</span></code></a> outcome is added if not found 
 and <a class="reference internal" href="../autodocgen/pysys.constants.html#pysys.constants.FAILED" title="pysys.constants.FAILED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FAILED</span></code></a> if found.</p>
 <p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39; ERROR .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39; ERROR .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># If error messages may be accompanied by stack traces you can use a mapper to join them into the same line </span>
 <span class="c1"># so if your test fails, the outcome reason includes all the information. This also allows ignoring errors </span>
 <span class="c1"># based on the stack trace:</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39; (ERROR|FATAL) .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39; (ERROR|FATAL) .*&#39;</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
         <span class="n">mappers</span><span class="o">=</span><span class="p">[</span><span class="n">pysys</span><span class="o">.</span><span class="n">mappers</span><span class="o">.</span><span class="n">JoinLines</span><span class="o">.</span><span class="n">JavaStackTrace</span><span class="p">()],</span>     
         <span class="n">ignores</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Caused by: java.lang.RuntimeError: My expected exception&#39;</span><span class="p">])</span>
 
 <span class="c1"># In Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Successfully authenticated user &quot;</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">username</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot; in .* seconds[.]&#39;</span><span class="p">)</span>
+<span class="c1"># (but assertThatGrep is a better choice here)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Successfully authenticated user &quot;</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">username</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot; in .* seconds[.]&#39;</span><span class="p">)</span>
 
 <span class="c1"># If you need to use \ characters use a raw r&#39;...&#39; string to avoid the need for Python \ escaping in </span>
 <span class="c1"># addition to regex escaping. Square brackets are often the clearest way to escape regular expression </span>
 <span class="c1"># characters such as \ . and ()</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;c:[\]Foo[\]bar[.]txt&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;c:[\]Foo[\]bar[.]txt&#39;</span><span class="p">)</span>
+
+<span class="c1"># Alternatively when dealing with paths on different OSes, a convenient approach is to perform a replacement on the final expression</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="s1">&#39;Checking for path: .*abc/def/ghi/jkl[.]txt&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;[/</span><span class="se">\\</span><span class="s1">]&#39;</span><span class="p">))</span>
 
 <span class="c1"># The IncludeLinesBetween mapper is very useful if you want to grep within a subset of the lines:</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;MyClass&#39;</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;MyClass&#39;</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[</span>
         <span class="n">pysys</span><span class="o">.</span><span class="n">mappers</span><span class="o">.</span><span class="n">IncludeLinesBetween</span><span class="p">(</span><span class="s1">&#39;Error message.* - stack trace is:&#39;</span><span class="p">,</span> <span class="n">stopBefore</span><span class="o">=</span><span class="s1">&#39;^$&#39;</span><span class="p">),</span>
 <span class="p">])</span>
 </pre></div>
@@ -1243,9 +1313,11 @@ Python string so that you don’t need to double-escape them, e.g. <code class="
 <p>If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
 substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
 through re.escape:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;A&quot;string[with \lots*] of crazy characters e.g. VALUE.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;(.*)&#39;</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;A&quot;string[with \lots*] of crazy characters e.g. VALUE.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;(.*)&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
+<p>If you need to extract a string for further processing without performing an assertion and 
+updating the test outcome, see the using <a class="reference internal" href="#pysys.basetest.BaseTest.grep" title="pysys.basetest.BaseTest.grep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grep</span></code></a> instead.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.1: </span>The return value and reFlags were added in 1.5.1.</p>
 </div>
@@ -1256,10 +1328,10 @@ through re.escape:</p>
 <li><p><strong>expr</strong> (<em>str</em>) – <p>The regular expression to check for in the file (or a string literal if literal=True), 
 for example <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">ERROR</span> <span class="pre">.*&quot;</span></code>.</p>
 <p>Remember to escape regular expression special characters such as <code class="docutils literal notranslate"><span class="pre">.</span></code>, <code class="docutils literal notranslate"><span class="pre">(</span></code>, <code class="docutils literal notranslate"><span class="pre">[</span></code>, <code class="docutils literal notranslate"><span class="pre">{</span></code> and <code class="docutils literal notranslate"><span class="pre">\</span></code> if you want them to 
-be treated as literal values.</p>
+be treated as literal values, or use the argument <code class="docutils literal notranslate"><span class="pre">literal=True</span></code>.</p>
 <p>If you wish to do something with the text inside the match you can use the <code class="docutils literal notranslate"><span class="pre">re</span></code> named 
 group syntax <code class="docutils literal notranslate"><span class="pre">(?P&lt;groupName&gt;...)</span></code> to specify a name for parts of the regular expression.</p>
-<p>For contains=False matches, you should end the expr with <code class="xref py py-obj docutils literal notranslate"><span class="pre">*</span></code> if you wish to include just the 
+<p>For contains=False matches, you should end the expr with <code class="xref py py-obj docutils literal notranslate"><span class="pre">**</span></code> if you wish to include just the 
 matching text in the outcome failure reason. If contains=False and expr does not end with a <code class="xref py py-obj docutils literal notranslate"><span class="pre">*</span></code> 
 then the entire matching line will be included in the outcome failure reason.</p>
 </p></li>
@@ -1280,6 +1352,8 @@ a string literal instead.</p></li>
 <li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to open the file. 
 The default value is None which indicates that the decision will be delegated 
 to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p></li>
+<li><p><strong>encodingReplaceOnError</strong> (<em>bool</em>) – Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+Added in PySys 2.2.</p></li>
 <li><p><strong>abortOnError</strong> (<em>bool</em>) – Set to True to make the test immediately abort if the
 assertion fails.</p></li>
 <li><p><strong>assertMessage</strong> (<em>str</em>) – An additional high-level description of what this assertion is checking, 
@@ -1506,28 +1580,27 @@ If no resultDetails are specified explicitly then parameters from the test’s m
 </dd></dl>
 
 <dl class="py method">
-<dt id="pysys.basetest.BaseTest.getDefaultFileEncoding">
-<code class="sig-name descname">getDefaultFileEncoding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">xargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.getDefaultFileEncoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Specifies what encoding should be used to read or write the specified 
-text file. The default implementation for BaseTest delegates to the 
-runner, which in turn gets its defaults from the <code class="docutils literal notranslate"><span class="pre">pysyproject.xml</span></code> 
-configuration.</p>
-<p>See <a class="reference internal" href="../autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser.getDefaultFileEncoding" title="pysys.process.user.ProcessUser.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.getDefaultFileEncoding</span></code></a> for more details.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="pysys.basetest.BaseTest.abort">
 <code class="sig-name descname">abort</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outcome</span></em>, <em class="sig-param"><span class="n">outcomeReason</span></em>, <em class="sig-param"><span class="n">callRecord</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.abort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raise an AbortException with the specified outcome and reason.</p>
+<dd><p>Raise an AbortExecution exception with the specified outcome and reason, to abort the current test.</p>
 <p>See also <a class="reference internal" href="#pysys.basetest.BaseTest.skipTest" title="pysys.basetest.BaseTest.skipTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skipTest</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>outcome</strong> – The outcome, which will override any existing outcomes previously recorded.</p></li>
+<li><p><strong>outcome</strong> – <p>The outcome, which will NOT override any existing outcomes previously recorded, unless 
+the abort outcome is a non-failure (such as SKIPPED). 
+If you want overriding behaviour for failure outcomes, instead of this function use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">outcomeReason</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</p></li>
 <li><p><strong>outcomeReason</strong> – A string summarizing the reason for the outcome.</p></li>
 </ul>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.2: </span>Previous outcomes are no longer overridden when aborting. </p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1577,7 +1650,7 @@ for example “Grep on x.log contains ‘ERROR: server failed’”.</p></li>
 <li><p><strong>abortOnError</strong> (<em>bool</em>) – If true abort the test on any error outcome. This should usually be set to 
 False for assertions, or the configured <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.defaultAbortOnError</span></code> setting (typically True) for 
 operations that involve waiting.</p></li>
-<li><p><strong>callRecord</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – An array of strings of the form path:lineno indicating the call stack that lead 
+<li><p><strong>callRecord</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – An array of strings of the form absolutepath:lineno indicating the call stack that lead 
 to this outcome. This will be appended to the log output for better test triage.</p></li>
 <li><p><strong>override</strong> (<em>bool</em>) – Remove any existing test outcomes when adding this one, ensuring 
 that this outcome is the one and only one reported even if an existing outcome 
@@ -1844,6 +1917,51 @@ kwargs down to the super implementation, to allow for future extensions.</p></li
 </dd></dl>
 
 <dl class="py method">
+<dt id="pysys.basetest.BaseTest.createThreadPoolExecutor">
+<code class="sig-name descname">createThreadPoolExecutor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">maxWorkers</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; concurrent.futures.thread.ThreadPoolExecutor<a class="headerlink" href="#pysys.basetest.BaseTest.createThreadPoolExecutor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a PySys-friendly instance of Python’s ThreadPoolExecutor, configured with support for PySys loggers,  
+cleanup, and a recommended default number of workers.</p>
+<p>During cleanup, the thread pool is shutdown, with any unstarted futures cancelled (requires Python 3.9+), and a wait 
+until all in-progress futures have completed.</p>
+<p>This is useful for tests that need to perform many latency-bound operations such as making HTTP requests. 
+Do not use it for starting lots of processes in parallel and waiting for them, since that is more easily achieved 
+using <a class="reference internal" href="#pysys.basetest.BaseTest.waitForBackgroundProcesses" title="pysys.basetest.BaseTest.waitForBackgroundProcesses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waitForBackgroundProcesses()</span></code></a>.</p>
+<p>If you use <code class="docutils literal notranslate"><span class="pre">submit</span></code> (rather than <code class="docutils literal notranslate"><span class="pre">map</span></code>), then any exceptions during the submitted job will not be logged anywhere 
+unless you you wait for the submitted job (or add an exception handler). 
+Note that this class is not thread-safe (apart from <code class="docutils literal notranslate"><span class="pre">addOutcome</span></code>, <code class="docutils literal notranslate"><span class="pre">startProcess</span></code> and the reading of fields 
+like <code class="docutils literal notranslate"><span class="pre">self.output</span></code> that don’t change) so if you need to use its fields or methods from background threads, 
+be sure to add your own locking to the foreground and background threads in your test, including any custom cleanup 
+functions.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createThreadPoolExecutor</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">tp</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">makeHTTPRequest</span><span class="p">)</span>
+
+<span class="c1"># Or for more complex use cases:</span>
+<span class="n">submittedFutures</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">submittedFutures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tp</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+<span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">submittedFutures</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>maxWorkers</strong> (<em>int</em>) – <p>Overrides the maximum number of worker threads that can be created by this pool. 
+Only override this if needed. The default maxWorkers is configured in <code class="docutils literal notranslate"><span class="pre">self.threadPoolMaxWorkers</span></code> and is 
+currently set at 6 since a higher number might overload a machine (or Python, due to the GIL) if pools are used by
+many/all of the PySys workers/tests running in parallel. The default may change in future.</p>
+<p>If overriding this value, use a small number of workers for Python-based logic that will hold the Python 
+Global Interpreter Lock, or a larger/more scalable number of workers for heavily I/O-bound operations with little Python logic.</p>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">concurrent.futures.ThreadPoolExecutor</span></code> instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pysys.basetest.BaseTest.deleteDir">
 <code class="sig-name descname">deleteDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.deleteDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recursively delete the specified directory.</p>
@@ -1978,8 +2096,18 @@ kwargs down to the super implementation, to allow for future extensions.</p></li
 </dd></dl>
 
 <dl class="py method">
+<dt id="pysys.basetest.BaseTest.getDefaultFileEncoding">
+<code class="sig-name descname">getDefaultFileEncoding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">xargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.getDefaultFileEncoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies what encoding should be used to read or write the specified 
+text file. The default implementation for BaseTest delegates to the 
+runner, which in turn gets its defaults from the <code class="docutils literal notranslate"><span class="pre">pysyproject.xml</span></code> 
+configuration.</p>
+<p>See <a class="reference internal" href="../autodocgen/pysys.process.user.html#pysys.process.user.ProcessUser.getDefaultFileEncoding" title="pysys.process.user.ProcessUser.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.getDefaultFileEncoding</span></code></a> for more details.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pysys.basetest.BaseTest.getExprFromFile">
-<code class="sig-name descname">getExprFromFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">groups</span><span class="o">=</span><span class="default_value">[1]</span></em>, <em class="sig-param"><span class="n">returnAll</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.getExprFromFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getExprFromFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">groups</span><span class="o">=</span><span class="default_value">[1]</span></em>, <em class="sig-param"><span class="n">returnAll</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">mustExist</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.getExprFromFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for a regular expression in the specified file, and returns it.</p>
 <p>Use of this function is discouraged - consider using <a class="reference internal" href="#pysys.basetest.BaseTest.grep" title="pysys.basetest.BaseTest.grep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grep</span></code></a> / <a class="reference internal" href="#pysys.basetest.BaseTest.grepOrNone" title="pysys.basetest.BaseTest.grepOrNone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepOrNone</span></code></a> / <a class="reference internal" href="#pysys.basetest.BaseTest.grepAll" title="pysys.basetest.BaseTest.grepAll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepAll</span></code></a> instead.</p>
 <p>If the regex contains unnamed groups using <code class="docutils literal notranslate"><span class="pre">(expr)</span></code> syntax, the specified group is returned. 
@@ -2021,9 +2149,12 @@ This parameter is ignored if the regular expression contains any <code class="do
 <li><p><strong>returnAll</strong> (<em>bool</em>) – returns a list containing all matching lines if True, the first matching line otherwise.</p></li>
 <li><p><strong>returnNoneIfMissing</strong> (<em>bool</em>) – True to return None instead of raising an exception
 if the regex is not found in the file (not needed when returnAll is used).</p></li>
+<li><p><strong>mustExist</strong> (<em>bool</em>) – Set to False to tolerate the file not existing and treat a missing file like an empty file.</p></li>
 <li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to open the file. 
 The default value is None which indicates that the decision will be delegated 
 to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p></li>
+<li><p><strong>encodingReplaceOnError</strong> (<em>bool</em>) – Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+Added in PySys 2.2.</p></li>
 <li><p><strong>mappers</strong> (<em>List</em><em>[</em><em>callable</em><em>[</em><em>str</em><em>]</em><em>-&gt;str</em><em>]</em>) – <p>A list of filter functions that will be used to pre-process each 
 line from the file (returning None if the line is to be filtered out). This provides a very powerful 
 capability for filtering the file, for example <a class="reference internal" href="../autodocgen/pysys.mappers.html#pysys.mappers.IncludeLinesBetween" title="pysys.mappers.IncludeLinesBetween"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers.IncludeLinesBetween</span></code></a> 
@@ -2129,7 +2260,7 @@ details.</p></li>
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.getOutcomeLocation">
 <code class="sig-name descname">getOutcomeLocation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.getOutcomeLocation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the location in the Python source file where this location was added.</p>
+<dd><p>Get the location in the Python source file where this outcome was added.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 1.6.0.</span></p>
 </div>
@@ -2207,7 +2338,7 @@ a dict[str,str] is returned where the keys are the groupNames.</p>
 
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.grepAll">
-<code class="sig-name descname">grepAll</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.grepAll" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">grepAll</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">mustExist</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.grepAll" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of all the occurrences of a regular expression in the specified file.</p>
 <p>See also <a class="reference internal" href="#pysys.basetest.BaseTest.grep" title="pysys.basetest.BaseTest.grep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grep</span></code></a> and <a class="reference internal" href="#pysys.basetest.BaseTest.grepOrNone" title="pysys.basetest.BaseTest.grepOrNone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepOrNone</span></code></a> for return-first-only behaviour.</p>
 <p>If you have a complex expression with multiple values to extract, you can use <code class="docutils literal notranslate"><span class="pre">(?P&lt;groupName&gt;...)</span></code> named groups 
@@ -2238,6 +2369,8 @@ provides the ability to filter in/out sections of a file.</p>
 <p>Do not share mapper instances across multiple tests or threads as this can cause race conditions.</p>
 <p>Added in PySys 1.6.0.</p>
 </p></li>
+<li><p><strong>mustExist</strong> (<em>bool</em>) – Set this to False to tolerate the file not existing and treat a missing file like an empty file. 
+Added in PySys 2.2.</p></li>
 <li><p><strong>reFlags</strong> (<em>int</em>) – <p>Zero or more flags controlling how the behaviour of regular expression matching, 
 combined together using the <code class="docutils literal notranslate"><span class="pre">|</span></code> operator, for example <code class="docutils literal notranslate"><span class="pre">reFlags=re.VERBOSE</span> <span class="pre">|</span> <span class="pre">re.IGNORECASE</span></code>.</p>
 <p>For details see the <code class="docutils literal notranslate"><span class="pre">re</span></code> module in the Python standard library. Note that <code class="docutils literal notranslate"><span class="pre">re.MULTILINE</span></code> cannot 
@@ -2254,7 +2387,7 @@ be used because expressions are matched against one line at a time. Added in PyS
 
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.grepOrNone">
-<code class="sig-name descname">grepOrNone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.grepOrNone" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">grepOrNone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">expr</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">mustExist</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.grepOrNone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the first occurrence of a regular expression in the specified file, or None if not found.</p>
 <p>See also <a class="reference internal" href="#pysys.basetest.BaseTest.grep" title="pysys.basetest.BaseTest.grep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grep</span></code></a> and <a class="reference internal" href="#pysys.basetest.BaseTest.grepAll" title="pysys.basetest.BaseTest.grepAll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grepAll</span></code></a> for error-on-missing and return-all behaviour.</p>
 <p>If you want to use a grep to set the outcome of the test, use <a class="reference internal" href="#pysys.basetest.BaseTest.assertThatGrep" title="pysys.basetest.BaseTest.assertThatGrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertThatGrep</span></code></a> or 
@@ -2291,6 +2424,8 @@ provides the ability to filter in/out sections of a file.</p>
 <p>Do not share mapper instances across multiple tests or threads as this can cause race conditions.</p>
 <p>Added in PySys 1.6.0.</p>
 </p></li>
+<li><p><strong>mustExist</strong> (<em>bool</em>) – Set this to False to tolerate the file not existing and treat a missing file like an empty file. 
+Added in PySys 2.2.</p></li>
 <li><p><strong>reFlags</strong> (<em>int</em>) – <p>Zero or more flags controlling how the behaviour of regular expression matching, 
 combined together using the <code class="docutils literal notranslate"><span class="pre">|</span></code> operator, for example <code class="docutils literal notranslate"><span class="pre">reFlags=re.VERBOSE</span> <span class="pre">|</span> <span class="pre">re.IGNORECASE</span></code>.</p>
 <p>For details see the <code class="docutils literal notranslate"><span class="pre">re</span></code> module in the Python standard library. Note that <code class="docutils literal notranslate"><span class="pre">re.MULTILINE</span></code> cannot 
@@ -2307,8 +2442,55 @@ a dict[str,str] is returned where the keys are the groupNames.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="pysys.basetest.BaseTest.handleRunnerAbort">
+<code class="sig-name descname">handleRunnerAbort</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.handleRunnerAbort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called from a background thread when the entire test run is aborting, to perform 
+quick operations to help this test to terminate as quickly as possible.</p>
+<p>The default implementation attempts to immediately stop any currently running processes 
+(in case they are holding open resources such as server sockets that the test may be blocking on).</p>
+<p>Subclasses may override this method, either to perform additional steps (such as closing server sockets 
+that clients may be blocking on) or to avoid stopping processes that need to be terminated in a more orderly way.</p>
+<p>Unlike the <a class="reference internal" href="#pysys.basetest.BaseTest.cleanup" title="pysys.basetest.BaseTest.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a> method, this will be called from a background thread so avoid using methods that are 
+not thread-safe.</p>
+<p>NB: Logging performed during this method will NOT be included in the test’s <code class="docutils literal notranslate"><span class="pre">run.log</span></code> output.</p>
+<p>The test’s <a class="reference internal" href="#pysys.basetest.BaseTest.cleanup" title="pysys.basetest.BaseTest.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a> method will usually be called to perform a fuller cleanup (later, or concurrently).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.basetest.BaseTest.listDirContents">
+<code class="sig-name descname">listDirContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">recurse</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.listDirContents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable 
+for diffing.</p>
+<p>The contents are returned in a normalized form suitable for diffing: relative to the scanned path, with forward 
+slashes on all platforms, a trailing slash for directories, and sorted to ensure deterministic results. 
+Symbolic links are not searched.</p>
+<p>For example this can be used with <a class="reference internal" href="#pysys.basetest.BaseTest.assertDiff" title="pysys.basetest.BaseTest.assertDiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.assertDiff</span></code></a> like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertDiff</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s1">&#39;MyDir-contents.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">listDirContents</span><span class="p">(</span><span class="s1">&#39;MyDir&#39;</span><span class="p">)</span> <span class="p">)))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The path to search, either absolute or relative to the output directory.</p></li>
+<li><p><strong>recurse</strong> (<em>bool</em>) – Set this to False to just include the specified directory but not any children.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of strings with the relative paths found, e.g. <code class="docutils literal notranslate"><span class="pre">[&quot;mysubdir/myfile.txt&quot;,</span> <span class="pre">&quot;mysubdir/mysubsubdir/&quot;]</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pysys.basetest.BaseTest.logFileContents">
-<code class="sig-name descname">logFileContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">includes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">excludes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maxLines</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">tail</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logFunction</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">stripWhitespace</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.logFileContents" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">logFileContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">includes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">excludes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maxLines</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">tail</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logFunction</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">stripWhitespace</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.logFileContents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs some or all of the lines from the specified file.</p>
 <p>If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
@@ -2334,9 +2516,11 @@ provides the ability to filter in/out sections of a file.</p>
 </p></li>
 <li><p><strong>maxLines</strong> (<em>int</em>) – Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited</p></li>
 <li><p><strong>tail</strong> (<em>bool</em>) – Prints the _last_ ‘maxLines’ in the file rather than the first ‘maxLines’.</p></li>
-<li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to open the file. 
+<li><p><strong>encoding</strong> (<em>str</em>) – <p>The encoding to use to open the file. 
 The default value is None which indicates that the decision will be delegated 
-to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p></li>
+to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p>
+<p>Any character encoding errors will result in backslash escape sequences being logged instead.</p>
+</p></li>
 <li><p><strong>logFunction</strong> (<em>Callable</em><em>[</em><em>[</em><em>line</em><em>]</em><em>,</em><em>None</em><em>]</em>) – <p>The function that will be used to log individual lines from the file. 
 Usually this is <code class="docutils literal notranslate"><span class="pre">self.log.info(u'</span>&#160; <span class="pre">%s',</span> <span class="pre">line,</span> <span class="pre">extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))</span></code> 
 but a custom implementation can be provided, for example to provide a different color using 
@@ -2352,6 +2536,9 @@ be used because expressions are matched against one line at a time. Added in PyS
 Added in PySys 2.0.</p></li>
 <li><p><strong>color</strong> (<em>bool</em>) – By default logged lines are colored blue to distinguish from the rest of the log contents. 
 Set this to False to disable coloring. Added in PySys 2.1.</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – The introductory message to log before the file content, with <code class="docutils literal notranslate"><span class="pre">&#64;PATH&#64;</span></code> as a placeholder for the path. 
+If not specified the default is equivalent to <code class="docutils literal notranslate"><span class="pre">&quot;Contents</span> <span class="pre">of</span> <span class="pre">&#64;PATH&#64;:</span> <span class="pre">&quot;</span></code>. 
+Added in PySys 2.2</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -2384,29 +2571,11 @@ to be met.</p>
 <p>Unlike <a class="reference internal" href="#pysys.basetest.BaseTest.wait" title="pysys.basetest.BaseTest.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.wait</span></code></a> (which should be used for larger waits inside tests), pollWait does not 
 log anything.</p>
 <p>Use this method instead of <code class="docutils literal notranslate"><span class="pre">time.sleep</span></code> as it provides PySys the chance to abort test execution early when 
-requested.</p>
+requested, for example as a result of a keyboard interrupt or signal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>secs</strong> (<em>float</em>) – The time to sleep for, typically a few hundred milliseconds. Do not use this method for 
-really long waits.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pysys.basetest.BaseTest.pythonDocTest">
-<code class="sig-name descname">pythonDocTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pythonFile</span></em>, <em class="sig-param"><span class="n">pythonPath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">environs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.pythonDocTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.pythonDocTest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute the Python doctests that exist in the specified python file; 
-adds a FAILED outcome if any do not pass.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pythonFile</strong> – the absolute path to a python file name.</p></li>
-<li><p><strong>pythonPath</strong> – a list of directories to be added to the PYTHONPATH.</p></li>
-<li><p><strong>output</strong> – the output file; if not specified, ‘%s-doctest.txt’ is used with 
-the basename of the python file.</p></li>
-<li><p><strong>kwargs</strong> – extra arguments are passed to startProcess/startPython.</p></li>
-</ul>
+really long waits. Cannot be negative.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2447,7 +2616,7 @@ ensure that the rest of the execute() and validate() methods do not execute.</p>
 
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.startProcess">
-<code class="sig-name descname">startProcess</code><span class="sig-paren">(</span><em class="sig-param">command</em>, <em class="sig-param">arguments</em>, <em class="sig-param">environs=None</em>, <em class="sig-param">workingDir=None</em>, <em class="sig-param">state=None</em>, <em class="sig-param">timeout=600</em>, <em class="sig-param">stdout=None</em>, <em class="sig-param">stderr=None</em>, <em class="sig-param">displayName=None</em>, <em class="sig-param">abortOnError=None</em>, <em class="sig-param">expectedExitStatus='==0'</em>, <em class="sig-param">ignoreExitStatus=None</em>, <em class="sig-param">onError=None</em>, <em class="sig-param">quiet=False</em>, <em class="sig-param">stdouterr=None</em>, <em class="sig-param">background=False</em>, <em class="sig-param">info={}</em>, <em class="sig-param">processFactory=&lt;class 'pysys.process.helper.ProcessImpl'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.startProcess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">startProcess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">command</span></em>, <em class="sig-param"><span class="n">arguments</span></em>, <em class="sig-param"><span class="n">environs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workingDir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">600</span></em>, <em class="sig-param"><span class="n">stdout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stderr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">abortOnError</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expectedExitStatus</span><span class="o">=</span><span class="default_value">'==0'</span></em>, <em class="sig-param"><span class="n">ignoreExitStatus</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">onError</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">quiet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">stdouterr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">background</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">info</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">processFactory</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.startProcess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start a process running in the foreground or background, and return 
 the <a class="reference internal" href="../autodocgen/pysys.process.html#pysys.process.Process" title="pysys.process.Process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.Process</span></code></a> object.</p>
 <p>Typical use is:</p>
@@ -2581,7 +2750,7 @@ example:</p>
 <p>Uses the same Python process the tests are running under.</p>
 <p>If PySys was run with the argument <code class="docutils literal notranslate"><span class="pre">-XcodeCoverage</span></code> or <code class="docutils literal notranslate"><span class="pre">-XpythonCoverage</span></code> then 
 <a class="reference internal" href="#pysys.basetest.BaseTest.startPython" title="pysys.basetest.BaseTest.startPython"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startPython</span></code></a> will add the necessary arguments to enable generation of 
-code coverage. Note that this requried the coverage.py library to be 
+code coverage. Note that this required the coverage.py library to be 
 installed. If a project property called <code class="xref py py-obj docutils literal notranslate"><span class="pre">pythonCoverageArgs</span></code> exists 
 then its value will be added as (space-delimited) arguments to the 
 coverage tool.</p>
@@ -2715,7 +2884,7 @@ project setting)</p></li>
 
 <dl class="py method">
 <dt id="pysys.basetest.BaseTest.waitForGrep">
-<code class="sig-name descname">waitForGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">expr</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">condition</span><span class="o">=</span><span class="default_value">'&gt;=1'</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">60</span></em>, <em class="sig-param"><span class="n">poll</span><span class="o">=</span><span class="default_value">0.25</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">process</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">errorExpr</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">errorIf</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">abortOnError</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">detailMessage</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">filedir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">quiet</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.waitForGrep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">waitForGrep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">expr</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">condition</span><span class="o">=</span><span class="default_value">'&gt;=1'</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">60</span></em>, <em class="sig-param"><span class="n">poll</span><span class="o">=</span><span class="default_value">0.25</span></em>, <em class="sig-param"><span class="n">ignores</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">process</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">errorExpr</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">errorIf</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">abortOnError</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encodingReplaceOnError</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">detailMessage</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">filedir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reFlags</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mappers</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">quiet</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysys.basetest.BaseTest.waitForGrep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 directory (waitForGrep was formerly known as <a class="reference internal" href="#pysys.basetest.BaseTest.waitForSignal" title="pysys.basetest.BaseTest.waitForSignal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waitForSignal</span></code></a>).</p>
 <p>This method provides some parameters that give helpful fail-fast behaviour with a descriptive outcome reason; 
@@ -2732,10 +2901,10 @@ error messages go to a different file than that being grepped</p></li>
 <p>This will generate much clearer outcome reasons, which makes test failures easy to triage, 
 and also avoids wasting time waiting for something that will never happen.</p>
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;myprocess.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39;INFO .*Started successfully&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;myprocess.log&#39;</span><span class="p">,</span> <span class="s1">&#39;INFO .*Started successfully&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
         <span class="n">process</span><span class="o">=</span><span class="n">myprocess</span><span class="p">,</span> <span class="n">errorExpr</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39; (ERROR|FATAL) &#39;</span><span class="p">,</span> <span class="s1">&#39;Failed to start&#39;</span><span class="p">])</span>
 
-<span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;myoutput.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39;My message&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;myoutput.log&#39;</span><span class="p">,</span> <span class="s1">&#39;My message&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
         <span class="n">process</span><span class="o">=</span><span class="n">myprocess</span><span class="p">,</span> <span class="n">errorIf</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">grepOrNone</span><span class="p">(</span><span class="s1">&#39;myprocess.err&#39;</span><span class="p">,</span> <span class="s1">&#39; ERROR .*&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -2747,9 +2916,15 @@ using one or more <code class="docutils literal notranslate"><span class="pre">(
 pattern is to unpack the resulting dict using <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> syntax and pass to <a class="reference internal" href="#pysys.basetest.BaseTest.assertThat" title="pysys.basetest.BaseTest.assertThat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTest.assertThat</span></code></a>. For 
 example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s1">&#39;username == expected&#39;</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="s1">&#39;myuser&#39;</span><span class="p">,</span>
-        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Successfully authenticated user &quot;(?P&lt;username&gt;[^&quot;]*)&quot;&#39;</span><span class="p">))</span>
+        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">waitForGrep</span><span class="p">(</span><span class="s1">&#39;myserver.log&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Successfully authenticated user &quot;(?P&lt;username&gt;[^&quot;]*)&quot;&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
+<p>If the file is large or contains long lines, it can take a long time for the regular expressions to be 
+evaluated over each line. It is important to avoid the possibility that data is written to the file faster 
+than Python can read it, which would lead to the PySys process running very slowly and likely a timeout. 
+To help detect this situation, this method will log warnings if dangerously long lines are detected. If needed 
+the threshold for these can be configured by setting the <code class="docutils literal notranslate"><span class="pre">self.grepWarnIfLineLongerThan</span></code> field. 
+If reading from a file that has long lines, consider adding <a class="reference internal" href="../autodocgen/pysys.mappers.html#pysys.mappers.TruncateLongLines" title="pysys.mappers.TruncateLongLines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers.TruncateLongLines</span></code></a> to the mappers list.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 1.5.1.</span></p>
 </div>
@@ -2793,6 +2968,8 @@ project setting, which for a modern project will be True).</p></li>
 <li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to open the file and convert from bytes to characters. 
 The default value is None which indicates that the decision will be delegated 
 to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFileEncoding" title="pysys.basetest.BaseTest.getDefaultFileEncoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefaultFileEncoding()</span></code></a> method.</p></li>
+<li><p><strong>encodingReplaceOnError</strong> (<em>bool</em>) – Set to True to replace erroneous characters that are invalid in the expected encoding (with a backslash escape) rather than throwing an exception. 
+Added in PySys 2.2.</p></li>
 <li><p><strong>detailMessage</strong> (<em>str</em>) – <p>An extra string to add to the start of the message logged when waiting to provide extra 
 information about the wait condition. e.g. <code class="docutils literal notranslate"><span class="pre">detailMessage='Wait</span> <span class="pre">for</span> <span class="pre">server</span> <span class="pre">startup:</span> <span class="pre">'</span></code>.</p>
 <p>Added in v1.5.1. From v2.1+ the detail string is added at the beginning not the end.</p>
@@ -2933,6 +3110,24 @@ to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFi
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="pysys.basetest.BaseTest.pythonDocTest">
+<code class="sig-name descname">pythonDocTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pythonFile</span></em>, <em class="sig-param"><span class="n">pythonPath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">environs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/basetest.html#BaseTest.pythonDocTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.basetest.BaseTest.pythonDocTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the Python doctests that exist in the specified python file; 
+adds a FAILED outcome if any do not pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pythonFile</strong> – the absolute path to a python file name.</p></li>
+<li><p><strong>pythonPath</strong> – a list of directories to be added to the PYTHONPATH.</p></li>
+<li><p><strong>output</strong> – the output file; if not specified, ‘%s-doctest.txt’ is used with 
+the basename of the python file.</p></li>
+<li><p><strong>kwargs</strong> – extra arguments are passed to startProcess/startPython.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -2946,7 +3141,7 @@ to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFi
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="UserGuide.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="UserGuide.html" class="btn btn-neutral float-right" title="Guides" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../GettingStarted.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -2958,7 +3153,7 @@ to the <a class="reference internal" href="#pysys.basetest.BaseTest.getDefaultFi
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2006-2022 M.B. Grieve; documentation last updated on 2022-03-17
+        &copy; Copyright 2006-2023 M.B. Grieve; documentation last updated on 2023-10-19
 
     </p>
   </div>
