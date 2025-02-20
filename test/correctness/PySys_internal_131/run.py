@@ -37,7 +37,7 @@ class PySysTest(BaseTest):
 				# end folding before summary
 				'^::endgroup::',
 				'^::group::[(]GitHub test failure annotations[)]',
-				'^::error file=.*/pysysproject.xml::Failure outcomes: 2 TIMED OUT, 1 FAILED.*%0A.*Summary of failures: ',
+				'^::error file=.*/pysysproject.xml::Failure outcomes: 2 TIMED OUT, 2 FAILED.*%0A.*Summary of failures: ',
 				
 				'^::warning file=.*/run.py',
 				'^::endgroup::',
@@ -53,7 +53,12 @@ class PySysTest(BaseTest):
 		self.assertGrep('test/GITHUB_OUTPUT-default-project.txt', '^artifact_TestOutputArchive=.*NestedFail.default-project.zip,[^, ]....')
 
 		self.assertGrep('default-project.out', expr='^::warning file=.*/run.py,line=7::.*Id.*NestedTimedout2%0A.*Test duration:') # includes line number
-		self.assertLineCount('default-project.out', expr='::(warning|error)', condition='==4')
-		self.assertLineCount('test-project.out', expr='::(warning|error)', condition='==3') # =4 minus the one GitHub adds for the non-zero exit code
+		self.assertLineCount('default-project.out', expr='::(warning|error)', condition='==5')
+		self.assertLineCount('test-project.out', expr='::(warning|error)', condition='==4') # =5 minus the one GitHub adds for the non-zero exit code
 		self.assertGrep('test-project.out', expr='(annotation limit reached; for any additional test failures, see the detailed log)', literal=True)
+
+		# A massive run.log is truncated
+		self.assertGrep('default-project.out', contains=False, expr='^::warning .*Start of the test')
+		# ... but the test metadata still appears at the top
+		self.assertGrep('default-project.out', expr='^::warning file=.*/run.py,.*Id.*BigBigLog%0A.*End of the test')
 

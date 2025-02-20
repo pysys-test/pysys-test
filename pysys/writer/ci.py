@@ -221,7 +221,13 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			if file:
 				params[u'file'] = file.replace(u'\\',u'/')
 				if lineno: params[u'line'] = lineno
-			self.failureTestLogAnnotations.append([u'warning', msg, params])
+
+			# Honour the Github 4k message limit, while still showing the head and tail of the run.log
+			header = os.linesep.join(msg.split(os.linesep)[:5]) + os.linesep
+			footer = ''
+			if((4096 - len(header)) > 0):
+				footer = msg[-(4096 - len(header)):]
+			self.failureTestLogAnnotations.append([u'warning', header + footer, params])
 			
 
 class TravisCIWriter(BaseRecordResultsWriter):
