@@ -99,7 +99,7 @@ setup(
 	python_requires=">=3, <4", # be flexible
 
 	install_requires=[
-		'pywin32 >= 310; platform_system=="Windows"', 
+		'pywin32 >= 310; markers="platform_system==\'Windows\'"',
 		'colorama; platform_system=="Windows"'
 	],
 
