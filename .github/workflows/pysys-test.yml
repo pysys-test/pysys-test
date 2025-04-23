@@ -226,7 +226,7 @@ jobs:
           folder: docs/build_output/html/
 
       - name: Upload to GitHub Release
-        uses: svenstaro/upload-release-action@04733e0 # v2.9.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         if: success() && matrix.doc-and-deploy && github.event_name == 'release'
         id: upload-release-asset 
         with:
