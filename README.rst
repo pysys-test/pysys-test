@@ -64,7 +64,7 @@ Project Links
 .. image:: https://github.com/pysys-test/pysys-test/actions/workflows/pysys-test.yml/badge.svg
 	:target: https://github.com/pysys-test/pysys-test/actions/workflows/pysys-test.yml
 
-.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/main/graph/badge.svg
 	:target: https://codecov.io/gh/pysys-test/pysys-test
 
 - Documentation: https://pysys-test.github.io/pysys-test
