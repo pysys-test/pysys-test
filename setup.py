@@ -104,7 +104,12 @@ setup(
 	],
 
 	scripts = ['scripts/pysys.py'],
-	packages=find_packages()+['pysys.process.plat-win32', 'pysys.process.plat-unix'],
+	packages=find_packages()+[
+		'pysys.process.plat-win32', 'pysys.process.plat-unix',
+		'pysys.config.templates',
+		'pysys.config.templates.dirconfig',
+		'pysys.config.templates.project',
+		],
 	include_package_data=True,
 	)
 	
