@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysysproject>
 	<requires-pysys>2.3</requires-pysys>
-	<requires-python>3.8</requires-python>
+	<requires-python>3.9</requires-python>
 	
 	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, ${hostname}. -->
 	

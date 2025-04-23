@@ -6,7 +6,7 @@
 
 
 	<!-- Unlike the samples, we do need to run these with all PySys versions we support -->
-	<requires-python>3.8</requires-python>
+	<requires-python>3.9</requires-python>
 
 	<!-- 
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:

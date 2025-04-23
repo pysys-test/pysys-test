@@ -18,7 +18,7 @@ Version 2.3 is under development.
 
 New features:
 
-- XXX
+- Add support for Python 3.13, including the new free-threaded build where the GIL can be disabled. Remove support for the end-of-life 3.8 Python release. 
 
 Fixes in 2.3:
 
