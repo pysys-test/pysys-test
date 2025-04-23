@@ -53,7 +53,7 @@ handleRunnerAbort
 		
 		# make this work against both source and binary distributions
 		pysysroot = os.path.dirname(os.path.dirname(pysys.__file__))
-		docdir = glob.glob(pysysroot+'/PySys*dist-info*') # created when installing from whl
+		docdir = glob.glob(pysysroot+'/PySys*dist-info*') or glob.glob(pysysroot+'/pysys*dist-info*') # created when installing from whl
 		if len(docdir)==1: 
 			docdir = docdir[0]
 		else:
