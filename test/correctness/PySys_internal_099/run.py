@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		pysysroot = os.path.dirname(os.path.dirname(pysys.__file__))
 		
-		distinfo = glob.glob(pysysroot+'/PySys*dist-info*') # created when installing from whl
+		distinfo = glob.glob(pysysroot+'/PySys*dist-info*') or glob.glob(pysysroot+'/pysys*dist-info*') # created when installing from whl
 		
 		rootdocs = ['README.rst', 'LICENSE.txt', 'CHANGELOG.rst', 'docs/pysys/BaseTest.rst', 'docs/pysys/UserGuide.rst']
 		
