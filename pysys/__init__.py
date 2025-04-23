@@ -57,7 +57,7 @@ __version__ = "2.3.dev1"
 __date__ = "yyyy-mm-dd"
 """The date of this release."""
 
-__license__ = "GNU Lesser General Public License"
+__license__ = "LGPL-2.1-or-later"
 """The PySys license."""
 
 __all__  = [

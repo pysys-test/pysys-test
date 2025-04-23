@@ -42,7 +42,6 @@ PLATFORMS_CLASSIFIERS = [
 	"Operating System :: MacOS",
 ]
 CLASSIFIERS = [
-	"License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
 	"Development Status :: 5 - Production/Stable",
 	"Intended Audience :: Developers",
 	"Programming Language :: Python",
