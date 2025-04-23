@@ -99,8 +99,8 @@ setup(
 	python_requires=">=3, <4", # be flexible
 
 	install_requires=[
-		"pywin32;sys_platform=='win32'", 
-		"colorama;sys_platform=='win32'"
+		'pywin32;platform_system=="Windows"', 
+		'colorama;platform_system=="Windows"'
 	],
 
 	scripts = ['scripts/pysys.py'],
