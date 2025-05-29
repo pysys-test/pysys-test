@@ -78,6 +78,7 @@ jobs:
       - name: Configure Python dependency requirements
         run: |
           echo build           > setup-python-package-requirements.txt
+          echo setuptools      >> setup-python-package-requirements.txt
           echo wheel           >> setup-python-package-requirements.txt
           echo coverage        >> setup-python-package-requirements.txt
       - uses: actions/setup-python@v5
@@ -120,9 +121,7 @@ jobs:
         shell: bash
         run: |
           # build universal wheel and python source distribution
-          python setup.py check --strict
-          python setup.py bdist_wheel
-          python setup.py sdist
+          python -m build
 
       - name: Install PySys
         shell: bash
