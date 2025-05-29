@@ -17,8 +17,10 @@
 
 import codecs, os, glob, sys, shutil
 
-import pysys
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
+
+sys.path.append(ROOTDIR)
+import pysys
 
 # Need to create dynamically generated rst files which we'll be including in the package
 sys.path.append(ROOTDIR+'/docs')
