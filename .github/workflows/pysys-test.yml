@@ -77,7 +77,7 @@ jobs:
       # Install Python and dependencies
       - name: Configure Python dependency requirements
         run: |
-          echo setuptools       > setup-python-package-requirements.txt
+          echo build           > setup-python-package-requirements.txt
           echo wheel           >> setup-python-package-requirements.txt
           echo coverage        >> setup-python-package-requirements.txt
       - uses: actions/setup-python@v5
@@ -178,7 +178,7 @@ jobs:
           echo Test packaging from an installed source dist:
           python -m pip uninstall --yes PySys
           python -m pip install --no-cache-dir "../dist/PySys-$PYSYS_VERSION.tar.gz"
-          pysys.py run --ci --include pysys-packaging --outdir against-src-dist-setuptools
+          pysys.py run --ci --include pysys-packaging --outdir against-src-dist
 
           # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
           echo Test packaging from source checkout:
