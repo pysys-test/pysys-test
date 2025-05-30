@@ -180,7 +180,7 @@ jobs:
           # as a quick sanity-test, also run packaging tests after installing from source
           echo Test packaging from an installed source dist:
           python -m pip uninstall --yes PySys
-          python -m pip install --no-cache-dir "../dist/PySys-$PYSYS_VERSION.tar.gz"
+          python -m pip install --no-cache-dir "../dist/*$PYSYS_VERSION.tar.gz"
           pysys.py run --ci --include pysys-packaging --outdir against-src-dist
 
           # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
