@@ -53,7 +53,7 @@ handleRunnerAbort
 		
 		# make this work against both source and binary distributions
 		pysysroot = os.path.dirname(os.path.dirname(pysys.__file__))
-		docdir = pysysroot+'/pysys/docs'
+		docdir = pysysroot+'/pysys_docs'
 		self.log.info('Checking completeness of %s/BaseTest.rst', docdir)
 		with codecs.open(docdir+'/BaseTest.rst', 'r', encoding='ascii') as f: # this also serves to check we don't have non-ascii chars creeping in
 			for l in f:

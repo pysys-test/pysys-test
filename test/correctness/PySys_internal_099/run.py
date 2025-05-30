@@ -25,7 +25,7 @@ class PySysTest(BaseTest):
 		if distinfo:
 			#self.log.info('Binary dist info contains: %s', sorted(os.listdir(distinfo[0])))
 			for d in rootdocs:
-				self.assertPathExists(pysysroot+'/pysys/docs/'+os.path.basename(d))
+				self.assertPathExists(pysysroot+'/pysys_docs/'+os.path.basename(d))
 		self.log.info('')
 		if isSourceDist:
 			for d in rootdocs:

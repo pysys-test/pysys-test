@@ -40,7 +40,7 @@ for doc in [
    'docs/pysys/ProjectConfiguration.rst',
    'docs/pysys/TestDescriptors.rst',
 ]:
-	shutil.copy(ROOTDIR+'/'+doc, ROOTDIR+'/pysys/docs/'+os.path.basename(doc))
+	shutil.copy(ROOTDIR+'/'+doc, ROOTDIR+'/pysys_docs/'+os.path.basename(doc))
 
 # classifiers come from PyPi's official list https://pypi.org/classifiers/
 PLATFORMS_CLASSIFIERS = [
@@ -118,7 +118,7 @@ setuptools.setup(
 		'pysys.config.templates',
 		'pysys.config.templates.dirconfig',
 		'pysys.config.templates.project',
-		'pysys.docs',
+		'pysys_docs',
 		],
 	include_package_data=True, # includes the package data files (specified in MANIFEST.in)
 	)

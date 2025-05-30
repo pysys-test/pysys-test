@@ -20,4 +20,4 @@ recursive-include test *
 recursive-include samples *
 
 # include doc files staged here by setup.py
-include pysys/docs/*
+include pysys_docs/*
