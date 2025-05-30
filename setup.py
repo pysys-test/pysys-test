@@ -22,13 +22,14 @@ ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(ROOTDIR)
 import pysys
 
-import setuptools
-print('using setuptools v%s'%setuptools.__version__)
-
 # Need to create dynamically generated rst files which we'll be including in the package
 sys.path.append(ROOTDIR+'/docs')
 import create_templated_rsts
 create_templated_rsts.prepareDocBuild()
+
+import setuptools
+print('using setuptools v%s'%setuptools.__version__)
+from setuptools import setup, find_packages
 
 # Copy the docs under the pysys package so we can include them in the wheel
 os.makedirs(ROOTDIR+'/pysys/docs', exist_ok=True)
@@ -80,7 +81,7 @@ with codecs.open(ROOTDIR+'/VERSION', "rb", "ascii") as f:
 	assert versionFromFile == pysys.__version__, '"%s" != "%s"'%(versionFromFile, pysys.__version__) # ensure consistent version
 
 # Ideally we've move the non-dynamic parts of this to pyproject.toml
-setuptools.setup(
+setup(
 	name='PySys',
 	description='Python System Test Framework',
 	
@@ -113,7 +114,7 @@ setuptools.setup(
 	],
 
 	scripts = ['scripts/pysys.py'],
-	packages=setuptools.find_packages('.', include=['pysys.*'])+
+	packages=find_packages('.', include=['pysys.*'])+
 		[
 		'pysys.process.plat-win32', 'pysys.process.plat-unix',
 		'pysys.config.templates',
