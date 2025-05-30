@@ -98,7 +98,7 @@ setup(
 	long_description=long_description,
 	long_description_content_type='text/x-rst',
 
-	python_requires=">=3, <4", # be flexible
+	python_requires=">=3", # be flexible
 
 	install_requires=[
 		'pywin32; platform_system=="Windows"',
