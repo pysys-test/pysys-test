@@ -32,17 +32,17 @@ print('using setuptools v%s'%setuptools.__version__)
 from setuptools import setup, find_packages
 
 # Copy the docs under the pysys package so we can include them in the wheel
-# os.makedirs(ROOTDIR+'/pysys/docs', exist_ok=True)
-# for doc in [
-#    'LICENSE.txt',
-#    'README.rst',
-#    'CHANGELOG.rst',
-#    'docs/pysys/UserGuide.rst',
-#    'docs/pysys/BaseTest.rst',
-#    'docs/pysys/ProjectConfiguration.rst',
-#    'docs/pysys/TestDescriptors.rst',
-# ]:
-# 	shutil.copy(ROOTDIR+'/'+doc, ROOTDIR+'/pysys/docs/'+os.path.basename(doc))
+os.makedirs(ROOTDIR+'/pysys/docs', exist_ok=True)
+for doc in [
+   'LICENSE.txt',
+   'README.rst',
+   'CHANGELOG.rst',
+   'docs/pysys/UserGuide.rst',
+   'docs/pysys/BaseTest.rst',
+   'docs/pysys/ProjectConfiguration.rst',
+   'docs/pysys/TestDescriptors.rst',
+]:
+	shutil.copy(ROOTDIR+'/'+doc, ROOTDIR+'/pysys/docs/'+os.path.basename(doc))
 
 # classifiers come from PyPi's official list https://pypi.org/classifiers/
 PLATFORMS_CLASSIFIERS = [
@@ -120,7 +120,7 @@ setup(
 		'pysys.config.templates',
 		'pysys.config.templates.dirconfig',
 		'pysys.config.templates.project',
-		#'pysys.docs',
+		'pysys.docs',
 		],
 	include_package_data=True, # includes the package data files (specified in MANIFEST.in)
 	)
