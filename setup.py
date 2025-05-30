@@ -30,7 +30,7 @@ import create_templated_rsts
 create_templated_rsts.prepareDocBuild()
 
 # Copy the docs under the pysys package so we can include them in the wheel
-os.makedirs(ROOTDIR+'/pysys/docs', exist_ok=True)
+os.makedirs(ROOTDIR+'/pysys_docs', exist_ok=True)
 for doc in [
    'LICENSE.txt',
    'README.rst',
