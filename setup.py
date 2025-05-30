@@ -16,13 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import codecs, os, glob, sys, shutil
-import setuptools
-print('using setuptools v%s'%setuptools.__version__)
 
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.append(ROOTDIR)
 import pysys
+
+import setuptools
+print('using setuptools v%s'%setuptools.__version__)
 
 # Need to create dynamically generated rst files which we'll be including in the package
 sys.path.append(ROOTDIR+'/docs')
