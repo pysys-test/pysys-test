@@ -3,6 +3,7 @@ docs/pysys/ProjectConfiguration.rst
 docs/pysys/TestDescriptors.rst
 docs/autodocgen
 docs/build_output*
+pysys/docs/*
 /__*
 .vscode
 

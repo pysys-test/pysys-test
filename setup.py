@@ -16,6 +16,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import codecs, os, glob, sys, shutil
+import setuptools
+print('using setuptools v%s'%setuptools.__version__)
 
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -27,14 +29,18 @@ sys.path.append(ROOTDIR+'/docs')
 import create_templated_rsts
 create_templated_rsts.prepareDocBuild()
 
-import setuptools
-print('using setuptools v%s'%setuptools.__version__)
-from setuptools import setup, find_packages
-
-# Conditional dependencies were added before v37, so need that version when building from source. 
-# (end-users should be using the wheel so won't be affected).
-assert int(setuptools.__version__.split(".", 1)[0]) >= 37, 'Please upgrade setuptools and wheel to latest versions (pip install --upgrade setuptools wheel); current setuptools=%s'%setuptools.__version__
-
+# Copy the docs under the pysys package so we can include them in the wheel
+os.makedirs(ROOTDIR+'/pysys/docs', exist_ok=True)
+for doc in [
+   'LICENSE.txt',
+   'README.rst',
+   'CHANGELOG.rst',
+   'docs/pysys/UserGuide.rst',
+   'docs/pysys/BaseTest.rst',
+   'docs/pysys/ProjectConfiguration.rst',
+   'docs/pysys/TestDescriptors.rst',
+]:
+	shutil.copy(ROOTDIR+'/'+doc, ROOTDIR+'/pysys/docs/'+os.path.basename(doc))
 
 # classifiers come from PyPi's official list https://pypi.org/classifiers/
 PLATFORMS_CLASSIFIERS = [
@@ -72,8 +78,8 @@ with codecs.open(ROOTDIR+'/VERSION', "rb", "ascii") as f:
 	versionFromFile = f.read()
 	assert versionFromFile == pysys.__version__, '"%s" != "%s"'%(versionFromFile, pysys.__version__) # ensure consistent version
 
-
-setup(
+# Ideally we've move the non-dynamic parts of this to pyproject.toml
+setuptools.setup(
 	name='PySys',
 	description='Python System Test Framework',
 	
@@ -106,12 +112,14 @@ setup(
 	],
 
 	scripts = ['scripts/pysys.py'],
-	packages=find_packages()+[
+	packages=setuptools.find_packages('.', include=['pysys.*'])+
+		[
 		'pysys.process.plat-win32', 'pysys.process.plat-unix',
 		'pysys.config.templates',
 		'pysys.config.templates.dirconfig',
 		'pysys.config.templates.project',
+		'pysys.docs',
 		],
-	include_package_data=True,
+	include_package_data=True, # includes the package data files (specified in MANIFEST.in)
 	)
 	

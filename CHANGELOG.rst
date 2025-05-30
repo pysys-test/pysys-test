@@ -22,7 +22,7 @@ New features:
 
 Fixes in 2.3:
 
-- XXX
+- The PySys documentation files are now located in `pysys/docs` rather than as part of the package distribution info directory. 
 
 -----------------
 What's new in 2.2
