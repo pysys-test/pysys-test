@@ -204,6 +204,8 @@ jobs:
            # check the non-sphinx documentation is valid rst
            rstcheck *.rst
 
+           pip freeze
+
            mkdir docs/build_output
            python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
            
