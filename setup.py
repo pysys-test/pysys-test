@@ -107,7 +107,7 @@ setuptools.setup(
 	python_requires=">=3", # be flexible
 
 	install_requires=[
-		'pywin32; platform_system=="Windows"',
+		#'pywin32; platform_system=="Windows"',
 		'colorama; platform_system=="Windows"'
 	],
 
