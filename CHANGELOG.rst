@@ -18,7 +18,8 @@ Version 2.3 is under development.
 
 New features:
 
-- Add support for Python 3.13, including the new free-threaded build where the GIL can be disabled. Remove support for the end-of-life 3.8 Python release. 
+- Add support for Python 3.13. Remove support for the end-of-life 3.8 Python release. 
+- TODO: Do we support the new free-threaded build where the GIL can be disabled? (definitely not on Windows since Pywin32 doesn't https://github.com/mhammond/pywin32/issues/2303)
 
 Fixes in 2.3:
 

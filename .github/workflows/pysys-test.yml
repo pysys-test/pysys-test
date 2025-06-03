@@ -37,10 +37,10 @@ jobs:
       matrix:
         # A selection range of OS, Python and Java versions
         include:
-          # Run with the free-threaded (GIl disable-able) build of the latest version
-          - test-run-id: lnx-py3.13t-doc-deploy
+          # Future: run with the free-threaded (GIL disable-able) build of the latest version
+          - test-run-id: lnx-py3.13-doc-deploy
             os: ubuntu-latest
-            python-version: "3.13t"
+            python-version: "3.13"
             doc-and-deploy: true
           
           - test-run-id: mac-py3.9
@@ -51,9 +51,9 @@ jobs:
             os: windows-latest
             python-version: "3.9"
 
-          - test-run-id: win-py3.13t
+          - test-run-id: win-py3.13
             os: windows-latest
-            python-version: "3.13t"
+            python-version: "3.13"
 
           # --- Additional testing combinations
 
@@ -141,7 +141,7 @@ jobs:
         run: |
           export PYTHONWARNINGS=error
           # For tests running in 3.13+, disable the GIL to check that this works
-          export PYTHON_GIL=0
+          # TODO: use the "t" executable, and export PYTHON_GIL=0
           
           # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
           # from working
@@ -201,10 +201,9 @@ jobs:
            pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3 jinja2==2.11.3 markupsafe==2.0.1
 
            pip install rstcheck
+           pip freeze
            # check the non-sphinx documentation is valid rst
            rstcheck *.rst
-
-           pip freeze
 
            mkdir docs/build_output
            python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W

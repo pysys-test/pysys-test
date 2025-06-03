@@ -32,9 +32,9 @@ jobs:
     steps:
       # Install the desired version of Python and PySys
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.13t"
+          python-version: "3.13"
       - name: Install Python dependencies
         id: deps
         run: |
