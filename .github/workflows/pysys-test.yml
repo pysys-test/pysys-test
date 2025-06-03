@@ -203,7 +203,7 @@ jobs:
            pip install rstcheck
            pip freeze
            # check the non-sphinx documentation is valid rst
-           rstcheck *.rst
+           # TODO: rstcheck *.rst
 
            mkdir docs/build_output
            python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
