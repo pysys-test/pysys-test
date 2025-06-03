@@ -38,11 +38,16 @@ jobs:
         # A selection range of OS, Python and Java versions
         include:
           # Future: run with the free-threaded (GIL disable-able) build of the latest version
-          - test-run-id: lnx-py3.13-doc-deploy
+          - test-run-id: lnx-py3.13
             os: ubuntu-latest
             python-version: "3.13"
+
+          # NB: Although we normally build doc on the latest version, we can't build doc on 3.13+ until we also upgrade Sphinx to 6.2+
+          - test-run-id: lnx-py3.12-doc-deploy
+            os: ubuntu-latest
+            python-version: "3.12"
             doc-and-deploy: true
-          
+
           - test-run-id: mac-py3.9
             os: macos-latest
             python-version: "3.9"
@@ -203,7 +208,7 @@ jobs:
            pip install rstcheck
            pip freeze
            # check the non-sphinx documentation is valid rst
-           # TODO: rstcheck *.rst
+           rstcheck *.rst
 
            mkdir docs/build_output
            python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
