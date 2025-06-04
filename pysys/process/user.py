@@ -27,6 +27,7 @@ import shutil
 import contextlib
 import importlib
 import concurrent.futures
+import tarfile
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -2315,7 +2316,7 @@ class ProcessUser(object):
 		finally:
 			pysys.internal.initlogging.pysysLogHandler.setLogHandlersForCurrentThread(saved)
 	
-	def unpackArchive(self, archive, dest=None, autoCleanup=True):
+	def unpackArchive(self, archive, dest=None, autoCleanup=True, tarFilter='data'):
 		"""
 		Unpacks the specified file(s) from an archive to a directory. Supports archive format such as zip/tar.gz/gz/tar.xz/xz. 
 		
@@ -2347,6 +2348,7 @@ class ProcessUser(object):
 			This dir will be created if needed. 
 		:param bool autoCleanup: Automatically deletes the unpackaged file/directory during test cleanup to save 
 			disk space (even if the test fails). 
+		:param str tarFilter: The `filter` parameter that controls unpacking of tar files. Ignored for zip files and older Python versions that do not support it. Added in PySys 2.3. 
 		
 		:return: The full path to the decompressed file or directory. 
 		
@@ -2375,11 +2377,10 @@ class ProcessUser(object):
 		if autoCleanup: self.addCleanupFunction(lambda: self.deleteDir(dest, ignore_errors=True))
 		# this takes care of multi-file archives such as tar.XXX/zip etc
 		unpackargs = {}
-		if sys.version_info[:2] == (3, 12) and not '.zip' in archive:
-			# avoid deprecation warning in 3.12 by explicitly requesting safe tar unpacking; unfortunately not accepted by .zip
+		if hasattr(tarfile, 'data_filter') and not '.zip' in archive:
+			# avoid deprecation warning in 3.12+ by explicitly requesting safe tar unpacking; unfortunately not accepted by .zip
 			# see https://github.com/python/cpython/issues/102950#issuecomment-1745101949
-			# for 3.13+ we may have to extend this hack, but maybe there will be a better fix by then
-			unpackargs['filter'] = 'data'
+			unpackargs['filter'] = tarFilter
 
 		shutil.unpack_archive(archive, dest, **unpackargs)
 		return dest

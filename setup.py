@@ -16,23 +16,31 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import codecs, os, glob, sys, shutil
+import setuptools
+print('using setuptools v%s'%setuptools.__version__)
 
-import pysys
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
+
+sys.path.append(ROOTDIR)
+import pysys
 
 # Need to create dynamically generated rst files which we'll be including in the package
 sys.path.append(ROOTDIR+'/docs')
 import create_templated_rsts
 create_templated_rsts.prepareDocBuild()
 
-import setuptools
-print('using setuptools v%s'%setuptools.__version__)
-from setuptools import setup, find_packages
-
-# Conditional dependencies were added before v37, so need that version when building from source. 
-# (end-users should be using the wheel so won't be affected).
-assert int(setuptools.__version__.split(".", 1)[0]) >= 37, 'Please upgrade setuptools and wheel to latest versions (pip install --upgrade setuptools wheel); current setuptools=%s'%setuptools.__version__
-
+# Copy the docs under the pysys package so we can include them in the wheel
+os.makedirs(ROOTDIR+'/pysys_docs', exist_ok=True)
+for doc in [
+   'LICENSE.txt',
+   'README.rst',
+   'CHANGELOG.rst',
+   'docs/pysys/UserGuide.rst',
+   'docs/pysys/BaseTest.rst',
+   'docs/pysys/ProjectConfiguration.rst',
+   'docs/pysys/TestDescriptors.rst',
+]:
+	shutil.copy(ROOTDIR+'/'+doc, ROOTDIR+'/pysys_docs/'+os.path.basename(doc))
 
 # classifiers come from PyPi's official list https://pypi.org/classifiers/
 PLATFORMS_CLASSIFIERS = [
@@ -42,16 +50,15 @@ PLATFORMS_CLASSIFIERS = [
 	"Operating System :: MacOS",
 ]
 CLASSIFIERS = [
-	"License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
 	"Development Status :: 5 - Production/Stable",
 	"Intended Audience :: Developers",
 	"Programming Language :: Python",
 	"Programming Language :: Python :: 3",
-	"Programming Language :: Python :: 3.8", 
 	"Programming Language :: Python :: 3.9", 
 	"Programming Language :: Python :: 3.10", 
 	"Programming Language :: Python :: 3.11", 
 	"Programming Language :: Python :: 3.12", 
+	"Programming Language :: Python :: 3.13", 
 	# see also python_requires
 	"Programming Language :: Python :: Implementation :: CPython",
 	"Environment :: Console",
@@ -71,8 +78,8 @@ with codecs.open(ROOTDIR+'/VERSION', "rb", "ascii") as f:
 	versionFromFile = f.read()
 	assert versionFromFile == pysys.__version__, '"%s" != "%s"'%(versionFromFile, pysys.__version__) # ensure consistent version
 
-
-setup(
+# Ideally we've move the non-dynamic parts of this to pyproject.toml
+setuptools.setup(
 	name='PySys',
 	description='Python System Test Framework',
 	
@@ -97,15 +104,22 @@ setup(
 	long_description=long_description,
 	long_description_content_type='text/x-rst',
 
-	python_requires=">=3, <4", # be flexible
+	python_requires=">=3", # be flexible
 
 	install_requires=[
-		"pywin32;sys_platform=='win32'", 
-		"colorama;sys_platform=='win32'"
+		'pywin32; platform_system=="Windows"',
+		'colorama; platform_system=="Windows"'
 	],
 
 	scripts = ['scripts/pysys.py'],
-	packages=find_packages()+['pysys.process.plat-win32', 'pysys.process.plat-unix'],
-	include_package_data=True,
+	packages=setuptools.find_packages()+
+		[
+		'pysys.process.plat-win32', 'pysys.process.plat-unix',
+		'pysys.config.templates',
+		'pysys.config.templates.dirconfig',
+		'pysys.config.templates.project',
+		'pysys_docs',
+		],
+	include_package_data=True, # includes the package data files (specified in MANIFEST.in)
 	)
 	

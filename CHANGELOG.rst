@@ -18,11 +18,12 @@ Version 2.3 is under development.
 
 New features:
 
-- XXX
+- Add support for Python 3.13. Remove support for the end-of-life 3.8 Python release. 
+- TODO: Do we support the new free-threaded build where the GIL can be disabled? (definitely not on Windows since Pywin32 doesn't https://github.com/mhammond/pywin32/issues/2303)
 
 Fixes in 2.3:
 
-- XXX
+- The PySys documentation files are now located in `pysys_docs/` rather than as part of the package `dist-info` directory. 
 
 -----------------
 What's new in 2.2

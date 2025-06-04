@@ -7,13 +7,13 @@ on:
   push:
     branches:
       # Run tests on the main branches only; for running tests on feature branches, use pull requests
-      - "master"
+      - "main"
       - "release"
       - "doc-updates"
     
   pull_request:
     branches:
-      - "master"
+      - "main"
 
   workflow_dispatch: # also allow manually invoking this
 
@@ -24,6 +24,10 @@ on:
     types:
       - created
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     strategy:
@@ -33,53 +37,60 @@ jobs:
       matrix:
         # A selection range of OS, Python and Java versions
         include:
+          # Future: run with the free-threaded (GIL disable-able) build of the latest version
+          - test-run-id: lnx-py3.13
+            os: ubuntu-latest
+            python-version: "3.13"
+
+          # NB: Although we normally build doc on the latest version, we can't build doc on 3.13+ until we also upgrade Sphinx to 6.2+
           - test-run-id: lnx-py3.12-doc-deploy
             os: ubuntu-latest
             python-version: "3.12"
             doc-and-deploy: true
-          
-          - test-run-id: mac-py3.8
+
+          - test-run-id: mac-py3.9
             os: macos-latest
-            python-version: "3.8"
+            python-version: "3.9"
 
-          - test-run-id: win-py3.8
+          - test-run-id: win-py3.9
             os: windows-latest
-            python-version: "3.8"
+            python-version: "3.9"
 
-          - test-run-id: win-py3.12
+          - test-run-id: win-py3.13
             os: windows-latest
-            python-version: "3.12"
+            python-version: "3.13"
 
           # --- Additional testing combinations
 
-          #- test-run-id: mac-py3.8
+          #- test-run-id: mac-py3.9
           #  os: macos-latest
-          #  python-version: "3.8"
-
-          #- test-run-id: lnx-py3.8
-          #  os: ubuntu-latest
-          #  python-version: "3.8"
+          #  python-version: "3.9"
 
           #- test-run-id: lnx-py3.9
           #  os: ubuntu-latest
           #  python-version: "3.9"
+
+          #- test-run-id: lnx-py3.10
+          #  os: ubuntu-latest
+          #  python-version: "3.10"
           
-          #- test-run-id: lnx-py3.9
+          #- test-run-id: lnx-py3.10
           #  os: ubuntu-latest
-          #  python-version: "3.9"
+          #  python-version: "3.10"
 
     runs-on: ${{matrix.os}}
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       # Install Python and dependencies
       - name: Configure Python dependency requirements
         run: |
-          echo setuptools       > setup-python-package-requirements.txt
+          echo build           > setup-python-package-requirements.txt
+          echo setuptools      >> setup-python-package-requirements.txt
           echo wheel           >> setup-python-package-requirements.txt
           echo coverage        >> setup-python-package-requirements.txt
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
           cache: pip
@@ -119,14 +130,14 @@ jobs:
         shell: bash
         run: |
           # build universal wheel and python source distribution
-          python setup.py check --strict
-          python setup.py bdist_wheel
-          python setup.py sdist
+          python -m build
 
       - name: Install PySys
         shell: bash
         run: |
-          python -m pip install --no-cache-dir dist/PySys*.whl
+          ls -l dist
+          # use wildcard since the capitalization PySys in the .whl varies between Python versions
+          python -m pip install --no-cache-dir dist/*.whl
       
       - name: Tests
         shell: bash
@@ -134,6 +145,8 @@ jobs:
         id: pysys
         run: |
           export PYTHONWARNINGS=error
+          # For tests running in 3.13+, disable the GIL to check that this works
+          # TODO: use the "t" executable, and export PYTHON_GIL=0
           
           # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
           # from working
@@ -153,7 +166,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           
       - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
 
         with:
@@ -164,6 +177,7 @@ jobs:
         shell: bash
         working-directory: test
         run: |
+          ls -l ../dist
           # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
           # it's hard to override language on many OSes so just do this on linux
           echo International tests:
@@ -172,8 +186,8 @@ jobs:
           # as a quick sanity-test, also run packaging tests after installing from source
           echo Test packaging from an installed source dist:
           python -m pip uninstall --yes PySys
-          python -m pip install --no-cache-dir "../dist/PySys-$PYSYS_VERSION.tar.gz"
-          pysys.py run --ci --include pysys-packaging --outdir against-src-dist-setuptools
+          python -m pip install --no-cache-dir "../dist/pysys-$PYSYS_VERSION.tar.gz"
+          pysys.py run --ci --include pysys-packaging --outdir against-src-dist
 
           # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
           echo Test packaging from source checkout:
@@ -187,13 +201,12 @@ jobs:
         run: |
            # Generate API docs, and a zip including these and the text files (with Windows line endings)
            
-           # must do this AFTER testing to avoid polluting the installed packages while running the tests
-           # peg to specific versions to avoid our build breaking when there's an upgrade
-           pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3 jinja2==2.11.3 markupsafe==2.0.1
+           # until we reimplement this with a venv or separate job, must do this AFTER testing to avoid polluting the installed packages while running the tests
+           # nb: this requirements file was generated by running "pip freeze" after installing: "sphinx sphinx-epytext sphinx_rtd_theme rstcheck"
+           pip install -r docs/sphinx-requirements.txt
 
-           pip install rstcheck
            # check the non-sphinx documentation is valid rst
-           rstcheck *.rst
+           rstcheck README.rst
 
            mkdir docs/build_output
            python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
@@ -209,7 +222,7 @@ jobs:
            cp CHANGELOG.rst dist/
 
       - name: Upload Python package .whl
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: success() && matrix.doc-and-deploy
         with:
           name: installation_package
@@ -223,7 +236,7 @@ jobs:
           folder: docs/build_output/html/
 
       - name: Upload to GitHub Release
-        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2 # v2.2.1
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         if: success() && matrix.doc-and-deploy && github.event_name == 'release'
         id: upload-release-asset 
         with:

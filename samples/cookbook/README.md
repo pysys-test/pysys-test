@@ -16,7 +16,7 @@ license they may use.
 
 # Running the tests
 
-To use this project all you need is Python 3.8+, and the latest version of PySys. 
+To use this project all you need is Python 3.9+, and the latest version of PySys. 
 
 To run all tests - except the manual (non-auto ones) - with recording of the results (to show the functionality of all 
 the configured writers) and code coverage:
