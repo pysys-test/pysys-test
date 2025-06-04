@@ -82,6 +82,9 @@ autodoc_default_options = {
 
 #nitpicky = True # so we get warnings about broken links
 
+# Since we already add headings for autodoc entries, stop Sphinx from creating duplicate ones underneath
+toc_object_entries = False
+
 autosummary_generate = True
 autosummary_generate_overwrite = False
 
