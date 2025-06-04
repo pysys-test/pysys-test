@@ -114,8 +114,18 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 		
 	return None
 
+def autodoc_process_docstring(app, what, name, obj, options, lines):
+	# Sphinx v2 used to require us to use "~." syntax for class instance vars; this looks wrong in the more recent sphinx versions 
+	# so until we know all downstream users of PySys have upgraded Sphinx, keep the docstrings the same and dynamically pre-process them
+	# To check this, see any class with instance variables e.g. Process
+	for i, l in enumerate(lines):
+		if ':ivar ' in l and ' ~.' in l:
+			lines[i] = l.replace(' ~.', ' ')
+
 def setup(app):
 	app.connect("autodoc-skip-member", autodoc_skip_member)
+
+	app.connect("autodoc-process-docstring", autodoc_process_docstring)
 
 	def supportGitHubPages(app, exception):
 		outputdir = os.path.abspath('docs/build_output/html')
