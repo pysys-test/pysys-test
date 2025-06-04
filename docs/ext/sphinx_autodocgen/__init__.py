@@ -3,9 +3,9 @@ Sphinx extension that automatically and recursively generates .rst files contain
 directives for a hierarchy of Python modules. 
 """
 
-__copyright__ = "Copyright (C) 2019-2020 Ben Spiller"
+__copyright__ = "Copyright (C) 2019-present Ben Spiller"
 __author__ = "Ben Spiller"
-__license__ = "Apache 2.0"
+__license__ = "MIT"
 __version__ = "1.1.dev"
 
 __all__ = ['AutoDocGen', 'setup']
@@ -18,12 +18,15 @@ import inspect
 import importlib
 import pkgutil
 import re
+import traceback
 
 from sphinx.util import logging
 from sphinx.util import rst
 
 import sphinx.ext.autosummary
-from sphinx.pycode import ModuleAnalyzer, PycodeError
+import sphinx.ext.autodoc
+import sphinx.environment
+from sphinx.pycode import ModuleAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +227,7 @@ class AutoDocGen:
 				".. autosummary::", 
 				"  :toctree: ./", 
 				""]+[
-				f'  {name}' for (name,_, _) in members])
+				f'  {name.replace(module.__name__+".", "")}' for (name,_, _) in members])
 
 		return '\n'.join(self.get_module_member_rst(memberType, mname, m, docstring) for (mname,m, docstring) in members)
 
@@ -302,85 +305,94 @@ class AutoDocGen:
 		# .... which we can avoid reimplementing by just using the existing code. 
 		# This was implemented against Sphinx 2.2.0
 
-		# unfortunately the FakeDirective from autosummary is a bit too fake to actually work, so make it slightly less so
-		class FakeBuildEnvironment(object): 
-			def __init__(self, app): self.app, self.config = app, app.config	
-		directive = sphinx.ext.autosummary.FakeDirective()
-		directive.env = FakeBuildEnvironment(self.app)
-		
-		documenterclass = sphinx.ext.autosummary.get_documenter(app=self.app, obj=module, parent=None)
-		documenter = documenterclass(directive, modulename)
-		
-		if not documenter.parse_name() or not documenter.import_object():
-			assert False, 'documenter failed to import module %s'%module
-		
-		# must call this before filter_members will work correctly
-		documenter.analyzer = ModuleAnalyzer.for_module(modulename)
-		attr_docs = documenter.analyzer.find_attr_docs()
-
-		# find out which members are documentable; use __dict__.items() to retain the ordering info, but delegate to 
-		# autodoc get_object_members for its __all__ handling logic
-		permittedmembers = set(memberinfo[0] for memberinfo in documenter.get_object_members(want_all=True)[1])
-		members = [(mname,m) for mname, m in mod.__dict__.items() if mname in permittedmembers]
-		
-		# TODO: ordering c.f. autodoc_member_order
-		for (mname, m, isattr) in documenter.filter_members(members, want_all=True):
-			logger.debug('   visiting member: %s'%mname)
-			if not isattr and not self.app.config['autodoc_default_options'].get('imported-members',False) and getattr(m, '__module__', modulename) != modulename: 
-				# need to immediately rule out the majority of items which aren't really defined in this module; 
-				# data attributes don't have module set on them so don't do the check for those else we'd miss stuff that 
-				# should be included
-				continue
+		try:
+			# unfortunately the FakeDirective from autosummary is a bit too fake to actually work, so make it slightly less so
+			directive = sphinx.ext.autosummary.FakeDirective()
+			if not hasattr(self.app, 'project'): self.app.project = None
+			directive.env = sphinx.environment.BuildEnvironment(self.app)
 			
-			if isattr:
-				mtype = 'data'
-			elif inspect.isclass(m):
-				if isinstance(m, BaseException):
-					mtype = 'exception'
-				else:
-					mtype = 'class'
-			elif inspect.ismodule(m):
-				continue # submodules are handled above, so anything here will be an imported module that we don't want
-			elif inspect.isfunction(m):
-				mtype = 'function'
-			else:
-				logger.debug(f'Ignoring unknown member type: {mname} {repr(m)}')
-				continue
+			documenterclass = sphinx.ext.autosummary.get_documenter(app=self.app, obj=module, parent=None)
+			documenter = documenterclass(directive, modulename)
+			
+			if not documenter.parse_name() or not documenter.import_object():
+				assert False, 'documenter failed to import module %s'%module
+			
+			# must call this before filter_members will work correctly
+			documenter.analyzer = ModuleAnalyzer.for_module(modulename)
+			attr_docs = documenter.analyzer.find_attr_docs()
 
-			if ('', mname) in attr_docs:
-				docstring = '\n'.join(attr_docs[('', mname)])
-			else:
-				docstring = getattr(m, '__doc__', None)
-			if skip_on_docstring_regex:
-				if docstring and re.search(skip_on_docstring_regex, docstring):
-					logger.info(f'{self} Skipping {modulename}.{mname} due to its docstring matching the skip_on_docstring_regex')
+			# find out which members are documentable; use __dict__.items() to retain the ordering info, but delegate to 
+			# autodoc get_object_members for its __all__ handling logic
+			objectMembers = documenter.get_object_members(want_all=True)[1] # list[ObjectMember]
+
+			permittedmembers = set(
+				memberinfo.__name__ if hasattr(memberinfo, '__name__') else memberinfo[0] # fallback to tuple for ancient sphinx versions
+				for memberinfo in objectMembers)
+
+			createObjectMember = sphinx.ext.autodoc.ObjectMember if hasattr(sphinx.ext.autodoc, 'ObjectMember') else ( lambda mname, m: tuple([mname, m]) ) # tuple for old Sphinx versions
+			members = [createObjectMember(mname,m) for mname, m in mod.__dict__.items() if mname in permittedmembers]
+		
+			# TODO: ordering c.f. autodoc_member_order
+			for (mname, m, isattr) in documenter.filter_members(members, want_all=True):
+				logger.debug('   visiting member: %s'%mname)
+				if not isattr and not self.app.config['autodoc_default_options'].get('imported-members',False) and getattr(m, '__module__', modulename) != modulename: 
+					# need to immediately rule out the majority of items which aren't really defined in this module; 
+					# data attributes don't have module set on them so don't do the check for those else we'd miss stuff that 
+					# should be included
+					continue
+				
+				if isattr:
+					mtype = 'data'
+				elif inspect.isclass(m):
+					if isinstance(m, BaseException):
+						mtype = 'exception'
+					else:
+						mtype = 'class'
+				elif inspect.ismodule(m):
+					continue # submodules are handled above, so anything here will be an imported module that we don't want
+				elif inspect.isfunction(m):
+					mtype = 'function'
+				else:
+					logger.debug(f'Ignoring unknown member type: {mname} {repr(m)}')
 					continue
 
-			membersByType[mtype].append((modulename+'.'+mname, m, docstring))
+				if ('', mname) in attr_docs:
+					docstring = '\n'.join(attr_docs[('', mname)])
+				else:
+					docstring = getattr(m, '__doc__', None)
+				if skip_on_docstring_regex:
+					if docstring and re.search(skip_on_docstring_regex, docstring):
+						logger.info(f'{self} Skipping {modulename}.{mname} due to its docstring matching the skip_on_docstring_regex')
+						continue
 
-		logger.debug('%s Visiting module %s with members: %s', self, modulename, membersByType)
+				membersByType[mtype].append((modulename+'.'+mname, m, docstring))
 
-		rst = self.generate_module_rst(mod, membersByType)
-		if not rst: 
-			logger.info(f'{self} No .rst generated for {modulename}')
-			return
+			logger.debug('%s Visiting module %s with members: %s', self, modulename, membersByType)
 
-		rstfile = self.config['generated_source_dir']+f'/{mod.__name__}.rst'
-		self.rst_files_generated.add(os.path.basename(rstfile))
-		
-		if os.path.exists(rstfile):
-			with open(rstfile, 'r', encoding='utf-8') as f:
-				if f.read() == rst:
-					return True # nothing to do
+			rst = self.generate_module_rst(mod, membersByType)
+			if not rst: 
+				logger.info(f'{self} No .rst generated for {modulename}')
+				return
 
-			if not self.config['overwrite_generated_source_rsts']:
-				logger.info(f'{self}    Skipping overwrite of {mod.__name__}.rst due to overwrite_generated_source_rsts=True')
-				return True
+			rstfile = self.config['generated_source_dir']+f'/{mod.__name__}.rst'
+			self.rst_files_generated.add(os.path.basename(rstfile))
+			
+			if os.path.exists(rstfile):
+				with open(rstfile, 'r', encoding='utf-8') as f:
+					if f.read() == rst:
+						return True # nothing to do
 
-		with open(rstfile, 'w', encoding='utf-8') as f:
-			f.write(rst)
-		
-		return True # indicates this module isn't skipped
+				if not self.config['overwrite_generated_source_rsts']:
+					logger.info(f'{self}    Skipping overwrite of {mod.__name__}.rst due to overwrite_generated_source_rsts=True')
+					return True
+
+			with open(rstfile, 'w', encoding='utf-8') as f:
+				f.write(rst)
+			
+			return True # indicates this module isn't skipped
+		except Exception as e: # since sphinx doesn't print the stack trace, print it ourselves so we can see where it really went wrong
+			logger.error(f'Error analyzing module {modulename}: {traceback.format_exc()}')
+			raise
 
 def setup(app):
 	AutoDocGen(app).connect()

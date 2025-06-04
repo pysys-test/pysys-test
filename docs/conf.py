@@ -141,7 +141,6 @@ exclude_patterns = ['pysys_docs'] # just use for the build process
 html_theme = 'sphinx_rtd_theme' # read-the-docs theme looks better than the default "classic" one but has bugs e.g. no table wrapping
 
 html_theme_options = {
-	'display_version': True,
 	#'prev_next_buttons_location': 'bottom',
 	#'style_external_links': False,
 	#'vcs_pageview_mode': '',
@@ -154,13 +153,12 @@ html_theme_options = {
 	#'titles_only': False
 }
 
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_context = {'css_files': [
+html_css_files = [
 	# Workaround for RTD 0.4.3 bug https://github.com/readthedocs/sphinx_rtd_theme/issues/117
-	'_static/theme_overrides.css',  # override wide tables in RTD theme
-]}
+	'theme_overrides.css',  # override wide tables in RTD theme
+]
