@@ -9,7 +9,21 @@ updates:
     directory: "/docs"
     schedule:
       interval: "monthly"
-      
+
+    groups:
+      pypi-updates:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "github-actions" 
     schedule:
       interval: "monthly"
+
+    groups:
+      gh-action-updates:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
