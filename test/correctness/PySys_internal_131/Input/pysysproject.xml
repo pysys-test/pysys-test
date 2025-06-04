@@ -2,7 +2,7 @@
 <pysysproject>
 	<writers>
 		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci">
-			<property name="maxAnnotations" value="4"/>
+			<property name="maxAnnotations" value="5"/>
 			<property name="failureTestLogAnnotations" value="true"/>
 		</writer>
 
