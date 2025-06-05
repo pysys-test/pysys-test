@@ -229,7 +229,7 @@ jobs:
           path: dist/*.whl
 
       - name: Upload HTML to gh-pages
-        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9 # v4.1.1
+        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
         if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
         with:
           branch: gh-pages
