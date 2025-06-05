@@ -68,6 +68,7 @@ class AutoDocGen:
 		This option can only be used if you take steps to explicitly clean stale files from previous builds, or use a pristine directory 
 		each time.
 		"""
+		# TODO: if we saved a list of generated rst from last time, we could clean them up then set this to False by default to get faster incremental builds
 
 		skip_module_regex: str='.+[.]_.*'
 		""" If a module matches this then it and any of its submodules will be skipped. 
