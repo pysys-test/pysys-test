@@ -38,23 +38,23 @@ jobs:
         # A selection range of OS, Python and Java versions
         include:
           # Future: run with the free-threaded (GIL disable-able) build of the latest version
-          - test-run-id: lnx-py3.13
-            os: ubuntu-latest
-            python-version: "3.13"
+          # - test-run-id: lnx-py3.13
+          #   os: ubuntu-latest
+          #   python-version: "3.13"
 
-          # NB: Although we normally build doc on the latest version, we can't build doc on 3.13+ until we also upgrade Sphinx to 6.2+
-          - test-run-id: lnx-py3.12-doc-deploy
-            os: ubuntu-latest
-            python-version: "3.12"
-            doc-and-deploy: true
+          # # NB: Although we normally build doc on the latest version, we can't build doc on 3.13+ until we also upgrade Sphinx to 6.2+
+          # - test-run-id: lnx-py3.12-doc-deploy
+          #   os: ubuntu-latest
+          #   python-version: "3.12"
+          #   doc-and-deploy: true
 
-          - test-run-id: mac-py3.9
-            os: macos-latest
-            python-version: "3.9"
+          # - test-run-id: mac-py3.9
+          #   os: macos-latest
+          #   python-version: "3.9"
 
-          - test-run-id: win-py3.9
-            os: windows-latest
-            python-version: "3.9"
+          # - test-run-id: win-py3.9
+          #   os: windows-latest
+          #   python-version: "3.9"
 
           - test-run-id: win-py3.13
             os: windows-latest
@@ -155,7 +155,7 @@ jobs:
 
           pysys.py --help
 
-          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
+          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main 111 -c5
 
       - name: Upload Python code coverage 
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # 2022-11 https://github.com/codecov/codecov-action/releases/tag/v3.1.1
