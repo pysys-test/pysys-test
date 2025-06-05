@@ -20,7 +20,9 @@ if __name__ == "__main__":
 	# the sys.path starts with the directory containing pysys.py which can lead to Python 
 	# mistaking this file for the pysys package; regardless, it's not needed for locating 
 	# the pysys modules since those will be in site-packages once pysys is installed
-	import os, sys
+	import os, sys, time
+	sys.stderr.write(f'Time = {time.time()} at entrypoint\n')
+
 	script_path = os.path.normcase(os.path.abspath(sys.path[0]))
 	sys.path = [p for p in sys.path if os.path.normcase(os.path.abspath(p)) != script_path]
 

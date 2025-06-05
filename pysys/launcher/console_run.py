@@ -462,3 +462,5 @@ def runTest(args):
 		sys.exit({
 			'The supplied options did not result in the selection of any tests':9, # special error code for specific things users might treat differently
 			}.get(str(e), 10)) # by default return 10
+	finally:
+		sys.stderr.write(f'Time = {time.time()} exiting\n')
