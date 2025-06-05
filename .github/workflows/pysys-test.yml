@@ -159,7 +159,7 @@ jobs:
 
           pysys.py --help
 
-          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main --printLogs ALL 092 020 -c10 -vDEBUG
+          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main --printLogs ALL 092 -c10 -vDEBUG
 
       - name: Upload archive artifacts for any test failures
         uses: actions/upload-artifact@v4

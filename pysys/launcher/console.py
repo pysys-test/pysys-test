@@ -18,7 +18,8 @@
 :meta private: Should be no reason for this module to be used outside of the PySys framework itself. 
 """
 
-import os.path, stat, getopt, logging, traceback, sys
+import os.path, stat, getopt, logging, traceback, sys, time
+sys.stderr.write(f'Time = {time.time()} console.py\n')
 
 import pysys
 from pysys import __version__
@@ -30,6 +31,7 @@ from pysys.launcher.console_makeproject import makeProject
 from pysys.launcher.console_make import *
 from pysys.launcher.console_run import ConsoleLaunchHelper, runTest
 
+sys.stderr.write(f'Time = {time.time()} after imports\n')
 
 def printUsage(returncode=0):
 	_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
@@ -53,9 +55,13 @@ def main(args):
 	if len(args) < 1 or args[0] in ['--help', '-h', '--version']: 
 		printUsage()
 	else:
+		import time
+		sys.stderr.write(f'Time = {time.time()}\n')
 		import faulthandler
 		faulthandler.enable() # writes threads to stderr on fatal errors, and on linux also for signals such as SIGABRT
-	
+
+		sys.stderr.write(f'Time = {time.time()} after faulthandler.enable()\n')
+
 		mode = args[0]
 		if mode == "run":
 			runTest(args[1:])

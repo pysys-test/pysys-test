@@ -136,7 +136,7 @@ Advanced:
    --preserveEmptyOutputs      prevents the usual deletion of empty files and directories after a test completes
    --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 
                                console; options are: all|none|failures (default is all).
-   -s, --sort      STRING      sort by: random (useful for performance testing and and reproducing test races)
+   -s, --sort      STRING      sort by: random (useful for performance testing and reproducing test races)
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
    -XcodeCoverage              enable collecting and reporting on code coverage with all coverage writers in the project
@@ -434,7 +434,7 @@ def decideWorkerThreads(threads: str):
 	
 	return threads
 
-
+import time
 def runTest(args):
 	try:
 		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
@@ -442,11 +442,13 @@ def runTest(args):
 		
 		cls = Project.getInstance().runnerClassname.split('.')
 		module = importlib.import_module('.'.join(cls[:-1]))
+		sys.stderr.write(f'Time = {time.time()} after importing module\n')
 		
 		# calculate the threads at this point AFTER runner has been imported (allowing monkey-patching in custom runner if needed)
 		args = list(args)
 		args[4] = decideWorkerThreads(args[4])
-		
+		sys.stderr.write(f'Time = {time.time()} after decideWorkerThreads()\n')
+
 		runner = getattr(module, cls[-1])(*args)
 		runner.start()
 	

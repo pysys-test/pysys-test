@@ -11,8 +11,10 @@ class PySysTest(BaseTest):
 			environs=env, state=state, **kwargs)
 
 	def execute(self):
-		self.startPython(['-m', 'pysys', 'print', '-h'], 
+		self.startPython(['-m', 'pysys', 'run', '-h', 'vDEBUG'], 
 			stdout='pysys-print.out', stderr='pysys-print.err')
+		self.logFileContents('pysys-print.out', maxLines=0)
+		self.logFileContents('pysys-print.err', maxLines=0)
 			
 	def validate(self):
 		self.assertGrep('pysys-print.out', expr='Usage: pysys.py print')
