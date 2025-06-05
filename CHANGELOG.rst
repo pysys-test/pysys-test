@@ -25,6 +25,15 @@ Fixes in 2.3:
 
 - The PySys documentation files are now located in `pysys_docs/` rather than as part of the package `dist-info` directory. 
 
+Minor behaviour changes
+-----------------------
+
+- The `pysys.constants.HOSTNAME` constant now provides the unqualified hostname from ``socket.gethostname()``, 
+  rather than the fully qualified hostname from ``socket.getfqdn()``, which can take several seconds to resolve 
+  on some systems (thus making PySys slow to start). 
+  If you do need the qualified hostname, call ``socket.getfqdn()`` directly, perhaps using a custom runner 
+  to avoid recalculating it for each test. 
+
 -----------------
 What's new in 2.2
 -----------------
@@ -77,8 +86,7 @@ Some new features you might want to try out include:
 - Use the environment variable ``PYSYS_PROJECT_APPEND`` to run PySys with any user-specific settings you like (e.g. custom writers) 
   without modifying the main project file.
 
-Command line usability
-----------------------
+Command line usability:
 
 This release adds several enhancements aimed at making it easier to use the ``pysys`` command line:
 
@@ -144,8 +152,7 @@ This release adds several enhancements aimed at making it easier to use the ``py
   the specified file appended to it. This allows user-specific settings such as custom writers to be added dynamically without 
   modifying the main project file. The XML file to append must have ``<pysysproject>`` as its root XML node. 
 
-IDE/editor support
-------------------
+IDE/editor support:
 
 Several changes make it easier to write and execute PySys tests from Python-enabled IDEs/editors:
 
@@ -196,8 +203,7 @@ Several changes make it easier to write and execute PySys tests from Python-enab
   an IDE. Currently only Visual Studio Code is supported automatically, though you can add support for the environment variables of other 
   IDEs using a project property like ``<property name="pysysLogAbsolutePaths" value="${eval: os.getenv('TERM_PROGRAM','')=='vscode' }"/>``.
 
-Ctrl+C/SIGTERM handling
------------------------
+Ctrl+C/SIGTERM handling:
 
 - Reimplemented the handling of signals such as Ctrl+C, SIGINT and SIGTERM to provide increased robustness and ensure child processes 
   are terminated and custom cleanup logic executed wherever possible. All these signals are now handled the same way, by setting 
@@ -223,8 +229,7 @@ Ctrl+C/SIGTERM handling
   If a second Ctrl+C or signal is sent more than 6 seconds after the original abort request, the PySys process will immediately 
   perform a hard/unclean exit, without further attempts to cleanup or to print information about test failures.
 
-Helper functions to use in your tests
--------------------------------------
+Helper functions to use in your tests:
 
 - Added `BaseTest.assertGrepOfGrep()` to simplify the common case of extracting a value using a grep 
   expression and then checks that value using another regular expression. This is a small wrapper method around 
@@ -270,8 +275,7 @@ Minor improvements:
 
 - Added ``message=`` for customizing the introductory log message in `BaseTest.logFileContents`. 
 
-Performance improvements
-------------------------
+Performance improvements:
 
 - Improved performance of waiting for processes (on Windows by blocking with ``WaitForSingleObject`` instead of sleep polling, 
   and on Linux if kernel version is >=5.3 and Python>=3.9 using ``pidfd_open``).
@@ -287,8 +291,7 @@ Performance improvements
   The default number of threads can also be further lowered for specific machines or users by setting the ``PYSYS_DEFAULT_THREADS`` 
   environment variable. 
 
-Project and test configuration
-------------------------------
+Improvements to project and test configuration:
 
 - Enhanced how user-provided ``userData`` in test descriptors is processed, to include automatic substitution of ``${...}`` project properties, 
   and to support specifying user data keys independently using ``_`` or ``.`` syntax as an alternative to providing an entire dictionary, 
@@ -310,8 +313,7 @@ Project and test configuration
 - Improved test descriptor loading for shared Python test classes so that it is no longer necessary to set ``__pysys_python_module__ = "PYTHONPATH"`` when 
   setting a ``__pysys_python_class__`` that contains at least one dot character, for example ``mypackage.MyTestClass``.
 
-Writers
--------
+Improvements to writers:
 
 - Added support for ``.tar.gz`` and ``.tar.xz`` to  `pysys.writer.testoutput.TestOutputArchiveWriter` which are both smaller 
   in many cases than ``.zip`` files. See the new ``format`` option to control this. 
@@ -341,8 +343,7 @@ Writers
   all worker threads. If you suspect a test failure could be related to other tests executing at the same time, logging 
   this list could be helpful for debugging the problem. 
 
-Fixes
------
+Fixes:
 
 - Fixed the GitHub Actions support to stop using the recently deprecated ``::set-output`` mechanism for publishing 
   output artifacts and instead use the ``GITHUB_OUTPUT`` variable. 
@@ -353,8 +354,7 @@ Fixes
 - Added ``time=`` attribute to JUnit XML output in the ``<testcase>`` node (in addition to the ``<testsuite>`` node where 
   it already existed), which is required by some tools. 
 
-Minor behaviour changes
------------------------
+Minor behaviour changes:
 
 There should be no breaking changes in this release, however the following behaviour changes might be observed by some users:
 

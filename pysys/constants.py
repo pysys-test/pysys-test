@@ -32,8 +32,12 @@ from pysys import stdoutHandler
 # do not add extra pysys import here - must keep minimal to avoid possible circular dependencies
 
 # set the platform and platform related constants
-HOSTNAME = socket.getfqdn()
-""" The fully qualified name of this host. """
+HOSTNAME = socket.gethostname()
+""" The (unqualified) name of this host.
+
+.. versionchanged:: 2.3
+	It is now set to the unqualified name returned by ``socket.gethostname()`` rather than the qualified hostname from ``socket.getfqdn()``. 
+ """
 
 if re.search('win32', sys.platform):
 	PLATFORM='win32'
