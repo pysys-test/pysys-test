@@ -18,7 +18,7 @@
 import os
 import sys, time
 sys.stderr.write(f'Time = {time.time()} main.py\n')
-sys.stderr.write(' = '+time.strftime("%a %Y-%m-%d %H:%M:%S %Z", time.localtime( time.time() ))) # local time in friendly format
+sys.stderr.write(' = '+time.strftime("%a %Y-%m-%d %H:%M:%S %Z", time.localtime( time.time() ))+"\n") # local time in friendly format
  
 
 if sys.version_info[0] < 3:
@@ -26,14 +26,18 @@ if sys.version_info[0] < 3:
 	sys.exit(100)
 
 import pysys
+sys.stderr.write(f'Time = {time.time()} imported pysys\n')
 import logging
+sys.stderr.write(f'Time = {time.time()} imported logging\n')
 
 def main(args=None):
 	"""The entry-point for invoking PySys."""
 	
 	if args is None: args = sys.argv[1:]
+	sys.stderr.write(f'Time = {time.time()} about to import console\n')
 
 	import pysys.launcher.console
+	sys.stderr.write(f'Time = {time.time()} imported console\n')
 	return pysys.launcher.console.main(args)
 if __name__ == "__main__": 
 	main()

@@ -31,7 +31,7 @@ from pysys.launcher.console_makeproject import makeProject
 from pysys.launcher.console_make import *
 from pysys.launcher.console_run import ConsoleLaunchHelper, runTest
 
-sys.stderr.write(f'Time = {time.time()} after imports\n')
+sys.stderr.write(f'Time = {time.time()} after console.py imports\n')
 
 def printUsage(returncode=0):
 	_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'

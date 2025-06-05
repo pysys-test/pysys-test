@@ -76,9 +76,13 @@ __all__  = [
 	"config",
 ]
 """The public submodules of PySys."""
+import time, sys
+sys.stderr.write(f'Time = {time.time()} about to import initlogging\n')
 
 # initialize the Python logging system for PySys
 from pysys.internal.initlogging import rootLogger, stdoutHandler, log
+sys.stderr.write(f'Time = {time.time()} imported initlogging\n')
+
 from pysys.internal.initlogging import ThreadFilter # for compatibility
 
 import threading
