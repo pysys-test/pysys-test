@@ -25,6 +25,14 @@ Fixes in 2.3:
 
 - The PySys documentation files are now located in `pysys_docs/` rather than as part of the package `dist-info` directory. 
 
+Minor behaviour changes
+-----------------------
+
+- The `pysys.constants.HOSTNAME` constant now provides the unqualified hostname from ``socket.gethostname()``, 
+  rather than the fully qualified hostname from ``socket.getfqdn()``, which can take several seconds to resolve 
+  on some systems. If you need the qualified hostname, call ``getfqdn`` directly, perhaps using a custom runner 
+  to avoid recalculating it for each test. 
+
 -----------------
 What's new in 2.2
 -----------------
