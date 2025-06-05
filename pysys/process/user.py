@@ -1967,7 +1967,7 @@ class ProcessUser(object):
 		raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
-	def logFileContents(self, path, includes=None, excludes=None, maxLines=50, tail=False, encoding=None, 
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, 
 			logFunction=None, reFlags=0, stripWhitespace=True, mappers=[], color=True, message=None):
 		""" Logs some or all of the lines from the specified file.
 		
