@@ -25,14 +25,19 @@ be referenced directly.
 """
 # undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, PROJECT
 
-import sys, re, os, os.path, socket, traceback, locale
+import sys, re, os, os.path, socket, traceback, locale, time
 from enum import Enum
+
+sys.stderr.write(f'Time = {time.time()} about to import stdouthandler\n')
 
 from pysys import stdoutHandler
 # do not add extra pysys import here - must keep minimal to avoid possible circular dependencies
 
 # set the platform and platform related constants
+sys.stderr.write(f'Time = {time.time()} about to get fqdn\n')
 HOSTNAME = socket.getfqdn()
+sys.stderr.write(f'Time = {time.time()} got fqdn\n')
+
 """ The fully qualified name of this host. """
 
 if re.search('win32', sys.platform):
@@ -97,6 +102,8 @@ else:  # pragma: no cover
 	DYLD_LIBRARY_PATH = ''
 	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
+
+sys.stderr.write(f'Time = {time.time()} about to get encoding\n')
 
 PREFERRED_ENCODING = locale.getpreferredencoding()
 """
