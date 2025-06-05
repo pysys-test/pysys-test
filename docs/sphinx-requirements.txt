@@ -4,7 +4,7 @@ babel==2.17.0
 certifi==2025.4.26
 charset-normalizer==3.4.2
 click==8.2.1
-docutils==0.16
+docutils==0.21.2
 idna==3.10
 imagesize==1.4.1
 Jinja2==2.11.3
@@ -13,7 +13,7 @@ MarkupSafe==2.0.1
 mdurl==0.1.2
 packaging==25.0
 pydantic==2.11.5
-pydantic_core==2.33.2
+pydantic_core==2.34.1
 Pygments==2.19.1
 requests==2.32.3
 rich==14.0.0
@@ -27,7 +27,7 @@ sphinx-epytext==0.0.4
 sphinx-rtd-theme==0.4.3
 sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2
-sphinxcontrib-htmlhelp==2.0.1
+sphinxcontrib-htmlhelp==2.1.0
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
