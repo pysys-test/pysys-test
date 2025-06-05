@@ -26,7 +26,9 @@ import time, sys
 sys.stderr.write(f'Time = {time.time()} launcher.py\n')
 
 from pysys.constants import *
+sys.stderr.write(f'Time = {time.time()} launcher.py imported constants\n')
 from pysys.exceptions import UserError
+sys.stderr.write(f'Time = {time.time()} launcher.py imported exceptions\n')
 from pysys.config.project import Project
 sys.stderr.write(f'Time = {time.time()} launcher.py imported done\n')
 
