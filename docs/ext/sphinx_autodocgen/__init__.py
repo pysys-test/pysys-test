@@ -42,6 +42,7 @@ autosummary_member_types = ['module'] # type for which we'll generate an autosum
 
 
 class AutoDocGen:
+	# NB: To avoid warnings with modern Sphinx versions, all items in the config should be pickable (i.e. no modules, callables etc)
 	class Config: 
 		"""Configuration options for this extension. 
 		
