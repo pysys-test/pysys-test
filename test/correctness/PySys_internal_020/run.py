@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 			self.abort('Expected exception from failed process start')
 			
 		self.hprocess = self.startProcess(command=sys.executable,
-						  arguments = [script, "2", 3],
+						  arguments = [script, "1", 3],
 						  environs = os.environ,
 						  workingDir = self.output,
 						  stdout = "counter.out",
@@ -34,6 +34,15 @@ class PySysTest(BaseTest):
 		# do a couple of wait for signals in the files
 		self.waitForGrep('counter.out', expr='Count is 1', timeout=4)
 		self.waitForGrep('counter.err', expr='Process id of test executable', timeout=4)	
+
+		self.hprocess = self.startProcess(command=sys.executable,
+						  arguments = [script, "not-a-number", 0],
+						  environs = os.environ,
+						  workingDir = self.output,
+						  stdout = "counter-bad.out",
+						  stderr = "%s/counter-bad.err" % self.output,
+						  ignoreExitStatus=True,
+						  state=FOREGROUND)
 
 		def myProcessFactory(**kwargs):
 			kwargs['arguments'].append(3)

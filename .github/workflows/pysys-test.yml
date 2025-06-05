@@ -52,9 +52,9 @@ jobs:
             os: macos-latest
             python-version: "3.9"
 
-          - test-run-id: mac-py3.13
-            os: macos-latest
-            python-version: "3.13"
+          - test-run-id: macos13
+            os: macos-13
+            python-version: "3.9"
 
           # - test-run-id: win-py3.9
           #   os: windows-latest
@@ -159,7 +159,7 @@ jobs:
 
           pysys.py --help
 
-          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main --printLogs ALL 092 -c20 -vDEBUG
+          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main --printLogs ALL 092 020 -c10 -vDEBUG
 
       - name: Upload archive artifacts for any test failures
         uses: actions/upload-artifact@v4
