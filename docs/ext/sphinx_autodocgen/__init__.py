@@ -86,9 +86,11 @@ class AutoDocGen:
 		"""
 		# uses same syntax as the official autodoc feature; it might therefore not be necessary anymore
 
-		module_title_decider = lambda modulename: modulename
+		module_title_decider: dict[str,str] = {}
 		"""
-		A callback function that allows the overall heading for each module's to be customized if needed. 
+		A dictionary that allows overriding the title displayed in the table of contents for specified module names. 
+
+		For backwards compatibility this can also be a function (modulename->title) but that is deprecated since it produces warnings with latest sphinx. 
 		"""
 
 		autodoc_options_decider = lambda app, what, fullname, obj, docstring, defaultOptions, extra: defaultOptions
@@ -254,7 +256,12 @@ class AutoDocGen:
 
 		self.documented_items.add(f'{module_fullname} (module)')
 
-		title = self.config['module_title_decider'](module_fullname)
+		if callable(self.config['module_title_decider']):
+			# deprecated, but still supported for backwards compatibility
+			title = self.config['module_title_decider'](module_fullname)
+		else:
+			# modern way to specify title overrides
+			title = self.config['module_title_decider'].get(module_fullname, module_fullname)
 
 		output = """
 {module_title}
