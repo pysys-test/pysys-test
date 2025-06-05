@@ -16,7 +16,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
-import sys
+import sys, time
+sys.stderr.write(f'Time = {time.time()} main.py\n')
+sys.stderr.write(' = '+time.strftime("%a %Y-%m-%d %H:%M:%S %Z", time.localtime( time.time() ))) # local time in friendly format
+ 
 
 if sys.version_info[0] < 3:
 	sys.stderr.write('This version of PySys requires Python 3; if you need Python 2 support, you must use an older version of PySys such as v1.6.1\n')
