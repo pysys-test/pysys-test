@@ -9,7 +9,7 @@ idna==3.10
 imagesize==1.4.1
 Jinja2==2.11.3
 markdown-it-py==3.0.0
-MarkupSafe==2.0.1
+MarkupSafe==3.0.2
 mdurl==0.1.2
 packaging==25.0
 pydantic==2.11.5
