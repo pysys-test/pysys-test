@@ -45,13 +45,14 @@ class AutoDocGen:
 	class Config: 
 		"""Configuration options for this extension. 
 		
-		These must be added to a dictionary ``autodocgen_config = {...}`` in your ``conf.py`` file. 
+		These must be added to a dictionary ``autodocgen_config = [{...}]`` in your ``conf.py`` file. 
 		"""
 		
-		modules: List[object] = []
+		modules: List[str] = []
 		"""The list of modules for which autodoc is to be recursively generated. 
 		
-		These are imported module objects (not strings), so you will need to add an import statement in your 
+		It is recommended to use strings, but for backwards compatibility you want to pass the module objects directly 
+		(deprecated, and will give warnings with modern Sphinx versions), you will need to add an import statement in your 
 		``conf.py`` before you can reference them here.
 		"""
 		
@@ -93,16 +94,18 @@ class AutoDocGen:
 		For backwards compatibility this can also be a function (modulename->title) but that is deprecated since it produces warnings with latest sphinx. 
 		"""
 
-		autodoc_options_decider = lambda app, what, fullname, obj, docstring, defaultOptions, extra: defaultOptions
+		autodoc_options_decider: dict[str,dict[str,str]] = {}
 		"""
-		A callback function that returns a dict of the autodoc options to use for documenting the specified item, 
+		A dict whose key is fullname of each module, and value is a dict of autodoc options to use for documenting the specified item, 
 		similar to the autodoc ``autodoc_default_options`` configuration option. 
 		
 		For example this could be used to enable autodoc flags such as 'private-members' by returning 
-		{'private-members':True} for some names and not others. Return defaultOptions to use the defaults. 
+		{'private-members':True} for some names and not others. 
 		
-		Alternatively, for simple cases just set this to a dict whose key is fullname and value is the desired options 
-		dict. 
+		For backwards compatibility - but deprecated - you can provide a callable here with signature
+		`(app, what, fullname, obj, docstring, defaultOptions, extra: defaultOptions)` to dynamically return 
+		the required options dir (or `defaultOptions` to use the defaults). However this is not pickable it produces 
+		a warning with modern Sphinx versions so is not recommended. 
 		"""
 
 		write_documented_items_output_file: str = None
@@ -181,6 +184,13 @@ class AutoDocGen:
 		self.documented_items = set() # list of names of everything we've documented, which can be used for diff-ing output
 		
 		for mod in modules:
+			if isinstance(mod, str):
+				# if a string, import the module
+				try:
+					mod = importlib.import_module(mod)
+				except ImportError as e:
+					logger.error(f'Error importing module listed in autodocgen_config "{mod}": {e}')
+					raise
 			self.visit_module(mod)
 		
 		for f in set(os.listdir(generated_dir)) - self.rst_files_generated:

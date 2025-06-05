@@ -89,8 +89,8 @@ autosummary_generate = True
 autosummary_generate_overwrite = False
 
 import pysys.basetest
-autodocgen_config = [{
-	'modules':[pysys], 
+autodocgen_config = [{ # Configuration format is defined by sphinx_autodocgen.AutoDocGen.Config
+	'modules':['pysys'], 
 	'generated_source_dir': DOC_SOURCE_DIR+'/autodocgen/',
 	'skip_module_regex': '(.*[.]__|pysys.basetest)', # if module matches this then it and any of its submodules will be skipped
 	'write_documented_items_output_file': PYSYS_ROOT_DIR+'/docs/build_output/autodocgen_documented_items.txt',
