@@ -89,3 +89,5 @@ import threading
 process_lock = threading.Lock()
 """ Lock to be held when creating processes also while holding any resources
 we don't want being passed to child processes e.g. sockets, files. """
+
+sys.stderr.write(f'Time = {time.time()} end of pysys __init\n')

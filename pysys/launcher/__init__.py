@@ -19,15 +19,16 @@
 """
 Implementation of the pysys.py command line launcher.
 """
-from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
-import time
+import time, sys
+sys.stderr.write(f'Time = {time.time()} launcher.py\n')
 
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.config.project import Project
+sys.stderr.write(f'Time = {time.time()} launcher.py imported done\n')
 
 def loadDescriptors(dir=None):
 	"""Load descriptor objects representing a set of tests to run for 

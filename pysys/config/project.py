@@ -23,20 +23,26 @@ user-defined project properties.
 
 __all__ = ['Project'] # Project is the only member we expose/document from this module
 
-import os.path, logging, xml.dom.minidom, collections, codecs, time
+import os.path, logging, xml.dom.minidom, collections, codecs, time, sys
+sys.stderr.write(f'Time = {time.time()} project.py\n')
+
 import platform
 import locale
 import getpass
 
 import pysys
 import pysys.utils.misc
+sys.stderr.write(f'Time = {time.time()} project.py imports1\n')
 from pysys.constants import *
 from pysys import __version__
+sys.stderr.write(f'Time = {time.time()} project.py imports2\n')
 from importlib import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
+sys.stderr.write(f'Time = {time.time()} project.py imports3\n')
 from pysys.utils.fileutils import mkdir, loadProperties, toLongPathSafe
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
+sys.stderr.write(f'Time = {time.time()} project.py imports done\n')
 
 log = logging.getLogger('pysys.config.project')
 
@@ -797,5 +803,10 @@ class Project(object):
 
 pysys.constants.Project = Project # for compatibility's sake' need to do this early
 
+sys.stderr.write(f'Time = {time.time()} project.py imports ing remainder\n')
+
 import pysys.utils.safeeval # down here to break circular dependency
 import pysys.config.descriptor
+
+
+sys.stderr.write(f'Time = {time.time()} project.py end\n')
