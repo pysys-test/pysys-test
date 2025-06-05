@@ -34,6 +34,8 @@ from pysys import stdoutHandler
 # do not add extra pysys import here - must keep minimal to avoid possible circular dependencies
 
 # set the platform and platform related constants
+sys.stderr.write(f'Time = {time.time()} about to get hostname\n')
+HOSTNAME = socket.gethostname()
 sys.stderr.write(f'Time = {time.time()} about to get fqdn\n')
 HOSTNAME = socket.getfqdn()
 sys.stderr.write(f'Time = {time.time()} got fqdn\n')
