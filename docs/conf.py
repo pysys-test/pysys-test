@@ -89,7 +89,7 @@ autosummary_generate = True
 autosummary_generate_overwrite = False
 
 import pysys.basetest
-autodocgen_config = {
+autodocgen_config = [{
 	'modules':[pysys], 
 	'generated_source_dir': DOC_SOURCE_DIR+'/autodocgen/',
 	'skip_module_regex': '(.*[.]__|pysys.basetest)', # if module matches this then it and any of its submodules will be skipped
@@ -99,7 +99,7 @@ autodocgen_config = {
 		'pysys.baserunner.BaseRunner':{ 'inherited-members':True },
 	},
 	'module_title_decider': lambda modulename: 'API Reference' if modulename=='pysys' else modulename,
-}
+}]
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
 	# nb: 'what' means the parent that the "name" item is in e.g. 'class', 'module'

@@ -1,12 +1,14 @@
 """
 Sphinx extension that automatically and recursively generates .rst files containing autodoc/autosummary 
 directives for a hierarchy of Python modules. 
+
+See https://github.com/ben-spiller/sphinx-autodocgen
 """
 
 __copyright__ = "Copyright (C) 2019-present Ben Spiller"
 __author__ = "Ben Spiller"
 __license__ = "MIT"
-__version__ = "1.1.dev"
+__version__ = "1.4.dev"
 
 __all__ = ['AutoDocGen', 'setup']
 
@@ -133,10 +135,19 @@ class AutoDocGen:
 		self.app.setup_extension('sphinx.ext.autodoc')
 		self.app.setup_extension('sphinx.ext.autosummary')
 
-		self.app.add_config_value('autodocgen_config', default={}, rebuild='env')
+		self.app.add_config_value('autodocgen_config', default=[], rebuild='env')
 
 		# must generate and update the generated rst files quite early in the process (before builder stage)
-		self.app.connect('config-inited', lambda app, config: self.generate())
+		self.app.connect('config-inited', lambda app, config: self.generateAll())
+
+	def generateAll(self):
+		# allow a list of generation configs
+		config = self.app.config.autodocgen_config
+
+		if isinstance(config, dict): config = [config]
+		for c in config:
+			self.config = dict(c)
+			self.generate()
 
 	def generate(self):
 		"""
@@ -144,7 +155,6 @@ class AutoDocGen:
 		
 		Called on the Sphinx builder-inited event. 
 		"""
-		self.config = dict(self.app.config.autodocgen_config)
 		for k in self.Config._config_keys:
 			self.config.setdefault(k, getattr(self.Config, k))
 		
@@ -195,7 +205,7 @@ class AutoDocGen:
 			type=memberType
 		)
 		
-		defaults = {'members':bool(memberType in {'class', 'exception'})} # TODO: could get this from the autodoc default
+		defaults = {'members':bool(memberType in {'class', 'exception'})} # could get this from the autodoc default instead?
 		autodocoptions = self.config['autodoc_options_decider'](self.app, memberType, qualifiedName, obj, docstring, defaults, None)
 
 		if autodocoptions is None: autodocoptions = defaults
@@ -221,8 +231,8 @@ class AutoDocGen:
 		
 		# special case, for modules an autosummary works best for seeing at a glance what's in each module
 		if memberType in autosummary_member_types:
-			# TODO: do we need a title here? maybe a generic way to specify titles for each member type. Perhaps just an option?
-			# TODO: would we need to separately generate an rst for each of these if we use an autosummary; maybe best to not make this a user config option
+			# Do we need a title here? maybe a generic way to specify titles for each member type. Perhaps just an option?
+			# Would we need to separately generate an rst for each of these if we use an autosummary; maybe best to not make this a user config option
 			return '\n'.join([
 				".. autosummary::", 
 				"  :toctree: ./", 
@@ -283,10 +293,10 @@ class AutoDocGen:
 		logger.info(f'{self} Visiting module: {modulename} {"(skipped)" if skipped else ""}')
 		if skipped: 
 			return False
-		# TODO: call skip here too
+		# TODO: would be nice to call the autodoc skip function here too
 		
-		# use a flat structure for the global modules list if we're not documenting submodules
-		#TODO: if 'module' not in doc_module_member_types: allmodules.append(modulename) # TODO: do something with this
+		# could use a flat structure for the global modules list if we're not documenting submodules, e.g.:
+		#    if 'module' not in doc_module_member_types: allmodules.append(modulename) # TODO: do something with this
 		
 		# can't use getmembers for getting submodules of packages
 		membersByType = {t:[] for t in doc_module_member_types}
@@ -297,8 +307,6 @@ class AutoDocGen:
 				if not self.visit_module(submodule): continue
 				if 'module' in membersByType: membersByType['module'].append( (submodulename, submodule, submodule.__doc__))
 				
-		moduleall = set(getattr(mod, '__all__', []))
-
 		# It'd be possible to iterate over mod.__dict__.items() but there are some subtlies around how to decide 
 		# what to document (including the __all__ handling in get_object_members and the fact that we have to use the 
 		# Sphinx ModuleAnalyzer if we want to get docstrings for attributes which filter_members does), 
@@ -323,16 +331,22 @@ class AutoDocGen:
 
 			# find out which members are documentable; use __dict__.items() to retain the ordering info, but delegate to 
 			# autodoc get_object_members for its __all__ handling logic
-			objectMembers = documenter.get_object_members(want_all=True)[1] # list[ObjectMember]
+			_, objectMembers = documenter.get_object_members(want_all=True) # list[ObjectMember]
 
-			permittedmembers = set(
+			# key is the list of member names (from autosummary), value is whether it's marked as skipped by autosummary
+			permittedmembers = {
 				memberinfo.__name__ if hasattr(memberinfo, '__name__') else memberinfo[0] # fallback to tuple for ancient sphinx versions
-				for memberinfo in objectMembers)
-
-			createObjectMember = sphinx.ext.autodoc.ObjectMember if hasattr(sphinx.ext.autodoc, 'ObjectMember') else ( lambda mname, m: tuple([mname, m]) ) # tuple for old Sphinx versions
-			members = [createObjectMember(mname,m) for mname, m in mod.__dict__.items() if mname in permittedmembers]
+				: getattr(memberinfo, 'skipped', False)
+				for memberinfo in objectMembers
+				}
+			
+			if hasattr(sphinx.ext.autodoc, 'ObjectMember'):
+				def createObjectMember(mname, m, skipped): return sphinx.ext.autodoc.ObjectMember(mname, m, skipped=skipped)
+			else:
+				def createObjectMember(mname, m, skipped): tuple([mname, m]) # tuple for old Sphinx versions; skipped is handled differently
+			members = [createObjectMember(mname,m,permittedmembers[mname]) for mname, m in mod.__dict__.items() if mname in permittedmembers]
 		
-			# TODO: ordering c.f. autodoc_member_order
+			# TODO: could implement ordering c.f. autodoc_member_order
 			for (mname, m, isattr) in documenter.filter_members(members, want_all=True):
 				logger.debug('   visiting member: %s'%mname)
 				if not isattr and not self.app.config['autodoc_default_options'].get('imported-members',False) and getattr(m, '__module__', modulename) != modulename: 
