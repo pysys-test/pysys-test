@@ -15,7 +15,7 @@ packaging==25.0
 pydantic==2.11.5
 pydantic_core==2.33.2
 Pygments==2.19.1
-requests==2.32.3
+requests==2.32.4
 rich==14.0.0
 roman-numerals-py==3.1.0
 rstcheck==6.2.5
