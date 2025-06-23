@@ -24,6 +24,7 @@ New features:
 Fixes in 2.3:
 
 - The PySys documentation files are now located in `pysys_docs/` rather than as part of the package `dist-info` directory. 
+- The process monitoring framework on linux now reads directly from `/proc` to avoid depending on the `ps` tool which is not always available.
 
 Minor behaviour changes
 -----------------------
@@ -33,6 +34,10 @@ Minor behaviour changes
   on some systems (thus making PySys slow to start). 
   If you do need the qualified hostname, call ``socket.getfqdn()`` directly, perhaps using a custom runner 
   to avoid recalculating it for each test. 
+- The CPU utilization recorded by the process monitor (see `startProcessMonitor`) on Linux is now calculated 
+  over the period since the previous sample rather than since the process started. This makes it consistent 
+  with Windows, and is more useful for tracking CPU utilization changes against time. 
+  If this is not the behaviour you need, you can create a custom implementation of `BaseProcessMonitor`.
 
 -----------------
 What's new in 2.2

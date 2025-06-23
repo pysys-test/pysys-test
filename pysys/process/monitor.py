@@ -49,7 +49,7 @@ class ProcessMonitorKey(object):
 	"""
 
 	CPU_CORE_UTILIZATION = 'CPU core %'
-	"""CPU utilization % scaled by the number of cores so that 100% indicates 
+	"""CPU utilization since the last sample, as a % scaled by the number of cores so that 100% indicates 
 	full use of one core, 200% indicates full use of two cores, etc. 
 	
 	The maximum value is 100 multiplied by the number of CPU cores 
@@ -59,7 +59,7 @@ class ProcessMonitorKey(object):
 	"""
 
 	CPU_TOTAL_UTILIZATION = 'CPU total %'
-	"""Total utilization % of all available CPU cores, with a maximum value of 100%.
+	"""Total utilization since the last sample as a % of all available CPU cores, with a maximum value of 100%.
 	
 	If you have 2 cores and one of them is 50% utilized, the value would be 25%.
 	
