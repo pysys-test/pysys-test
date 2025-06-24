@@ -223,11 +223,11 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 				if lineno: params[u'line'] = lineno
 
 			# Honour the Github 4k message limit, while still showing the head and tail of the run.log
-			header = os.linesep.join(msg.split(os.linesep)[:5]) + os.linesep
-			footer = ''
-			if((4096 - len(header)) > 0):
+			if(len(msg) > 4096):
+				header = os.linesep.join(msg.split(os.linesep)[:5]) + os.linesep
 				footer = msg[-(4096 - len(header)):]
-			self.failureTestLogAnnotations.append([u'warning', header + footer, params])
+				msg = header + footer
+			self.failureTestLogAnnotations.append([u'warning', msg, params])
 			
 
 class TravisCIWriter(BaseRecordResultsWriter):
