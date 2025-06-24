@@ -60,5 +60,5 @@ class PySysTest(BaseTest):
 		# A massive run.log is truncated
 		self.assertGrep('default-project.out', contains=False, expr='^::warning .*Start of the test')
 		# ... but the test metadata still appears at the top
-		self.assertGrep('default-project.out', expr='^::warning file=.*/run.py,.*Id.*BigBigLog%0A.*End of the test')
+		self.assertGrep('default-project.out', expr='^::warning file=.*/pysystest.py,.*Id.*BigBigLog%0A.*End of the test')
 
