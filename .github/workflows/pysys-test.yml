@@ -17,6 +17,9 @@ on:
 
   workflow_dispatch: # also allow manually invoking this
 
+  schedule:
+      - cron: '25 0 1 */2 *' # run on the default branch once every 2 months (25mins past the hour to avoid peak load)
+
   # When a new (empty, non-draft) release is created via the GitHub UI, uploads the files to that release, upload it to PyPi 
   # and upload the doc to GitHub pages. Only do this when all the tests are passing. 
   # Requires defining secrets PYPI_USERNAME and PYPI_PASSWORD with your PyPi credentials. 
