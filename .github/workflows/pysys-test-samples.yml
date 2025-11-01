@@ -74,7 +74,7 @@ jobs:
       # The follow lines are a copy from the sample pysys workflow
 
       - name: Upload performance CSV artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         # Only do this if some performance results were generated
         if: always() && steps.pysys.outputs.artifact_CSVPerformanceReport
 
@@ -83,7 +83,7 @@ jobs:
           path: ${{ steps.pysys.outputs.artifact_CSVPerformanceReport }}
 
       - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
 
         with:

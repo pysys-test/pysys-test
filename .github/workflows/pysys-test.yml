@@ -169,7 +169,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           
       - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
 
         with:
@@ -225,7 +225,7 @@ jobs:
            cp CHANGELOG.rst dist/
 
       - name: Upload Python package .whl
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() && matrix.doc-and-deploy
         with:
           name: installation_package
