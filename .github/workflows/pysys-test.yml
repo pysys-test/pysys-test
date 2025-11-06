@@ -93,7 +93,7 @@ jobs:
           echo setuptools      >> setup-python-package-requirements.txt
           echo wheel           >> setup-python-package-requirements.txt
           echo coverage        >> setup-python-package-requirements.txt
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{matrix.python-version}}
           cache: pip
