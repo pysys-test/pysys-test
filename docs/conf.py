@@ -82,12 +82,15 @@ autodoc_default_options = {
 
 #nitpicky = True # so we get warnings about broken links
 
+# Since we already add headings for autodoc entries, stop Sphinx from creating duplicate ones underneath
+toc_object_entries = False
+
 autosummary_generate = True
 autosummary_generate_overwrite = False
 
 import pysys.basetest
-autodocgen_config = {
-	'modules':[pysys], 
+autodocgen_config = [{ # Configuration format is defined by sphinx_autodocgen.AutoDocGen.Config
+	'modules':['pysys'], 
 	'generated_source_dir': DOC_SOURCE_DIR+'/autodocgen/',
 	'skip_module_regex': '(.*[.]__|pysys.basetest)', # if module matches this then it and any of its submodules will be skipped
 	'write_documented_items_output_file': PYSYS_ROOT_DIR+'/docs/build_output/autodocgen_documented_items.txt',
@@ -95,8 +98,8 @@ autodocgen_config = {
 		'pysys.basetest.BaseTest':    { 'inherited-members':True },
 		'pysys.baserunner.BaseRunner':{ 'inherited-members':True },
 	},
-	'module_title_decider': lambda modulename: 'API Reference' if modulename=='pysys' else modulename,
-}
+	'module_title_decider': {'pysys': 'API Reference'},
+}]
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
 	# nb: 'what' means the parent that the "name" item is in e.g. 'class', 'module'
@@ -114,8 +117,18 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 		
 	return None
 
+def autodoc_process_docstring(app, what, name, obj, options, lines):
+	# Sphinx v2 used to require us to use "~." syntax for class instance vars; this looks wrong in the more recent sphinx versions 
+	# so until we know all downstream users of PySys have upgraded Sphinx, keep the docstrings the same and dynamically pre-process them
+	# To check this, see any class with instance variables e.g. Process
+	for i, l in enumerate(lines):
+		if ':ivar ' in l and ' ~.' in l:
+			lines[i] = l.replace(' ~.', ' ')
+
 def setup(app):
 	app.connect("autodoc-skip-member", autodoc_skip_member)
+
+	app.connect("autodoc-process-docstring", autodoc_process_docstring)
 
 	def supportGitHubPages(app, exception):
 		outputdir = os.path.abspath('docs/build_output/html')
@@ -141,7 +154,6 @@ exclude_patterns = ['pysys_docs'] # just use for the build process
 html_theme = 'sphinx_rtd_theme' # read-the-docs theme looks better than the default "classic" one but has bugs e.g. no table wrapping
 
 html_theme_options = {
-	'display_version': True,
 	#'prev_next_buttons_location': 'bottom',
 	#'style_external_links': False,
 	#'vcs_pageview_mode': '',
@@ -154,13 +166,12 @@ html_theme_options = {
 	#'titles_only': False
 }
 
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_context = {'css_files': [
+html_css_files = [
 	# Workaround for RTD 0.4.3 bug https://github.com/readthedocs/sphinx_rtd_theme/issues/117
-	'_static/theme_overrides.css',  # override wide tables in RTD theme
-]}
+	'theme_overrides.css',  # override wide tables in RTD theme
+]

@@ -59,6 +59,11 @@ class _XMLProjectParser(object):
 		except Exception as ex:
 			username = 'UNKNOWN_USER'
 		
+		try:
+			platformSystem = platform.system()
+		except Exception as ex: # should never happen, but seen on Python 3.13 - worth capturing more diagnostic info if this occurs
+			log.error('Failed to determine platform system: %r', ex)
+			raise
 		self.properties = {
 			'testRootDir':self.dirname,
 			
@@ -69,7 +74,7 @@ class _XMLProjectParser(object):
 			'startTimeSecs':'%0.3f'%self.startTimestamp,
 
 			'hostname':HOSTNAME.lower().split('.')[0],
-			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
+			'os':platformSystem.lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
 			'osfamily':OSFAMILY, # windows or unix
 			
 			'pysysTemplatesDir': os.path.dirname(__file__)+os.sep+'templates',
