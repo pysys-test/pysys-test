@@ -221,6 +221,12 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			if file:
 				params[u'file'] = file.replace(u'\\',u'/')
 				if lineno: params[u'line'] = lineno
+
+			# Honour the Github 4k message limit, while still showing the head and tail of the run.log
+			if(len(msg) > 4096):
+				header = os.linesep.join(msg.split(os.linesep)[:5]) + os.linesep
+				footer = msg[-(4096 - len(header)):]
+				msg = header + footer
 			self.failureTestLogAnnotations.append([u'warning', msg, params])
 			
 
