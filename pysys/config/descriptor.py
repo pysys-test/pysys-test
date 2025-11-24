@@ -1265,7 +1265,7 @@ class _XMLDescriptorParser(object):
 		if node is None: return default
 		return self.getText(node)
 
-IGNORED_PYSYSTEST_SUFFIXES = tuple( (os.getenv('PYSYS_IGNORED_PYSYSTEST_SUFFIXES', '')+',~,.tmp,.bak,.swp,.orig').strip(',').replace(' ','').split(',') )
+IGNORED_PYSYSTEST_SUFFIXES = tuple( (os.getenv('PYSYS_IGNORED_PYSYSTEST_SUFFIXES', '')+',~,.tmp,.bak,.swp,.orig,.rej').strip(',').replace(' ','').split(',') )
 """
 A tuple listing ``pysystest.*`` suffixes that will be ignored due to being temporary/backup/swap files for common 
 editors and IDEs. 
