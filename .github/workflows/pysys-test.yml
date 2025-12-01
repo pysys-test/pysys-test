@@ -232,14 +232,14 @@ jobs:
           path: dist/*.whl
 
       - name: Upload HTML to gh-pages
-        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
+        uses: JamesIves/github-pages-deploy-action@4a3abc783e1a24aeb44c16e869ad83caf6b4cc23 # v4.7.4
         if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
         with:
           branch: gh-pages
           folder: docs/build_output/html/
 
       - name: Upload to GitHub Release
-        uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2.11.2
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2.11.3
         if: success() && matrix.doc-and-deploy && github.event_name == 'release'
         id: upload-release-asset 
         with:
