@@ -84,7 +84,7 @@ jobs:
     runs-on: ${{matrix.os}}
     
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       
       # Install Python and dependencies
       - name: Configure Python dependency requirements
