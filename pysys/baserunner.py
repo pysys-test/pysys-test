@@ -453,7 +453,7 @@ class BaseRunner(ProcessUser):
 		if inProgressTests:
 			# Inherits log handlers from current thread
 			loghandlers = pysysLogHandler.getLogHandlersForCurrentThread()
-			if stdoutHandler not in loghandlers: loghandler = loghandler+[stdoutHandler]
+			if stdoutHandler not in loghandlers: loghandlers = loghandlers+[stdoutHandler]
 
 			def handleRunnerAbortExecute(**kwargs):
 				pysysLogHandler.setLogHandlersForCurrentThread(loghandlers)
