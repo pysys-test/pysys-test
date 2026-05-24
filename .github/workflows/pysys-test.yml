@@ -161,7 +161,7 @@ jobs:
           python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
       - name: Upload Python code coverage 
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # https://github.com/codecov/codecov-action/releases/tag/v5.5.1
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # https://github.com/codecov/codecov-action/releases/tag/v5.5.2
         if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
         with:
           name: ${{matrix.test-run-id}}
@@ -232,14 +232,14 @@ jobs:
           path: dist/*.whl
 
       - name: Upload HTML to gh-pages
-        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
+        uses: JamesIves/github-pages-deploy-action@9d877eea73427180ae43cf98e8914934fe157a1a # v4.7.6
         if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
         with:
           branch: gh-pages
           folder: docs/build_output/html/
 
       - name: Upload to GitHub Release
-        uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2.11.2
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2.11.3
         if: success() && matrix.doc-and-deploy && github.event_name == 'release'
         id: upload-release-asset 
         with:
