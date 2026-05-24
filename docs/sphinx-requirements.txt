@@ -22,7 +22,7 @@ rstcheck==6.2.5
 rstcheck-core==1.2.2
 shellingham==1.5.4
 snowballstemmer==3.0.1
-Sphinx==8.2.3
+Sphinx==9.0.1
 sphinx-epytext==0.0.4
 sphinx-rtd-theme==3.0.2
 sphinxcontrib-applehelp==2.0.0
