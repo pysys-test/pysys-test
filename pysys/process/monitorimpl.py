@@ -30,6 +30,7 @@ from pysys.process.monitor import *
 
 if PLATFORM=='win32' and 'sphinx' not in sys.modules:
 	import win32api, win32pdh, win32con, win32process
+import subprocess
 
 log = logging.getLogger('pysys.processmonitor')
 
@@ -97,20 +98,74 @@ class UnixProcessMonitor(BaseProcessMonitor):
 	"""
 	Unix implementation of a process monitor. 
 	
-	Uses the `ps` command line tool, reading columns `pcpu`, `rss` and `vsz`. 
+	Equivalent to running the `ps` command reading columns `pcpu`, `rss` and `vsz`, but 
+	implemented directly since ps is not always installed. 
 	"""
 	def _getData(self, sample):
 		with process_lock:
-			with os.popen("ps -p %d -o pid,pcpu,rss,vsz"%self.pid) as fp: 
-				info = fp.readlines()
-			
-			if len(info) <= 1: raise Exception('No matching processes found from ps; perhaps process has terminated')
-			assert len(info) == 2, 'Unexpected ps output: %s'%info
-			thisdata = info[1].split()
+			proc_dir = f"/proc/{self.pid}"
+			try:
+				with open(os.path.join(proc_dir, "stat"), "r") as f:
+					stat_fields = f.read().split()
+				with open(os.path.join(proc_dir, "status"), "r") as f:
+					status_lines = f.readlines()
+			except FileNotFoundError:
+				raise Exception(f"Process {self.pid} not found in /proc; perhaps it has terminated")
+			except Exception as e:
+				raise Exception(f"Error reading /proc for pid {self.pid}: {e}")
+
+			# Calculate CPU usage
+			cpu_usage = -1
+			try:
+				# Get clock ticks per second
+				try:
+					clk_tck = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+				except (AttributeError, KeyError, ValueError):
+					clk_tck = 100  # fallback default
+
+				# Defensive: Ensure stat_fields has enough fields
+				if len(stat_fields) < 22:
+					raise Exception(f"Unexpected /proc/{self.pid}/stat format: {stat_fields}")
+				try:
+					utime = int(stat_fields[13]) # user mode ticks
+					stime = int(stat_fields[14]) # kernetl mode ticks
+				except (IndexError, ValueError) as e:
+					raise Exception(f"Error parsing stat fields for pid {self.pid}: {e}")
+
+				cpu_ticks = utime + stime # user+kernel time
+				now = time.monotonic()
+				# Store previous values to calculate CPU usage since last call
+				if not hasattr(self, '_last_cpu_values'):
+					self._last_cpu_values = {
+						'cpu_ticks': cpu_ticks,
+						'timestamp': now,
+					}
+					cpu_usage = 0 # it's unavoidable for the first sample to be 0 and we don't want to treat that as an error
+				else:
+					delta_time = now - self._last_cpu_values['timestamp']
+					if delta_time > 0:
+						cpu_usage = 100 * (((cpu_ticks - self._last_cpu_values['cpu_ticks']) / clk_tck) / delta_time)
+					self._last_cpu_values['cpu_ticks'] = cpu_ticks
+					self._last_cpu_values['timestamp'] = now
+			except Exception:
+				pass
+
+			# Memory usage: VmRSS and VmSize from /proc/[pid]/status
+			mem_res_kb = mem_virt_kb = -1
+			for line in status_lines:
+				if line.startswith("VmRSS:"):
+					try:
+						mem_res_kb = int(line.split()[1])
+					except Exception: pass
+				elif line.startswith("VmSize:"):
+					try:
+						mem_virt_kb = int(line.split()[1])
+					except Exception: pass
+
 			data = {}
-			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = int(float(thisdata[1]))
-			data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(float(thisdata[2]))
-			data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(float(thisdata[3]))
+			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = int(cpu_usage)
+			data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = mem_res_kb
+			data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = mem_virt_kb		
 			
 			return data
 			

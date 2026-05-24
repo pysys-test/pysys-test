@@ -2,6 +2,7 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.process.monitor import *
 from pysys.utils.pycompat import openfile
+import multiprocessing
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -10,6 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
+		self.log.info('Testing on a machine with %d CPUs', multiprocessing.cpu_count())
 		p = self.startProcess(command=sys.executable,
 						  arguments = [self.input+'/spinner.py'],
 						  stdout = "%s/test.out" % self.output,
